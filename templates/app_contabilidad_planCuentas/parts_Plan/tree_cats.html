@@ -1,0 +1,21 @@
+<ul id="the-node">
+    {% for folder in planCuenta %}
+        <li><span class="context-menu-one"><label style="visibility: hidden">{{ folder.id }}</label> &nbsp;&nbsp; <strong>{{ folder.codigo }}</strong> &nbsp;&nbsp;<span class="badge badge-secondary">{{ folder.nombre }}</span></span> <span class="float-right"><strong>Nivel {{ folder.nivel }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </strong></span>
+{#        <li><span class="context-menu-one btn btn-neutral"><strong>{{ folder.codigo }}</strong> &nbsp;&nbsp;{{ folder.nombre }} Nivel {{ folder.nivel }}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>#}
+        {% if folder.idcuentasuma.exists %}
+            {% with folder.idcuentasuma.all as planCuenta %}
+                {% include "app_contabilidad_planCuentas/parts_Plan/tree_cats.html" %}
+            {% endwith %}
+        {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+{% comment %}<menu id="html5menu" style="display:none" class="showcase">
+    <command label="rotate" icon="edit" onclick="alert('rotate')"></command>
+    <command label="resize" onclick="alert('resize')"></command>
+    <command label="twitter" onclick="alert('twitter')"></command>
+    <command label="facebook" onclick="alert('facebook')"></command>
+</menu>{% endcomment %}
+
+

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h4 class="card-title"><strong>LISTADO DE CONSUMO POR PISCINAS:</strong></h4>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row mt-6">
+                                {% for data in object_list %}
+                                <div class="col-md-2">
+
+                                    <div class="card card-widget widget-user">
+                                        <div class="widget-user-header bg-primary">
+                                            <h2 class="widget-user-username"><strong> {{ data.numero }} </strong></h2>
+                                            <h5 class="widget-user-desc">Empresa: {{ data.empresa.siglas }}</h5>
+                                        </div>
+                                        <div class="widget-user-image">
+                                            <img class="img-circle elevation-2" src="{% static 'img/camaronsito.png' %}" alt="User Avatar">
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="row">
+                                                <div class="col-sm-12">
+                                                    <div class="description-block">
+                                                        <a href="{% url 'app_consumo:listar_consumo_piscina' data.id %}"
+                                                           class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-search"> &nbsp Detalles</i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

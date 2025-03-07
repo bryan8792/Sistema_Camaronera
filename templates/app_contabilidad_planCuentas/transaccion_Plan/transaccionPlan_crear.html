@@ -1,0 +1,799 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <!-- Libreria JQuery -->
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <!-- Libreria Select2 -->
+    <link href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+
+    <script src="{% static 'lib/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <link href="{% static 'lib/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet"/>
+
+    <link href="{% static 'lib/bootstrap-touchspin-4.3.0/jquery.bootstrap-touchspin.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/bootstrap-touchspin-4.3.0/jquery.bootstrap-touchspin.js' %}"></script>
+
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/transaccionPlan.js' %}"></script>
+
+   {% comment %} <script type="text/javascript">
+        var jQuery = $.noConflict(true);
+    </script>
+
+    <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>{% endcomment %}
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- AdminLTE App -->
+    <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{% static 'dist/js/demo.js' %}"></script>
+
+{% comment %}
+    <script src="//cdn.rawgit.com/ashl1/datatables-rowsgroup/v1.0.0/dataTables.rowsGroup.js"></script>{% endcomment %}
+
+    <style>
+        .confondo {
+            background-color: #eaeaea;
+        }
+
+        input[type=text]:disabled {
+            background: #ffffff;
+        }
+
+        {% comment %}input:disabled {
+            color: black;
+        }{% endcomment %}
+
+    </style>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Formulario de {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <form id="frmSale" method="post">
+
+            {% comment %}<section class="content">
+
+            <!-- /.card -->
+            <div class="card">
+                <div class="card-header" style="background-color:#3498DB">
+                    <h3 class="card-title">Ingreso del Registro:<strong> {{ nombre }}</strong></h3>
+                </div>
+
+                <!-- /.card-body -->
+                <div class="card-body">
+
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="{{ form.codigo.label }}">{{ form.codigo.label }}:</label>
+                        {{ form.codigo }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.nombre.label }}">{{ form.nombre.label }}:</label>
+                        {{ form.nombre }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.nivel.label }}">{{ form.nivel.label }}:</label>
+                        {{ form.nivel }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.tipo_cuenta.label }}">{{ form.tipo_cuenta.label }}:</label>
+                        {{ form.tipo_cuenta }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.empresa.label }}">{{ form.empresa.label }}:</label>
+                        {{ form.empresa }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.periodo.label }}">{{ form.periodo.label }}:</label>
+                        {{ form.periodo }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.cuentasuma.label }}">{{ form.cuentasuma.label }}:</label>
+                        {{ form.cuentasuma }}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.estado.label }}">{{ form.estado.label }}:</label>
+                            {{ form.estado }}
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="{{ form.band_total.label }}">{{ form.band_total.label }}:</label>
+                            &nbsp;{{ form.band_total }}
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="card-footer navbar-white">
+                    <button type="submit" class="btn btn-primary btn-flat btnTest">
+                        <i class="fas fa-save"></i> Guardar registro
+                    </button>
+                    <a href="{% url 'app_planCuentas:listar_planCuenta' %}" class="btn btn-danger btn-file">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- /.card -->
+
+            <!-- /.row -->
+        </section>{% endcomment %}
+
+            <div class="container-fluid">
+                {% comment %}<div class="row">
+                    <div class="col-12">
+                        <div class="callout callout-info">
+                            <h5><i class="fas fa-info"></i> &nbsp; <strong>Información:</strong></h5>
+                            Llene todos los campos verificando que la informacion ingresada sea correcta.
+                        </div>
+
+                        <!-- Main content -->
+                        <div class="invoice p-3 mb-3">
+                            <!-- title row -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <h4>
+                                        <i class="fas fa-calculator"></i> &nbsp;<strong>Modulo de Contabilidad</strong>
+                                        <small class="float-right">
+                                            <button class="btn btn-primary" type="button" id="btnBuscarPlan">
+                                                <i class="fas fa-search"></i> <strong>Buscar Plan</strong>
+                                            </button>
+                                        </small>
+                                    </h4>
+                                </div>
+                                <!-- /.col -->
+                            </div>
+
+                            <hr>
+
+                            <div class="row invoice-info">
+                                <input type="hidden" name="action" value="{{ action }}">
+                                <div class="col-sm-6 invoice-col">
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Código:</label>
+                                        <div class="col-sm-3">
+                                            {{ form.codigo }}
+                                            {#                                            <input type="email" class="form-control" id="inputEmail3" placeholder="Ingresar una descripción">#}
+                                        </div>
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Tipo Cuenta:</label>
+                                        <div class="col-sm-5">
+                                            {{ form.tip_cuenta }}
+                                            {#                                            <input type="email" class="form-control" id="inputEmail3" placeholder="Ingresar una descripción">#}
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Descripción:</label>
+                                        <div class="col-sm-10">
+                                            {{ form.descripcion }}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-sm-1 invoice-col"></div>
+
+                                <div class="col-sm-5 invoice-col">
+
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Fecha Contable:</label>
+                                        <div class="col-sm-9">
+                                            {{ form.fecha|attr:"type:date" }}
+                                            {#                                            <input type="email" class="form-control border-width-2" id="inputEmail3" placeholder="Ingresar una fecha">#}
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Comprobante:</label>
+                                        <div class="col-sm-10">
+                                            {{ form.comprobante }}
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- Table row -->
+                            <div class="row">
+                                <div class="col-12 table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>Qty</th>
+                                            <th>Product</th>
+                                            <th>Serial #</th>
+                                            <th>Description</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Call of Duty</td>
+                                            <td>455-981-221</td>
+                                            <td>El snort testosterone trophy driving gloves handsome</td>
+                                            <td>$64.50</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Need for Speed IV</td>
+                                            <td>247-925-726</td>
+                                            <td>Wes Anderson umami biodiesel</td>
+                                            <td>$50.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Monsters DVD</td>
+                                            <td>735-845-642</td>
+                                            <td>Terry Richardson helvetica tousled street art master</td>
+                                            <td>$10.70</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Grown Ups Blue Ray</td>
+                                            <td>422-568-642</td>
+                                            <td>Tousled lomo letterpress</td>
+                                            <td>$25.99</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+
+                                    <table class="table table-sm  table-sm" id="tbl_transaccionPlan">
+                                        <thead style="background-color:#3498DB">
+                                        <tr class="text-center">
+                                            <th>Codigo</th>
+                                            <th>Nombre</th>
+                                            <th>Detalle</th>
+                                            <th>Debe</th>
+                                            <th>Haber</th>
+                                            <th><i class="fas fa-list"></i></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                        <tfoot>
+                                        <tr>
+                                            <th colspan="3">
+                                                <h5 class="text-left"><strong>Total:</strong></h5>
+                                            </th>
+                                            <th>
+                                                <input type="text" class="form-control text-center" readonly
+                                                       name="debe_resp" value="0.00">
+                                            </th>
+                                            <th>
+                                                <input type="text" class="form-control text-center" readonly
+                                                       name="haber_resp" value="0.00">
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <!-- accepted payments column -->
+                                <div class="col-6">
+                                    <p class="lead">Payment Methods:</p>
+                                    <img src="../../dist/img/credit/visa.png" alt="Visa">
+                                    <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
+                                    <img src="../../dist/img/credit/american-express.png" alt="American Express">
+                                    <img src="../../dist/img/credit/paypal2.png" alt="Paypal">
+
+                                    <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
+                                        Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles, weebly ning
+                                        heekya handango imeem
+                                        plugg
+                                        dopplr jibjab, movity jajah plickers sifteo edmodo ifttt zimbra.
+                                    </p>
+                                </div>
+                                <!-- /.col -->
+                                <div class="col-6">
+                                    <p class="lead">Amount Due 2/22/2014</p>
+
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <tr>
+                                                <th style="width:50%">Subtotal:</th>
+                                                <td>$250.30</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Tax (9.3%)</th>
+                                                <td>$10.34</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Shipping:</th>
+                                                <td>$5.80</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Total:</th>
+                                                <td>$265.24</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <!-- /.col -->
+                            </div>
+
+                            <hr>
+
+                            <!-- this row will not appear when printing -->
+                            <div class="row no-print">
+                                <div class="col-12">
+                                    {#                                    <a href="#" rel="noopener" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>#}
+                                    <button type="button" class="btn btn-success float-left btnSave">
+                                        <i class="far fa-save"></i> Guardar
+                                    </button>
+                                    <button type="button" class="btn btn-primary float-left" style="margin-right: 5px;">
+                                        <i class="fas fa-download"></i> Generate PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>{% endcomment %}
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="card card-white">
+                            <div class="card-header">
+                                <h1 class="card-title"><i class="fas fa-calculator"></i>
+                                    &nbsp; <strong>Módulo de Contabilidad:</strong>
+                                </h1>
+                                {% comment %}<div class="card-tools">
+                                    <small class="float-right">
+                                        <button class="btn btn-primary btn-sm" type="button" id="btnBuscarPlan">
+                                            <i class="fas fa-search"></i> <strong>Buscar Plan</strong>
+                                        </button>
+                                    </small>
+                                </div>{% endcomment %}
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group" align="justify">
+                                    <div class="row invoice-info">
+                                        <input type="hidden" name="action" value="{{ action }}">
+                                        <div class="col-sm-6 invoice-col">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-sm-2 col-form-label">Tipo Cuenta:</label>
+                                                <div class="col-sm-5">
+                                                    {{ form.tip_cuenta }}
+                                                </div>
+                                                <label for="inputEmail3" class="col-sm-2 col-form-label">Código:</label>
+                                                <div class="col-sm-3">
+                                                    {{ form.codigo }}
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="inputEmail3"
+                                                       class="col-sm-2 col-form-label">Comprobante:</label>
+                                                <div class="col-sm-10">
+                                                    {{ form.comprobante }}
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="inputEmail3"
+                                                       class="col-sm-2 col-form-label">Descripción:</label>
+                                                <div class="col-sm-10">
+                                                    {{ form.descripcion }}
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-sm-2 col-form-label">Escoger Empresa:</label>
+                                                <div class="col-sm-10">
+                                                    {{ form.empresa|add_class:"form-control required:true" }}
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-sm-1 invoice-col"></div>
+
+                                        <div class="col-sm-5 invoice-col">
+
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-sm-3 col-form-label">Fecha
+                                                    Contable:</label>
+                                                <div class="col-sm-9">
+                                                    {{ form.fecha|attr:"type:date" }}
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="inputEmail3"
+                                                       class="col-sm-3 col-form-label">Dirección:</label>
+                                                <div class="col-sm-9">
+                                                    {{ form.direccion }}
+                                                    {#                                                    <small class="form-text text-muted">Ingrese una Dirección ..</small>#}
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="form-group">
+                                    <label>Buscar Cuenta del Plan:</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" name="search"></select>
+                                        <small class="float-right">
+                                            <button class="btn btn-primary" type="button" id="btnBuscarPlanBIO">
+                                                <i class="fas fa-search"></i> &nbsp;<strong>Plan de Cuentas Bio</strong>
+                                            </button>
+                                            <button class="btn btn-success" type="button" id="btnBuscarPlanPSM">
+                                                <i class="fas fa-search"></i> &nbsp;<strong>Plan de Cuentas PSM</strong>
+                                            </button>
+                                        </small>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-12 table-responsive">
+                                        {% comment %}<table class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>Qty</th>
+                                            <th>Product</th>
+                                            <th>Serial #</th>
+                                            <th>Description</th>
+                                            <th>Subtotal</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Call of Duty</td>
+                                            <td>455-981-221</td>
+                                            <td>El snort testosterone trophy driving gloves handsome</td>
+                                            <td>$64.50</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Need for Speed IV</td>
+                                            <td>247-925-726</td>
+                                            <td>Wes Anderson umami biodiesel</td>
+                                            <td>$50.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Monsters DVD</td>
+                                            <td>735-845-642</td>
+                                            <td>Terry Richardson helvetica tousled street art master</td>
+                                            <td>$10.70</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Grown Ups Blue Ray</td>
+                                            <td>422-568-642</td>
+                                            <td>Tousled lomo letterpress</td>
+                                            <td>$25.99</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>{% endcomment %}
+
+
+                                        <table class="table table-sm  table-sm" id="tbl_transaccionPlan">
+                                            <thead style="background-color:#3498DB">
+                                            <tr class="text-center">
+                                                <th><i class="fas fa-list"></i></th>
+                                                <th>Codigo</th>
+                                                <th>Nombre</th>
+                                                <th>Detalle</th>
+                                                <th>Debe</th>
+                                                <th>Haber</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                            <tfoot>
+                                            <tr>
+                                                <th>
+                                                    <h5 class="text-left"><strong>Total:</strong></h5>
+                                                </th>
+                                                <th></th>
+                                                <th>
+                                                    <label id="resul"></label>
+                                                </th>
+                                                 <th>
+                                                    <input type="text" class="form-control text-right text-red border-white confondo" disabled="disabled"
+                                                           name="proceso" value="" >
+                                                </th>
+                                                <th>
+                                                    <input type="text" class="form-control text-center" disabled="disabled"
+                                                           name="debe_resp" value="0.00">
+                                                </th>
+                                                <th>
+                                                    <input type="text" class="form-control text-center text_haber" disabled="disabled"
+                                                           name="haber_resp" value="0.00">
+                                                    <p></p>
+                                                    <input type="text" class="form-control text-center text_haber" disabled="disabled"
+                                                           name="resultado" value="0.00">
+                                                </th>
+                                            </tr>
+                                            </tfoot>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer navbar-white">
+                                <button type="submit" class="btn btn-success float-left" id="btnSave">
+                                    <i class="far fa-save"></i> Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </section>
+
+    <script type="application/javascript">
+
+        {% if form.errors %}
+            var errores = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errores = '{{ error }}\n';
+                {% endfor %}
+            {% endfor %}
+            Swal.fire({
+                title: 'Error',
+                text: errores,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+        {% endif %}
+
+        $('.select2').select2({
+            theme: 'bootstrap4',
+            language: "es",
+        });
+
+    </script>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <!-- datatables JS -->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <!-- para usar botones en datatables JS -->
+    {% comment %}<script src="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_1.13.6_js_jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_buttons_2.4.1_js_dataTables.buttons.min.js' %}"></script>
+    <link href="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_1.13.6_css_jquery.dataTables.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_buttons_2.4.1_css_buttons.dataTables.min.css' %}" rel="stylesheet"/>
+{% endcomment %}
+    <!-- Modal -->
+    {% comment %}<div class="modal fade" id="myModalSearchPlan" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <b><i class="fas fa-search"></i> Plan de Cuenta - Detalle</b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered table-hover table-sm" id="tblSearchPlan">
+                        <thead>
+                        <tr>
+                            <th>Codigo</th>
+                            <th>Nombre de Plan</th>
+                            <th>Agregar</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <a href="{% url 'app_categoria:crear_producto' %}" class="btn btn-primary">
+                        <b>Registrar Producto</b>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>{% endcomment %}
+
+    <!-- Second Modal -->
+    <div class="modal fade" id="myModalSearchPlan" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <b><i class="fas fa-search"></i> Plan de Cuenta - Detalle</b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="wrapper_page">
+                        <div>
+                            <!-- Main content -->
+                            <section class="content">
+                                <div class="container-fluid">
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="card">
+
+                                                <!-- ./card-header -->
+                                                <div class="card-header" style="background-color: #1a7bb9">
+                                                    <h3 class="card-title"><strong>ARBOL DETALLE PLAN DE CUENTAS</strong></h3>
+                                                </div>
+
+                                                <!-- ./card-body -->
+                                                <div class="modal-body">
+
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered table-hover table-sm display" id="tblSearchPlan" style="width:100%">
+                                                            <thead style="background-color: #1a7bb9">
+                                                            <tr>
+                                                                <th>Codigo</th>
+                                                                <th>Tipo Cuenta</th>
+                                                                <th>Nombre de Plan</th>
+                                                                <th>Emp</th>
+                                                                <th>Agregar</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody id="table-tree">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                                <!-- /.card-body -->
+                                            </div>
+                                            <!-- /.card -->
+                                        </div>
+                                    </div>
+                                    <!-- /.row -->
+                                </div><!-- /.container-fluid -->
+                            </section>
+                            <!-- /.content -->
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% comment %}<script>
+        vents.items.products = {{ det|safe }};
+        {#vents.list();#}
+    </script>{% endcomment %}
+
+    <script>
+        $(function () {
+            vents.items.products = {{ det|safe }};
+            vents.list();
+            setTimeout(function () {
+                vents.list();
+            }, 1000);
+            console.log('vents.items.products')
+            console.log(vents.items.products)
+        });
+    </script>
+
+    {% comment %}<script type="application/javascript">
+        $(function () {
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_planCuentas:listar_planCuenta' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data) {
+                    console.log(data)
+                }).always(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+    </script>{% endcomment %}
+
+    {% comment %}<script>
+        $(function () {
+            $("#data").DataTable({
+
+                bPaginate: false,
+                responsive: true,
+                autoWidth: false,
+                scrollY: "305px",
+                destroy: true,
+                "language": {
+                    url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
+                },
+                columnDefs: [
+                {
+                    targets: [-3],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return data;
+                    }
+                },
+                {
+                    targets: [-2],
+                    class: 'text-center',
+                    render: function (data, type, row) {
+                        return data;
+                    }
+                },
+                {
+                    targets: [-1],
+                    class: 'text-center',
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<a rel="add" class="btn btn-success btn-xs btn-flat" style="color: white;"><i class="fas fa-plus"></i></a> ';
+                    }
+                },
+            ],
+            });
+        });
+    </script>{% endcomment %}
+
+{% endblock %}

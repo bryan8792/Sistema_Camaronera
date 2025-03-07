@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i>
+                        </li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header" style="background-color: #0d8ddb">
+                            <div class="card-tools">
+                                {% comment %}<a href="#" id="crear" data-toggle="modal" data-target="#modal_crear_mes"
+                                   class="btn btn-md bg-gradient-white">
+                                    <i class="fas fa-plus"></i> Crear Mes
+                                </a>{% endcomment %}
+                                <a href="{% url 'app_dieta:principal_anio_prec' %}" class="btn btn-md bg-danger">
+                                    <i class="fas fa-reply"></i> Regresar
+                                </a>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+
+                            <div class="row mt-6">
+                                {% for mes in meses %}
+                                    <div class="col-12 col-sm-6 col-md-3 d-flex align-items-stretch">
+                                        <div class="card bg-light">
+                                            <div class="card-header text-muted border-bottom-0">
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-8">
+                                                        <h2 class="lead"><b><strong> {{ mes.mes_dieta }}
+                                                            DEL {{ mes.anio.anio_dieta }}</strong></b></h2>
+                                                        <p class="text-muted text-sm">
+                                                            <b><strong>CONTROL Y ELABORACIÓN DE DIETAS DE PRECRIAS DEL MES: </strong></b>
+                                                            </br>
+                                                            {{ mes.descripcion }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-4 text-center">
+                                                        <img src="{% static 'img/camaronsito.png' %}" class="img-circle img-fluid"
+                                                             style="width: 120px; height: 100px;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-footer">
+                                                <div class="text-center">
+                                                    <a href="{% url 'app_dieta:principal_anio_prec' %}"
+                                                       class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-reply"></i>
+                                                    </a>
+                                                    <a href="#" data-toggle="modal" data-id="{{ mes.id }}" data-mes="{{ mes.mes_dieta }}" data-descripcion="{{ mes.descripcion }}" data-target="#modal_crear_mes" class="btn btn-sm btn-info edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'app_dieta:principal_dia_prec' mes.id %}"
+                                                       class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-file-alt"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- /.row -->
+    <!-- /.modal_crear_mes -->
+    <div class="modal fade" id="modal_crear_mes">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Crear Mes</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="crear_mes" method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <label for="anio" class="col-sm-2 col-form-label">Año *</label>
+                                <div class="col-sm-10">
+                                    <input type="text" value="{{ anio }}" readonly="readonly" class="form-control" id="anio" name="anio" placeholder="Ingrese el Año">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="mes_dieta" class="col-sm-2 col-form-label">Mes Dieta</label>
+                                <div class="col-sm-10">
+                                    <select name="mes_dieta" id="mes_dieta" class="form-control">
+                                        <option value="ENERO">Enero</option>
+                                        <option value="FEBRERO">Febrero</option>
+                                        <option value="MARZO">Marzo</option>
+                                        <option value="ABRIL">Abril</option>
+                                        <option value="MAYO">Mayo</option>
+                                        <option value="JUNIO">Junio</option>
+                                        <option value="JULIO">Julio</option>
+                                        <option value="AGOSTO">Agosto</option>
+                                        <option value="SEPTIEMBRE">Septiembre</option>
+                                        <option value="OCTUBRE">Octubre</option>
+                                        <option value="NOVIEMBRE">Noviembre</option>
+                                        <option value="DICIEMBRE">Diciembre</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="descripcion" class="col-sm-2 col-form-label">Descripción *</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" required="required" id="descripcion" name="descripcion" placeholder="Ingrese la descripción">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Registrar</button>
+                            <button type="reset" class="btn btn-default" data-dismiss="modal">Salir</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        $('#crear').click(function(){
+            $("#crear_mes").attr('action','{% url 'app_dieta:principal_mes' anio.id %}?nuevo=nuevo')
+            $("#mes_dieta").removeAttr('readonly')
+        });
+        $('.edit').click(function(){
+            $("#crear_mes").attr('action','{% url 'app_dieta:principal_mes' anio.id %}?mes='+$(this).data('id'))
+            $("#descripcion").val($(this).data('descripcion'))
+            $("#mes_dieta").val($(this).data('mes'))
+            $("#mes_dieta").attr('readonly','readonly')
+        })
+    </script>
+{% endblock %}

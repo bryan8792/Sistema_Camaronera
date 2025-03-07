@@ -1,0 +1,11 @@
+<ul>
+    {% for folder in folders %}
+        <li id="child_node-{{ folder.pk }}"><strong>{{ folder.name }}</strong>
+        {% if folder.children.exists %}
+            {% with folder.children.all as folders %}
+                {% include "parts/tree_cats.html" %}
+            {% endwith %}
+        {% endif %}
+        </li>
+    {% endfor %}
+</ul>

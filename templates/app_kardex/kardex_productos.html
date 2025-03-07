@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <link href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <form id="frmKardexProductos">
+            <div class="card">
+                <!-- /.card-header -->
+                <div class="card-header" style="background-color:#3498DB">
+                    <h3 class="card-title"><strong> {{ nombre }}</strong></h3>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-body">
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label"> BUSCADOR DE PRODUCTOS ( * ) : &nbsp </label>
+                        <div class="col-sm-10">
+                            <input type="hidden" name="action" value="{{ action }}">
+                            <input class="form-control" name="search">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card card-secondary">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-boxes"></i> &nbsp KARDEX PSM</h3>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table" id="tblProducts_psm">
+                                        <thead style="background: #5d6974">
+                                        <tr>
+                                            <th scope="col" style="width: 20%;">Fecha</th>
+                                            <th scope="col" style="width: 20%;">Producto</th>
+                                            <th scope="col" style="width: 20%;">Ingreso</th>
+                                            <th scope="col" style="width: 20%;">Egreso</th>
+                                            <th scope="col" style="width: 20%;">Saldo</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="card card-secondary">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-boxes"></i> &nbsp KARDEX BIO</h3>
+                                </div>
+                                <div class="card-body">
+                                    <table class="table" id="tblProducts_bio">
+                                        <thead style="background: #5d6974">
+                                        <tr>
+                                            <th scope="col" style="width: 20%;">Fecha</th>
+                                            <th scope="col" style="width: 20%;">Producto</th>
+                                            <th scope="col" style="width: 20%;">Ingreso</th>
+                                            <th scope="col" style="width: 20%;">Egreso</th>
+                                            <th scope="col" style="width: 20%;">Saldo</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <!-- código JS propìo-->
+    <script src="{% static 'acciones/app_kardex/kardex_productos_psm.js' %}"></script>
+    <script src="{% static 'acciones/app_kardex/kardex_productos_bio.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Crear nuevo año de {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action=".">
+        <section class="content">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title">Ingresar Año de: <strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="anio_dieta">{{ form.anio_dieta.label }}:</label>
+                                {{ form.anio_dieta }}
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
+                                <i class="fas fa-save"></i> GUARDAR
+                            </button>
+                            <a href="{% url 'app_dieta:principal_anio' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-times"></i> CANCELAR
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </form>
+
+    <!-- /.row -->
+
+    <!-- /.container-fluid -->
+
+    <!-- /.content -->
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(function (){
+            $('.btnTest').on('click', function (){
+                $.ajax({
+                    url: '{% url 'app_dieta:principal_anio' %}',
+                    type: 'POST',
+                    data: { id: 1},
+                    dataType: 'json'
+                }).done(function (data){
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data){
+                    alert('FALLAAAAAA');
+                }).always(function (data){
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

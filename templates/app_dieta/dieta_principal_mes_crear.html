@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Crear nueva {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action=".">
+        <section class="content">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title">Ingresar nuevo Mes de: <strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="mes_dieta">{{ form.mes_dieta.label }}:</label>
+                                {{ form.mes_dieta }}
+                            </div>
+                            <div class="form-group">
+                                <label for="descripcion">{{ form.descripcion.label }}:</label>
+                                {{ form.descripcion }}
+                            </div>
+
+                        </div>
+                        <div class="row card-body">
+                            <div class="col-sm-12 col-md-10">
+                                <button type="submit" class="btn btn-primary btn-flat btnTest">
+                                    <i class="fas fa-save"></i> Guardar registro
+                                </button>
+                            </div>
+
+                            <div class="col-sm-12 col-md-2">
+                                <a href="{% url 'app_dieta:principal_mes' %}" class="btn btn-danger btn-file">
+                                    <i class="fas fa-database"></i> Cancelar
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(function (){
+            $('.btnTest').on('click', function (){
+                $.ajax({
+                    url: '{% url 'app_dieta:principal_mes' %}',
+                    type: 'POST',
+                    data: { id: 1},
+                    dataType: 'json'
+                }).done(function (data){
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data){
+                    alert('FALLAAAAAA');
+                }).always(function (data){
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Litado de: <strong> {{ nombre }}</strong></h3>
+                        <div class="card-tools">
+                            <ul class="pagination pagination-sm float-right">
+                                <li class="page-item">
+                                   {% comment %} <a href="{% url 'app_proveedor:crear_proveedor' %}"
+                                       class="btn btn-block btn-default btn-sm">
+                                        <strong><i class="fas fa-plus"></i> NUEVO REGISTRO</strong>
+                                    </a>{% endcomment %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-body">
+                        <table id="tb_proveedor" class="table table-striped table-bordered">
+                            <thead>
+                            <tr role="row">
+                                <th style="width: 2%;" class="text-center">#</th>
+                                <th style="width: 23%;" class="text-left">Nombre Comercial</th>
+                                <th style="width: 10%;" class="text-center">RUC</th>
+                                <th style="width: 30%;" class="text-left">Dirección</th>
+                                <th style="width: 32%;" class="text-left">Actividad comercial</th>
+                                <th style="width: 3%;" class="text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for prov in object_list %}
+                                <tr role="row" class="odd">
+                                    <td><strong>{{ prov.id }}</strong></td>
+                                    <td>{{ prov.nombre_com }}</td>
+                                    <td class="text-center">{{ prov.ruc }}</td>
+                                    <td>{{ prov.direccion1 }}</td>
+                                    <td>{{ prov.actividad_com }}</td>
+                                    <td class="text-center">
+                                        <a href="{% url 'app_proveedor:actualizar_proveedor' prov.id %}"
+                                           class="btn btn-primary btn-xs btn-flat">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'app_proveedor:eliminar_proveedor' prov.id %}"
+                                           class="btn btn-danger btn-xs btn-flat">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-footer -->
+                    <div class="card-footer">
+                        {% block buttons_list %}
+                            <a href="{% url 'app_proveedor:crear_proveedor' %}"
+                               class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-plus"></i> Nuevo registro
+                            </a>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(function () {
+            $("#tb_proveedor").DataTable({
+                "responsive": true,
+                "autoWidth": false,
+                "language": {
+                    url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
+                }
+            });
+        });
+    </script>
+{% endblock %}
+

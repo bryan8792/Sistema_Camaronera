@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+
+    <!-- Main content -->
+
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Registros de: <strong> {{ nombre }}</strong></h3>
+                        <div class="card-tools">
+                            <ul class="pagination pagination-sm float-right">
+                                <li class="page-item">
+                                    <a href="{% url 'app_categoria:crear_producto' %}" class="btn btn-block btn-default btn-sm">
+                                        <strong><i class="fas fa-plus"></i> NUEVO PRODUCTO</strong>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="tb_categoria" class="table table-sm table-striped table-bordered">
+                            <thead>
+                            <tr>
+                                <th style="width: 5%;">Id</th>
+                                <th style="width: 25%;">Nombre</th>
+                                <th style="width: 10%;" class="text-center">Categoria</th>
+                                <th style="width: 30%;" class="text-center">Sub-Categoria</th>
+                                <th style="width: 10%;" class="text-center">Estado</th>
+                                <th style="width: 10%;" class="text-center">Imagen</th>
+                                <th style="width: 10%;" class="text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            {% for prod in object_list %}
+                                <tr>
+                                    <td><h6><strong>{{ prod.id }}</strong></h6></td>
+                                    <td><h6><strong>{{ prod.nombre }}</strong></h6></td>
+                                    <td class="text-center">
+                                        {% if prod.categoria.nombre == 'BALANCEADOS' %}
+                                            <h5><span class="badge badge-info float-center">  {{ prod.categoria.nombre }}  </span></h5>
+                                        {% else %}
+                                            <h5><span class="badge badge-success float-center">  {{ prod.categoria.nombre }}  </span></h5>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if prod.descripcion == 'BALANCEADO' %}
+                                            <h5><span class="badge badge-info float-center">  {{ prod.descripcion }}  </span></h5>
+                                        {% else %}
+                                            <h5><span class="badge badge-success float-center">  {{ prod.descripcion }}  </span></h5>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if prod.estado %}
+                                            <h5><span class="badge badge-primary float-center"> ACTIVO </span></h5>
+                                        {% else %}
+                                            <h5><span class="badge badge-danger float-center"> INACTIVO </span></h5>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <img src="{{ prod.get_image }}" class="img-size-50 mr-2 imagen" style="width: 40px; height: 40px;">
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'app_categoria:actualizar_producto' prod.id %}"
+                                           class="btn btn-primary btn-xs">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'app_categoria:eliminar_producto' prod.id %}"
+                                           class="btn btn-danger btn-xs">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+
+        $(function () {
+            $('.imagen').on('click', function () {
+                var src = $(this).attr('src');
+                Swal.fire({
+                    title: 'PRODUCTO',
+                    imageUrl: src,
+                    imageWidth: 1000,
+                    imageHeight: 500,
+                    imageAlt: 'Custom image',
+                    animation: true,
+                });
+            });
+        });
+
+        $(function () {
+            $("#tb_categoria").DataTable({
+                "responsive": true,
+                "autoWidth": false,
+                "language": {
+                    url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: [0, 1, 2, 3,4,5,6]
+                }]
+            });
+        });
+    </script>
+{% endblock %}

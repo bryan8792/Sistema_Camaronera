@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    {% comment %}<link rel="stylesheet" type="text/css" href="{% static 'acciones/app_contabilidad_planCuentas/dist/themes/default/style.min.css' %}">
+    <script src='{% static 'acciones/app_contabilidad_planCuentas/dist/jquery/jquery-2.0.3.min.js' %}'></script>
+    <script type="text/javascript">
+        var jQuery_2_0_3 = $.noConflict(true);
+    </script>{% endcomment %}
+
+    {% comment %}<script src='{% static 'acciones/app_contabilidad_planCuentas/dist/contextMenu/jquery.min.js' %}'></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/contextMenu/jquery.contextMenu.min.js' %}" integrity="sha512-kvg/Lknti7OoAw0GqMBP8B+7cGHvp4M9O9V6nAYG91FZVDMW3Xkkq5qrdMhrXiawahqU7IZ5CNsY/wWy1PpGTQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/dist/contextMenu/jquery.contextMenu.min.css' %}" integrity="sha512-EF5k2tHv4ShZB7zESroCVlbLaZq2n8t1i8mr32tgX0cyoHc3GfxuP7IoT8w/pD+vyoq7ye//qkFEqQao7Ofrag==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/contextMenu/jquery.contextMenu.js' %}" integrity="sha512-2ABKLSEpFs5+UK1Ol+CgAVuqwBCHBA0Im0w4oRCflK/n8PUVbSv5IY7WrKIxMynss9EKLVOn1HZ8U/H2ckimWg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/contextMenu/jquery.ui.position.js' %}" integrity="sha512-vBR2rismjmjzdH54bB2Gx+xSe/17U0iHpJ1gkyucuqlTeq+Q8zwL8aJDIfhQtnWMVbEKMzF00pmFjc9IPjzR7w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/contextMenu/jquery.ui.position.min.js' %}" integrity="sha512-878jmOO2JNhN+hi1+jVWRBv1yNB7sVFanp2gA1bG++XFKNj4camtC1IyNi/VQEhM2tIbne9tpXD4xaPC4i4Wtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>{% endcomment %}
+
+    <script src="{% static 'acciones/app_datatable/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script src='{% static 'acciones/app_contabilidad_planCuentas/dist/jstree 3.3.1/jstree.js' %}'></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/jstree 3.3.1/jstree.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/CSS/jquery.contextMenu.min.css' %}">
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/jquery.contextMenu.min.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/jquery.ui.position.js' %}"></script>
+
+    {% comment %}<script type="text/javascript">
+        var jQuery_3_3_1 = $.noConflict(true);
+    </script>{% endcomment %}
+    {% comment %}<link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/dist/jstree 3.3.1/jquery.contextMenu.min.css' %}">
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/jstree 3.3.1/jquery.contextMenu.min.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/jstree 3.3.1/jquery.ui.position.js' %}"></script>{% endcomment %}
+
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/planCuenta.js' %}"></script>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp;
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp;
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB; text-transform: uppercase">
+                            <h4 class="card-title"><strong>{{ nombre }}:</strong></h4>
+                            <div class="card-tools">
+                                {% comment %}<a href="{% url 'app_planCuentas:crear_planCuenta' %}" class="btn btn-block btn-default btn-sm">
+                                    <strong><i class="fas fa-plus"></i> &nbsp; CREAR PLAN:</strong>
+                                </a>{% endcomment %}
+                            </div>
+                        </div>
+                        &nbsp;<h5 class="text-center"><strong>CATÁLOGO DE PLAN DE CUENTAS</strong></h5>
+                        <div id="wrapper_page">
+                            {% block content %}
+                            {% endblock %}
+                        </div>
+                        <br><br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
