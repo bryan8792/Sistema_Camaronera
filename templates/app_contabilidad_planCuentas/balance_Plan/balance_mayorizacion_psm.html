@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    {% comment %}<script src="https://cdn.jsdelivr.net/npm/ag-grid-community@29.3.0/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@29.3.0/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@29.3.0/styles/ag-theme-alpine.css">
+{% endcomment %}
+
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}">
+
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/datagrid/ag-grid-community.min.noStyle.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/JS/datagrid/ag-grid.css' %}">
+    <link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/JS/datagrid/ag-theme-alpine.css' %}">
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/datagrid/ag-grid-enterprise.min.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/datagrid/Botones/jspdf.umd.min.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/datagrid/Botones/jspdf.plugin.autotable.min.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/list_balance_dtagrid_PSM.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/datagrid/Botones/xlsx.full.min.js' %}"></script>
+    <!-- Incluir jsPDF y AutoTable -->
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/jspdf/jspdf.umd.min.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/jspdf/jspdf.plugin.autotable.min.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- /.card-header -->
+                        <div class="card-header p-2 pt-1">
+                            <h2 class="card-title text-uppercase">&nbsp;&nbsp;<strong> {{ nombre }} - EMPRESA PESQUERA
+                                SAN MIGUEL</strong></h2>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            <h1 style="text-align: center"><b>BALANCE DE COMPROBACIÓN DE PSM</b></h1>
+                            <div class="class row">
+                                <div class="col-2">
+                                    <div style="margin-top: 10px;">
+                                        <div class="form-group">
+                                            <b class="text-center">FECHA DE INICIO</b> <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control">
+                                            <b class="text-center">FECHA DE FIN:</b> <input type="date" name="fecha_fin" id="fecha_fin" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div style="margin-top: 10px;">
+                                        <div class="form-group">
+                                            <b class="text-center">DESDE LA CUENTA</b> <select class="form-control select2" name="cuenta_inicio" id="cuenta_inicio"></select>
+                                            <b class="text-center">HASTA LA CUENTA</b> <select class="form-control select2" name="cuenta_fin" id="cuenta_fin"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <div style="margin-top: 10px;">
+                                        <div class="form-group">
+                                            <b class="text-center">SELECCIONE EL TIPO DE CUENTA</b>
+                                            <select name="tipo_cuenta" id="tipo_cuenta" class="form-control">
+                                                <option value="">TODOS</option>
+                                                <option value="G">GENERAL</option>
+                                                <option value="D">DETALLE</option>
+                                            </select>
+                                        </div>
+                                        <button id="btnActualizar" class="btn btn-primary"> Generar </button>
+                                    </div>
+                                </div>
+                                <div class="col-2 text-right">
+                                    <div style="margin-top: 10px;">
+                                        <br><br><br>
+                                        <button id="exportPdf" class="btn btn-danger">
+                                            <i class="fas fa-file-pdf"></i> &nbsp; PDF
+                                        </button>
+                                        <button id="exportExcel" class="btn btn-success">
+                                            <i class="fas fa-file-excel"></i> &nbsp; Excel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <div id="myGrid" style="height: 810px; width: 100%;" class="ag-theme-alpine"></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+{% endblock %}
+
+{% block scripts %}
+    <!-- para usar DataRangePicker JS -->
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}"/>
+    <script>
+        $(function () {
+            document.getElementById('btnActualizar').addEventListener('click', loadData);
+        })
+
+        $('.select2').select2({
+            theme: 'bootstrap4',
+            language: "es",
+            width: '100%',
+            dropdownAutoWidth: true
+        });
+
+    </script>
+
+{% endblock %}

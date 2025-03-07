@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet"
+          href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/jquery-3.5.1.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'acciones/app_datatable/datatables/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="{% static 'acciones/app_consumo_piscinas/css/estilo.css' %}">
+    <!--datables CSS básico-->
+    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">
+    <!--datables estilo bootstrap 4 CSS-->
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active"> {{ detail }} &nbsp;
+                            <i class="far nav-icon fa fa-clipboard-check"></i>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header p-0 pt-1">
+                            <div class="card-tools">
+                                <a href="{% url 'app_consumo:listar_consumo' %}"
+                                   class="btn btn-md bg-danger">
+                                    <i class="fas fa-reply"></i> REGRESAR
+                                </a>
+                                &nbsp;&nbsp;&nbsp;
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group row">
+                                        <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
+                                        <div class="col-sm-5">
+                                            {{ form.date_range2 }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <div class="table-responsive">
+                                    <table id="insumos_conglomerado_psm" class="table table-sm table-striped table-bordered" style="margin-left: 0px; width: 1644.56px;">
+                                        <thead style="background-color:#3498DB; text-align: center">
+                                        <tr>
+                                            <th scope="col" style="width: 50%;">Nombre del Producto</th>
+{#                                            <th scope="col" style="width: 20%;">Piscina</th>#}
+                                            <th scope="col" style="width: 10%;">Cantidad</th>
+                                            <th scope="col" style="width: 20%;">Costo</th>
+                                            <th scope="col" style="width: 20%;">Total</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <!-- para usar DataRangePicker JS -->
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}"/>
+    <!-- datatables JS -->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <!-- para usar botones en datatables JS -->
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.html5.min.js' %}"></script>
+    <!-- PARA DETALLES DEL DATATABLE -->
+    <script src="{% static 'acciones/app_consumo_piscinas/insumos_conglomerado_psm.js' %}"></script>
+
+{% endblock %}

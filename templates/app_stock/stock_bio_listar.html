@@ -1,0 +1,618 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/main_stock_bio_balanceados.css' %}">
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/main_stock_bio_insumos.css' %}">
+    <!--datables CSS básico-->
+    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">
+    <!--datables estilo bootstrap 4 CSS-->
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+    <!--font awesome con CDN-->
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/cdn/cdn_datatable.css' %}"
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                {% comment %}<div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header border-0" style="background-color:#3498DB">
+                            <h3 class="card-title text-center"><strong><i class="fas fa-boxes"></i> &nbsp AJUSTE DE
+                                STOCK DE BALANCEADOS - BIO:</strong></h3>
+                            <div class="card-tools">
+                                <a href="{% url 'app_stock:crear_stock_psm' %}" type="button" class="btn btn-block btn-default btn-sm">
+                                    <strong><i class="fas fa-plus"></i> AGREGAR</strong>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="container-fluid">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="tb_stock_bal_bio" class="table table-striped table-bordered"
+                                           style="width:100%">
+                                        <thead style="background-color:#3498DB">
+                                        <tr>
+                                            <th style="width: 60%;">Producto</th>
+                                            <th style="width: 25%;" class="text-center" colspan="2">Cantidad</th>
+                                            {#                                          <th style="width: 5%;" class="text-center">Unidad</th>#}
+                                            <th style="width: 5%;" class="text-center">Porcentaje</th>
+                                            <th style="width: 10%;" class="text-center">Accion</th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody>
+                                        {% for dato in balanceados %}
+                                            {% if dato.nombre_prod.estado == True and dato.nombre_prod.aplic_directa == False %}
+                                                <tr>
+                                                    <td>
+                                                        {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                            {{ dato.nombre_prod.nombre }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                            {% for emp in sotck %}
+                                                                {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                    {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                        <h6><strong>{{ emp.stock }}</strong></h6>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                            {% if dato.nombre_prod.unid_aplicacion  == 'GR' %}
+                                                                <h5><span
+                                                                        class="badge badge-info float-center">GRAMOS</span>
+                                                                </h5>
+                                                            {% elif dato.nombre_prod.unid_aplicacion  == 'LB' %}
+                                                                <h5><span
+                                                                        class="badge badge-info float-center">LIBRAS</span>
+                                                                </h5>
+                                                            {% elif dato.nombre_prod.unid_aplicacion  == 'KG' %}
+                                                                <h5><span class="badge badge-info float-center">KILOGRAMOS</span>
+                                                                </h5>
+                                                            {% else %}
+                                                                <h5><span class="badge badge-info float-center">MILILITROS</span>
+                                                                </h5>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                            {% for emp in sotck %}
+                                                                {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                    {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                        {% if emp.stock >= 1000 %}
+                                                                            <h4><span
+                                                                                    class="badge badge-primary float-center">100 %</span>
+                                                                            </h4>
+                                                                        {% elif emp.stock >= 500 %}
+                                                                            <h4><span
+                                                                                    class="badge badge-info float-center">50 %</span>
+                                                                            </h4>
+                                                                        {% elif emp.stock >= 300 %}
+                                                                            <h4><span
+                                                                                    class="badge badge-warning float-center">30 %</span>
+                                                                            </h4>
+                                                                        {% elif emp.stock >= dato.nombre_prod.minimo_stock %}
+                                                                            <h4><span
+                                                                                    class="badge badge-danger float-center">10 %</span>
+                                                                            </h4>
+                                                                        {% else %}
+                                                                            <h4><span
+                                                                                    class="badge badge-danger float-center">0 %</span>
+                                                                            </h4>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                            <div class="btn-group-sm">
+                                                                <a href="{% url 'app_stock:crear_stock_bio' dato.id %}"
+                                                                   class="btn-primary btn btn-xs">
+                                                                    <i class="fas fa-plus"> </i>
+                                                                </a>
+                                                                <a href="{% url 'app_stock:listar_stock_unico_bio' dato.id %}"
+                                                                   class="btn-info btn btn-xs">
+                                                                    <i class="fas fa-search"> </i>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header border-0" style="background-color:#3498DB">
+                            <h3 class="card-title text-center"><strong><i class="fas fa-boxes"></i> &nbsp AJUSTE DE
+                                STOCK DE INSUMOS - BIO:</strong></h3>
+                            <div class="card-tools"></div>
+                        </div>
+                        <div class="container-fluid">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="tb_stock_insumo_bio" class="table table-striped table-bordered"
+                                           style="width:100%">
+                                        <thead style="background-color:#3498DB">
+                                        <tr>
+                                            <th style="width: 60%;">Producto</th>
+                                            <th style="width: 25%;" class="text-center" colspan="2">Cantidad</th>
+                                            {#                                          <th style="width: 5%;" class="text-center">Unidad</th>#}
+                                            <th style="width: 5%;" class="text-center">Porcentaje</th>
+                                            <th style="width: 10%;" class="text-center">Accion</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for dato in insumos %}
+                                            {% if dato.nombre_prod.estado == True and dato.nombre_prod.aplic_directa == False %}
+                                                <tr>
+                                                    <td>
+                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                            {{ dato.nombre_prod.nombre }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                            {% for emp in sotck %}
+                                                                {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                    {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                        <h6><strong>{{ emp.stock }}</strong></h6>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                            {% if dato.nombre_prod.unid_aplicacion  == 'GR' %}
+                                                                <h5><span
+                                                                        class="badge badge-info float-center">GRAMOS</span>
+                                                                </h5>
+                                                            {% elif dato.nombre_prod.unid_aplicacion  == 'LB' %}
+                                                                <h5><span
+                                                                        class="badge badge-info float-center">LIBRAS</span>
+                                                                </h5>
+                                                            {% elif dato.nombre_prod.unid_aplicacion  == 'KG' %}
+                                                                <h5><span class="badge badge-info float-center">KILOGRAMOS</span>
+                                                                </h5>
+                                                            {% else %}
+                                                                <h5><span class="badge badge-info float-center">MILILITROS</span>
+                                                                </h5>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                            {% for emp in sotck %}
+                                                                {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                    {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                        {% if emp.stock >= 500000 %}
+                                                                            <h4><span
+                                                                                    class="badge badge-primary float-center">100 %</span>
+                                                                            </h4>
+                                                                        {% elif emp.stock >= 150000 %}
+                                                                            <h4><span
+                                                                                    class="badge badge-info float-center">50 %</span>
+                                                                            </h4>
+                                                                        {% elif emp.stock >= 80000 %}
+                                                                            <h4><span
+                                                                                    class="badge badge-warning float-center">30 %</span>
+                                                                            </h4>
+                                                                        {% elif emp.stock >= dato.nombre_prod.minimo_stock %}
+                                                                            <h4><span
+                                                                                    class="badge badge-danger float-center">10 %</span>
+                                                                            </h4>
+                                                                        {% else %}
+                                                                            <h4><span
+                                                                                    class="badge badge-danger float-center">0 %</span>
+                                                                            </h4>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                            <div class="btn-group-sm">
+                                                                <a href="{% url 'app_stock:crear_stock_bio' dato.id %}"
+                                                                   class="btn-primary btn btn-xs">
+                                                                    <i class="fas fa-plus"> </i>
+                                                                </a>
+                                                                <a href="{% url 'app_stock:listar_stock_unico_bio' dato.id %}"
+                                                                   class="btn-info btn btn-xs">
+                                                                    <i class="fas fa-search"> </i>
+                                                                </a>
+                                                            </div>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>{% endcomment %}
+
+                <div class="col-12">
+                    <div class="card card-primary card-tabs">
+                        <div class="card-header p-0 pt-1">
+                            <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
+                                       aria-selected="true"> <b> STOCK DE BALANCEADOS </b> </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-profile" role="tab"
+                                       aria-controls="custom-tabs-one-profile"
+                                       aria-selected="false"> <b> STOCK DE INSUMOS </b> </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-one-tabContent">
+                                <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel"
+                                     aria-labelledby="custom-tabs-one-home-tab">
+                                    <h3 class="card-title text-center">
+                                        <strong><i class="fas fa-boxes"></i>
+                                            &nbsp AJUSTE Y DETALLE DE STOCK DE BALANCEADOS - BIO:
+                                        </strong>
+                                    </h3>
+                                    <br>
+                                    <hr>
+                                    <div class="table-responsive">
+                                        <table id="tb_stock_bal_bio" class="table table-sm table-striped table-bordered"
+                                               style="width:100%">
+                                            <thead style="background-color:#3498DB">
+                                            <tr>
+                                                <th style="width: 50%;">Producto</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Total</th>
+                                                <th style="width: 5%;" class="text-center">Porcentaje</th>
+                                                <th style="width: 5%;" class="text-center">Accion</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            {% for dato in balanceados %}
+                                                {% if dato.nombre_prod.estado == True and dato.nombre_prod.aplic_directa == False %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                                {{ dato.nombre_prod.nombre }}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            <h6><strong>{{ emp.stock }}</strong></h6>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                                {% if dato.nombre_prod.unid_aplicacion  == 'GR' %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">GRAMOS</span>
+                                                                    </h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'LB' %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">LIBRAS</span>
+                                                                    </h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'KG' %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">KILOGRAMOS</span>
+                                                                    </h5>
+                                                                {% else %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">MILILITROS</span>
+                                                                    </h5>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            <h6>
+                                                                                <strong>
+                                                                                    {{ emp.stock|dividir:dato.nombre_prod.peso_presentacion }}
+                                                                                </strong>
+                                                                            </h6>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            <h5>
+                                                                                <span class="badge badge-success float-center">
+                                                                                    {{ dato.nombre_prod.presentacion }}
+                                                                                </span>
+                                                                            </h5>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            {% if emp.stock >= 1000 %}
+                                                                                <h4><span
+                                                                                        class="badge badge-primary float-center">100 %</span>
+                                                                                </h4>
+                                                                            {% elif emp.stock >= 500 %}
+                                                                                <h4><span
+                                                                                        class="badge badge-info float-center">50 %</span>
+                                                                                </h4>
+                                                                            {% elif emp.stock >= 300 %}
+                                                                                <h4><span
+                                                                                        class="badge badge-warning float-center">30 %</span>
+                                                                                </h4>
+                                                                            {% elif emp.stock >= dato.nombre_prod.minimo_stock %}
+                                                                                <h4><span
+                                                                                        class="badge badge-danger float-center">10 %</span>
+                                                                                </h4>
+                                                                            {% else %}
+                                                                                <h4><span
+                                                                                        class="badge badge-danger float-center">0 %</span>
+                                                                                </h4>
+                                                                            {% endif %}
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                                <div class="btn-group-sm">
+                                                                    <a href="{% url 'app_stock:crear_stock_bio' dato.id %}"
+                                                                       class="btn-primary btn btn-xs">
+                                                                        <i class="fas fa-plus"> </i>
+                                                                    </a>
+                                                                    <a href="{% url 'app_stock:listar_stock_unico_bio' dato.id %}"
+                                                                       class="btn-info btn btn-xs">
+                                                                        <i class="fas fa-search"> </i>
+                                                                    </a>
+                                                                </div>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel"
+                                     aria-labelledby="custom-tabs-one-profile-tab">
+                                    <h3 class="card-title text-center">
+                                        <strong><i class="fas fa-boxes"></i>
+                                            &nbsp AJUSTE Y DETALLE DE STOCK DE INSUMOS - BIO:
+                                        </strong>
+                                    </h3>
+                                    <br>
+                                    <hr>
+                                    <div class="table-responsive">
+                                        <table id="tb_stock_insumo_bio" class="table table-sm table-striped table-bordered">
+                                            <thead style="background-color:#3498DB">
+                                            <tr>
+                                                <th style="width: 50%;">Producto</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Total</th>
+                                                <th style="width: 5%;" class="text-center">Porcentaje</th>
+                                                <th style="width: 5%;" class="text-center">Accion</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for dato in insumos %}
+                                                {% if dato.nombre_prod.estado == True and dato.nombre_prod.aplic_directa == False %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                                {{ dato.nombre_prod.nombre }}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            <h6><strong>{{ emp.stock }}</strong>
+                                                                            </h6>
+                                                                            {#                                                                        <h5><span class="badge badge-info float-center">{{ dato.nombre_prod.unid_aplicacion }}</span></h5>#}
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                                {% if dato.nombre_prod.unid_aplicacion  == 'GR' %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">GRAMOS</span>
+                                                                    </h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'LB' %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">LIBRAS</span>
+                                                                    </h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'KG' %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">KILOGRAMOS</span>
+                                                                    </h5>
+                                                                {% else %}
+                                                                    <h5><span
+                                                                            class="badge badge-info float-center">MILILITROS</span>
+                                                                    </h5>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            <h6>
+                                                                                <strong>
+                                                                                    {{ emp.stock|dividir:dato.nombre_prod.peso_presentacion }}
+                                                                                </strong>
+                                                                            </h6>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            <h5>
+                                                                                <span class="badge badge-success float-center">
+                                                                                    {{ dato.nombre_prod.presentacion }}
+                                                                                </span>
+                                                                            </h5>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                                {% for emp in sotck %}
+                                                                    {% if emp.nombre_empresa.siglas == 'BIO' %}
+                                                                        {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                            {% if emp.stock >= 500000 %}
+                                                                                <h4><span
+                                                                                        class="badge badge-primary float-center">100 %</span>
+                                                                                </h4>
+                                                                            {% elif emp.stock >= 150000 %}
+                                                                                <h4><span
+                                                                                        class="badge badge-info float-center">50 %</span>
+                                                                                </h4>
+                                                                            {% elif emp.stock >= 80000 %}
+                                                                                <h4><span
+                                                                                        class="badge badge-warning float-center">30 %</span>
+                                                                                </h4>
+                                                                            {% elif emp.stock >= dato.nombre_prod.minimo_stock %}
+                                                                                <h4><span
+                                                                                        class="badge badge-danger float-center">10 %</span>
+                                                                                </h4>
+                                                                            {% else %}
+                                                                                <h4><span
+                                                                                        class="badge badge-danger float-center">0 %</span>
+                                                                                </h4>
+                                                                            {% endif %}
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}
+                                                                <div class="btn-group-sm">
+                                                                    <a href="{% url 'app_stock:crear_stock_bio' dato.id %}"
+                                                                       class="btn-primary btn btn-xs">
+                                                                        <i class="fas fa-plus"> </i>
+                                                                    </a>
+                                                                    <a href="{% url 'app_stock:listar_stock_unico_bio' dato.id %}"
+                                                                       class="btn-info btn btn-xs">
+                                                                        <i class="fas fa-search"> </i>
+                                                                    </a>
+                                                                </div>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script src="{% static 'acciones/app_datatable/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/popper/popper.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/bootstrap/js/bootstrap.min.js' %}"></script>
+    <!-- datatables JS -->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <!-- para usar botones en datatables JS -->
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.html5.min.js' %}"></script>
+    <!-- código JS propìo-->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/main_stock_bio_balanceados.js' %}"></script>
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/main_stock_bio_insumos.js' %}"></script>
+
+{% endblock %}

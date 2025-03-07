@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load pos_extras %}
+{% load widget_tweaks %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action="." enctype="multipart/form-data">
+        <section class="content">
+            <div class="row">
+
+                <div class="col-12">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title">Ingreso del Registro:<strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            {% for fields in form|split_form_fields:4 %}
+                                <div class="row">
+                                    {% for field in fields %}
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <label for="{{ field.label }}"
+                                                       class="font-weight-bold">{{ field.label }}:</label>
+                                                {% if field.name == 'electronic_signature' %}
+                                                    <div class="input-group mb-3">
+                                                        {{ field }}
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-secondary btnLoadCertificate" disabled type="button">
+                                                                <i class="fa-solid fa-file-circle-check"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    {{ field }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+
+                            {% comment %}<div class="form-group">
+                                <label for="nombre">{{ form.nombre.label }}:</label>
+                                {{ form.nombre }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.ruc.label }}:</label>
+                                {{ form.ruc }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.direccion.label }}:</label>
+                                {{ form.direccion }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.siglas.label }}:</label>
+                                {{ form.siglas }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="aperturada">{{ form.aperturada.label }}:</label>
+                                {{ form.aperturada|attr:"type:date" }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.actividad.label }}:</label>
+                                {{ form.actividad }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">Seleccione el {{ form.estado.label }}:</label>
+                                {{ form.estado }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.logo.label }}:</label>
+                                {{ form.logo }}
+                            </div>{% endcomment %}
+
+
+                        </div>
+
+                    <div class="modal fade" id="myModalCertificate" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title font-weight-bold">
+                                        <i class="fa-solid fa-file-circle-check"></i> Información de la firma electrónica
+                                    </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="container-fluid" id="content-certificate"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-save"></i> Guardar registro
+                            </button>
+                            <a href="{% url 'app_empresa:listar_empresa' %}" class="btn btn-danger btn-file">
+                                    <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </form>
+
+    <!-- /.row -->
+
+    <!-- /.container-fluid -->
+
+    <!-- /.content -->
+
+    <script type="application/javascript">
+
+        {% if form.errors %}
+            var errores = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errores = '{{ error }}\n';
+                {% endfor %}
+            {% endfor %}
+            Swal.fire({
+                title: 'Error',
+                text: errores,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+        {% endif %}
+
+    </script>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(function () {
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_empresa:listar_empresa' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data) {
+                    console.log(data)
+                }).always(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

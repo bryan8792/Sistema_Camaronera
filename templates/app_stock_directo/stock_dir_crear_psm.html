@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+    <link href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Ingreso de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action=".">
+        <section class="content">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title"><strong> Ingresar {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            <div class="form-group" readonly="readonly">
+                                <label for="producto_empresa">{{ form.producto_empresa.label }}:</label>
+                                {{ form.producto_empresa|attr:"readonly:True" }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tipo">{{ form.tipo.label }}</label>
+                                {{ form.tipo }}
+                            </div>
+
+                            <div class="form-group" id="div_piscina">
+                                <label for="piscina">Escoger Piscina</label>
+                                {{ form.piscinas }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cantidad_usar">{{ form.cantidad_usar.label }}: <strong> ( {{ producto.nombre_prod.presentacion }} de  {{ producto.nombre_prod.peso_presentacion }} {{ producto.nombre_prod.unid_medida }} ) </strong></label>
+                                {{ form.cantidad_usar }}
+                            </div>
+
+                            <div class="form-group" id="div_cantidad_ingreso" >
+                                <label for="cantidad_ingreso">{{ form.cantidad_ingreso.label }}: <strong> ( {{ producto.nombre_prod.unid_medida }} ) </strong></label>
+                                {{ form.cantidad_ingreso }}
+                            </div>
+
+                            <div class="form-group" id="div_cantidad_egreso">
+                                {% comment %}<label for="cantidad_egreso">{{ form.cantidad_egreso.label }}: <strong> ( {{ producto.nombre_prod.presentacion }} de  {{ producto.nombre_prod.peso_presentacion }} {{ producto.nombre_prod.unid_medida }} ) </strong></label>
+                                {% endcomment %}
+                                <label for="cantidad_egreso">{{ form.cantidad_egreso.label }}: <strong> ( {{ producto.nombre_prod.unid_medida }} ) </strong></label>
+                                {{ form.cantidad_egreso }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fecha_ingreso">{{ form.fecha_ingreso.label }}:</label>
+                                {{ form.fecha_ingreso }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="numero_guia">Ingresar una Descripción del (Ingreso - Egreso) del Producto:</label>
+                                {{ form.numero_guia }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="responsable_ingreso">{{ form.responsable_ingreso.label }}:</label>
+                                {{ form.responsable_ingreso }}
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-save"></i> GUARDAR
+                            </button>
+                            <a href="{% url 'app_stock_directo:listar_stock_directo_psm' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-undo"></i> CANCELAR
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        {% comment %}$(function () {
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                language: "es",
+            });
+        });{% endcomment %}
+
+
+        $(document).ready(function () {
+            $("select[name='producto_empresa']").val("{{ id_producto_empresa }}");
+            $("#div_cantidad_egreso").hide();
+            $("#div_cantidad_ingreso").show();
+        });
+
+        $("select[name='tipo']").blur(function() {
+            if($("select[name='tipo']").val() === 'INGRESO') {
+                $("#div_cantidad_egreso").hide()
+                $("#div_piscina").hide();
+                $("#div_cantidad_ingreso").show();
+                $("input[name='cantidad_usar']").blur(function () {
+                    console.log('Resultado:  ', {{ peso_presentacion }});
+                    {% comment %}alert("input[name='cantidad_usar']")
+                    alert(parseFloat($("input[name='cantidad_usar']").val())){% endcomment %}
+                    if( {{ peso_presentacion }} == 35 || {{ peso_presentacion }} == 30){
+                        var total = parseFloat($("input[name='cantidad_usar']").val());
+                        $("input[name='cantidad_ingreso']").val(parseFloat(total.toFixed(2)));
+                        $("input[name='cantidad_egreso']").val(0.00);
+                    }else{
+                        {#var total = parseFloat($("input[name='cantidad_usar']").val()) * parseFloat("{{ peso_presentacion }}".replace(",", "."));#}
+                        var total = parseFloat($("input[name='cantidad_usar']").val());
+                        $("input[name='cantidad_ingreso']").val(parseFloat(total.toFixed(2)));
+                        $("input[name='cantidad_egreso']").val(0.00);
+                    }
+                });
+            }else{
+                $("#div_cantidad_ingreso").hide();
+                $("#div_piscina").show();
+                $("#div_cantidad_egreso").show();
+                $("input[name='cantidad_usar']").blur(function () {
+                    {% comment %}alert("input[name='cantidad_usar']")
+                    alert(parseFloat($("input[name='cantidad_usar']").val())){% endcomment %}
+                    var total = parseFloat($("input[name='cantidad_usar']").val());
+                    $("input[name='cantidad_egreso']").val(parseFloat(total.toFixed(2)));
+                    $("input[name='cantidad_ingreso']").val(0.00);
+                });
+            }
+        });
+
+        $(function () {
+
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_stock_directo:listar_stock_directo_psm' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+                     Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data) {
+                    console.log(data)
+                }).always(function (data) {
+                     Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

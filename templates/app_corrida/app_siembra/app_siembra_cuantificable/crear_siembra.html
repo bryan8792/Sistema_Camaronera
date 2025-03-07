@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+    <script src="{% static 'acciones/app_factura_detalle/functions.js' %}"></script>
+    <script src="{% static 'acciones/app_corrida/js/crear_siembra.js' %}"></script>
+
+    <style>
+        .tb {
+            width: 100%;
+        }
+        .tb th, .tb td {
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        .tb thead {
+            background-color: #3498DB;
+        }
+    </style>
+
+{% endblock %}
+
+{% block contenido %}
+    <!-- Main header -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-primary card-tabs">
+                        <div class="card-header p-0 pt-1">
+                            <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="registro-siembra-precria-tab" data-toggle="pill"
+                                       href="#registro-siembra-precria" role="tab" aria-controls="custom-tabs-one-home"
+                                       aria-selected="true"> <b> REGISTRO SIEMBRA PRECRIA </b>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile"
+                                       aria-selected="false"> <b> RESULTADOS - MOVIMIENTOS</b>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="tab-content" id="custom-tabs-one-tabContent">
+
+                                <div class="tab-pane fade show active" id="registro-siembra-precria" role="tabpanel" aria-labelledby="registro-siembra-precria-tab">
+                                    <form id="frmFact" method="post">
+                                        <!-- /.card-body -->
+                                        <div class="card-body">
+                                            <div class="row">
+
+                                                <div class="col-lg-5">
+                                                    <div class="card card-light">
+                                                        <div class="card-header">
+                                                            <div>
+                                                                <h4 class="card-title text-center">
+                                                                    <b>
+                                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                        HISTORIAL DE CONSUMO - CRIA DE CAMARON
+                                                                    </b>
+                                                                </h4>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <input type="hidden" name="action" value="{{ action }}">
+                                                            <div class="row">
+                                                                <div class="col-lg-2" align="center"></div>
+                                                                <div class="col-lg-8" align="center">
+                                                                    <div class="form-group row">
+                                                                        <label class="col-sm-5 col-form-label">FECHA DE REGISTRO</label>
+                                                                        <div class="col-sm-7">
+                                                                            {{ form.fecha_registro }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-2" align="center"></div>
+                                                                <div class="col-lg-12" align="center">
+                                                                    <hr>
+                                                                </div>
+
+                                                                <div class="col-lg-12" align="center">
+                                                                    <div class="form-group row">
+                                                                        <label class="col-sm-5 col-form-label">FECHA DE SIEMBRA DE LA LARVA</label>
+                                                                        <div class="col-sm-7">
+                                                                            {{ form.fecha_compra }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-12" align="center">
+                                                                    <div class="form-group row">
+                                                                        <label class="col-sm-5 col-form-label">FECHA DE TRANSFERENCIA DE LARVA</label>
+                                                                        <div class="col-sm-7">
+                                                                            {{ form.fecha_transferencia }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-lg-12" align="center">
+                                                                    <hr>
+                                                                </div>
+                                                                <div class="col-lg-12 text-center" align="left">
+                                                                    <div class="form-group row">
+                                                                        <label class="col-sm-6 col-form-label">Cantidad de Larva (PSM):</label>
+                                                                        <div class="col-sm-6">
+                                                                            {{ form.comp_1 }}
+                                                                        </div>
+                                                                        <label class="col-sm-6 col-form-label">Cantidad de Larva (BIO):</label>
+                                                                        <div class="col-sm-6">
+                                                                            {{ form.comp_2 }}
+                                                                        </div>
+                                                                        <label class="col-sm-6 col-form-label">Otra Cantidad de Larva:</label>
+                                                                        <div class="col-sm-6">
+                                                                            {{ form.comp_3 }}
+                                                                        </div>
+                                                                        <label class="col-sm-6 col-form-label">Total:</label>
+                                                                        <div class="col-sm-6">
+                                                                            {{ form.tot_comp }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                {% comment %}<div class="col-lg-4 text-center" align="left">
+                                                                    <p>VALORIZABLE</p>
+                                                                    <div class="form-group row">
+                                                                        <div class="col-sm-12">
+                                                                            {{ form.comp_1_val|add_class:'text-center monto_val' }}
+                                                                        </div>
+                                                                        <div class="col-sm-12">
+                                                                            {{ form.comp_2_val|add_class:'text-center monto_val' }}
+                                                                        </div>
+                                                                        <div class="col-sm-12">
+                                                                            {{ form.comp_3_val|add_class:'text-center monto_val' }}
+                                                                        </div>
+                                                                        <div class="col-sm-12">
+                                                                            {{ form.tot_comp_val|add_class:'text-center' }}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>{% endcomment %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-7">
+                                                    <div class="card card-light">
+                                                        <div class="card-header">
+                                                            <h2 class="card-title" style="text-align: center">
+                                                                <b>ESCOGER PRODUCTOS A AÑADIR</b>
+                                                            </h2>
+                                                            <div class="card-tools">
+                                                                <ul class="pagination pagination-sm float-right">
+                                                                    <li class="page-item">
+                                                                        <button class="btn btn-sm btn-primary btn-flat" type="button" id="btnBuscProducto">
+                                                                            <i class="fas fa-search"></i> &nbsp;<b>BUSCAR</b>
+                                                                        </button>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            {% comment %}<div class="text-right">
+                                                                <h5><b>ESCOGER PRODUCTOS &nbsp;&nbsp;</b>
+                                                                    <button class="btn btn-primary btn-flat" type="button" id="btnBuscProducto">
+                                                                        <i class="fas fa-search"></i> &nbsp; Buscar
+                                                                    </button>
+                                                                </h5>
+                                                            </div>
+                                                            <hr>{% endcomment %}
+                                                            <div class="form-group">
+                                                                <table class="table table-sm table-striped table-bordered" id="tb_detalle">
+                                                                    <thead style="background-color:#3498DB">
+                                                                    <tr>
+                                                                        <th style="width: 2%;">#</th>
+                                                                        <th style="width: 15%;">Categoria</th>
+                                                                        <th style="width: 15%;">Linea</th>
+                                                                        <th style="width: 40%;">Producto</th>
+                                                                        <th style="width: 16%;text-align: center">Cantidad</th>
+                                                                        <th style="width: 12%;">Valor</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+
+                                                <div class="col-lg-12">
+                                                    <div class="card card-secondary">
+                                                        <div class="card-body">
+                                                            <div class="form-group">
+                                                                <div class="form-group row">
+                                                                    <label class="col-sm-3 col-form-label"><b>BUSQUEDA E INGRESO DE LAS PISCINAS A REGISTRAR :</b></label>
+                                                                    <div class="col-sm-4">
+                                                                        <button class="btn btn-primary btn-flat" type="button" id="btnBuscPiscina">
+                                                                            <i class="fas fa-search"></i> &nbsp; Buscar Piscinas
+                                                                        </button>
+                                                                        <button class="btn btn-success btn-flat" type="button" id="btnRefrescar">
+                                                                            <i class="fas fa-list"></i> &nbsp; Actualizar Tabla
+                                                                        </button>
+                                                                        {% comment %}<button class="btn btn-secondary btn-flat" type="button" id="btnCalcFechas">
+                                                                            <i class="fas fa-calculator"></i> &nbsp; Calcular Fechas (Dias)
+                                                                        </button>{% endcomment %}
+                                                                    </div>
+                                                                    <div class="col-sm-5 col-form-label" id="lblResulDias"></div>
+                                                                </div>
+                                                                <table class="table table-sm table-striped table-bordered display" style='width: 100%' id="tb_proceso">
+                                                                    <thead style="background-color:#3498DB">
+                                                                    <tr>
+                                                                        <th style="width: 3%;" >#</th>
+                                                                        <th style="width: 8%;" >Piscina</th>
+                                                                        <th style="width: 9%;" >Dias</th>
+                                                                        <th style="width: 10%;">Siembra</th>
+                                                                        <th style="width: 10%;">Costo de Larvas</th>
+                                                                        <th style="width: 10%;">Dias por Hectarea</th>
+                                                                        <th style="width: 33%;">Productos</th>
+                                                                        <th style="width: 15%;">Total de Productos</th>
+                                                                        <th style="width: 2%;">Accion</th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    </tbody>
+                                                                    <tfoot id="pie_pagina">
+                                                                    </tfoot>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- /.card-footer -->
+                                        <div class="card-footer">
+                                            {% block buttons_list %}
+                                                <a href="#" class="btn btn-primary btn-flat btnCalcular">
+                                                    <i class="fas fa-calculator"></i> &nbsp;CALCULAR
+                                                </a>
+                                                <button type="submit" class="btn btn-success btn-flat btnSave">
+                                                    <i class="fas fa-save"></i> &nbsp;GUARDAR
+                                                </button>
+                                                <a href="{% url 'app_corrida:listar_siembra_cuant' %}"
+                                                   class="btn btn-danger btn-flat">
+                                                    <i class="fas fa-undo"></i> &nbsp;REGRESAR
+                                                </a>
+                                            {% endblock %}
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+                                    <div>
+                                        <div class="col-lg-12">
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label"> INGRESE OBSERVACIÓN O NOVEDAD :</label>
+                                                <div class="col-sm-10">
+                                                    {{ form.observacion }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <h5 class="text-center">
+                                                <b id="resul"></b>
+                                            </h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-striped table-bordered" id="tb_devolucion" style="width: 1685px; margin-left: 0px;">
+                                                    <thead style="background-color:#3498DB">
+                                                    <tr>
+                                                        <th style="width: 10%;text-align: center">Siglas</th>
+                                                        <th style="width: 65%;text-align: center">Nombre</th>
+                                                        <th style="width: 25%;text-align: center">Cantidad</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody id="Resultad_ope">
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% comment %}<div class="card-footer navbar-white">
+                                        <a href="#" class="btn btn-primary btn-flat">
+                                            <i class="fas fa-print"></i> Imprimir
+                                        </a>
+                                    </div>{% endcomment %}
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModalSearchProducts" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <b><i class="fas fa-search"></i> Búsqueda de Productos</b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm table-bordered table-striped table-hover" id="tblSearchProducts">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre del Producto</th>
+                            <th>Agregar</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myModalSearchPiscinas" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <b><i class="fas fa-search"></i> Búsqueda de Piscinas</b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-sm table-bordered table-striped table-hover" id="tblSearchPiscinas">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Número de Piscina</th>
+                            <th>Agregar</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

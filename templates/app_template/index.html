@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Dashboard PSM & BIO</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Principal</a></li>
+                        <li class="breadcrumb-item active">PSM & BIO Sistema Informático</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">CPU Traffic</span>
+                            <span class="info-box-number">10<small>%</small></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="info-box mb-3">
+                        <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-thumbs-up"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Likes</span>
+                            <span class="info-box-number">41,410</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="clearfix hidden-md-up"></div>
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="info-box mb-3">
+                        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Sales</span>
+                            <span class="info-box-number">760</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.col -->
+                <div class="col-12 col-sm-6 col-md-3">
+                    <div class="info-box mb-3">
+                        <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">New Members</span>
+                            <span class="info-box-number">2,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header border-0">
+                        <div class="d-flex justify-content-between">
+                            <h3 class="card-title">Control de Sistema PSM-BIO</h3>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <p class="d-flex flex-column">
+                                <span class="text-bold text-lg">Desarrollo</span>
+                                <span>Porcentaje (%)</span>
+                            </p>
+
+                            <p class="ml-auto d-flex flex-column text-right">
+                                <span class="text-success">
+                                    <i class="fas fa-arrow-up"></i> 33.1%
+                                </span>
+                                <span class="text-muted">Since last month</span>
+                            </p>
+                        </div>
+
+                        <div class="position-relative mb-4">
+                            <canvas id="sales-chart" height="300"></canvas>
+                        </div>
+
+                        <div class="d-flex flex-row justify-content-end">
+                            <span class="mr-2">
+                                <i class="fas fa-square text-primary"></i> Valor
+                            </span>
+
+                            <span>
+                                <i class="fas fa-square text-gray"></i> Referencia
+                            </span>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Dashboard de Seguimiento Mes a Mes</h5>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fas fa-wrench"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <a href="#" class="dropdown-item">Action</a>
+                                    <a href="#" class="dropdown-item">Another action</a>
+                                    <a href="#" class="dropdown-item">Something else here</a>
+                                    <a class="dropdown-divider"></a>
+                                    <a href="#" class="dropdown-item">Separated link</a>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p class="text-center">
+                                    <strong>TOTAL DE SEGUIMIENTO</strong>
+                                </p>
+
+                                <div class="chart">
+                                    <!-- Sales Chart Canvas -->
+                                    <canvas id="areaChart" height="180" style="height: 250px;"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="text-center">
+                                    <strong>PORCENTAJE</strong>
+                                </p>
+                                <div class="progress-group">
+                                    Dato 1
+                                    <span class="float-right"><b>160</b>/200</span>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-primary" style="width: 80%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="progress-group">
+                                    Dato 2
+                                    <span class="float-right"><b>310</b>/400</span>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-danger" style="width: 75%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="progress-group">
+                                    <span class="progress-text">Dato 3</span>
+                                    <span class="float-right"><b>480</b>/800</span>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-success" style="width: 60%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="progress-group">
+                                    Dato 4
+                                    <span class="float-right"><b>250</b>/500</span>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-warning" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block border-right">
+                                        <span class="description-percentage text-success">
+                                            <i class="fas fa-caret-up"></i> 17%</span>
+                                    <h5 class="description-header">$35,210.43</h5>
+                                    <span class="description-text">TOTAL REVENUE</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block border-right">
+                                        <span class="description-percentage text-warning"><i
+                                                class="fas fa-caret-left"></i> 0%</span>
+                                    <h5 class="description-header">$10,390.90</h5>
+                                    <span class="description-text">TOTAL COST</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block border-right">
+                                        <span class="description-percentage text-success"><i
+                                                class="fas fa-caret-up"></i> 20%</span>
+                                    <h5 class="description-header">$24,813.53</h5>
+                                    <span class="description-text">TOTAL PROFIT</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-3 col-6">
+                                <div class="description-block">
+                                        <span class="description-percentage text-danger"><i
+                                                class="fas fa-caret-down"></i> 18%</span>
+                                    <h5 class="description-header">1200</h5>
+                                    <span class="description-text">GOAL COMPLETIONS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script src="{% static 'acciones/app_index/js/Control_Sistema_PSM_BIO.js' %}"></script>
+    <script src="{% static 'acciones/app_index/js/Dashboard_Seguimiento_Mes.js' %}"></script>
+
+{% endblock %}
+

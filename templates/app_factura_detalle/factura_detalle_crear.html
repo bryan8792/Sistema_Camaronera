@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+    <link href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+
+    <script src="{% static 'lib/moment-2.25.3/moment-with-locales.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <link href="{% static 'lib/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet"/>
+
+    <link rel="stylesheet" href="{% static 'lib/bootstrap-touchspin-4.2.5/css/jquery.bootstrap-touchspin.css' %}"/>
+    <script src="{% static 'lib/bootstrap-touchspin-4.2.5/js/jquery.bootstrap-touchspin.js' %}"></script>
+
+    <script src="{% static 'acciones/app_factura_detalle/functions.js' %}"></script>
+    <script src="{% static 'acciones/app_factura_detalle/form_factura_detalle.js' %}"></script>
+    <script src="{% static 'acciones/app_factura_detalle/form_factura_detalle_super.js' %}"></script>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Registro de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <form id="frmFactura" method="post">
+            <div class="card">
+                <!-- /.card-header -->
+                <div class="card-header" style="background-color:#3498DB">
+                    <h3 class="card-title">Registros de: <strong> {{ nombre }}</strong></h3>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-body">
+                    <div class="row">
+                        {% if request.user.is_superuser %}
+
+                            <div class="col-lg-9">
+                                <div class="card card-secondary">
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="fas fa-boxes"></i> &nbsp Detalle de Productos
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group" align="right">
+                                            <label>Buscador de productos: &nbsp </label>
+                                            {% comment %}<div class="input-group">
+                                        <select class="form-control select2" name="search"></select>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary dropdown-toggle" type="button"
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Opciones
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" id="btnSearchProducts">
+                                                    <i class="fas fa-search"></i> Buscar productos
+                                                </a>
+                                                <a class="dropdown-item btnClearSearch">
+                                                    <i class="fas fa-times"></i> Limpiar búsqueda
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>{% endcomment %}
+                                            <button class="btn btn-primary btn-flat" type="button" id="btnBuscarPsm">
+                                                <i class="fas fa-search"></i> Productos PSM
+                                            </button>
+                                            <button class="btn btn-success btn-flat" type="button" id="btnBuscarBio">
+                                                <i class="fas fa-search"></i> Productos BIO
+                                            </button>
+                                        </div>
+                                        <hr>
+                                        <table width="100%"
+                                               class="table table-sm table-striped table-bordered display nowrap" style="width: auto" id="tblProducts_sup">
+{#                                            <thead style="background: #5d6974">#}
+                                            <thead>
+                                            <tr>
+                                                <th>Eliminar</th>
+                                                <th>Producto</th>
+                                                <th>Presentación</th>
+                                                <th>Empresa Siglas</th>
+                                                <th>Ingresar Cantidad</th>
+                                                <th>Cantidad a Ingresar</th>
+                                                <th>Valor</th>
+                                                <th>Subtotal</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <div class="card card-secondary">
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="fas fa-shopping-cart"></i> &nbsp Datos de la Factura</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <input type="hidden" name="action" value="{{ action }}">
+                                        <div class="form-group">
+                                            <label for="{{ form.fecha_ingreso.label }}">{{ form.fecha_ingreso.label }}:</label>
+                                            {{ form.fecha_ingreso|attr:"type:date"|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ form.numero_guia.label }}">{{ form.numero_guia.label }}:</label>
+                                            {{ form.numero_guia|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ form.responsable_ingreso.label }}">{{ form.responsable_ingreso.label }}:</label>
+                                            {{ form.responsable_ingreso|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ form.proveedor.label }}">{{ form.proveedor.label }}:</label>
+                                            {{ form.proveedor|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Subtotal:</label>
+                                            {{ form.subtotal }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IVA:</label>
+                                            {{ form.iva }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label>IVA Calculado:</label>
+{#                                            <input type="text" class="form-control" readonly name="ivacalc" value="0.00">#}
+                                            {{ form.ivacalc }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Total a pagar:</label>
+                                            {{ form.total }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="card card-secondary">
+
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label for="{{ form.observacion.label }}">{{ form.observacion.label }}:</label>
+                                            {{ form.observacion|attr:"cols:10"|attr:"rows:3" }}
+                                            <small class="form-text text-danger"><b>Ingrese una Observación en caso de haber alguna..</b></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% else %}
+
+                            <div class="col-lg-9">
+                                <div class="card card-secondary">
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="fas fa-boxes"></i> &nbsp Detalle de Productos
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group" align="right">
+                                            <label>Buscador de productos: &nbsp </label>
+                                            {% comment %}<div class="input-group">
+                                        <select class="form-control select2" name="search"></select>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary dropdown-toggle" type="button"
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Opciones
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" id="btnSearchProducts">
+                                                    <i class="fas fa-search"></i> Buscar productos
+                                                </a>
+                                                <a class="dropdown-item btnClearSearch">
+                                                    <i class="fas fa-times"></i> Limpiar búsqueda
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>{% endcomment %}
+                                            <button class="btn btn-primary btn-flat" type="button" id="btnBuscarPsm">
+                                                <i class="fas fa-search"></i> Productos PSM
+                                            </button>
+                                            <button class="btn btn-success btn-flat" type="button" id="btnBuscarBio">
+                                                <i class="fas fa-search"></i> Productos BIO
+                                            </button>
+                                        </div>
+                                        <hr>
+                                        <table width="100%"
+                                               class="table table-sm table-striped table-bordered display nowrap" id="tblProducts">
+{#                                            <thead style="background: #5d6974">#}
+                                            <thead>
+                                            <tr>
+                                                <th>Eliminar</th>
+                                                <th>Producto</th>
+                                                <th>Presentación</th>
+                                                <th>Empresa Siglas</th>
+                                                <th>Ingresar Cantidad</th>
+                                                <th>Cantidad a Ingresar</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <div class="card card-secondary">
+                                    <div class="card-header">
+                                        <h3 class="card-title"><i class="fas fa-shopping-cart"></i> &nbsp Datos de la
+                                            Factura</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <input type="hidden" name="action" value="{{ action }}">
+                                        <div class="form-group">
+                                            <label for="{{ form.fecha_ingreso.label }}">{{ form.fecha_ingreso.label }}:</label>
+                                            {{ form.fecha_ingreso|attr:"type:date"|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ form.numero_guia.label }}">{{ form.numero_guia.label }}:</label>
+                                            {{ form.numero_guia|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ form.responsable_ingreso.label }}">{{ form.responsable_ingreso.label }}:</label>
+                                            {{ form.responsable_ingreso|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ form.proveedor.label }}">{{ form.proveedor.label }}:</label>
+                                            {{ form.proveedor|attr:'required:True' }}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ form.observacion.label }}">{{ form.observacion.label }}:</label>
+                                            {{ form.observacion }}
+                                            <small class="form-text text-muted">Observación en caso de haber alguna..</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- /.card-footer -->
+                <div class="card-footer navbar-white" >
+                    <button type="submit" class="btn btn-primary btn-flat btnSave">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                    <a href="{{ list_url }}" class="btn btn-danger btn-flat">
+                        <i class="fas fa-times"></i> Regresar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </section>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModalSearchProducts" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <b><i class="fas fa-search"></i> Búsqueda de Productos</b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered table-hover" id="tblSearchProducts">
+                        <thead>
+                        <tr>
+                            <th>Nombre del Producto</th>
+                            <th>Nombre de la Empresa</th>
+                            <th>Agregar</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <a href="{% url 'app_categoria:crear_producto' %}" class="btn btn-primary">
+                        <b>Registrar Producto</b>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        vents.items.products = {{ det|safe }};
+        vents_sup.items.products = {{ det|safe }};
+    </script>
+
+{% endblock %}

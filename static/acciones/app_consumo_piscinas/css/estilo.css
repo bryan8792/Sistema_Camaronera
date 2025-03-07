@@ -1,0 +1,19 @@
+
+/*estilos para la tabla*/
+table>tbody>tr>td {
+    vertical-align: middle !important;
+}
+
+table>thead {
+    width:100% !important;
+}
+
+/*para alinear los botones y cuadro de busqueda*/
+.btn-group, .btn-group-vertical {
+    position: absolute !important;
+}
+
+table.display {
+  margin:0 auto;
+  width:100%;
+}

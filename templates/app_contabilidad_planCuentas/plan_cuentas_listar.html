@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    {% comment %}<link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/dist/css/estilo_letra.css' %}">
+    <link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/dist/css/adminlte.min.css' %}"/>{% endcomment %}
+    <!-- Font Awesome -->
+    {#    <link rel="stylesheet" href="../../plugins/fontawesome-free/css/all.min.css">#}
+
+
+    <style>
+        ul, #myUL {
+            list-style-type: none;
+        }
+
+        #myUL {
+            margin: 0;
+            padding: 0;
+        }
+
+        .caret {
+            cursor: pointer;
+            -webkit-user-select: none; /* Safari 3.1+ */
+            -moz-user-select: none; /* Firefox 2+ */
+            -ms-user-select: none; /* IE 10+ */
+            user-select: none;
+        }
+
+        .caret::before {
+            content: "\25B6";
+            color: black;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .caret-down::before {
+            -ms-transform: rotate(90deg); /* IE 9 */
+            -webkit-transform: rotate(90deg); /* Safari */
+        ' transform: rotate(90 deg);
+        }
+
+        .nested {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+    </style>
+
+    <link rel="stylesheet" href="{% static 'acciones/app_contabilidad_planCuentas/dist/themes/default/style.min.css' %}"/>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Formulario de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB; text-transform: uppercase">
+                            <h4 class="card-title"><strong>{{ nombre }}:</strong></h4>
+                        </div>
+
+                        {% comment %}<div class="card-body">
+                            <div class="row mt-6">
+                                {% for data in planCuenta %}
+
+                                    <div class="container-fluid">
+
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="card">
+
+                                                    <div class="card-body p-0">
+                                                        <table class="table table-hover" style="border: hidden">
+                                                            <tbody style="border: hidden">
+                                                            <tr data-widget="expandable-table" aria-expanded="false"
+                                                                style="border: hidden">
+
+                                                                <td>
+                                                                    <i class="nav-icon fas fa-folder-open"></i>
+                                                                    <i class="expandable-table-caret fas fa-caret-right fa-fw"></i>
+                                                                    &nbsp; <strong> {{ data.codigo }}
+                                                                    &nbsp; {{ data.nombre }} </strong> &nbsp;
+                                                                    <span class="badge badge-secondary float-right"> &nbsp; {{ data.nivel }}</span>
+                                                                </td>
+
+                                                                {% if data.cuenta.nivel == 1 %}
+                                                                {% for emp in planCuenta %}
+                                                                    {% if emp.nivel == 1 %}
+                                                                        {% if data.cuenta.nivel == emp.nivel %}
+                                                                            &nbsp; <strong> {{ emp.codigo }} &nbsp; {{ emp.nombre }} &nbsp;&nbsp;&nbsp; </strong>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            {% endif %}
+
+                                                            </tr>
+                                                            <tr class="expandable-body" aria-expanded="false"
+                                                                style="border: hidden">
+                                                                <td style="border: hidden">
+                                                                    <div class="p-0">
+                                                                        <table class="table table-hover"
+                                                                               style="border: hidden">
+                                                                            <tbody>
+                                                                            <tr data-widget="expandable-table"
+                                                                                aria-expanded="false"
+                                                                                style="border: hidden">
+                                                                                <td style="border: hidden">
+                                                                                    {% for recorre in object_list %}
+                                                                                        {% if recorre.cuenta.codigo == data.codigo %}
+                                                                                            <ul>
+                                                                                                <li>
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                                                    <i class="expandable-table-caret fas fa-caret-right fa-fw"></i>
+                                                                                                    &nbsp;<strong>&nbsp;{{ recorre.orden }}
+                                                                                                    &nbsp;&nbsp; {{ recorre.nombre }} </strong>
+                                                                                                    <span class="badge badge-secondary float-right"> &nbsp; {{ recorre.orden }}</span>
+                                                                                                </li>
+                                                                                            </ul>
+
+
+
+
+
+                                                                                        {% endif %}
+                                                                                        <br>
+                                                                                    {% endfor %}
+                                                                                </td>
+
+                                                                                {% if data.nivel == 1 %}
+                                                                                    {% for emp in object_list %}
+                                                                                        {% if emp.cuenta.nivel == 1 %}
+                                                                                            {% if data.nivel == emp.cuenta.nivel %}
+                                                                                                &nbsp;
+                                                                                                <strong> {{ emp.codigo }} &nbsp; {{ emp.nombre }} ddddddd</strong>
+                                                                                            {% endif %}
+                                                                                        {% endif %}
+                                                                                    {% endfor %}
+                                                                                {% endif %}
+                                                                            </tr>
+                                                                            <tr class="expandable-body"
+                                                                                aria-expanded="false"
+                                                                                style="border: hidden">
+                                                                                <td style="border: hidden">
+                                                                                    <div class="p-0">
+                                                                                        <table class="table table-hover"
+                                                                                               style="border: hidden">
+                                                                                            <tbody>
+                                                                                            <tr style="border: hidden">
+                                                                                                <td style="border: hidden">
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                                                    dato niv 2
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr style="border: hidden">
+                                                                                                <td style="border: hidden">
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                                                    dato niv 2
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr style="border: hidden">
+                                                                                                <td style="border: hidden">
+                                                                                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                                                                                    dato niv 2
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr data-widget="expandable-table"
+                                                                                aria-expanded="false">
+                                                                                <td>
+                                                                                    <i class="expandable-table-caret fas fa-caret-right fa-fw"></i>
+                                                                                    219-2
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr class="expandable-body">
+                                                                                <td>
+                                                                                    <div class="p-0">
+                                                                                        <table class="table table-hover">
+                                                                                            <tbody>
+                                                                                            <tr>
+                                                                                                <td>219-2-1</td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td>219-2-2</td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td>219-2-3</td>
+                                                                                            </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td>219-3</td>
+                                                                            </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>657</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>175</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>134</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>494</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>832</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>982</td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    <!-- /.card-body -->
+                                                </div>
+                                                <!-- /.card -->
+                                            </div>
+                                        </div>
+                                        <!-- /.row -->
+                                    </div><!-- /.container-fluid -->
+                                {% endfor %}
+                            </div>
+                        </div>{% endcomment %}
+
+                        <div class="card-body" id="jstree">
+
+                            {% comment %}<h1>PLAN DE CUENTAS</h1>{% endcomment %}
+
+                            {% for data in planCuenta %}
+
+                                {% if data.nivel == 1 %}
+
+                                    <ul id="myUL">
+                                        <li><span
+                                                class="caret"><strong>{{ data.codigo }} &nbsp; {{ data.nombre }}</strong></span>
+                                            <ul class="nested">
+                                                {#                                            <li>Water</li>#}
+                                                {#                                            <li>Coffee</li>#}
+                                                {% for nivelplancuenta in nivelplancuenta_list %}
+                                                    {% if nivelplancuenta.cuenta.codigo == data.codigo and nivelplancuenta.nivel == 2 %}
+                                                        <li><span class="caret"><strong>{{ nivelplancuenta.orden }}</strong> &nbsp;&nbsp; {{ nivelplancuenta.nombre }}</span>
+
+                                                            <ul class="nested">
+                                                                {% if nivelplancuenta.nivel == 3 %}
+                                                                    <li><span class="caret">Green Tea</span>
+                                                                        <ul class="nested">
+                                                                            <li>Sencha</li>
+                                                                            <li>Gyokuro</li>
+                                                                            <li>Matcha</li>
+                                                                            <li>Pi Lo Chun</li>
+                                                                        </ul>
+                                                                    </li>
+                                                                {% endif %}
+                                                            </ul>
+
+                                                        </li>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </li>
+                                    </ul>
+
+                                {% endif %}
+
+                            {% endfor %}
+
+                            {#                            <div id="jstree">#}
+                            {#                                <!-- in this example the tree is populated from inline HTML -->#}
+                            {#                                <ul>#}
+                            {#                                    <li>Root node 1#}
+                            {#                                        <ul>#}
+                            {#                                            <li id="child_node_1">Child node 1</li>#}
+                            {#                                            <li>Child node 2</li>#}
+                            {#                                        </ul>#}
+                            {#                                    </li>#}
+                            {#                                    <li>Root node 2</li>#}
+                            {#                                </ul>#}
+                            {#                            </div>#}
+                            {#                            <button>demo button</button>#}
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </section>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <!-- jQuery -->
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/jquery/jquery.min.js' %}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- AdminLTE App -->
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/js/adminlte.min.js' %}"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/modelo_arbol_planCuentas.js' %}"></script>
+
+    <script>
+        var toggler = document.getElementsByClassName("caret");
+        var i;
+
+        for (i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function () {
+                this.parentElement.querySelector(".nested").classList.toggle("active");
+                this.classList.toggle("caret-down");
+            });
+        }
+    </script>
+
+        <script src="{% static 'acciones/app_contabilidad_planCuentas/jquery/jquery.js' %}"></script>
+        <!-- 5 include the minified jstree source -->
+        <script src="{% static 'acciones/app_contabilidad_planCuentas/dist/jstree.min.js' %}"></script>
+        {% comment %}<script>
+            $(function () {
+                // 6 create an instance when the DOM is ready
+                $('#jstree').jstree();
+                // 7 bind to events triggered on the tree
+                $('#jstree').on("changed.jstree", function (e, data) {
+                    console.log('data.selected');
+                    console.log(data.selected);
+                });
+                // 8 interact with the tree - either way is OK
+                $('button').on('click', function () {
+                    $('#jstree').jstree(true).select_node('child_node_1');
+                    $('#jstree').jstree('select_node', 'child_node_1');
+                    $.jstree.reference('#jstree').select_node('child_node_1');
+                });
+            });
+        </script>{% endcomment %}
+
+{% endblock %}

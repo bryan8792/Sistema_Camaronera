@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Registro {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action=".">
+        <section class="content">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title">Opción:<strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            {% for datos in form.visible_fields %}
+                                <div class="form-group">
+                                    <label for="nombre">{{ datos.label }}:</label>
+                                    {{ datos }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
+                                <i class="fas fa-save"></i> GUARDAR
+                            </button>
+                            <a href="{% url 'app_categoria:listar_categoria' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-times"></i> CANCELAR
+                            </a>
+                        </div>
+
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </form>
+
+    <!-- /.row -->
+    <script type="application/javascript">
+
+        {% if form.errors %}
+            var errores = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errores = '{{ error }}\n';
+                {% endfor %}
+            {% endfor %}
+            Swal.fire({
+                title: 'Error',
+                text: errores,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+        {% endif %}
+
+        {% comment %}$('form').on('submit', function (e) {
+            e.preventDefault();
+            alert('x');
+        });
+{% endcomment %}
+    </script>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script type="application/javascript">
+
+        $(function () {
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_categoria:listar_categoria' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data) {
+                    toastr.error('Error verificar por favor', data)
+                }).always(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+
+        alert_jqueryconfirm();
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet"
+          href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/jquery-3.5.1.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'acciones/app_datatable/datatables/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="{% static 'acciones/app_consumo_piscinas/css/estilo.css' %}">
+    <!--datables CSS básico-->
+    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">
+    <!--datables estilo bootstrap 4 CSS-->
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+
+{#    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_consumo_piscinas/css/botones_derecha.css' %}">#}
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active"> Análisis por Piscinas&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header p-0 pt-1">
+                            <div class="card-tools">
+                                <a href="{% url 'app_consumo:listar_consumo' %}"
+                                   class="btn btn-md bg-danger">
+                                    <i class="fas fa-reply"></i> &nbsp REGRESAR
+                                </a>
+                            </div>
+                            <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
+                                       aria-selected="true"> <b> DETALLE DE CONSUMO </b> </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-profile" role="tab"
+                                       aria-controls="custom-tabs-one-profile"
+                                       aria-selected="false"> <b> DETALLE DE INSUMOS POR PISCINAS</b> </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-messages" role="tab"
+                                       aria-controls="custom-tabs-one-messages"
+                                       aria-selected="false"> <b> RESUMEN DE PISCINAS POR INSUMOS</b> </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-one-tabContent">
+                                <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel"
+                                     aria-labelledby="custom-tabs-one-home-tab">
+                                    <h3 class="card-title text-center">
+                                        &nbsp CONSUMO DE : <strong> {{ numero_piscina }}</strong>
+                                    </h3>
+                                    <br>
+                                    <hr>
+                                    <div>
+                                        <table id="tb_consumo_piscinas"  width="100%" style="width:100%"
+                                               class="table table-sm table-striped table-bordered">
+                                            <thead style="background-color:#3498DB; text-align: center">
+                                            <tr>
+                                                <th style="width: 5%;">Empresa</th>
+                                                <th style="width: 10%;">Piscina</th>
+                                                <th style="width: 10%;">Fecha</th>
+                                                <th style="width: 10%;">Egreso</th>
+                                                <th style="width: 40%; text-align: center">( Guia - Descripcion )</th>
+                                                <th style="width: 15%;">Producto</th>
+                                                <th style="width: 10%;">Responsable</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
+                                                    <div class="col-sm-5">
+                                                        {{ form.date_range }}
+                                                    </div>
+                                                    {% comment %}<div class="col-sm-2">
+                                                        <a href="#" class="btn btn-primary btn-flat">
+                                                            <i class="fas fa-clipboard-list"></i> Reporte
+                                                        </a>
+                                                    </div>{% endcomment %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="table-responsive">
+                                            <table id="tb_resumen_piscinas" class="table table-sm table-striped table-bordered display"
+                                                   style="width: 1618px; margin-left: 0px;">
+                                                <thead style="background-color:#3498DB; text-align: center">
+                                                <tr>
+                                                    <th style="width: 45%;">Nombre del Producto</th>
+                                                    <th style="width: 10%;">Piscina</th>
+                                                    <th style="width: 10%;">Fecha</th>
+                                                    <th style="width: 10%;">Cantidad</th>
+                                                    <th style="width: 10%;">Costo</th>
+                                                    <th style="width: 15%;">Total</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                            {% comment %}<div class="col-lg-2">
+                                            <div class="card">
+                                                <div class="card-header" style="background-color:#3498DB">
+                                                    <h4 class="card-title"><strong>ANALISIS POR PISCINAS: </strong></h4>
+                                                    <div class="card-tools">
+                                                        <button type="button" class="btn btn-tool"
+                                                                data-card-widget="collapse"><i
+                                                                class="fas fa-minus"></i></button>
+                                                    </div>
+                                                </div>
+                                                <div class="card-body table-responsive p-0" style="height: 1030px;">
+                                                    <table class="table table-head-fixed text-nowrap" id="tb_piscina">
+                                                        <thead>
+                                                        <tr>
+                                                            <th scope="col" style="width: 60%;">Piscinas</th>
+                                                            <th scope="col" style="width: 10%;">Ver</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        {% for pis in piscinas %}
+                                                            <tr>
+                                                                <td>{{ pis.numero }}</td>
+                                                                <td>
+                                                                    <a href="{% url 'app_consumo_piscinas:listar_seguimiento_det_piscina' pis.orden %}"
+                                                                       class="btn-primary btn btn-xs">
+                                                                        <i class="fas fa-search"> </i>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>{% endcomment %}
+                                        </div>
+                                    </div>
+                                    {% comment %}<div class="card-footer navbar-white">
+                                        <a href="#" class="btn btn-primary btn-flat">
+                                            <i class="fas fa-print"></i> Imprimir
+                                        </a>
+                                    </div>{% endcomment %}
+                                </div>
+
+                                <div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel"
+                                     aria-labelledby="custom-tabs-one-messages-tab">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
+                                                    <div class="col-sm-5">
+                                                        {{ form.date_range2 }}
+                                                    </div>
+                                                    {% comment %}<div class="col-sm-2">
+                                                        <a href="#" class="btn btn-primary btn-flat">
+                                                            <i class="fas fa-clipboard-list"></i> Reporte
+                                                        </a>
+                                                    </div>{% endcomment %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="table-responsive">
+                                            <table id="tb_piscinas_por_insumos" class="table table-sm table-striped table-bordered"
+                                                   style="margin-left: 0px; width: 1644.56px;">
+                                                <thead style="background-color:#3498DB; text-align: center">
+                                                <tr>
+                                                    <th scope="col" style="width: 30%;">Nombre del Producto</th>
+                                                    <th scope="col" style="width: 20%;">Piscina</th>
+                                                    <th scope="col" style="width: 10%;">Cantidad</th>
+                                                    <th scope="col" style="width: 20%;">Costo</th>
+                                                    <th scope="col" style="width: 20%;">Total</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script src="{% static 'lib/datatables-1.10.20/Seg_Lineal/js/highcharts.js' %}"></script>
+    <!-- para usar DataRangePicker JS -->
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}"/>
+    <!-- datatables JS -->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <!-- para usar botones en datatables JS -->
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.html5.min.js' %}"></script>
+    <!-- PARA DETALLES DEL DATATABLE Y LA GRAFICA  -->
+    <script src="{% static 'acciones/app_consumo_piscinas/detalle_consumo_piscinas.js' %}"></script>
+    <script src="{% static 'acciones/app_consumo_piscinas/detalle_insumos_por_piscinas.js' %}"></script>
+    <script src="{% static 'acciones/app_consumo_piscinas/detalle_piscinas_por_insumos.js' %}"></script>
+
+{% endblock %}

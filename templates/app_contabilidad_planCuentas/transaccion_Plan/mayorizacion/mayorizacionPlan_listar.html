@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <!-- Libreria JQuery -->
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <!-- Libreria Select2 -->
+    <link href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}"/>
+    {% comment %}<link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+
+{#    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/jquery-3.5.1.js' %}"></script>#}
+{#    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/jquery.dataTables.min.js' %}"></script>#}
+{#    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">#}
+{#    <!-- CSS personalizado -->#}
+{#    <link rel="stylesheet" href="{% static 'acciones/app_consumo_piscinas/css/estilo.css' %}">#}
+{#    <!--datables CSS básico-->#}
+{#    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">#}
+    <!--datables estilo bootstrap 4 CSS-->
+{#    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">#}
+{% endcomment %}
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/jquery.dataTables.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="{% static 'acciones/app_consumo_piscinas/css/estilo.css' %}">
+    <!--Codigo JS propio-->
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/listar_rango.js' %}"></script>
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/list_mayorizacionPlan.js' %}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- AdminLTE App -->
+    <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{% static 'dist/js/demo.js' %}"></script>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- /.card-header -->
+                        <div class="card-header p-0 pt-1" style="background-color: #3498DB">
+{#                            <h2 class="card-title text-uppercase">&nbsp;&nbsp;<strong> {{ nombre }} </strong></h2>#}
+                            <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
+                                       aria-selected="true" style="color: #0c0c0c"> <b> LIBRO GENERAL </b> </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-profile" role="tab"
+                                       aria-controls="custom-tabs-one-profile"
+                                       aria-selected="false" style="color: #0c0c0c"> <b> LIBRO A DETALLE </b> </a>
+                                </li>
+                                {% comment %}<li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-messages-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-messages" role="tab"
+                                       aria-controls="custom-tabs-one-messages"
+                                       aria-selected="false" style="color: #0c0c0c"> <b> RESUMEN DE PISCINAS POR INSUMOS</b> </a>
+                                </li>{% endcomment %}
+                            </ul>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-body">
+                            <div class="tab-content" id="custom-tabs-one-tabContent">
+                                <div class="tab-pane fade show active" id="custom-tabs-one-home" role="tabpanel"
+                                     aria-labelledby="custom-tabs-one-home-tab">
+                                    <h3 class="card-title text-center">
+                                        <strong> {{ nombre }} General</strong>
+                                    </h3>
+                                    <br>
+                                    <hr>
+                                    <div>
+                                        <table id="tb_mayorizacion_plan" class="table table-sm table-striped table-bordered">
+                                            <thead style="background-color:#3498DB">
+                                            <tr>
+                                                <th>Código</th>
+                                                <th>Nombre Cuenta</th>
+                                                <th>Descripción</th>
+                                                <th>Fecha</th>
+                                                <th>Transacción</th>
+                                                <th>Asiento</th>
+                                                <th>Debe</th>
+                                                <th>Haber</th>
+                                                <th>Saldo</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <!-- PONEMOS EL OBJETO DE LA PLANTILLA-->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-3 col-form-label">Desde la Cuenta:</label>
+                                                    <div class="input-group col-sm-9">
+                                                        <select class="form-control select2" name="rango_desde">
+                                                            <option value="">---------</option>
+                                                        </select>
+                                                    </div>
+                                                    <label class="col-sm-3 col-form-label">Hasta la Cuenta:</label>
+                                                    <div class="input-group col-sm-9">
+                                                        <select class="form-control select2" name="rango_hasta">
+                                                            <option value="">---------</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
+                                                    <div class="col-sm-5">
+                                                        <input type="text" class="form-control" name="date_range" autocomplete="off">
+                                                    </div>
+                                                </div>
+                                                <button type="button" style="float: right; visibility: hidden"
+                                                        class="btn btn-danger btn-sm btn-flat ">
+                                                    <i class="fas fa-trash"></i> sssssssssssssssss
+                                                </button>
+                                                <button type="button" style="float: right"
+                                                        class="btn btn-danger btn-sm btn-flat btnRemoveAll">
+                                                    <i class="fas fa-trash"></i> Eliminar todos mis items
+                                                </button>
+
+                                            </div>
+                                            {% comment %}<div class="col-lg-12">
+                                                <div class="form-group row">
+                                                    <div class="col-sm-10"></div>
+                                                    <div class="col-sm-2">
+                                                        <button class="btn btn-primary" type="button" id="btnReport">
+                                                            <i class="fas fa-clipboard-list"></i>&nbsp;&nbsp; Reporte
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>{% endcomment %}
+                                        </div>
+
+                                        <hr>
+
+                                        <div class="table table-responsive">
+                                            <table class="table table-bordered table-sm" id="date_range" style="width:100%">
+                                                <thead style="background-color:#3498DB">
+                                                <tr>
+                                                    <th>Código</th>
+                                                    <th>Nombre Cuenta</th>
+                                                    <th>Descripción</th>
+                                                    <th>Fecha</th>
+                                                    <th>Transacción</th>
+                                                    <th>Asiento</th>
+                                                    <th>Debe</th>
+                                                    <th>Haber</th>
+                                                    <th>Saldo</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                                {% comment %}<tfoot>
+                                            <tr>
+                                                <th colspan="6"></th>
+                                                <th style="text-align: center"> Total:</th>
+                                                <th style="text-align: center"></th>
+                                            </tr>
+                                            </tfoot>{% endcomment %}
+                                            </table>
+                                        </div>
+                                    </div>
+                                    {% comment %}<div class="card-footer navbar-white">
+                                        <a href="#" class="btn btn-primary btn-flat">
+                                            <i class="fas fa-print"></i> Imprimir
+                                        </a>
+                                    </div>{% endcomment %}
+                                </div>
+
+                                {% comment %}<div class="tab-pane fade" id="custom-tabs-one-messages" role="tabpanel"
+                                     aria-labelledby="custom-tabs-one-messages-tab">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group row">
+                                                    <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
+                                                    <div class="col-sm-5">
+                                                        {{ form.date_range2 }}
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <a href="#" class="btn btn-primary btn-flat">
+                                                            <i class="fas fa-clipboard-list"></i> Reporte
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="table-responsive">
+                                            <table id="tb_piscinas_por_insumos" class="table table-sm table-striped table-bordered"
+                                                   style="margin-left: 0px; width: 1644.56px;">
+                                                <thead style="background-color:#3498DB; text-align: center">
+                                                <tr>
+                                                    <th scope="col" style="width: 30%;">Nombre del Producto</th>
+                                                    <th scope="col" style="width: 20%;">Piscina</th>
+                                                    <th scope="col" style="width: 10%;">Cantidad</th>
+                                                    <th scope="col" style="width: 20%;">Costo</th>
+                                                    <th scope="col" style="width: 20%;">Total</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>{% endcomment %}
+                            </div>
+
+                        </div>
+                        <!-- /.card-footer -->
+                        {% comment %}<div class="card-footer">
+                        {% block buttons_list %}
+                            <a href="{% url 'app_planCuentas:crear_transaccionPlan' %}" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-plus"></i> Nuevo registro
+                            </a>
+                        {% endblock %}
+                    </div>{% endcomment %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   {% comment %} <script type="application/javascript">
+        $(function () {
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                language: "es",
+            });
+        });
+    </script>{% endcomment %}
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script src="{% static 'lib/datatables-1.10.20/Seg_Lineal/js/highcharts.js' %}"></script>
+    <!-- para usar DataRangePicker JS -->
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}"/>
+    <!-- datatables JS -->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <!-- para usar botones en datatables JS -->
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.html5.min.js' %}"></script>
+    <!-- PARA DETALLES DEL DATATABLE  -->
+
+
+    <script type="application/javascript">
+        $(function () {
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                language: "es",
+            });
+        });
+    </script>
+
+{% endblock %}

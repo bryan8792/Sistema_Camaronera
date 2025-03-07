@@ -1,0 +1,70 @@
+<?xml version="1.0" ?>
+<comprobanteRetencion id="comprobante" version="2.0.0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>PESQUERA SAN MIGUEL</razonSocial>
+    <nombreComercial>PESQUERA SAN MIGUEL</nombreComercial>
+    <ruc>0790046617001</ruc>
+    <claveAcceso>2401202507079004661700110010020000000431473223611</claveAcceso>
+    <codDoc>07</codDoc>
+    <estab>001</estab>
+    <ptoEmi>002</ptoEmi>
+    <secuencial>000000043</secuencial>
+    <dirMatriz>GUAYAS 1811 E/SUCRE Y 25 JUNIO</dirMatriz>
+  </infoTributaria>
+  <infoCompRetencion>
+    <fechaEmision>24/01/2025</fechaEmision>
+    <dirEstablecimiento>GUAYAS 1811 E/ SUCRE Y 25 DE JUNIO</dirEstablecimiento>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <tipoIdentificacionSujetoRetenido>04</tipoIdentificacionSujetoRetenido>
+    <parteRel>NO</parteRel>
+    <razonSocialSujetoRetenido>TAPIA VELOZ CARMEN DEL ROCIO</razonSocialSujetoRetenido>
+    <identificacionSujetoRetenido>1709704397001</identificacionSujetoRetenido>
+    <periodoFiscal>12/2024</periodoFiscal>
+  </infoCompRetencion>
+  <docsSustento>
+    <docSustento>
+      <codSustento>02</codSustento>
+      <codDocSustento>01</codDocSustento>
+      <numDocSustento>001002000000313</numDocSustento>
+      <fechaEmisionDocSustento>24/01/2025</fechaEmisionDocSustento>
+      <fechaRegistroContable>24/01/2025</fechaRegistroContable>
+      <numAutDocSustento>0412202401170970439700120010020000003130000031617</numAutDocSustento>
+      <pagoLocExt>01</pagoLocExt>
+      <totalSinImpuestos>274.45</totalSinImpuestos>
+      <importeTotal>315.62</importeTotal>
+      <impuestosDocSustento>
+        <impuestoDocSustento>
+          <codImpuestoDocSustento>2</codImpuestoDocSustento>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <baseImponible>274.45</baseImponible>
+          <tarifa>15</tarifa>
+          <valorImpuesto>41.17</valorImpuesto>
+        </impuestoDocSustento>
+      </impuestosDocSustento>
+      <retenciones>
+        <retencion>
+          <codigo>2</codigo>
+          <codigoRetencion>1</codigoRetencion>
+          <baseImponible>0.0</baseImponible>
+          <porcentajeRetener>30</porcentajeRetener>
+          <valorRetenido>0.0</valorRetenido>
+        </retencion>
+        <retencion>
+          <codigo>2</codigo>
+          <codigoRetencion>10</codigoRetencion>
+          <baseImponible>0.0</baseImponible>
+          <porcentajeRetener>20</porcentajeRetener>
+          <valorRetenido>0.0</valorRetenido>
+        </retencion>
+      </retenciones>
+      <pagos>
+        <pago>
+          <formaPago>20</formaPago>
+          <total>315.62</total>
+        </pago>
+      </pagos>
+    </docSustento>
+  </docsSustento>
+</comprobanteRetencion>

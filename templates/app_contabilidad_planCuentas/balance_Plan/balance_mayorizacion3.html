@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <script src="https://cdn.jsdelivr.net/npm/ag-grid-community@29.3.0/dist/ag-grid-community.min.noStyle.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@29.3.0/styles/ag-grid.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@29.3.0/styles/ag-theme-alpine.css">
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <!-- /.card-header -->
+                        <div class="card-header p-0 pt-1" style="background-color: #3498DB">
+                            <h2 class="card-title text-uppercase">&nbsp;&nbsp;<strong> {{ nombre }} </strong></h2>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            <h1>AG Grid Test</h1>
+                            <div id="myGrid" style="height: 500px; width: 100%;" class="ag-theme-alpine"></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+
+        const da;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const columnDefs = [
+                {headerName: 'Make', field: 'make'},
+                {headerName: 'Model', field: 'model'},
+                {headerName: 'Price', field: 'price', editable: true}
+            ];
+
+            const rowData = [
+                {make: 'Toyota', model: 'Celica', price: 35000},
+                {make: 'Ford', model: 'Mondeo', price: 32000},
+                {make: 'Porsche', model: 'Boxter', price: 72000}
+            ];
+
+            const gridOptions = {
+                columnDefs: columnDefs,
+                rowData: rowData,
+                defaultColDef: {
+                    sortable: true,
+                    filter: true,
+                }
+            };
+
+            const eGridDiv = document.querySelector('#myGrid');
+            new agGrid.Grid(eGridDiv, gridOptions);
+        });
+    </script>
+
+    <script type="text/javascript">
+
+        let dtos = [];
+        let obterner = () => {
+            $.ajax({
+                url: window.location.pathname,
+                type: 'POST',
+                data: {
+                    'action': 'searchdata'
+                },
+                dataType: 'json',
+
+            }).done(function (data) {
+                console.log('data del grid')
+                console.log(data)
+
+
+
+                data.map(function (x) {
+                    dtos.push({
+                        codigo_cuenta_plan: x.codigo_cuenta_plan,
+                        nombre_cuenta_plan: x.nombre_cuenta_plan,
+                        debe: x.debe,
+                        haber: x.haber
+                    })
+                })
+
+
+
+
+            });
+        }
+
+
+        obterner();
+
+        // Configuración de las columnas
+        {% comment %}const columnDefs = [
+            {headerName: 'Código', field: 'codigo', sortable: true, filter: true},
+            {headerName: 'Nombre', field: 'nombre', sortable: true, filter: true},
+            {headerName: 'Debe', field: 'debe', sortable: true, filter: true},
+            {headerName: 'Haber', field: 'Haber', sortable: true, filter: true},
+            {headerName: 'Debe', field: 'debe', sortable: true, filter: true},
+            {headerName: 'Haber', field: 'Haber', sortable: true, filter: true},
+            {headerName: 'Debe', field: 'debe', sortable: true, filter: true},
+            {headerName: 'Haber', field: 'Haber', sortable: true, filter: true},
+        ];
+
+        // Opciones de la cuadrícula
+        const gridOptions = {
+            columnDefs: columnDefs,
+            rowData: [], // Los datos se cargarán dinámicamente
+            defaultColDef: {
+                sortable: true,
+                filter: true,
+                resizable: true,
+            },
+        };
+
+        // Inicialización de la cuadrícula
+        document.addEventListener('DOMContentLoaded', () => {
+            const eGridDiv = document.querySelector('#myGrid');
+            new agGrid.Grid(eGridDiv, gridOptions);
+
+            // Cargar datos desde el servidor
+            fetch('{% url "app_planCuentas:listar_transaccionPlan" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+                body: new URLSearchParams({
+                    action: 'searchdata',
+                }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.error) {
+                        console.error('Error en los datos:', data.error);
+                        return;
+                    }
+                    // Establecer los datos obtenidos en la cuadrícula
+                    gridOptions.api.setRowData(data);
+                })
+                .catch((error) => {
+                    console.error('Error al cargar los datos:', error);
+                });
+        });{% endcomment %}
+    </script>
+
+{% endblock %}

@@ -1,0 +1,21 @@
+<ul id="the-node">
+    {% for folder in planCuenta %}
+        <li id="arbol"><span class="context-menu-one"><label style="visibility: hidden">{{ folder.id }}</label> &nbsp;&nbsp; <strong>{{ folder.codigo }}</strong> &nbsp;&nbsp;<span class="badge badge-secondary">{{ folder.nombre }}</span></span> <span class="float-right"><strong><button rel="add" class="btn btn-success btn-xs btn-flat btnAdd" style="color: white;"><i class="fas fa-plus"></i></button></strong></span>
+        {% if folder.idcuentasuma.exists %}
+            {% with folder.idcuentasuma.all as planCuenta %}
+                {% include "app_contabilidad_planCuentas/transaccion_Plan/otro/tree_transaction.html" %}
+            {% endwith %}
+        {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+
+{% comment %}<menu id="html5menu" style="display:none" class="showcase">
+    <command label="rotate" icon="edit" onclick="alert('rotate')"></command>
+    <command label="resize" onclick="alert('resize')"></command>
+    <command label="twitter" onclick="alert('twitter')"></command>
+    <command label="facebook" onclick="alert('facebook')"></command>
+</menu>{% endcomment %}
+
+

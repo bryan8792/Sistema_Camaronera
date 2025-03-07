@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+
+{% block head %}
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance de Mayorización</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+{% endblock %}
+
+
+{% block contenido %}
+
+    <div class="container">
+        <h1>Balance de Mayorización</h1>
+        <table id="tb_mayorizacion_plan" class="display responsive nowrap" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre de la Cuenta</th>
+                    <th>Debe</th>
+                    <th>Haber</th>
+                    <th>Saldo</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            const date_now = moment().format('YYYY-MM-DD');
+
+            $('#tb_mayorizacion_plan').DataTable({
+                language: {
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "zeroRecords": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "infoEmpty": "Tabla vacía, por favor inserte datos",
+                    "lengthMenu": "Listando _MENU_ registros",
+                    "sSearch": "Buscar:",
+                    "infoFiltered": "(filtrado de _MAX_ registros totales)"
+                },
+                responsive: true,
+                bPaginate: false,
+                autoWidth: false,
+                destroy: true,
+                deferRender: true,
+                scrollY: "700px",
+                scrollX: true,
+                bInfo: false,
+                dom: 'Bfrtip',
+                ajax: {
+                    url: window.location.pathname,
+                    type: 'POST',
+                    data: {
+                        'action': 'searchdata'
+                    },
+                    dataSrc: ""
+                },
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-csv"></i> ',
+                        titleAttr: 'Exportar a Excel',
+                        className: 'btn btn-success'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fa fa-print"></i> ',
+                        titleAttr: 'Imprimir',
+                        className: 'btn btn-info'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<i class="fas fa-file-pdf"></i> ',
+                        titleAttr: 'Exportar a PDF',
+                        className: 'btn btn-danger',
+                        download: 'open',
+                        orientation: 'landscape',
+                        pageSize: 'LEGAL',
+                        footer: true,
+                        customize: function (doc) {
+                            doc.styles.tableHeader = {
+                                fillColor: '#2d4154',
+                                color: 'white',
+                                alignment: 'center'
+                            };
+                            doc.content[1].layout = 'lightHorizontalLines';
+                        }
+                    }
+                ],
+                columns: [
+                    { "data": "codigo_cuenta_plan", "className": "text-center" },
+                    { "data": "nombre_cuenta_plan", "className": "text-left" },
+                    { "data": "debe", "className": "text-center" },
+                    { "data": "haber", "className": "text-center" },
+                    {
+                        "data": null,
+                        "className": "text-center",
+                        "render": function (data, type, row) {
+                            const saldo = parseFloat(row.debe) - parseFloat(row.haber);
+                            return saldo.toFixed(2);
+                        }
+                    }
+                ],
+                initComplete: function (settings, json) {
+                    console.log("Tabla inicializada con datos:", json);
+                }
+            });
+        });
+    </script>
+
+{% endblock %}

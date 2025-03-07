@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block  head %}
+
+    <!--Formvalidation Libs-->
+    <link rel="stylesheet" href="{% static 'lib/formvalidation-1.9.0/css/formValidation.min.css' %}">
+    <script src="{% static 'lib/formvalidation-1.9.0/js/es6-shim.min.js' %}"></script>
+    <script src="{% static 'lib/formvalidation-1.9.0/js/FormValidation.min.js' %}"></script>
+    <script src="{% static 'lib/formvalidation-1.9.0/js/plugins/Bootstrap.min.js' %}"></script>
+    <script src="{% static 'lib/formvalidation-1.9.0/js/locales/es_ES.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/bootstrap-touchspin-4.2.5/css/jquery.bootstrap-touchspin.css' %}"/>
+    <script src="{% static 'lib/bootstrap-touchspin-4.2.5/js/jquery.bootstrap-touchspin.js' %}"></script>
+    <script src="{% static 'acciones/app_recibo/js/form.js' %}"></script>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form class="form" method="post" action="." enctype="multipart/form-data" id="frmForm" data-url="{{ list_url }}" autocomplete="off">
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title">Ingreso del Registro:<strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body" style="display: block;">
+
+                            {% comment %}<input type="hidden" name="action" id="action" value="{{ action }}">
+                            {% csrf_token %}
+
+                            {% for datos in form.visible_fields %}
+                                <div class="form-group">
+                                    <label for="{{ datos.label }}">{{ datos.label }}:</label>
+                                    {{ datos }}
+                                </div>
+                            {% endfor %}{% endcomment %}
+                            <div class="container-fluid">
+                                <input type="hidden" name="action" id="action" value="{{ action }}">
+                                {% csrf_token %}
+                                {% block form_fields %}
+                                    {% for field in form.visible_fields %}
+                                        <div class="form-group">
+                                            <label>{{ field.label }}:</label>
+                                            {% if field.field.widget.input_type == 'checkbox' %}
+                                                <br>{{ field }}
+                                            {% else %}
+                                                {{ field }}
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                {% endblock %}
+                            </div>
+
+                        </div>
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-save"></i> Guardar registro
+                            </button>
+                            <a href="{% url 'app_planCuentas:recibo_listar' %}" class="btn btn-danger btn-file">
+                                    <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </form>
+
+    <script type="application/javascript">
+
+        {% if form.errors %}
+            var errores = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errores = '{{ error }}\n';
+                {% endfor %}
+            {% endfor %}
+            Swal.fire({
+                title: 'Error',
+                text: errores,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+        {% endif %}
+
+    </script>
+
+{% endblock %}
+{% comment %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(function () {
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_planCuentas:recibo_listar' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+                    console.log('data done')
+                    console.log(data)
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                    location.href = '/planCuentas/app_recibo/listar/';
+
+                }).fail(function (data) {
+                    console.log(data)
+
+                }).always(function (data) {
+                    console.log('data always')
+                    console.log(data)
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                    location.href = '/planCuentas/app_recibo/listar/';
+                })
+            })
+        })
+    </script>
+
+{% endblock %}
+{% endcomment %}
+

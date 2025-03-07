@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Eliminar {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action=".">
+        <section class="content">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <!-- /.card -->
+                    <div class="card ">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title">Eliminar:<strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            <div class="alert alert-default-danger alert-dismissible" style="text-align: center">
+
+                                <h4><i class="icon fas fa-ban"> Notificacion:</i></h4>
+
+                                <button class="alert alert-default-danger alert-dismissible btn btn-lg"
+                                        style="text-align: center;height: 180px;width: 145px">
+                                    <i class="fas fa-trash-alt fa-6x"></i>
+                                </button>
+                                </br></br>
+                                <h4>
+                                    Esta seguro de eliminar el registro </br></br>
+                                    Id:<strong>&nbsp &nbsp{{ object.id }} </strong>
+                                    &nbsp &nbsp - &nbsp &nbsp
+                                    Nombre:<strong>&nbsp &nbsp{{ object.numero }}</strong>
+                                </h4>
+                            </div>
+
+                        </div>
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
+                                <i class="fas fa-check-circle"></i> SI, ACEPTAR
+                            </button>
+                            <a href="{% url 'app_empresa:listar_piscinas' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-times"></i> CANCELAR
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </form>
+
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(function () {
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_empresa:listar_piscinas' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+
+                }).fail(function (data) {
+                    toastr.error('Error verificar por favor')
+                }).always(function (data) {
+                    toastr.info('Procesando datos')
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

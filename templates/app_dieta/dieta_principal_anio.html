@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <div class="card-tools">
+                                <a href="{% url 'app_dieta:crear_anio_dieta' %}"  class="btn btn-block btn-default btn-sm">
+                                    <strong><i class="fas fa-plus"></i> CREAR AÑO:</strong>
+                                </a>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div class="row mt-6">
+                                {% for data in object_list %}
+                                    <div class="col-12 col-sm-6 col-md-2 d-flex align-items-stretch">
+                                        <div class="card bg-light">
+                                            <div class="card-header text-muted border-bottom-0">
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-7 text-center">
+                                                        <h2 class="lead"><strong><b>Año: {{ data.anio_dieta }}</b></strong></h2>
+                                                        <p class="text-muted text-sm text-center">
+                                                            <b>Registro y Control</b>
+                                                            <b>Dietas Diarias</b>
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-5 text-center">
+                                                        <img src="{% static 'img/camaronsito.png' %}" alt=""
+                                                             class="img-circle img-fluid">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-footer">
+                                                <div class="text-center">
+                                                    <a href="{% url 'app_dieta:principal_mes' data.id %}"
+                                                       class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-plus"></i> Ver
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- /.row -->
+
+{% endblock %}

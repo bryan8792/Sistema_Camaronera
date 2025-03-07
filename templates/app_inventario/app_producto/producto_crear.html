@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block head %}
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+
+    <link href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+{% endblock %}
+
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#"><b>{{ nombre }}</b></a></li>
+                        <li class="breadcrumb-item active"><b>Crear nuevo: {{ nombre }}</b></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action="." enctype="multipart/form-data">
+        <section class="content">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title">Opción:<strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            {% comment %}{% for datos in form.visible_fields %}
+                                <div class="form-group">
+                                    <label for="{{ datos.label }}">{{ datos.label }}:</label>
+                                    {{ datos }}
+                                </div>
+                            {% endfor %}{% endcomment %}
+
+                            <div class="form-group">
+                                <label for="{{ form.nombre.label }}">{{ form.nombre.label }}:</label>
+                                {{ form.nombre }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.categoria.label }}">{{ form.categoria.label }}:</label>
+                                {{ form.categoria }}
+                                <small class="form-text text-muted">Seleccione una Categoria</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.descripcion.label }}">{{ form.descripcion.label }}:</label>
+                                {{ form.descripcion }}
+                                <small class="form-text text-muted">Seleccione una Sub-Categoria</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.gramaje.label }}">{{ form.gramaje.label }}:</label>
+                                {{ form.gramaje }}
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label for="{{ form.presentacion.label }}">{{ form.presentacion.label }}:</label>
+                                    {{ form.presentacion }}
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label for="{{ form.peso_presentacion.label }}">{{ form.peso_presentacion.label }}:</label>
+                                    {{ form.peso_presentacion }}
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label for="{{ form.unid_medida.label }}">{{ form.unid_medida.label }}:</label>
+                                    {{ form.unid_medida }}
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label for="{{ form.unid_aplicacion.label }}">{{ form.unid_aplicacion.label }}:</label>
+                                    {{ form.unid_aplicacion }}
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.minimo_stock.label }}">{{ form.minimo_stock.label }}:</label>
+                                    {{ form.minimo_stock }}
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.costo.label }}">{{ form.costo.label }} del Producto:</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="inputGroupPrepend">$</span>
+                                        </div>
+                                        {{ form.costo }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.estado.label }}">Seleccione el {{ form.estado.label }}:</label>
+                                    {{ form.estado }}
+                                    <br><br>
+                                    <div class="form-group">
+                                        <label for="{{ form.aplic_directa.label }}">Es un producto de {{ form.aplic_directa.label }}:</label>
+                                        {{ form.aplic_directa }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label for="{{ form.costo_aplicacion.label }}">{{ form.costo_aplicacion.label }}:</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="inputGroupPrepend">$</span>
+                                        </div>
+                                        {{ form.costo_aplicacion }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.imagen.label }}">{{ form.imagen.label }}:</label>
+                                {{ form.imagen }}
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-save"></i> GUARDAR
+                            </button>
+                            <a href="{% url 'app_categoria:listar_producto' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-times"></i> CANCELAR
+                            </a>
+                        </div>
+
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </form>
+
+    <script type="application/javascript">
+
+        {% if form.errors %}
+            var errores = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errores = '{{ error }}\n';
+                {% endfor %}
+            {% endfor %}
+            Swal.fire({
+                title: 'Error',
+                text: errores,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            })
+        {% endif %}
+
+        $('.select2').select2({
+            theme: 'bootstrap4',
+            language: "es",
+        });
+
+    </script>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(function () {
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_categoria:listar_producto' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: 'Hubo un error',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).always(function (data) {
+                    Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

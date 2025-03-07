@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <form method="post" action=".">
+        <section class="content">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    <!-- /.card -->
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB">
+                            <h3 class="card-title"><strong> Ingresar {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            {% csrf_token %}
+
+                            <div class="form-group">
+                                <label for="producto_empresa">{{ form.producto_empresa.label }}:</label>
+                                {{ form.producto_empresa }}
+                            </div>
+
+                            <div class="form-group" style="display: none">
+                                <label for="tipo">{{ form.tipo.label }}:</label>
+                                {{ form.tipo }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cantidad_usar">{{ form.cantidad_usar.label }}: <strong> ( {{ producto.nombre_prod.presentacion }} de  {{ producto.nombre_prod.peso_presentacion }} {{ producto.nombre_prod.unid_medida }} ) </strong></label>
+                                {{ form.cantidad_usar }}
+                            </div>
+
+                            {% comment %}<div class="form-group">
+                                <label for="cantidad_usar">Presentación : {{ producto.nombre_prod.presentacion }}</label>
+                            </div>{% endcomment %}
+
+                            <div class="form-group" id="div_cantidad_ingreso" >
+                                <label for="cantidad_ingreso">{{ form.cantidad_ingreso.label }}: ( {{ producto.nombre_prod.unid_aplicacion }} )</label>
+                                {{ form.cantidad_ingreso }}
+                            </div>
+
+                            <div class="form-group" id="div_cantidad_egreso">
+                                <label for="cantidad_egreso">{{ form.cantidad_egreso.label }}:</label>
+                                {{ form.cantidad_egreso }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.fecha_ingreso.label }}:</label>
+                                {{ form.fecha_ingreso }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.numero_guia.label }}:</label>
+                                {{ form.numero_guia }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="nombre">{{ form.responsable_ingreso.label }}:</label>
+                                {{ form.responsable_ingreso }}
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-save"></i> GUARDAR
+                            </button>
+                            <a href="{% url 'app_stock:listar_stock_bio' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-undo"></i> CANCELAR
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <!-- /.card -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+    </form>
+
+    <!-- /.row -->
+
+    <!-- /.container-fluid -->
+
+    <!-- /.content -->
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $("select[name='producto_empresa']").val("{{ id_producto_empresa}}");
+            $("#div_cantidad_egreso").hide();
+            $("#div_cantidad_ingreso").show();
+        });
+
+        $("select[name='tipo']").blur(function() {
+            if($("select[name='tipo']").val() == 'INGRESO') {
+                $("#div_cantidad_egreso").hide();
+                $("#div_cantidad_ingreso").show();
+            }else{
+                $("#div_cantidad_egreso").hide();
+                $("#div_cantidad_ingreso").show();
+            }
+        });
+
+        $("input[name='cantidad_usar']").blur(function() {
+            var total = parseFloat($("input[name='cantidad_usar']").val()) * parseFloat("{{ total }}".replace(",", "."));
+            $("input[name='cantidad_ingreso']").val(parseFloat(total.toFixed(0)));
+        });
+
+        $(function () {
+            $('.btnTest').on('click', function () {
+                $.ajax({
+                    url: '{% url 'app_stock:listar_stock_bio' %}',
+                    type: 'POST',
+                    data: {id: 1},
+                    dataType: 'json'
+                }).done(function (data) {
+                     Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                }).fail(function (data) {
+                    console.log(data)
+                }).always(function (data) {
+                     Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Información registrada correctamente',
+                        showConfirmButton: false,
+                        timer: 95000
+                    });
+                })
+            })
+        })
+    </script>
+
+{% endblock %}

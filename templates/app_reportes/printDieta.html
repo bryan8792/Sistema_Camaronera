@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<style>
+
+    @page {
+        size: A3;
+        margin: 15px;
+        orientation: landscape;
+    }
+
+    .head {
+        text-align: center;
+        text-transform: uppercase;
+        font: 12pt "Tahoma";
+    }
+
+    .cue {
+        text-align: left;
+        text-transform: uppercase;
+        font: 8pt "Tahoma";
+    }
+
+    #invoice thead tr th {
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+        padding-top: 10px;
+        text-align: center;
+        background-color: #3498DB
+    }
+
+    #invoice thead tr {
+        margin-bottom: 1px;
+        padding-bottom: 1px;
+    }
+
+    #invoice tbody tr {
+        padding-top: 5px;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    #invoice tbody tr td {
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+
+</style>
+<body>
+<p class="head">
+    <b>REPORTE DE DIETA PSM & BIO</b>
+</p>
+<p class="cue">
+    <b>Aplicada el: &nbsp {{ fecha_dieta }}</b>
+</p>
+<table id="invoice">
+    <thead>
+    <tr class="text-center">
+        <th style="width: 5%;" class="text-center">Piscina</th>
+        <th style="width: 15%;" class="text-center">Balanceado</th>
+        <th style="width: 5%;" class="text-center">Lbs</th>
+        <th style="width: 15%;" class="text-center">Insumo 1</th>
+        <th style="width: 5%;" class="text-center">Gramos</th>
+        <th style="width: 15%;" class="text-center">Insumo 2</th>
+        <th style="width: 5%;" class="text-center">Gramos</th>
+        <th style="width: 15%;" class="text-center">Insumo 3</th>
+        <th style="width: 5%;" class="text-center">Gramos</th>
+        <th style="width: 10%;" class="text-center">Insumo 4</th>
+        <th style="width: 5%;" class="text-center">Gramos</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% if dieta_registros %}
+        {% for dato in dieta_registros %}
+            <tr>
+                <td class="text-center">{{ dato.piscinas.numero }}</td>
+                <td class="text-center">{{ dato.balanceado.nombre }} </td>
+                <td class="text-center">{{ dato.cantidad }}</td>
+                <td class="text-center">
+                    {% for insumo in insumos %}
+                        {% if dato.insumo1 == insumo.id %}
+                            {{ insumo.nombre }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="text-center">{{ dato.gramaje1 }}</td>
+                <td class="text-center">
+                    {% for insumo in insumos %}
+                        {% if dato.insumo2 == insumo.id %}
+                            {{ insumo.nombre }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="text-center">{{ dato.gramaje2 }} </td>
+                <td class="text-center">
+                    {% for insumo in insumos %}
+                        {% if dato.insumo3 == insumo.id %}
+                            {{ insumo.nombre }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="text-center">{{ dato.gramaje3 }}</td>
+                <td class="text-center">
+                    {% for insumo in insumos %}
+                        {% if dato.insumo4 == insumo.id %}
+                            {{ insumo.nombre }}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="text-center">{{ dato.gramaje4 }}</td>
+            </tr>
+        {% endfor %}
+    {% endif %}
+    </tbody>
+</table>
+
+<div class="row">
+    <div class="col-12">
+        <table style="margin-top: 20px;">
+            <thead>
+            <tr>
+                <td>
+                    <table style="margin-top: 15px;">
+                        <thead>
+                        <tr>
+                            <th style="width: 20%;" class="text-center">INSUMO PSM</th>
+                            <th style="width: 20%;" class="text-center">BALANCEADO PSM</th>
+                            <th style="width: 10%;" class="text-center">TOTAL</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for key, values in resumen_totales.items %}
+                            {% if key == 'psm' %}
+                                {% for key_2, values_2 in values.items %}
+                                    {% if key_2 == 'insumo' %}
+                                        {% for key_3, values_3 in values_2.items %}
+                                            <tr>
+                                                <td class="text-center">{{ key_3 }}</td>
+                                                <td class="text-center">-</td>
+                                                <td class="text-center">{{ values_3 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if key_2 == 'balanceado' %}
+                                        {% for key_3, values_3 in values_2.items %}
+                                            <tr>
+                                                <td class="text-center">-</td>
+                                                <td class="text-center">{{ key_3 }}</td>
+                                                <td class="text-center">{{ values_3 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+
+                <td>
+                    <table style="margin-top: 15px;">
+                        <thead>
+                        <tr>
+                            <th style="width: 20%;" class="text-center">INSUMO BIO</th>
+                            <th style="width: 20%;" class="text-center">BALANCEADO BIO</th>
+                            <th style="width: 10%;" class="text-center">TOTAL</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for key, values in resumen_totales.items %}
+                            {% if key == 'bio' %}
+                                {% for key_2, values_2 in values.items %}
+                                    {% if key_2 == 'insumo' %}
+                                        {% for key_3, values_3 in values_2.items %}
+                                            <tr>
+                                                <td class="text-center">{{ key_3 }}</td>
+                                                <td class="text-center">-</td>
+                                                <td class="text-center">{{ values_3 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if key_2 == 'balanceado' %}
+                                        {% for key_3, values_3 in values_2.items %}
+                                            <tr>
+                                                <td class="text-center">-</td>
+                                                <td class="text-center">{{ key_3 }}</td>
+                                                <td class="text-center">{{ values_3 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+            </thead>
+        </table>
+        {% comment %}<table style="margin-top: 15px;">
+            <thead>
+            <tr>
+                <th style="width: 20%;" class="text-center">INSUMO</th>
+                <th style="width: 20%;" class="text-center">BALANCEADO</th>
+                <th style="width: 10%;" class="text-center">TOTAL PSM</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, values in resumen_totales.items %}
+                {% if key == 'psm' %}
+                    {% for key_2, values_2 in values.items %}
+                        {% if key_2 == 'insumo' %}
+                            {% for key_3, values_3 in values_2.items %}
+                                <tr>
+                                    <td class="text-center">{{ key_3 }}</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">{{ values_3 }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        {% if key_2 == 'balanceado' %}
+                            {% for key_3, values_3 in values_2.items %}
+                                <tr>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">{{ key_3 }}</td>
+                                    <td class="text-center">{{ values_3 }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+        <table style="margin-top: 15px;">
+            <thead>
+            <tr>
+                <th style="width: 20%;" class="text-center">INSUMO</th>
+                <th style="width: 20%;" class="text-center">BALANCEADO</th>
+                <th style="width: 10%;" class="text-center">TOTAL BIO</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key, values in resumen_totales.items %}
+                {% if key == 'bio' %}
+                    {% for key_2, values_2 in values.items %}
+                        {% if key_2 == 'insumo' %}
+                            {% for key_3, values_3 in values_2.items %}
+                                <tr>
+                                    <td class="text-center">{{ key_3 }}</td>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">{{ values_3 }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        {% if key_2 == 'balanceado' %}
+                            {% for key_3, values_3 in values_2.items %}
+                                <tr>
+                                    <td class="text-center">-</td>
+                                    <td class="text-center">{{ key_3 }}</td>
+                                    <td class="text-center">{{ values_3 }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>{% endcomment %}
+    </div>
+</div>
+
+
+<table style="margin-top: 60px;">
+    <thead>
+    <tr>
+        <th>--------------------------------------------------</th>
+        <th>--------------------------------------------------</th>
+    </tr>
+    <tr>
+        <th>DIGITADOR DIETA</th>
+        <th>ING. STALYN AGUIRRE</th>
+    </tr>
+    </thead>
+</table>
+<table style="margin-top: 60px;">
+    <thead>
+    <tr>
+        <th>--------------------------------------------------</th>
+        <th>--------------------------------------------------</th>
+        <th>--------------------------------------------------</th>
+    </tr>
+    <tr>
+        <th>1 er PREPARADOR DIETA</th>
+        <th>2 do PREPARADOR DIETA</th>
+        <th>BODEGUERO</th>
+    </tr>
+    </thead>
+</table>
+</body>
+</html>

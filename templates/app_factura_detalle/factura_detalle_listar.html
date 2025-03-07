@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'acciones/app_factura_detalle/list_factura_detalle.js' %}"></script>
+    <script src="{% static 'acciones/app_factura_detalle/list_factura_detalle_super.js' %}"></script>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">{{ title }}&nbsp;
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <!-- /.card-header -->
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Listado de: <strong> Facturas</strong></h3>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-body">
+
+                        {% if request.user.is_superuser %}
+
+                            <table id="tb_factura_detalle_super" class="table table-striped table-bordered">
+                            <thead style="background-color:#3498DB">
+                            {#                            <tr style="border: 1px solid black;">#}
+                            <tr>
+                                <th class="text-center">Número</th>
+                                <th scope="col" class="text-center">Proveedor</th>
+                                <th class="text-left">Fecha de registro</th>
+                                <th class="text-left">Fecha de ingreso</th>
+                                <th class="text-center">Número de Guia o Factura</th>
+                                <th class="text-center">Responsable</th>
+                                <th class="text-left">Opciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- PONEMOS EL OBJETO DE LA PLANTILLA-->
+                            </tbody>
+                        </table>
+
+                        {% else %}
+
+                            <table id="tb_factura_detalle" class="table table-striped table-bordered">
+                            <thead style="background-color:#3498DB">
+                            {#                            <tr style="border: 1px solid black;">#}
+                            <tr>
+                                <th class="text-center">Número</th>
+                                <th scope="col" class="text-center">Proveedor</th>
+                                <th class="text-left">Fecha de registro</th>
+                                <th class="text-left">Fecha de ingreso</th>
+                                <th class="text-center">Número de Guia o Factura</th>
+                                <th class="text-center">Responsable</th>
+                                <th class="text-left">Opciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- PONEMOS EL OBJETO DE LA PLANTILLA-->
+                            </tbody>
+                        </table>
+
+                        {% endif %}
+
+                    </div>
+                    <!-- /.card-footer -->
+                    <div class="card-footer">
+                        {% block buttons_list %}
+                            <a href="{% url 'app_factura:crear_factura' %}" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-plus"></i> Nuevo registro
+                            </a>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Listado de: <strong> {{ nombre }}</strong></h3>
+                        <div class="card-tools">
+                            <ul class="pagination pagination-sm float-right">
+                                <li class="page-item">
+                                    <a href="{% url 'app_dieta:crear_descripcion_dieta' %}"
+                                       class="btn btn-block btn-default btn-sm">
+                                        <strong><i class="fas fa-plus"></i> NUEVO ESCANEO</strong>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="tb_descripcion" class="table table-bordered table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th style="width: 5%;">Id</th>
+                                <th style="width: 15%;" class="text-center">Fecha</th>
+                                <th style="width: 50%;">Novedad de la Dieta</th>
+                                <th style="width: 25%;" class="text-center">Escaneo</th>
+                                <th style="width: 5%;" class="text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            {% for desc in object_list %}
+                                <tr>
+                                    <td>{{ desc.id }} </td>
+                                    <td class="text-center">{{ desc.fecha }}</td>
+                                    <td>{{ desc.descripcion }}</td>
+                                    <td class="text-center">
+                                        <img src="{{ desc.get_image }}" class="img-fluid d-block mx-auto imagen"
+                                             style="width: 60px; height: 60px">
+                                    </td>
+                                    <td class="text-left">
+                                        <div class="btn-group-sm">
+                                            <a href="{% url 'app_dieta:editar_descripcion_dieta' desc.id %}"
+                                               class="btn-primary btn btn-xs">
+                                                <i class="fas fa-edit"> </i>
+                                            </a>
+                                            <a href="{% url 'app_dieta:eliminar_descripcion_dieta' desc.id %}"
+                                               class="btn-danger btn btn-xs">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+
+        $(function () {
+            $('.imagen').on('click', function () {
+                var src = $(this).attr('src');
+                Swal.fire({
+                    title: 'Escaneo de Dieta',
+                    imageUrl: src,
+                    imageWidth: 1000,
+                    imageHeight: 700,
+                    imageAlt: 'Custom image',
+                    animation: true,
+                });
+               {% comment %} Swal.fire({
+                    imageUrl: src,
+                    imageWidth: 2000,
+                    imageHeight: 700,
+                    imageAlt: 'A tall image'
+                });{% endcomment %}
+            });
+        });
+
+        $(function () {
+            $("#tb_descripcion").DataTable({
+                "language": {
+                    url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: [0, 1, 2, 3]
+                }]
+            });
+        });
+    </script>
+{% endblock %}
