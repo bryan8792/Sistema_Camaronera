@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <!-- /.card -->
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Listado de: <strong> {{ nombre }}</strong></h3>
+
+                        <div class="card-tools">
+                            <ul class="pagination pagination-sm">
+                                <li class="page-item">
+                                    <a href="{% url 'app_empresa:crear_piscinas' %}" class="btn btn-block btn-default btn-sm">
+                                        <strong><i class="fas fa-plus"></i> NUEVO REGISTRO</strong>
+                                    </a>
+                            </ul>
+                        </div>
+
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4">
+
+                            <div class="row">
+                                <div class="card-body table-responsive p-0" style="height: 750px;">
+                                    <table class="table table-sm table-head-fixed text-nowrap table-striped table-bordered">
+                                        <thead style="text-align: center">
+                                        <tr role="row">
+                                            <th scope="col" style="width: 20%;">REFERENCIA</th>
+                                            <th scope="col" style="width: 10%;">ES PISCINA</th>
+                                            <th scope="col" style="width: 10%;">ES PRECRIA</th>
+                                            <th scope="col" style="width: 30%;">EMPRESA ASIGNADA</th>
+                                            <th scope="col" style="width: 10%;">DIMENSIONES</th>
+                                            <th scope="col" style="width: 10%;">ESTADO</th>
+                                            <th scope="col" style="width: 10%;">ACCIONES</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody style="text-align: center">
+                                        {% for pis in object_list %}
+                                            <tr>
+                                                <td><h6><strong> {{ pis.numero }} </strong></h6></td>
+                                                <td>
+                                                    {% if pis.pis %}
+                                                        <h4><span class="badge badge-info float-center"> SI </span></h4>
+                                                    {% else %}
+                                                        <h4><span class="badge badge-danger float-center"> NO </span></h4>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if pis.prec %}
+                                                        <h4><span class="badge badge-info float-center"> SI </span></h4>
+                                                    {% else %}
+                                                        <h4><span class="badge badge-danger float-center"> NO </span></h4>
+                                                    {% endif %}
+                                                </td>
+                                                <td><h6><strong> {{ pis.empresa.nombre }} </strong></h6></td>
+                                                <td><h6><strong> {{ pis.hect }} </strong></h6></td>
+                                                <td>
+                                                    {% if pis.estado %}
+                                                        <h4><span class="badge badge-primary float-center"> ACTIVA </span></h4>
+                                                    {% else %}
+                                                        <h4><span class="badge badge-danger float-center"> INACTIVA </span></h4>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'app_empresa:actualizar_piscinas' pis.id %}"
+                                                       class="btn btn-primary btn-xs btn-flat">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'app_empresa:eliminar_piscinas' pis.id %}"
+                                                       class="btn btn-danger btn-xs">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+{% endblock %}
+

@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/main_stock_directo_psm_insumos.css' %}">
+    <!--datables CSS básico-->
+    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">
+    <!--datables estilo bootstrap 4 CSS-->
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+    <!--font awesome con CDN-->
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/cdn/cdn_datatable.css' %}"
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp;
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp;
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header border-0" style="background-color:#3498DB">
+                            <h3 class="card-title text-center"><strong><i class="fas fa-boxes"></i> &nbsp AJUSTE DE STOCK INSUMOS APLICACIÓN DIRECTA - PSM:</strong></h3>
+                            <div class="card-tools">
+                                {% comment %}<a href="{% url 'app_stock:icrear_stock_psm' %}" type="button" class="btn btn-block btn-default btn-sm">
+                                    <strong><i class="fas fa-plus"></i> AGREGAR</strong>
+                                </a>{% endcomment %}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="container-fluid">
+
+                                <div class="card-body">
+                                    <table id="tb_stock_directo_insumo_psm" class="table table-sm table-striped table-bordered">
+                                        <thead style="background-color:#3498DB">
+                                        <tr>
+                                            <th style="width: 65%;">Producto</th>
+                                            <th style="width: 15%;" class="text-center">Cantidad</th>
+                                            <th style="width: 10%;" class="text-center">Aplicación</th>
+                                            <th style="width: 5%;" class="text-center">Porcentaje</th>
+                                            <th style="width: 5%;" class="text-center">Accion</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for dato in insumos %}
+                                            {% if dato.nombre_prod.estado == True and dato.nombre_prod.aplic_directa == True %}
+                                                <tr>
+                                                    <td>
+                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' or dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
+                                                            {{ dato.nombre_prod.nombre }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center">
+{#                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}#}
+
+                                                            {% for emp in sotck %}
+                                                                {% if emp.nombre_empresa.siglas == dato.nombre_empresa.siglas %}
+                                                                    {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                        <h6><strong>{{ emp.stock }}</strong></h6>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+
+{#                                                        {% endif %}#}
+                                                    </td>
+                                                    <td class="text-center">
+{#                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}#}
+                                                                {% if dato.nombre_prod.unid_aplicacion  == 'GR' %}
+                                                                    <h5><span class="badge badge-info float-center">GRAMOS</span></h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'LB' %}
+                                                                    <h5><span class="badge badge-info float-center">LIBRAS</span></h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'KG' %}
+                                                                    <h5><span class="badge badge-info float-center">KILOGRAMOS</span></h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'CA' %}
+                                                                    <h5><span class="badge badge-info float-center">CANECAS</span></h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'LT' %}
+                                                                    <h5><span class="badge badge-info float-center">LITROS</span></h5>
+                                                                {% elif dato.nombre_prod.unid_aplicacion  == 'SC' %}
+                                                                    <h5><span class="badge badge-info float-center">SACOS</span></h5>
+                                                                {% else %}
+                                                                    <h5><span class="badge badge-info float-center">MILILITROS</span></h5>
+                                                                {% endif %}
+{#                                                        {% endif %}#}
+                                                    </td>
+                                                    <td class="text-center">
+{#                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}#}
+
+                                                            {% for emp in sotck %}
+                                                                {% if emp.nombre_empresa.siglas == dato.nombre_empresa.siglas %}
+                                                                    {% if dato.nombre_prod.nombre == emp.nombre_prod.nombre %}
+                                                                        {% if emp.stock >= 1000 %}
+                                                                            <h4><span class="badge badge-primary float-center">100 %</span></h4>
+                                                                        {% elif emp.stock >= 500 %}
+                                                                            <h4><span class="badge badge-info float-center">50 %</span></h4>
+                                                                        {% elif emp.stock >= 300 %}
+                                                                            <h4><span class="badge badge-warning float-center">30 %</span></h4>
+                                                                        {% else %}
+                                                                            <h4><span class="badge badge-danger float-center">0 %</span></h4>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+{#                                                        {% endif %}#}
+                                                    </td>
+                                                    <td class="text-center">
+{#                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}#}
+                                                            <div class="btn-group-sm">
+                                                                <a href="{% url 'app_stock_directo:crear_stock_directo_psm' dato.id %}"
+                                                                   class="btn-primary btn btn-xs">
+                                                                    <i class="fas fa-plus"> </i>
+                                                                </a>
+                                                                <a href="{% url 'app_stock_directo:listar_stock_directo_unico_psm' dato.id %}"
+                                                                   class="btn-info btn btn-xs">
+                                                                    <i class="fas fa-search"> </i>
+                                                                </a>
+                                                            </div>
+{#                                                        {% endif %}#}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% comment %}<div class="modal fade" role="dialog" id="modal-default">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Añadir Stock</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form role="form">
+                        <input type="hidden" id="txt_id_proyecto">
+                        <div class="form-group">
+                            <label for="txt_nombre">Empresa:</label>
+                            <input id="txt_nombre" type="text" class="form-control" required>
+                            <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txt_nombre">Producto:</label>
+                            <input id="txt_nombre" type="text" class="form-control" required>
+                            <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txt_nombre">Cantidad:</label>
+                            <input id="txt_nombre" type="text" class="form-control" required>
+                            <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txt_nombre">Fecha Ingreso:</label>
+                            <input id="txt_nombre" type="text" class="form-control" required>
+                            <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txt_nombre">Número Guia:</label>
+                            <input id="txt_nombre" type="text" class="form-control" required>
+                            <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txt_nombre">Responsable Ingreso:</label>
+                            <input id="txt_nombre" type="text" class="form-control" required>
+                            <div class="help-block with-errors"></div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>{% endcomment %}
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script src="{% static 'acciones/app_datatable/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/popper/popper.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/bootstrap/js/bootstrap.min.js' %}"></script>
+    <!-- datatables JS -->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <!-- para usar botones en datatables JS -->
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.html5.min.js' %}"></script>
+    <!-- código JS propìo-->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/main_stock_directo_psm_insumos.js' %}"></script>
+
+{% endblock %}

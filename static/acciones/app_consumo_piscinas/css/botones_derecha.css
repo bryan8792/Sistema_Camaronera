@@ -1,0 +1,23 @@
+.top {
+    display:-webkit-inline-box;
+}
+
+.toolbar {
+    float: right;
+}
+
+.dt-buttons {
+    float: right !important;
+}
+
+#example_length {
+    margin-left: 20px;
+}
+
+#example_filter {
+    margin-left: 20px;
+}
+
+#example_wrapper {
+    width: 94% !important;
+}

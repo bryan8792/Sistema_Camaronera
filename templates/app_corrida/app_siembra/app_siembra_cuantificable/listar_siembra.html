@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+
+    <link rel="stylesheet"
+          href="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/css/buttons.bootstrap.min.css' %}"/>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/js/dataTables.buttons.min.js' %}"
+            type="text/javascript"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/jszip-2.5.0/jszip.min.js' %}"
+            type="text/javascript"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/pdfmake-0.1.36/pdfmake.min.js' %}"
+            type="text/javascript"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/pdfmake-0.1.36/vfs_fonts.js' %}"
+            type="text/javascript"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/js/buttons.html5.min.js' %}"
+            type="text/javascript"></script>
+
+    <script src="{% static 'acciones/app_corrida/js/listar_siembra_cuantificable.js' %}"></script>
+    <script src="{% static 'acciones/app_corrida/js/listar_siembra_valorizable.js' %}"></script>
+
+    <style>
+        .tb {
+            width: 100%;
+        }
+
+        .tb th, .tb td {
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        .tb thead {
+            background-color: #3498DB;
+        }
+    </style>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Main content -->
+    {% comment %}<section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <!-- /.card-header -->
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Listado de: <strong> {{ nombre }}</strong></h3>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-body">
+                        <table id="tb_siembra_detalle" class="table table-striped table-bordered">
+                            <thead style="background-color:#3498DB">
+                            <tr>
+                                <th class="text-center" style="width: 7%">Número</th>
+                                <th class="text-center" style="width: 10%">Fecha Registro</th>
+                                <th class="text-center" style="width: 10%">Fecha Compra</th>
+                                <th class="text-center" style="width: 10%">Fecha Transfer</th>
+                                <th class="text-center" style="width: 48%">Obsrevación</th>
+                                <th class="text-center" style="width: 10%">Total Larva</th>
+                                <th class="text-center" style="width: 5%">Ver</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- DEFINIMOS EL OBJETO DE LA PLANTILLA-->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-footer -->
+                    <div class="card-footer">
+                        {% block buttons_list %}
+                            <a href="{% url 'app_corrida:crear_siembra' %}" class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-plus"></i> Nuevo registro
+                            </a>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>{% endcomment %}
+
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-primary card-tabs">
+                        <div class="card-header p-0 pt-1">
+                            <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="registro-siembra-precria-tab" data-toggle="pill"
+                                       href="#registro-siembra-precria" role="tab" aria-controls="custom-tabs-one-home"
+                                       aria-selected="true"> <b> LISTADO DE SIEMBRA CUANTIFICABLE </b>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                       href="#custom-tabs-one-profile" role="tab" aria-controls="custom-tabs-one-profile"
+                                       aria-selected="false"> <b> LISTADO DE SIEMBRA VALORIZABLE </b>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+
+                            <div class="tab-content" id="custom-tabs-one-tabContent">
+
+                                <div class="tab-pane fade show active" id="registro-siembra-precria" role="tabpanel" aria-labelledby="registro-siembra-precria-tab">
+
+                                    <div class="card">
+                                        <!-- /.card-header -->
+                                        <div class="card-header" style="background-color:#3498DB">
+                                            <h3 class="card-title">Listado de: <strong> {{ nombre }}</strong>
+                                            </h3>
+                                        </div>
+                                        <!-- /.card-body -->
+                                        <div class="card-body">
+                                            <table id="tb_siembra_cuantificable" class="table table-striped table-bordered">
+                                                <thead style="background-color:#3498DB">
+                                                <tr>
+                                                    <th class="text-center" style="width: 7%">Número</th>
+                                                    <th class="text-center" style="width: 10%">Fecha Registro</th>
+                                                    <th class="text-center" style="width: 10%">Fecha Compra</th>
+                                                    <th class="text-center" style="width: 10%">Fecha Transfer</th>
+                                                    <th class="text-center" style="width: 48%">Obsrevación</th>
+                                                    <th class="text-center" style="width: 10%">Total Larva</th>
+                                                    <th class="text-center" style="width: 5%">Ver</th>
+                                                </tr>
+                                                </thead>
+
+                                            </table>
+                                        </div>
+                                        <!-- /.card-footer -->
+                                        <div class="card-footer">
+                                            <a href="{% url 'app_corrida:crear_siembra_cuant' %}"
+                                               class="btn btn-primary btn-flat btnTest">
+                                                <i class="fas fa-plus"></i> Nuevo registro
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="tab-pane fade" id="custom-tabs-one-profile" role="tabpanel" aria-labelledby="custom-tabs-one-profile-tab">
+
+                                    <div class="card">
+                                        <!-- /.card-header -->
+                                        <div class="card-header" style="background-color:#3498DB">
+                                            <h3 class="card-title">Listado de: <strong> {{ nombre }}</strong>
+                                            </h3>
+                                        </div>
+                                        <!-- /.card-body -->
+                                        <div class="card-body">
+                                            <table id="tb_siembra_valorizable" class="table table-striped table-bordered" style="width: 1662.56px;">
+                                                <thead style="background-color:#3498DB">
+                                                <tr>
+                                                    <th class="text-center" style="width: 7%">Número</th>
+                                                    <th class="text-center" style="width: 10%">Fecha Registro</th>
+                                                    <th class="text-center" style="width: 10%">Fecha Compra</th>
+                                                    <th class="text-center" style="width: 10%">Fecha Transfer</th>
+                                                    <th class="text-center" style="width: 48%">Obsrevación</th>
+                                                    <th class="text-center" style="width: 10%">Total Larva</th>
+                                                    <th class="text-center" style="width: 5%">Ver</th>
+                                                </tr>
+                                                </thead>
+
+                                            </table>
+                                        </div>
+                                        <!-- /.card-footer -->
+                                        <div class="card-footer">
+                                            <a href="{% url 'app_corrida:crear_siembra_val' %}"
+                                               class="btn btn-primary btn-flat btnTest">
+                                                <i class="fas fa-plus"></i> Nuevo registro
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <div class="modal fade" id="myModalSearchPiscinas" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <b><i class="fas fa-search"></i> RESULTADO: HISTORIAL DE CONSUMO - CRIA DE CAMARON</b>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="demo"></div>
+                    <table class="table table-sm table-bordered table-striped" id="tblSearchPiscinas">
+                        <thead style="background-color:#3498DB">
+                        <tr>
+                            <th style="text-align: center">Piscina</th>
+                            <th style="text-align: center">Dias</th>
+                            <th style="text-align: center">Siembra</th>
+                            <th style="text-align: center">Costo Larva</th>
+                            <th style="text-align: center">Dias x Hect</th>
+                            <th style="text-align: center">Calculos Realizados</th>
+                            <th style="text-align: center">Total</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th colspan="2" style="background-color:#dce0e3"> Total :</th>
+                            <th style="text-align: center"></th>
+                            <th style="text-align: center"></th>
+                            <th style="text-align: center"></th>
+                            <th style="text-align: center"></th>
+                            <th style="text-align: center"></th>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

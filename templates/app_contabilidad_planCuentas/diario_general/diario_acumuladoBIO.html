@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <link rel="stylesheet"
+          href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}">
+    <!-- Agregar estos enlaces para los botones de exportación -->
+    <link rel="stylesheet"
+          href="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/css/buttons.bootstrap4.min.css' %}">
+    <style>
+        .dataTables_filter input {
+            width: 300px !important;
+        }
+
+        .table th, .table td {
+            font-size: 12px;
+        }
+
+        .numeric {
+            text-align: right;
+        }
+
+        .total-row {
+            font-weight: bold;
+        }
+
+        .grand-total {
+            font-weight: bold;
+            border-top: double #000;
+        }
+
+        .resaltado {
+            background-color: yellow;
+            text-align: right !important;
+            padding-right: 10px;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <div class="card card-default">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-book"></i>
+                {{ title }}
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group row">
+                        <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
+                        <div class="col-sm-5">
+                            <input type="text" name="rango_dias" class="form-control" autocomplete="off" id="rango_dias" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <table class="table table-bordered" id="data">
+                <thead>
+                <tr>
+                    <th>FECHA</th>
+                    <th>CÓDIGO</th>
+                    <th>NOMBRE CUENTA</th>
+                    <th>DOC</th>
+                    <th>DESCRIPCIÓN</th>
+                    <th class="numeric">DEBE</th>
+                    <th class="numeric">HABER</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- para usar DataRangePicker JS -->
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}"/>
+    <!-- datatables JS -->
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <!-- Agregar estos scripts para los botones de exportación -->
+    <script src="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/js/buttons.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/jszip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/js/buttons.print.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/js/buttons.colVis.min.js' %}"></script>
+    <!-- PARA DETALLES -->
+    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/diario_general/diario_general.js' %}"></script>
+
+    {% comment %}<script>
+        $(function () {
+            var tblDiario = $('#data').DataTable({
+                responsive: true,
+                autoWidth: false,
+                destroy: true,
+                deferRender: true,
+                bPaginate: false,
+                scrollY: "700px",
+                scrollX: true,
+                // bFilter: false,
+                bInfo: false,
+                dom: 'Bfrtip',
+                ajax: {
+                    url: window.location.pathname,
+                    type: 'POST',
+                    data: function (d) {
+                        d.action = 'searchdata';
+                        d.fecha_inicio = $('input[name="fecha_inicio"]').val();
+                        d.fecha_fin = $('input[name="fecha_fin"]').val();
+                        d.empresa = 'PSM';
+                    },
+                    dataSrc: function (json) {
+                        var data = json.asientos;
+                        data.push(json.total_general);
+                        return data;
+                    }
+                },
+                columns: [
+                    {"data": "fecha"},
+                    {"data": "codigo"},
+                    {"data": "nombre"},
+                    {"data": "doc"},
+                    {"data": "descripcion"},
+                    {"data": "debe"},
+                    {"data": "haber"}
+                ],
+                columnDefs: [
+                    {
+                        targets: [-1, -2],
+                        class: 'numeric',
+                        render: function (data, type, row) {
+                            return parseFloat(data).toFixed(2);
+                        }
+                    }
+                ],
+                createdRow: function (row, data, dataIndex) {
+                    if (data.tipo === 'total') {
+                        $(row).addClass('total-row resaltado');
+                    } else if (data.tipo === 'grand_total') {
+                        $(row).addClass('grand-total resaltado');
+                    }
+                },
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        titleAttr: 'Exportar a Excel',
+                        className: 'btn btn-success btn-sm',
+                        exportOptions: {
+                            format: {
+                                body: function (data, row, column, node) {
+                                    if (row.tipo === 'total' || row.tipo === 'grand_total') {
+                                        if (column === 0) {
+                                            return data;
+                                        } else if (column === 5 || column === 6) {
+                                            return data;
+                                        }
+                                        return '';
+                                    }
+                                    return data;
+                                }
+                            }
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        titleAttr: 'Exportar a PDF',
+                        className: 'btn btn-danger btn-sm',
+                        exportOptions: {
+                            format: {
+                                body: function (data, row, column, node) {
+                                    if (row.tipo === 'total' || row.tipo === 'grand_total') {
+                                        if (column === 0) {
+                                            return data;
+                                        } else if (column === 5 || column === 6) {
+                                            return data;
+                                        }
+                                        return '';
+                                    }
+                                    return data;
+                                }
+                            }
+                        },
+                        customize: function (doc) {
+                            // Cambiar a orientación paisaje
+                            doc.pageOrientation = 'landscape';
+
+                            // Ajustar el tamaño de la página a A4
+                            doc.pageSize = 'A4';
+
+                            // Ajustar los márgenes
+                            doc.pageMargins = [20, 20, 20, 20];
+
+                            // Ajustar el tamaño de la fuente
+                            doc.defaultStyle.fontSize = 8;
+                            doc.styles.tableHeader.fontSize = 9;
+
+                            // Ajustar el ancho de las columnas
+                            doc.content[1].table.widths =
+                                ['10%', '10%', '20%', '10%', '20%', '15%', '15%'];
+
+                            // Añadir un título al PDF
+                            doc.content.splice(0, 0, {
+                                text: 'Diario General Acumulado',
+                                style: 'header',
+                                alignment: 'center',
+                                margin: [0, 0, 0, 10]
+                            });
+
+                            // Estilo para el título
+                            doc.styles.header = {
+                                fontSize: 18,
+                                bold: true
+                            };
+
+                            // Añadir numeración de páginas
+                            var objLayout = {};
+                            objLayout['hLineWidth'] = function (i) {
+                                return .5;
+                            };
+                            objLayout['vLineWidth'] = function (i) {
+                                return .5;
+                            };
+                            objLayout['hLineColor'] = function (i) {
+                                return '#aaa';
+                            };
+                            objLayout['vLineColor'] = function (i) {
+                                return '#aaa';
+                            };
+                            objLayout['paddingLeft'] = function (i) {
+                                return 4;
+                            };
+                            objLayout['paddingRight'] = function (i) {
+                                return 4;
+                            };
+                            doc.content[1].layout = objLayout;
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Imprimir',
+                        titleAttr: 'Imprimir',
+                        className: 'btn btn-info btn-sm',
+                        exportOptions: {
+                            format: {
+                                body: function (data, row, column, node) {
+                                    if (row.tipo === 'total' || row.tipo === 'grand_total') {
+                                        if (column === 0) {
+                                            return data;
+                                        } else if (column === 5 || column === 6) {
+                                            return data;
+                                        }
+                                        return '';
+                                    }
+                                    return data;
+                                }
+                            }
+                        }
+                    },
+                    'colvis'
+                ],
+                initComplete: function (settings, json) {
+                }
+            });
+
+            $('input[name="fecha_inicio"], input[name="fecha_fin"]').change(function () {
+                tblDiario.ajax.reload();
+            });
+        });
+    </script>{% endcomment %}
+{% endblock %}

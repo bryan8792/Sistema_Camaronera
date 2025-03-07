@@ -1,0 +1,300 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'lib/bootstrap-4.6.0/css/bootstrap.min.css' %}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0 auto;
+            padding-left: 10px;
+            padding-right: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+
+        .content {
+            margin-top: 0;
+            padding: 0 0 5px 10px;
+            width: 78%;
+            display: flex;
+            flex-flow: row wrap;
+        }
+
+        .col-50 {
+            flex: 1;
+            width: 374px;
+            padding: 5px;
+        }
+
+        .col-100 {
+            flex: 1;
+            width: 748px;
+            padding: 5px;
+        }
+
+        .logo {
+            width: 100%;
+            height: 120px;
+            margin-bottom: 20px;
+        }
+
+        .text-content {
+            color: black;
+            background-color: #f6f6f6;
+            font-weight: normal;
+        }
+
+        .text-content p {
+            margin-bottom: 2px;
+            padding: 2px 10px;
+        }
+
+        .barcode {
+            width: 100%;
+            height: 188px;
+        }
+
+        .details th, details td {
+            padding: 5px 1px 1px 1px;
+            text-transform: uppercase;
+        }
+
+        .details tbody tr td {
+            border: 1px solid black;
+        }
+
+        .details thead tr {
+            border: 1px solid black;
+        }
+
+        .details thead tr th {
+            border: 1px solid black !important;
+            background-color: #000000;
+            color: white;
+        }
+
+        .totals {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+<div class="content mt-3">
+    <div class="col-50">
+        <img class="img-fluid d-block mx-auto logo" alt="" src="{{ sale.company.get_image }}">
+        <div class="text-content"><p><b>Emisor:</b> {{ sale.company.tradename }}</p></div>
+        <div class="text-content"><p><b>Ruc:</b> {{ sale.company.ruc }}</p></div>
+        <div class="text-content"><p><b>Matriz:</b> {{ sale.company.main_address }}</p></div>
+        <div class="text-content"><p><b>Correo:</b> {{ sale.company.email }}</p></div>
+        <div class="text-content"><p><b>Obligado a llevar contabilidad:</b> {{ sale.company.obligated_accounting }}</p>
+        </div>
+        <div class="text-content"><p><b>Agente de Retención:</b> {{ sale.company.retention_agent }}</p></div>
+        {% comment %}<div class="text-content"><p><b>Ambiente:</b> {{ sale.company.environment_type }}</p></div>{% endcomment %}
+        <div class="text-content"><p><b>Ambiente:</b>{% if sale.company.environment_type == 1 %} PRUEBAS {% else %}
+            PRODUCCIÓN {% endif %}</p></div>
+        <div class="text-content"><p><b>Emisión:</b> {% if sale.company.environment_type == 1 %} EMISIÓN
+            NORMAL {% endif %}</p></div>
+    </div>
+    <div class="col-50">
+        <div class="text-content">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width: 100%;; text-align: left;">
+                        <p style="width: 100%; font-size: 19px; margin-bottom: 0"><b>Comprobante de Retención</b></p>
+                    </th>
+                    <th style="width: 100%;; text-align: right;">
+                        <p style="width: 100%; font-size: 19px; margin-bottom: 0"><b>{{ sale.get_voucher_number_full }}</b>
+                        </p>
+                    </th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="text-content">
+            <p>
+                <b>Autorización:</b><br>
+                <span style="font-size: 12px">{{ sale.access_code }}</span>
+            </p>
+        </div>
+        <div class="text-content">
+            <p>
+                <b>Fecha de autorización:</b><br>
+                {{ sale.get_authorization_date }}
+            </p>
+        </div>
+        <div class="text-content">
+            <p>
+                <b>Clave de acceso:</b><br>
+                <img alt="" class="img-fluid barcode" src="{{ access_code_barcode }}">
+            </p>
+        </div>
+    </div>
+</div>
+<div class="content">
+    <div class="col-50">
+        <div class="text-content"><p><b>Razón Social:</b> {{ encabezado.descripcion }} </p></div>
+        <div class="text-content"><p><b>Fecha de emisión:</b> {{ encabezado.fecha }}</p></div>
+        <div class="text-content"><p><b>RUC/CI:</b> {{ encabezado.ruc }}</p></div>
+    </div>
+    <div class="col-50">
+        <div class="text-content"><p><b>Conprobante:</b></p>
+            <p style="font-size: 12px;">{{ encabezado.comprobante }}</p></div>
+        <div class="text-content"><p><b>Dirección:</b> {{ encabezado.direccion }}</p></div>
+    </div>
+</div>
+<div class="content">
+    <div class="col-100">
+        <table class="details" style="width: 100%;">
+            <thead>
+            <tr>
+                <th class="text-center" style="width: 10%;">Comprobante</th>
+                <th class="text-center" style="width: 15%;">Número</th>
+                <th class="text-center" style="width: 10%;">Fecha Emisión</th>
+                <th class="text-center" style="width: 10%;">Ejercicio Fiscal</th>
+                <th class="text-center" style="width: 15%;">Base Imponible</th>
+                <th class="text-center" style="width: 10%;">Impuesto</th>
+                <th class="text-center" style="width: 15%;">Porcentaje (%)</th>
+                <th class="text-center" style="width: 15%;">Valor Retenido</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% comment %}BASE CERO{% endcomment %}
+            {% if sale.base_cero_bruto_fcientocuatro %}
+            <tr>
+                <td class="text-center">{{ sale.label_tipo_comprobante }}</td>
+                <td class="text-center">{{ sale.comp_serie }} {{ sale.comp_secuencia }}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"d/m/Y"}}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"m/Y"}}</td>
+                <td class="text-center">{{ sale.base_cero_bruto }}</td>
+                <td class="text-center">{{ sale.base_cero_bruto_fcientocuatro }}</td>
+                <td class="text-center">0 %</td>
+                <td class="text-center">0</td>
+            </tr>
+            {% endif %}
+
+            {% comment %}Base IVA Normal{% endcomment %}
+            {% if sale.base_iva_normal_bruto_fcientocuatro %}
+            <tr>
+                <td class="text-center">{{ sale.label_tipo_comprobante }}</td>
+                <td class="text-center">{{ sale.comp_serie }} {{ sale.comp_secuencia }}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"d/m/Y"}}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"m/Y"}}</td>
+                <td class="text-center">{{ sale.base_iva_normal_bruto }}</td>
+                <td class="text-center">{{ sale.base_iva_normal_bruto_fcientocuatro }}</td>
+                <td class="text-center">0 %</td>
+                <td class="text-center">0</td>
+            </tr>
+            {% endif %}
+
+            {% if sale.ret_iva_treint %}
+            <tr>
+                <td class="text-center">{{ sale.label_tipo_comprobante }}</td>
+                <td class="text-center">{{ sale.comp_serie }} {{ sale.comp_secuencia }}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"d/m/Y"}}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"m/Y"}}</td>
+                <td class="text-center">{{ sale.iva_treint }}</td>
+                <td class="text-center">{{ sale.ret_iva_treint }}</td>
+                <td class="text-center">30 %</td>
+                <td class="text-center">{{ sale.cant_iva_treint }}</td>
+            </tr>
+            {% endif %}
+
+            {% if sale.ret_iva_veint %}
+            <tr>
+                <td class="text-center">{{ sale.label_tipo_comprobante }}</td>
+                <td class="text-center">{{ sale.comp_serie }} {{ sale.comp_secuencia }}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"d/m/Y"}}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"m/Y"}}</td>
+                <td class="text-center">{{ sale.iva_veint }}</td>
+                <td class="text-center">{{ sale.ret_iva_veint }}</td>
+                <td class="text-center">20 %</td>
+                <td class="text-center">{{ sale.cant_iva_veint }}</td>
+            </tr>
+            {% endif %}
+
+            {% if sale.ret_fue_iva_uno %}
+            <tr>
+                <td class="text-center">{{ sale.label_tipo_comprobante }}</td>
+                <td class="text-center">{{ sale.comp_serie }} {{ sale.comp_secuencia }}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"d/m/Y"}}</td>
+                <td class="text-center">{{ sale.comp_fecha_em | date:"m/Y"}}</td>
+                <td class="text-center">{{ sale.ret_fue_iva_uno }}</td>
+                <td class="text-center">{{ sale.ret_fue_iva_anexo_uno }}</td>
+                <td class="text-center">{{ sale.ret_fue_iva_porcent_uno }}</td>
+                <td class="text-center">{{ sale.ret_fue_iva_monto_uno }}</td>
+            </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="content">
+    <div class="col-50">
+        <table class="details" style="width: 100%;">
+            <thead>
+            <tr>
+                <th colspan="2" class="text-center text-uppercase">INFORMACIÓN ADICIONAL</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="text-left"><b>Dirección</b></td>
+                <td class="text-center">{{ encabezado.direccion }}</td>
+            </tr>
+{#            <tr>#}
+{#                <td class="text-left"><b>Email</b></td>#}
+{#                <td class="text-center">{{ encabezado.email }}</td>#}
+{#            </tr>#}
+{#            <tr>#}
+{#                <td class="text-left"><b>Celular</b></td>#}
+{#                <td class="text-center">{{ encabezado.telefono }}</td>#}
+{#            </tr>#}
+            </tbody>
+        </table>
+        <br>
+        {% if sale.additional_info %}
+            <table class="details" style="width: 100%;">
+                <thead>
+                <tr>
+                    <th colspan="2" class="text-center text-uppercase">información adicional</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for additional_info in sale.additional_info %}
+                    <tr>
+                        <td class="text-left"><b>{{ additional_info.name }}</b></td>
+                        <td class="text-center">{{ additional_info.value }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+    <div class="col-50">
+        <table class="totals" style="width: 100%;">
+            <thead>
+            <tr>
+                <th style="width: 70%;"></th>
+                <th style="width: 30%;"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="float-right font-weight-bold">Total</td>
+                {% comment %}<td class="text-right">{{ sale.total|floatformat:2 }}</td>{% endcomment %}
+                <td class="text-center"> &nbsp;&nbsp; 0.00</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

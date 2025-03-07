@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guia</title>
+    <style>
+
+        @page {
+            size: A4 landscape;
+            margin: 2mm;
+        }
+        * {
+            color: black;
+            size: landscape;
+        }
+
+        body {
+            font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            color: black;
+        }
+
+        .name-company {
+            font-size: 25px;
+            padding: 0;
+            margin: 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        table thead tr th {
+            border: 1px solid black !important;
+            padding: 3px;
+        }
+
+        table tbody tr td {
+            border: 1px solid black;
+            padding: 3px;
+        }
+
+        .img-logo {
+            margin-top: 10px;
+            width: 75px;
+            height: 75px;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <p class="text-center">
+        <b> {{ comp.comprobante }} </b>
+    </p>
+    <p>
+        <b>Fecha de Registro:</b> {{ fecha }}<br><br>
+        <b>Productos Utilizados:</b> {{ prod_cantidad }}<br><br>
+        <b>Observación:</b> {{ observacion }}<br>
+    </p>
+    <table class="table" style="width: 100%;">
+        <thead>
+        <tr style="border: 1px solid black;">
+            <th style="width: 10%;" class="text-center">Piscinas</th>
+            <th style="width: 8%;" class="text-center" >Dias</th>
+            <th style="width: 10%;" class="text-center">Siembra</th>
+            <th style="width: 10%;" class="text-center">Costo Larva</th>
+            <th style="width: 10%;" class="text-center">Dia por Hect</th>
+            <th style="width: 44%;" class="text-center">Calculos Realizados</th>
+            <th style="width: 8%;" class="text-center" >Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for det in detalle_cuerpo %}
+            <tr>
+                <td class="text-center">{{ det.piscina }}</td>
+                <td class="text-center">{{ det.dias }}</td>
+                <td class="text-center">{{ det.siembra }}</td>
+                <td class="text-center">{{ det.costo_larva }}</td>
+                <td class="text-center">{{ det.dia_por_hect }}</td>
+                <td class="text-center">{{ det.dia_por_hect }}</td>
+                <td class="text-center">{{ det.total }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="7" class="text-center"><b>Movimientos de Ajuste de Stock:</b></td>
+        </tr>
+        <tr>
+            <td colspan="7">
+                 {% comment %}{% for key, values in resul_oper.items %}
+                    {% if key == 'PSM' %}
+                        {% for key_2, values_2 in values.items %}
+                            <tr>
+                                <td class="text-center">{{ key_2 }}</td>
+                                <td class="text-center">-</td>
+                                <td class="text-center">{{ values_2 }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    <p>{{ key }}</p>
+                    <p>{{ values }}</p>
+                {% endfor %}{% endcomment %}
+
+                <p> DATOS DE  </p>
+                {{ resul_oper }}
+
+                {% for x, y in resul_oper.items %}
+                    <p>The {{ x }} is {{ y }}.</p>
+                {% endfor %}
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>

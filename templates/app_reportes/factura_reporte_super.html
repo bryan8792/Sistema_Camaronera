@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guia {{ numero_guia }}</title>
+    <style>
+        * {
+            color: black;
+        }
+
+        body {
+            font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
+            padding: 0;
+            margin: 0;
+            color: black;
+        }
+
+        .name-company {
+            font-size: 25px;
+            padding: 0;
+            margin: 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        table thead tr th {
+            border: 1px solid black !important;
+            padding: 3px;
+        }
+
+        table tbody tr td {
+            border: 1px solid black;
+            padding: 3px;
+        }
+
+        .img-logo {
+            margin-top: 10px;
+            width: 75px;
+            height: 75px;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <img src="{% static 'img/img_empresa/logo123.png' %}" class="img-fluid d-block mx-auto img-logo" style="width: 200px; height: 80px;">
+    <h3 class="name-company"> {{ comp.name }} </h3>
+    <p class="text-center">
+        {{ comp.address }}<br>
+        <b>Teléfono: </b>{{ comp.numero }}<br>
+        <b> {{ comp.comprobante }} </b>
+    </p>
+    <p>
+        <b>Registro N:</b> {{ sale.id }}<br>
+        <b>Guia :</b> {{ sale.numero_guia }}<br>
+        <b>Fecha de Ingreso:</b> {{ sale.fecha_ingreso }} ({{ sale.fecha_ingreso|date:'c' }})<br>
+        <b>Ingresado a la Empresa:</b> {{ empresa }}<br>
+        <b>Proveedor:</b> {{ sale.proveedor }}<br>
+    </p>
+    <table class="table" style="width: 100%;">
+        <thead>
+        <tr style="border: 1px solid black;">
+            <th style="width: 20%;" colspan="2" class="text-center">Ingreso</th>
+            <th style="width: 35%;">Descripcion del Articulo</th>
+            <th style="width: 20%;" class="text-center">Cantidad</th>
+            <th style="width: 15%;" class="text-center">P. Unitario</th>
+            <th style="width: 10%;" class="text-center">Importe</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for det in sale.producto_stock_set.all %}
+            <tr>
+                <td class="text-center">{{ det.cantidad_usar|floatformat:0 }}</td>
+                <td class="text-center">{{ det.producto_empresa.nombre_prod.presentacion }} {{ det.producto_empresa.nombre_prod.peso_presentacion }} {{ det.producto_empresa.nombre_prod.unid_medida }}</td>
+                <td>{{ det.producto_empresa.nombre_prod.nombre }}</td>
+                <td class="text-center">{{ det.cantidad_ingreso }}
+                    {% if det.producto_empresa.nombre_prod.unid_aplicacion == 'SC' %}
+                        SACOS
+                    {% elif det.producto_empresa.nombre_prod.unid_aplicacion == 'GR' %}
+                        GRAMOS
+                    {% elif det.producto_empresa.nombre_prod.unid_aplicacion == 'LB' %}
+                        LIBRAS
+                    {% elif det.producto_empresa.nombre_prod.unid_aplicacion == 'CA' %}
+                        CANECAS
+                    {% else %}
+                        MILILITROS
+                    {% endif %}
+{#                    {{ det.producto_empresa.nombre_prod.unid_aplicacion }}#}
+                </td>
+                <td class="text-center">{{ det.producto_empresa.nombre_prod.costo_aplicacion|floatformat:5 }}</td>
+                <td class="text-right">{{ det.subtotal }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="5" class="text-right"><b>Sub - Total</b></td>
+            <td class="text-right"><b>{{ sale.subtotal|floatformat:2 }}</b></td>
+        </tr>
+        <tr>
+            <td colspan="5" class="text-right"><b>I.V.A {{ sale.iva }} %</b></td>
+            <td class="text-right">{{ sale.ivacalc|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td colspan="5" class="text-right"><b>Total a Pagar</b></td>
+            <td class="text-right"><b>{{ sale.total|floatformat:2 }}</b></td>
+        </tr>
+        <tr>
+            <td colspan="6">
+                <p class="text-uppercase font-weight-bold text-center">
+                    TOTAL DE PRODUCTOS ADQUIRIDOS:  {{ sale.producto_stock_set.count }}<br>
+                    !TOTAL DE INSUMOS COMPRADOS PARA CAMARONERA!<br>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6">
+                <p>
+                    <b> - Novedad:</b> {{ sale.observacion }}
+                </p>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<br>
+<hr>
+
+<table class="table table-bordered" style="margin-top: 60px; border-style: hidden">
+    <thead>
+    <tr style="border-style: hidden">
+        <th style="text-align: center">-------------------------------</th>
+        <th style="text-align: center">-------------------------------</th>
+        <th style="text-align: center">-------------------------------</th>
+    </tr>
+    <tr style="border-style: hidden">
+        <th style="text-align: center">ELABORADO</th>
+        <th style="text-align: center">REVISADO</th>
+        <th style="text-align: center">VISTO BUENO</th>
+    </tr>
+    </thead>
+</table>
+
+</body>
+</html>

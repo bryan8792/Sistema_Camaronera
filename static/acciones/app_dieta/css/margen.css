@@ -1,0 +1,5 @@
+/*estilos para la tabla*/
+div.dataTables_wrapper {
+    width: 1700px;
+    margin: 0 auto;
+}
