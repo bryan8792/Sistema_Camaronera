@@ -1272,6 +1272,7 @@ class listarMayorPlanView(ListView):
 #         return context
 
 
+
 class listarBalancePlanView(ListView):
     model = DetalleCuentasPlanCuenta
     template_name = 'app_contabilidad_planCuentas/balance_Plan/balance_mayorizacion_psm.html'
@@ -1284,19 +1285,23 @@ class listarBalancePlanView(ListView):
     def get_saldos_cuenta(self, cuenta, fecha_inicio, fecha_fin):
         """
         Calcula los saldos de una cuenta para un período específico
-        """
-        # Saldo anterior: todas las transacciones hasta el día anterior a fecha_inicio
-        fecha_anterior = fecha_inicio - timedelta(days=1)
-        saldo_anterior = DetalleCuentasPlanCuenta.objects.filter(
-            cuenta=cuenta,
-            encabezadocuentaplan__fecha__lte=fecha_anterior
-        ).aggregate(
-            debe=Coalesce(Sum('debe'), Decimal('0')),
-            haber=Coalesce(Sum('haber'), Decimal('0'))
-        )
 
-        # Saldo del mes: transacciones entre fecha_inicio y fecha_fin (inclusive)
-        saldo_mes = DetalleCuentasPlanCuenta.objects.filter(
+        Saldo anterior: Transacciones dentro del rango de fechas seleccionado
+        Saldo mes: Transacciones del mes actual
+        Saldo actual: Suma de ambos
+        """
+        # Obtener la fecha actual para determinar el mes en curso
+        hoy = datetime.now().date()
+        primer_dia_mes_actual = datetime(hoy.year, hoy.month, 1).date()
+
+        # Calcular el último día del mes actual
+        if hoy.month == 12:
+            ultimo_dia_mes_actual = datetime(hoy.year + 1, 1, 1).date() - timedelta(days=1)
+        else:
+            ultimo_dia_mes_actual = datetime(hoy.year, hoy.month + 1, 1).date() - timedelta(days=1)
+
+        # Saldo anterior: todas las transacciones dentro del rango de fechas seleccionado
+        saldo_anterior = DetalleCuentasPlanCuenta.objects.filter(
             cuenta=cuenta,
             encabezadocuentaplan__fecha__gte=fecha_inicio,
             encabezadocuentaplan__fecha__lte=fecha_fin
@@ -1304,6 +1309,21 @@ class listarBalancePlanView(ListView):
             debe=Coalesce(Sum('debe'), Decimal('0')),
             haber=Coalesce(Sum('haber'), Decimal('0'))
         )
+
+        # Saldo del mes: transacciones del mes actual
+        saldo_mes = DetalleCuentasPlanCuenta.objects.filter(
+            cuenta=cuenta,
+            encabezadocuentaplan__fecha__gte=primer_dia_mes_actual,
+            encabezadocuentaplan__fecha__lte=ultimo_dia_mes_actual
+        ).aggregate(
+            debe=Coalesce(Sum('debe'), Decimal('0')),
+            haber=Coalesce(Sum('haber'), Decimal('0'))
+        )
+
+        # Depuración
+        logger.debug(f"Cuenta: {cuenta.codigo}, Fecha inicio: {fecha_inicio}, Fecha fin: {fecha_fin}")
+        logger.debug(f"Mes actual: {primer_dia_mes_actual} a {ultimo_dia_mes_actual}")
+        logger.debug(f"Cuenta: {cuenta.codigo}, Saldo anterior: {saldo_anterior}, Saldo mes: {saldo_mes}")
 
         # Para cuentas padre, incluir saldos de subcuentas
         subcuentas = PlanCuenta.objects.filter(parentId=cuenta)
@@ -1317,8 +1337,6 @@ class listarBalancePlanView(ListView):
 
         debe_actual = saldo_anterior['debe'] + saldo_mes['debe']
         haber_actual = saldo_anterior['haber'] + saldo_mes['haber']
-
-        logger.debug(f"Cuenta: {cuenta.codigo}, Saldo anterior: {saldo_anterior}, Saldo mes: {saldo_mes}")
 
         return {
             'debe_ant': float(saldo_anterior['debe']),
@@ -1340,7 +1358,22 @@ class listarBalancePlanView(ListView):
 
     def get_nivel(self, codigo):
         """Determina el nivel de la cuenta basado en su código"""
-        return len(codigo.split('.'))
+        partes = codigo.split('.')
+        return len(partes)
+
+    def format_nombre_cuenta(self, nombre, codigo):
+        """
+        Formatea el nombre de la cuenta con la indentación correcta basada en el código
+        """
+        # Calculamos el nivel basado en la cantidad de segmentos en el código
+        nivel = len(codigo.split('.'))
+
+        # Aplicamos la indentación (2 espacios por nivel, excepto nivel 1)
+        if nivel == 1:
+            return nombre
+        else:
+            indentacion = ' ' * ((nivel - 1) * 2)  # 2 espacios por nivel
+            return f"{indentacion}{nombre}"
 
     def get_parent_code(self, codigo):
         """Obtiene el código del padre de una cuenta"""
@@ -1389,37 +1422,23 @@ class listarBalancePlanView(ListView):
                     }, status=404)
 
                 data = []
-                account_dict = {}
-
-                # Primera pasada: calcular saldos para todas las cuentas
                 for cuenta in cuentas:
                     saldos = self.get_saldos_cuenta(cuenta, fecha_inicio, fecha_fin)
-                    nivel = self.get_nivel(cuenta.codigo)
-                    tipo_cuenta = self.get_account_type(cuenta)
+
+                    # Formatear el nombre con la indentación correcta
+                    nombre_formateado = self.format_nombre_cuenta(cuenta.nombre, cuenta.codigo)
 
                     item = {
                         'id': cuenta.id,
                         'codigo': cuenta.codigo,
-                        'nombre': cuenta.nombre,
-                        'nivel': nivel,
-                        'tipo': tipo_cuenta,
+                        'nombre': nombre_formateado,
+                        'tipo': self.get_account_type(cuenta),
                         **saldos
                     }
-                    account_dict[cuenta.codigo] = item
+                    data.append(item)
 
-                # Segunda pasada: agregar saldos a cuentas padre
-                for codigo, item in account_dict.items():
-                    parent_code = self.get_parent_code(codigo)
-                    while parent_code and parent_code in account_dict:
-                        parent = account_dict[parent_code]
-                        for field in ['debe_ant', 'haber_ant', 'debe_mes', 'haber_mes', 'debe_act', 'haber_act']:
-                            parent[field] += item[field]
-                        parent_code = self.get_parent_code(parent_code)
-
-                # Convertir el diccionario a una lista ordenada
-                data = sorted(account_dict.values(), key=lambda x: x['codigo'])
-
-                logger.debug(f"Datos procesados: {data}")
+                # Ordenar los datos por código
+                data = sorted(data, key=lambda x: x['codigo'])
 
             elif action == 'get_cuentas':
                 # Obtener todas las cuentas principales (nivel 1)
@@ -1448,8 +1467,6 @@ class listarBalancePlanView(ListView):
         context['title'] = 'Balance de Comprobación'
         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
         return context
-
-
 
 
 # CODIGO SI VALE SOLO EL DE ARRIBA ESTA CON CAMBIO PARA MEJORAR LA SEPARACION POR FECHA DE CORTE
