@@ -3312,6 +3312,74 @@ function getCookie(name) {
 const { jsPDF } = window.jspdf
 let gridOptions
 
+const loadData = async () => {
+  try {
+    showLoadingMessage()
+
+    const fechaInicioElement = document.querySelector('input[name="fecha_inicio"]')
+    const fechaFinElement = document.querySelector('input[name="fecha_fin"]')
+    const cuentaInicioElement = document.querySelector('select[name="cuenta_inicio"]')
+    const cuentaFinElement = document.querySelector('select[name="cuenta_fin"]')
+
+    if (!fechaInicioElement || !fechaFinElement || !cuentaInicioElement || !cuentaFinElement) {
+      throw new Error("No se encontraron todos los elementos necesarios en el formulario")
+    }
+
+    const fechaInicio = fechaInicioElement.value
+    const fechaFin = fechaFinElement.value
+    const cuentaInicio = cuentaInicioElement.value
+    const cuentaFin = cuentaFinElement.value
+
+    if (!fechaInicio || !fechaFin) {
+      throw new Error("Las fechas de inicio y fin son requeridas")
+    }
+
+    const response = await fetch(window.location.pathname, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: new URLSearchParams({
+        action: "searchdata_psm",
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        cuenta_inicio: cuentaInicio,
+        cuenta_fin: cuentaFin,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    if (data.error) {
+      throw new Error(data.error)
+    }
+
+    // Filter out accounts with all zero values
+    const filteredData = data.filter(
+      (account) =>
+        account.debe_ant !== 0 ||
+        account.haber_ant !== 0 ||
+        account.debe_mes !== 0 ||
+        account.haber_mes !== 0 ||
+        account.debe_act !== 0 ||
+        account.haber_act !== 0,
+    )
+
+    gridOptions.api.setRowData(filteredData)
+    updateTotals(gridOptions.api)
+  } catch (error) {
+    console.error("Error realizando la petición AJAX:", error)
+    alert(`Error al cargar los datos: ${error.message}`)
+  } finally {
+    hideLoadingMessage()
+  }
+}
+
 function getCurrentDateTime() {
   const now = new Date()
   return now.toLocaleString("es-EC", {
@@ -3380,266 +3448,6 @@ function hideLoadingMessage() {
   }
 }
 
-function updateTotals(data) {
-  const totals = {
-    debe_ant: 0,
-    haber_ant: 0,
-    debe_mes: 0,
-    haber_mes: 0,
-    debe_act: 0,
-    haber_act: 0,
-  }
-
-  // Only sum parent accounts (codes starting with 1-7)
-  data.forEach((item) => {
-    if (["1", "2", "3", "4", "5", "6", "7"].includes(item.codigo.split(".")[0])) {
-      totals.debe_ant += Number(item.debe_ant || 0)
-      totals.haber_ant += Number(item.haber_ant || 0)
-      totals.debe_mes += Number(item.debe_mes || 0)
-      totals.haber_mes += Number(item.haber_mes || 0)
-      totals.debe_act += Number(item.debe_act || 0)
-      totals.haber_act += Number(item.haber_act || 0)
-    }
-  })
-
-  // Verify overall balance
-  const totalDebeAnt = totals.debe_ant
-  const totalHaberAnt = totals.haber_ant
-  const totalDebeMes = totals.debe_mes
-  const totalHaberMes = totals.haber_mes
-  const totalDebeAct = totals.debe_act
-  const totalHaberAct = totals.haber_act
-
-  console.log("Balance verification:")
-  console.log(`Saldo Anterior: DEBE=${totalDebeAnt.toFixed(2)}, HABER=${totalHaberAnt.toFixed(2)}`)
-  console.log(`Saldo Mes: DEBE=${totalDebeMes.toFixed(2)}, HABER=${totalHaberMes.toFixed(2)}`)
-  console.log(`Saldo Actual: DEBE=${totalDebeAct.toFixed(2)}, HABER=${totalHaberAct.toFixed(2)}`)
-
-  if (Math.abs(totalDebeAct - totalHaberAct) > 0.01) {
-    console.warn("Balance de Comprobación is not balanced!")
-  }
-
-  const totalRow = [
-    {
-      codigo: "",
-      nombre: "Total de las cuentas",
-      debe_ant: totalDebeAnt.toFixed(2),
-      haber_ant: totalHaberAnt.toFixed(2),
-      debe_mes: totalDebeMes.toFixed(2),
-      haber_mes: totalHaberMes.toFixed(2),
-      debe_act: totalDebeAct.toFixed(2),
-      haber_act: totalHaberAct.toFixed(2),
-      tipo: "",
-    },
-  ]
-
-  gridOptions.api.setPinnedBottomRowData(totalRow)
-  return totals
-}
-
-function calculateSaldoActual(debe_ant, haber_ant, debe_mes, haber_mes) {
-  // Convert all inputs to numbers and handle null/undefined
-  debe_ant = Number(debe_ant || 0)
-  haber_ant = Number(haber_ant || 0)
-  debe_mes = Number(debe_mes || 0)
-  haber_mes = Number(haber_mes || 0)
-
-  // Calculate the total debe and haber
-  const totalDebe = debe_ant + debe_mes
-  const totalHaber = haber_ant + haber_mes
-
-  // Calculate the difference
-  const saldo = totalDebe - totalHaber
-
-  // Return object with debe and haber values
-  return {
-    debe: saldo > 0 ? saldo.toFixed(2) : "0.00",
-    haber: saldo < 0 ? Math.abs(saldo).toFixed(2) : "0.00",
-  }
-}
-
-const loadData = async () => {
-  try {
-    showLoadingMessage()
-
-    const fechaInicioElement = document.querySelector('input[name="fecha_inicio"]')
-    const fechaFinElement = document.querySelector('input[name="fecha_fin"]')
-    const cuentaInicioElement = document.querySelector('select[name="cuenta_inicio"]')
-    const cuentaFinElement = document.querySelector('select[name="cuenta_fin"]')
-
-    if (!fechaInicioElement || !fechaFinElement || !cuentaInicioElement || !cuentaFinElement) {
-      throw new Error("No se encontraron todos los elementos necesarios en el formulario")
-    }
-
-    const fechaInicio = fechaInicioElement.value
-    const fechaFin = fechaFinElement.value
-
-    // Function to format date as YYYY-MM-DD
-    function formatDate(dateString) {
-      const date = new Date(dateString)
-      return date.toISOString().split("T")[0]
-    }
-
-    // Validate and format dates
-    if (!fechaInicio || !fechaFin) {
-      throw new Error("Las fechas de inicio y fin son requeridas")
-    }
-
-    const formattedFechaInicio = formatDate(fechaInicio)
-    const formattedFechaFin = formatDate(fechaFin)
-
-    const cuentaInicio = cuentaInicioElement.value
-    const cuentaFin = cuentaFinElement.value
-
-    if (!fechaInicio || !fechaFin) {
-      throw new Error("Las fechas de inicio y fin son requeridas")
-    }
-
-    const response = await fetch(window.location.pathname, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "X-CSRFToken": getCookie("csrftoken"),
-      },
-      body: new URLSearchParams({
-        action: "searchdata_psm",
-        fecha_inicio: formattedFechaInicio,
-        fecha_fin: formattedFechaFin,
-        cuenta_inicio: cuentaInicio,
-        cuenta_fin: cuentaFin,
-      }),
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
-    }
-
-    const data = await response.json()
-    if (data.error) {
-      throw new Error(data.error)
-    }
-
-    // Process each row
-    data.forEach((item) => {
-      // Ensure all numeric values are properly parsed
-      ;["debe_ant", "haber_ant", "debe_mes", "haber_mes"].forEach((field) => {
-        item[field] = Number(item[field] || 0)
-      })
-
-      // Parse the transaction date
-      const fechaTransaccion = new Date(item.fecha)
-
-      // Determine if the transaction belongs to SALDO ANTERIOR or SALDO MES
-      const primerDiaMes = new Date(formattedFechaInicio.split("-")[0], formattedFechaInicio.split("-")[1] - 1, 1)
-      if (fechaTransaccion < primerDiaMes) {
-        // Transaction is before the start of the month (SALDO ANTERIOR)
-        item.debe_ant = item.debe_ant + item.debe_mes
-        item.haber_ant = item.haber_ant + item.haber_mes
-        item.debe_mes = 0
-        item.haber_mes = 0
-      } else {
-        // Transaction is within the month (SALDO MES)
-        item.debe_mes = item.debe_ant + item.debe_mes
-        item.haber_mes = item.haber_ant + item.haber_mes
-        item.debe_ant = 0
-        item.haber_ant = 0
-      }
-
-      // Calculate saldo actual
-      const debeActual = item.debe_ant + item.debe_mes
-      const haberActual = item.haber_ant + item.haber_mes
-      const saldoActual = debeActual - haberActual
-
-      item.debe_act = saldoActual > 0 ? saldoActual.toFixed(2) : "0.00"
-      item.haber_act = saldoActual < 0 ? Math.abs(saldoActual).toFixed(2) : "0.00"
-
-      // Format all values to 2 decimal places
-      ;["debe_ant", "haber_ant", "debe_mes", "haber_mes"].forEach((field) => {
-        item[field] = Number(item[field]).toFixed(2)
-      })
-    })
-
-    // Filter data to show only rows with values
-    const filteredData = data.filter(
-      (item) =>
-        Number(item.debe_ant) !== 0 ||
-        Number(item.haber_ant) !== 0 ||
-        Number(item.debe_mes) !== 0 ||
-        Number(item.haber_mes) !== 0 ||
-        Number(item.debe_act) !== 0 ||
-        Number(item.haber_act) !== 0,
-    )
-
-    // Calculate totals for parent accounts only
-    const totals = data.reduce(
-      (acc, item) => {
-        if (["1", "2", "3", "4", "5", "6", "7"].includes(item.codigo.split(".")[0])) {
-          acc.debe_ant += Number(item.debe_ant)
-          acc.haber_ant += Number(item.haber_ant)
-          acc.debe_mes += Number(item.debe_mes)
-          acc.haber_mes += Number(item.haber_mes)
-          acc.debe_act += Number(item.debe_act)
-          acc.haber_act += Number(item.haber_act)
-        }
-        return acc
-      },
-      {
-        debe_ant: 0,
-        haber_ant: 0,
-        debe_mes: 0,
-        haber_mes: 0,
-        debe_act: 0,
-        haber_act: 0,
-      },
-    )
-
-    // Format totals
-    Object.keys(totals).forEach((key) => {
-      totals[key] = totals[key].toFixed(2)
-    })
-
-    // Get the selected account type
-    const tipoSelect = document.querySelector('select[name="tipo_cuenta"]')
-    const tipoSeleccionado = tipoSelect ? tipoSelect.value : ""
-
-    // Apply type filter if a type is selected
-    const dataFiltrada = filteredData.filter((item) => {
-      if (!tipoSeleccionado) return true // Show all if no type selected
-      return item.tipo === tipoSeleccionado
-    })
-
-    // Set the total row
-    const totalRow = [
-      {
-        codigo: "",
-        nombre: "Total de las cuentas",
-        debe_ant: totals.debe_ant,
-        haber_ant: totals.haber_ant,
-        debe_mes: totals.debe_mes,
-        haber_mes: totals.haber_mes,
-        debe_act: totals.debe_act,
-        haber_act: totals.haber_act,
-        tipo: "",
-      },
-    ]
-
-    gridOptions.api.setPinnedBottomRowData(totalRow)
-    gridOptions.api.setRowData(dataFiltrada)
-  } catch (error) {
-    console.error("Error realizando la petición AJAX:", error)
-    let errorMessage = "Error al cargar los datos: "
-    if (error.message.includes("Formato de fecha inválido")) {
-      errorMessage += "El formato de fecha es inválido. Por favor, use el formato YYYY-MM-DD."
-    } else {
-      errorMessage += error.message
-    }
-    alert(errorMessage)
-  } finally {
-    hideLoadingMessage()
-  }
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   // Set default dates to today
   const today = new Date().toISOString().split("T")[0]
@@ -3664,11 +3472,6 @@ document.addEventListener("DOMContentLoaded", () => {
       field: "nombre",
       width: 350,
       headerClass: "header-blue",
-      cellRenderer: (params) => {
-        const nivel = params.data.nivel || 1
-        const indent = "&nbsp;".repeat((nivel - 1) * 4)
-        return `${indent}${params.value}`
-      },
     },
     {
       headerName: "SALDO ANTERIOR",
@@ -3678,21 +3481,19 @@ document.addEventListener("DOMContentLoaded", () => {
           headerName: "DEBE",
           field: "debe_ant",
           width: 100,
-          valueFormatter: (params) => Number.parseFloat(params.value || 0).toFixed(2),
+          valueFormatter: (params) => Number(params.value || 0).toFixed(2),
           cellClass: "numeric-cell",
           headerClass: "header-blue",
           aggFunc: "sum",
-          showColumnHeader: true,
         },
         {
           headerName: "HABER",
           field: "haber_ant",
           width: 100,
-          valueFormatter: (params) => Number.parseFloat(params.value || 0).toFixed(2),
+          valueFormatter: (params) => Number(params.value || 0).toFixed(2),
           cellClass: "numeric-cell",
           headerClass: "header-blue",
           aggFunc: "sum",
-          showColumnHeader: true,
         },
       ],
     },
@@ -3704,7 +3505,7 @@ document.addEventListener("DOMContentLoaded", () => {
           headerName: "DEBE",
           field: "debe_mes",
           width: 100,
-          valueFormatter: (params) => Number.parseFloat(params.value || 0).toFixed(2),
+          valueFormatter: (params) => Number(params.value || 0).toFixed(2),
           cellClass: "numeric-cell",
           headerClass: "header-blue",
           aggFunc: "sum",
@@ -3713,7 +3514,7 @@ document.addEventListener("DOMContentLoaded", () => {
           headerName: "HABER",
           field: "haber_mes",
           width: 100,
-          valueFormatter: (params) => Number.parseFloat(params.value || 0).toFixed(2),
+          valueFormatter: (params) => Number(params.value || 0).toFixed(2),
           cellClass: "numeric-cell",
           headerClass: "header-blue",
           aggFunc: "sum",
@@ -3728,7 +3529,7 @@ document.addEventListener("DOMContentLoaded", () => {
           headerName: "DEBE",
           field: "debe_act",
           width: 100,
-          valueFormatter: (params) => Number.parseFloat(params.value || 0).toFixed(2),
+          valueFormatter: (params) => Number(params.value || 0).toFixed(2),
           cellClass: "numeric-cell",
           headerClass: "header-blue",
           aggFunc: "sum",
@@ -3737,7 +3538,7 @@ document.addEventListener("DOMContentLoaded", () => {
           headerName: "HABER",
           field: "haber_act",
           width: 100,
-          valueFormatter: (params) => Number.parseFloat(params.value || 0).toFixed(2),
+          valueFormatter: (params) => Number(params.value || 0).toFixed(2),
           cellClass: "numeric-cell",
           headerClass: "header-blue",
           aggFunc: "sum",
@@ -3753,6 +3554,7 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   ]
 
+  // Actualizar las opciones del grid
   gridOptions = {
     columnDefs,
     defaultColDef: {
@@ -3770,23 +3572,18 @@ document.addEventListener("DOMContentLoaded", () => {
         fontWeight: nivel === 1 ? "bold" : "normal",
       }
     },
+    suppressRowGroupPanel: true, // Asegurarse de que no se muestre el panel de agrupación
+    groupDisplayType: null, // No mostrar columna de grupo
+    pinnedBottomRowData: [],
     onGridReady: (params) => {
       params.api.sizeColumnsToFit()
+      // Calcular y actualizar totales
+      updateTotals(params.api)
     },
-    // Add pinnedBottom configuration
-    pinnedBottomRowData: [
-      {
-        codigo: "",
-        nombre: "Total de las cuentas",
-        debe_ant: 0,
-        haber_ant: 0,
-        debe_mes: 0,
-        haber_mes: 0,
-        debe_act: 0,
-        haber_act: 0,
-        tipo: "",
-      },
-    ],
+    onFilterChanged: (params) => {
+      // Actualizar totales cuando cambie el filtro
+      updateTotals(params.api)
+    },
   }
 
   // Update CSS styles
@@ -3878,9 +3675,34 @@ document.addEventListener("DOMContentLoaded", () => {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .ag-theme-alpine .ag-icon-tree-closed,
+    .ag-theme-alpine .ag-icon-tree-open {
+      color: #00b0f0 !important;
+    }
 
-    .ag-header-cell {
-      overflow: visible !important;
+    .ag-theme-alpine .ag-row-group {
+      cursor: pointer;
+    }
+    .ag-theme-alpine .ag-icon-tree-closed::before {
+      content: '\\u25B6'; /* Right-pointing triangle */
+      color: #00b0f0;
+      font-size: 12px;
+    }
+
+    .ag-theme-alpine .ag-icon-tree-open::before {
+      content: '\\u25BC'; /* Down-pointing triangle */
+      color: #00b0f0;
+      font-size: 12px;
+    }
+
+    .ag-theme-alpine .ag-cell {
+      display: flex;
+      align-items: center;
+      white-space: pre !important;  /* Asegura que se preserven los espacios */
+    }
+    .ag-theme-alpine .ag-row-pinned {
+      background-color: #f0f0f0 !important;
+      font-weight: bold !important;
     }
   `
   document.head.appendChild(styleElement)
@@ -3904,14 +3726,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("No se encontró el botón de actualizar")
   }
 
-  // Add after the btnActualizar event listener
-  const tipoSelect = document.getElementById("tipo_cuenta")
-  if (tipoSelect) {
-    tipoSelect.addEventListener("change", loadData)
-  } else {
-    console.error("No se encontró el selector de tipo de cuenta")
-  }
-
   // Export to Excel
   document.getElementById("exportExcel").addEventListener("click", () => {
     const currentDateTime = getCurrentDateTime()
@@ -3919,7 +3733,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const fechaFin = document.querySelector('input[name="fecha_fin"]').value
 
     // Create empty cells array for proper column spanning
-    const emptyCells = Array(8).fill("")
+    const emptyCells = Array(9).fill("")
 
     const params = {
       fileName: `balance_comprobacion_${getCurrentDateTime().replace(/[/:]/g, "-")}.xlsx`,
@@ -3931,6 +3745,15 @@ document.addEventListener("DOMContentLoaded", () => {
           return {
             value: "'" + params.value,
             type: "String",
+          }
+        }
+        if (params.column.getColId() === "nombre") {
+          return {
+            value: params.value,
+            type: "String",
+            style: {
+              alignment: { indent: Math.floor((params.value.length - params.value.trimLeft().length) / 2) },
+            },
           }
         }
         if (
@@ -3976,56 +3799,13 @@ document.addEventListener("DOMContentLoaded", () => {
           alignment: { horizontal: "right" },
         },
       },
+      onlySelected: false,
+      allColumns: true,
+      shouldRowBeSkipped: (params) => {
+        const data = params.node.data
+        return !(data.debe_ant || data.haber_ant || data.debe_mes || data.haber_mes || data.debe_act || data.haber_act)
+      },
     }
-
-    const rows = []
-    const totals = {
-      debe_ant: 0,
-      haber_ant: 0,
-      debe_mes: 0,
-      haber_mes: 0,
-      debe_act: 0,
-      haber_act: 0,
-    }
-
-    gridOptions.api.forEachNodeAfterFilterAndSort((node) => {
-      if (node.data) {
-        rows.push([
-          node.data.codigo,
-          node.data.nombre,
-          Number(node.data.debe_ant).toFixed(2),
-          Number(node.data.haber_ant).toFixed(2),
-          Number(node.data.debe_mes).toFixed(2),
-          Number(node.data.haber_mes).toFixed(2),
-          Number(node.data.debe_act).toFixed(2),
-          Number(node.data.haber_act).toFixed(2),
-          node.data.tipo,
-        ])
-
-        // Only sum parent accounts (codes starting with 1-7)
-        if (["1", "2", "3", "4", "5", "6", "7"].includes(node.data.codigo.split(".")[0])) {
-          totals.debe_ant += Number(node.data.debe_ant) || 0
-          totals.haber_ant += Number(node.data.haber_ant) || 0
-          totals.debe_mes += Number(node.data.debe_mes) || 0
-          totals.haber_mes += Number(node.data.haber_mes) || 0
-          totals.debe_act += Number(node.data.debe_act) || 0
-          totals.haber_act += Number(node.data.haber_act) || 0
-        }
-      }
-    })
-
-    // Add totals row
-    rows.push([
-      "",
-      "Total de las cuentas",
-      totals.debe_ant.toFixed(2),
-      totals.haber_ant.toFixed(2),
-      totals.debe_mes.toFixed(2),
-      totals.haber_mes.toFixed(2),
-      totals.debe_act.toFixed(2),
-      totals.haber_act.toFixed(2),
-      "",
-    ])
 
     gridOptions.api.exportDataAsExcel(params)
   })
@@ -4057,89 +3837,40 @@ document.addEventListener("DOMContentLoaded", () => {
     doc.text(`Generado el: ${currentDateTime}`, doc.internal.pageSize.width - 40, 100, { align: "right" })
 
     const rows = []
-    const totals = {
-      debe_ant: 0,
-      haber_ant: 0,
-      debe_mes: 0,
-      haber_mes: 0,
-      debe_act: 0,
-      haber_act: 0,
-    }
-
     gridOptions.api.forEachNodeAfterFilterAndSort((node) => {
       if (node.data) {
-        rows.push([
-          node.data.codigo,
-          node.data.nombre,
-          Number(node.data.debe_ant).toFixed(2),
-          Number(node.data.haber_ant).toFixed(2),
-          Number(node.data.debe_mes).toFixed(2),
-          Number(node.data.haber_mes).toFixed(2),
-          Number(node.data.debe_act).toFixed(2),
-          Number(node.data.haber_act).toFixed(2),
-          node.data.tipo,
-        ])
-
-        // Accumulate totals only for parent accounts (codes 1-7)
-        if (["1", "2", "3", "4", "5", "6", "7"].includes(node.data.codigo.split(".")[0])) {
-          totals.debe_ant += Number(node.data.debe_ant) || 0
-          totals.haber_ant += Number(node.data.haber_ant) || 0
-          totals.debe_mes += Number(node.data.debe_mes) || 0
-          totals.haber_mes += Number(node.data.haber_mes) || 0
-          totals.debe_act += Number(node.data.debe_act) || 0
-          totals.haber_act += Number(node.data.haber_act) || 0
+        const data = node.data
+        if (data.debe_ant || data.haber_ant || data.debe_mes || data.haber_mes || data.debe_act || data.haber_act) {
+          rows.push([
+            data.codigo,
+            data.nombre,
+            Number(data.debe_ant).toFixed(2),
+            Number(data.haber_ant).toFixed(2),
+            Number(data.debe_mes).toFixed(2),
+            Number(data.haber_mes).toFixed(2),
+            Number(data.debe_act).toFixed(2),
+            Number(data.haber_act).toFixed(2),
+            data.tipo,
+          ])
         }
       }
     })
 
-    // Add totals row
-    rows.push([
-      "",
-      "Total de las cuentas",
-      totals.debe_ant.toFixed(2),
-      totals.haber_ant.toFixed(2),
-      totals.debe_mes.toFixed(2),
-      totals.haber_mes.toFixed(2),
-      totals.debe_act.toFixed(2),
-      totals.haber_act.toFixed(2),
-      "",
-    ])
-
     doc.autoTable({
       startY: 120,
       head: [
-        [
-          { content: "CÓDIGO", rowSpan: 2, styles: { fillColor: [255, 218, 185] } },
-          { content: "NOMBRE CUENTA", rowSpan: 2, styles: { fillColor: [255, 218, 185] } },
-          { content: "SALDO ANTERIOR", colSpan: 2, styles: { fillColor: [255, 218, 185] } },
-          { content: "SALDO MES", colSpan: 2, styles: { fillColor: [255, 218, 185] } },
-          { content: "SALDO ACTUAL", colSpan: 2, styles: { fillColor: [255, 218, 185] } },
-          { content: "TIPO", rowSpan: 2, styles: { fillColor: [255, 218, 185] } },
-        ],
-        [
-          "",
-          "",
-          { content: "DEBE", styles: { fillColor: [255, 218, 185] } },
-          { content: "HABER", styles: { fillColor: [255, 218, 185] } },
-          { content: "DEBE", styles: { fillColor: [255, 218, 185] } },
-          { content: "HABER", styles: { fillColor: [255, 218, 185] } },
-          { content: "DEBE", styles: { fillColor: [255, 218, 185] } },
-          { content: "HABER", styles: { fillColor: [255, 218, 185] } },
-          "",
-        ],
+        ["CÓDIGO", "NOMBRE CUENTA", "DEBE_ANT", "HABER_ANT", "DEBE_MES", "HABER_MES", "DEBE_ACT", "HABER_ACT", "TIPO"],
       ],
       body: rows,
       theme: "grid",
-      styles: {
-        fontSize: 8,
-        cellPadding: 2,
-        halign: "center",
-        valign: "middle",
-        lineWidth: 0.5,
-      },
+      styles: { fontSize: 8, cellPadding: 2 },
       columnStyles: {
-        0: { cellWidth: 60, halign: "left" },
-        1: { cellWidth: 200, halign: "left" },
+        0: { cellWidth: 60 },
+        1: {
+          cellWidth: 200,
+          cellPadding: { left: 0 }, // Importante para preservar la indentación
+          whiteSpace: "pre", // Preservar espacios
+        },
         2: { cellWidth: 70, halign: "right" },
         3: { cellWidth: 70, halign: "right" },
         4: { cellWidth: 70, halign: "right" },
@@ -4147,16 +3878,6 @@ document.addEventListener("DOMContentLoaded", () => {
         6: { cellWidth: 70, halign: "right" },
         7: { cellWidth: 70, halign: "right" },
         8: { cellWidth: 40, halign: "center" },
-      },
-      headStyles: {
-        fillColor: [255, 218, 185],
-      },
-      // Style for the totals row
-      didParseCell: (data) => {
-        if (data.row.index === rows.length - 1) {
-          data.cell.styles.fontStyle = "bold"
-          data.cell.styles.fillColor = [240, 240, 240]
-        }
       },
       didDrawPage: (data) => {
         // Add page number at the bottom
@@ -4183,5 +3904,45 @@ function getCookie(name) {
   }
   return cookieValue
 }
+
+function updateTotals(gridApi) {
+  // Obtener todas las filas visibles (después del filtrado)
+  const visibleNodes = []
+  gridApi.forEachNodeAfterFilter((node) => {
+    if (node.data) {
+      visibleNodes.push(node.data)
+    }
+  })
+
+  // Calcular totales
+  const totals = {
+    codigo: "",
+    nombre: "Total de las cuentas",
+    tipo: "",
+    debe_ant: 0,
+    haber_ant: 0,
+    debe_mes: 0,
+    haber_mes: 0,
+    debe_act: 0,
+    haber_act: 0,
+  }
+
+  visibleNodes.forEach((row) => {
+    totals.debe_ant += Number(row.debe_ant || 0)
+    totals.haber_ant += Number(row.haber_ant || 0)
+    totals.debe_mes += Number(row.debe_mes || 0)
+    totals.haber_mes += Number(row.haber_mes || 0)
+    totals.debe_act += Number(row.debe_act || 0)
+    totals.haber_act += Number(row.haber_act || 0)
+  })
+
+  // Actualizar la fila de totales
+  gridApi.setPinnedBottomRowData([totals])
+}
+
+
+
+
+
 
 
