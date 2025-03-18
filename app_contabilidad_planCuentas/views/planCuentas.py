@@ -2244,7 +2244,7 @@ class DiarioGeneralAcumuladoPSMView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Diario General Acumulado'
+        context['title'] = 'Diario General Acumulado Empresa PSM'
         context['list_url'] = reverse_lazy('diario_general:diario_acumulado')
         # context['empresa_id'] = self.kwargs['empresa_id']
         # context['empresa_nombre'] = Empresa.objects.get(id=self.kwargs['empresa_id']).nombre
@@ -2253,7 +2253,7 @@ class DiarioGeneralAcumuladoPSMView(ListView):
 
 class DiarioGeneralAcumuladoBIOView(ListView):
     model = EncabezadoCuentasPlanCuenta
-    template_name = 'app_contabilidad_planCuentas/diario_general/diario_acumuladoPSM.html'
+    template_name = 'app_contabilidad_planCuentas/diario_general/diario_acumuladoBIO.html'
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
@@ -2266,6 +2266,8 @@ class DiarioGeneralAcumuladoBIOView(ListView):
             action = request.POST['action']
             if action == 'searchdata':
                 empresa = request.POST['empresa']
+                print('empresa')
+                print(empresa)
                 fecha_inicio = request.POST.get('fecha_inicio', '2024-12-01')
                 fecha_fin = request.POST.get('fecha_fin', '2025-01-31')
 
@@ -2357,7 +2359,7 @@ class DiarioGeneralAcumuladoBIOView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = 'Diario General Acumulado'
+        context['title'] = 'Diario General Acumulado Empresa BIO'
         context['list_url'] = reverse_lazy('diario_general:diario_acumulado')
         # context['empresa_id'] = self.kwargs['empresa_id']
         # context['empresa_nombre'] = Empresa.objects.get(id=self.kwargs['empresa_id']).nombre

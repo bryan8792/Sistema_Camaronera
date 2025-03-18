@@ -494,10 +494,26 @@
                                             class="fa fa-book nav-icon"></i>
                                         <p>Mayores</p></a>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}" class="nav-link"><i
-                                            class="fa fa-book nav-icon"></i>
-                                        <p>Diario General PSM</p></a>
+{#                                <li class="nav-item">#}
+{#                                    <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}" class="nav-link"><i#}
+{#                                            class="fa fa-book nav-icon"></i>#}
+{#                                        <p>Diario General PSM</p></a>#}
+{#                                </li>#}
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
+                                        <p>Diario General<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_bio' %}" class="nav-link">
+                                                <i class="fas fa-balance-scale-left nav-icon"></i>
+                                                <p>Diario de BIO</p></a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}" class="nav-link">
+                                                <i class="fas fa-balance-scale-right nav-icon"></i>
+                                                <p>Diario de PSM</p></a>
+                                        </li>
+                                    </ul>
                                 </li>
                                 <li class="nav-item has-treeview">
                                     <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
