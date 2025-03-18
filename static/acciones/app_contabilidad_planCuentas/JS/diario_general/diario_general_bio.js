@@ -8,7 +8,7 @@ function generate_report_diario() {
     action: "searchdata",
     fecha_inicio: date_now,
     fecha_fin: date_now,
-    empresa: "PSM",
+    empresa: "BIO",
   }
 
   if (date_range !== null) {
