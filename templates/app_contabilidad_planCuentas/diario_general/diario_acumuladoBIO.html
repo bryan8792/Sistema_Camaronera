@@ -42,41 +42,54 @@
 {% endblock %}
 
 {% block contenido %}
-    <div class="card card-default">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-book"></i>
-                {{ title }}
-            </h3>
-        </div>
-        <div class="card-body">
+    <br>
+    <section class="content">
+        <div class="container-fluid">
             <div class="row">
-                <div class="col-lg-6">
-                    <div class="form-group row">
-                        <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
-                        <div class="col-sm-5">
-                            <input type="text" name="rango_dias" class="form-control" autocomplete="off" id="rango_dias" required>
+                <div class="col-12">
+                    <div class="card">
+                        <!-- /.card-header -->
+                        <div class="card-header p-2 pt-1">
+                            <h3 class="card-title">
+                                <i class="fas fa-book"></i>
+                                {{ title }}
+                            </h3>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group row">
+                                        <label class="col-sm-5 col-form-label">BUSCAR POR RANGO DE FECHAS:</label>
+                                        <div class="col-sm-5">
+                                            <input type="text" name="rango_dias" class="form-control" autocomplete="off" id="rango_dias" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <table class="table table-bordered" id="data">
+                                <thead>
+                                <tr>
+                                    <th>FECHA</th>
+                                    <th>CÓDIGO</th>
+                                    <th>NOMBRE CUENTA</th>
+                                    <th>DOC</th>
+                                    <th>DESCRIPCIÓN</th>
+                                    <th class="numeric">DEBE</th>
+                                    <th class="numeric">HABER</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
                         </div>
                     </div>
                 </div>
             </div>
-            <table class="table table-bordered" id="data">
-                <thead>
-                <tr>
-                    <th>FECHA</th>
-                    <th>CÓDIGO</th>
-                    <th>NOMBRE CUENTA</th>
-                    <th>DOC</th>
-                    <th>DESCRIPCIÓN</th>
-                    <th class="numeric">DEBE</th>
-                    <th class="numeric">HABER</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
         </div>
-    </div>
+    </section>
 {% endblock %}
 
 {% block scripts %}
