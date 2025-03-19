@@ -486,8 +486,8 @@ class listarTransaccionPlanView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Transaccion de Plan de Cuentas'
-        context['title'] = 'Transaccion de Plan de Cuentas'
+        context['nombre'] = 'Transaccion de Plan de Cuentas Empresa PSM'
+        context['title'] = 'Transaccion de Plan de Cuentas Empresa PSM'
         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
         return context
 
@@ -517,8 +517,8 @@ class listarTransaccionPlanBIOView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Transaccion de Plan de Cuentas'
-        context['title'] = 'Transaccion de Plan de Cuentas'
+        context['nombre'] = 'Transaccion de Plan de Cuentas Empresa BIO'
+        context['title'] = 'Transaccion de Plan de Cuentas Empresa BIO'
         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
         return context
 
