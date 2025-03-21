@@ -157,7 +157,10 @@ class EncabezadoCuentasPlanCuenta(models.Model):
     reg_control = models.CharField(max_length=400, verbose_name='Tipo de Registro', default='RT')
 
     def __str__(self):
-        return self.comprobante if self.comprobante else "Sin comprobante"
+        return str(self.codigo)
+
+    # def __str__(self):
+    #     return str(self.comprobante) if self.comprobante else "Sin comprobante"
         # return str(self.fecha) if self.fecha else 'Sin fecha'
 
     def toJSON(self):
