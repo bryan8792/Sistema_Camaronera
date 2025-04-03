@@ -41,7 +41,7 @@ function mayor_list() {
             type: 'POST',
             data: {
                 'action': 'searchdata',
-                'empresa': "PSM"
+                'empresa': "BIO"
             },
             dataSrc: ""
         },

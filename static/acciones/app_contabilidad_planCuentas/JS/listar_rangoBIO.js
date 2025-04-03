@@ -14,7 +14,7 @@ var params = {
             'end_date': date_now,
             'desde_rang': desde_rang,
             'hasta_rang': hasta_rang,
-            'empresa': "PSM",
+            'empresa': "BIO",
         };
 
         if (date_range !== null && (desde_rang > 0 && hasta_rang > 0)) {
@@ -399,7 +399,7 @@ function generate_report() {
         'end_date': date_now,
         'desde_rang': desde_rang,
         'hasta_rang': hasta_rang,
-        'empresa': "PSM",
+        'empresa': "BIO",
     };
 
     if (date_range !== null && (desde_rang > 0 && hasta_rang > 0)) {

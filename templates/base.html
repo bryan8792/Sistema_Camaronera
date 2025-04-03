@@ -66,11 +66,7 @@
             {% comment %}<li class="nav-item d-none d-sm-inline-block">
                 <a href="#" class="nav-link"><strong>Contact</strong></a>
             </li>{% endcomment %}
-
-
-
         </ul>
-
 
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
@@ -119,7 +115,6 @@
                     </a>
                 </div>
             </li>
-
         </ul>
     </nav>
 
@@ -489,16 +484,27 @@
                                         </li>
                                     </ul>
                                 </li>
-                                <li class="nav-item">
-                                    <a href="{% url 'app_planCuentas:listar_mayorPlan' %}" class="nav-link"><i
-                                            class="fa fa-book nav-icon"></i>
-                                        <p>Mayores</p></a>
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-book nav-icon"></i>
+                                        <p>Mayores<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_bio' %}" class="nav-link">
+                                                <i class="fa fa-book-reader nav-icon"></i>
+                                                <p>Mayores de BIO</p></a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_psm' %}" class="nav-link">
+                                                <i class="fa fa-book-reader nav-icon"></i>
+                                                <p>Mayores de PSM</p></a>
+                                        </li>
+                                    </ul>
                                 </li>
-{#                                <li class="nav-item">#}
-{#                                    <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}" class="nav-link"><i#}
-{#                                            class="fa fa-book nav-icon"></i>#}
-{#                                        <p>Diario General PSM</p></a>#}
-{#                                </li>#}
+{% comment %}                                <li class="nav-item">
+                                    <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}" class="nav-link"><i
+                                            class="fa fa-book nav-icon"></i>
+                                        <p>Diario General PSM</p></a>
+                                </li>{% endcomment %}
                                 <li class="nav-item has-treeview">
                                     <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
                                         <p>Diario General<i class="right fas fa-angle-left"></i></p></a>
