@@ -991,14 +991,17 @@ class listarMayorPlanView(ListView):
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                detallecuenta = DetalleCuentasPlanCuenta.objects.all().order_by('cuenta__codigo')
+                empresa = request.POST['empresa']
+                print('empresa')
+                print(empresa)
+                detallecuenta = DetalleCuentasPlanCuenta.objects.filter(cuenta__empresa__siglas__exact=empresa).order_by('cuenta__codigo')
                 for i in detallecuenta:
                     data.append(i.toJSON())
 
             elif action == 'searchdataplan':
                 print('llego a search data plan')
                 data = []
-                for i in PlanCuenta.objects.all().order_by('codigo'):
+                for i in PlanCuenta.objects.filter(empresa__siglas__exact='PSM').order_by('codigo'):
                     item = i.toJSON()
                     item['codigo'] = i.codigo
                     item['text'] = i.get_name()
@@ -1044,11 +1047,15 @@ class listarMayorPlanView(ListView):
                 end_date = request.POST.get('end_date', '')
                 desde_rang = request.POST.get('desde_rang', '')
                 hasta_rang = request.POST.get('hasta_rang', '')
+                empresa = request.POST['empresa']
+                print('empresa')
+                print(empresa)
                 search = DetalleCuentasPlanCuenta.objects.all()
                 if len(start_date) and len(end_date):
                     search = search.filter(
                         encabezadocuentaplan__fecha__range=[start_date, end_date],
                         cuenta__codigo__range=[desde_rang, hasta_rang],
+                        cuenta__empresa__siglas__exact=empresa,
                     )
                 for i in search:
                     data.append(i.toJSON())
@@ -1061,10 +1068,110 @@ class listarMayorPlanView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Libro Mayor'
-        context['title'] = 'Libro Mayor'
+        context['nombre'] = 'Libro Mayor Empresa PSM'
+        context['title'] = 'Libro Mayor Empresa PSM'
         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
         return context
+
+
+# LIBRO MAYOR
+class listarMayorPlanViewBIO(ListView):
+    model = DetalleCuentasPlanCuenta
+    template_name = 'app_contabilidad_planCuentas/transaccion_Plan/mayorizacion/mayorizacionPlan_listarBIO.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = []
+                empresa = request.POST['empresa']
+                print('empresa')
+                print(empresa)
+                detallecuenta = DetalleCuentasPlanCuenta.objects.filter(cuenta__empresa__siglas__exact=empresa).order_by('cuenta__codigo')
+                for i in detallecuenta:
+                    data.append(i.toJSON())
+
+            elif action == 'searchdataplan':
+                print('llego a search data plan')
+                data = []
+                for i in PlanCuenta.objects.filter(empresa__siglas__exact='BIO').order_by('codigo'):
+                    item = i.toJSON()
+                    item['codigo'] = i.codigo
+                    item['text'] = i.get_name()
+                    data.append(item)
+            # elif action == 'search_plan':
+            #     print('LLEGO A SEARCH PLAN')
+            #     data = []
+            #     term = request.POST['term'].strip()
+            #     queryset = PlanCuenta.objects.filter(codigo__icontains=term)
+            #     for i in queryset:
+            #         item = i.toJSON()
+            #         item['codigo'] = i.codigo
+            #         item['text'] = i.nombre
+            #         data.append(item)
+            #
+            # elif action == 'search_autocomplete':
+            #     print('LLEGO A SEARCH AUTOCOMPLETE')
+            #     data = []
+            #     term = request.POST['term']
+            #     print('se extrajo parametro de term')
+            #     print(term)
+            #     data.append({'codigo': term, 'text': term})
+            #     plan_detail = PlanCuenta.objects.filter(Q(nombre__icontains=term))[0:50]
+            #     for i in plan_detail:
+            #         item = i.toJSON()
+            #         data.append(item)
+            #
+            # elif action == 'search_autocomplete':
+            #     data = []
+            #     ids_exclude = json.loads(request.POST['ids'])
+            #     term = request.POST['term'].strip()
+            #     data.append({'codigo': term, 'text': term})
+            #     plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
+            #     for i in plan_detail[0:50]:
+            #         item = i.toJSON()
+            #         item['codigo'] = i.codigo
+            #         item['text'] = i.nombre
+            #         data.append(item)
+
+            elif action == 'search_report':
+                data = []
+                start_date = request.POST.get('start_date', '')
+                end_date = request.POST.get('end_date', '')
+                desde_rang = request.POST.get('desde_rang', '')
+                hasta_rang = request.POST.get('hasta_rang', '')
+                empresa = request.POST['empresa']
+                print('empresa')
+                print(empresa)
+                search = DetalleCuentasPlanCuenta.objects.all()
+                if len(start_date) and len(end_date):
+                    search = search.filter(
+                        encabezadocuentaplan__fecha__range=[start_date, end_date],
+                        cuenta__codigo__range=[desde_rang, hasta_rang],
+                        cuenta__empresa__siglas__exact=empresa,
+                    )
+                for i in search:
+                    data.append(i.toJSON())
+
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Libro Mayor Empresa BIO'
+        context['title'] = 'Libro Mayor Empresa BIO'
+        context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
+        return context
+
 
 # BALANCE PLAN
 # class listarBalancePlanView(ListView):

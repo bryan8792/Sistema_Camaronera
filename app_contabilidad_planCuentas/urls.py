@@ -42,7 +42,8 @@ urlpatterns = [
     # path('transaccion/editar/<int:pk>/', editarTransaccionPlanView.as_view(), name='editar_transaccionPlan'),
 
     # REQUISITOS PARA EL MODULO TRANSACCION DEL PLAN DE CUENTAS
-    path('mayorizacion/listar/', listarMayorPlanView.as_view(), name='listar_mayorPlan'),
+    path('mayorizacion_psm/listar/', listarMayorPlanView.as_view(), name='listar_mayorPlan_psm'),
+    path('mayorizacion_bio/listar/', listarMayorPlanViewBIO.as_view(), name='listar_mayorPlan_bio'),
 
     path('diario_acumulado_psm/', DiarioGeneralAcumuladoPSMView.as_view(), name='diario_general_acumulado_psm'),
     path('diario_acumulado_bio/', DiarioGeneralAcumuladoBIOView.as_view(), name='diario_general_acumulado_bio'),
