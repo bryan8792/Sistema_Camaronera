@@ -67,160 +67,49 @@
 
             <div class="col-lg-12">
                 <div class="card">
-                    <div class="card-header border-0">
-                        <div class="d-flex justify-content-between">
-                            <h3 class="card-title">Control de Sistema PSM-BIO</h3>
+                    <br>
+                    <div class="card-header text-center" style="text-align: center">
+                        <div class="text-center mb-4">
+                            <h2 class="text-info"><b>Seleccione una Empresa:</b></h2>
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex">
-                            <p class="d-flex flex-column">
-                                <span class="text-bold text-lg">Desarrollo</span>
-                                <span>Porcentaje (%)</span>
-                            </p>
 
-                            <p class="ml-auto d-flex flex-column text-right">
-                                <span class="text-success">
-                                    <i class="fas fa-arrow-up"></i> 33.1%
-                                </span>
-                                <span class="text-muted">Since last month</span>
-                            </p>
+                        <div class="row justify-content-center">
+
+                            <div class="col-md-5">
+                                <div class="card empresa-card" data-empresa="psm" style="border: 2px solid #0099cc; border-radius: 15px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                                    <div class="card-body text-center">
+                                        <img src="{% static 'img/img_empresa/PSM.png' %}">
+                                        <hr>
+                                        <h4 class="text-dark"><b>Empresa PSM</b></h4>
+                                        {% comment %}<p class="text-dark">Escuela de Posgrado</p>{% endcomment %}
+                                        <div class="mt-3">
+                                            <h5 class="text-dark">Industria Pesquera San Miguel</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <div class="card empresa-card" data-empresa="bio" style="border: 2px solid #0099cc; border-radius: 15px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                                    <div class="card-body text-center">
+                                        <img src="{% static 'img/img_empresa/BIO.png' %}">
+                                        <hr>
+                                        <h4 class="text-dark"><b>Empresa BIO</b></h4>
+                                        {% comment %}<p class="text-dark">LA UNIVERSIDAD EN INTERNET</p>{% endcomment %}
+                                        <div class="mt-3">
+                                            <h5 class="text-dark">Empresa de Produccion Bioacuática Biocascajal</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="position-relative mb-4">
-                            <canvas id="sales-chart" height="300"></canvas>
-                        </div>
-
-                        <div class="d-flex flex-row justify-content-end">
-                            <span class="mr-2">
-                                <i class="fas fa-square text-primary"></i> Valor
-                            </span>
-
-                            <span>
-                                <i class="fas fa-square text-gray"></i> Referencia
-                            </span>
-
-                        </div>
                     </div>
                 </div>
             </div>
-            <!-- /.card -->
 
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Dashboard de Seguimiento Mes a Mes</h5>
-
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown">
-                                    <i class="fas fa-wrench"></i>
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <a href="#" class="dropdown-item">Action</a>
-                                    <a href="#" class="dropdown-item">Another action</a>
-                                    <a href="#" class="dropdown-item">Something else here</a>
-                                    <a class="dropdown-divider"></a>
-                                    <a href="#" class="dropdown-item">Separated link</a>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- /.card-header -->
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <p class="text-center">
-                                    <strong>TOTAL DE SEGUIMIENTO</strong>
-                                </p>
-
-                                <div class="chart">
-                                    <!-- Sales Chart Canvas -->
-                                    <canvas id="areaChart" height="180" style="height: 250px;"></canvas>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <p class="text-center">
-                                    <strong>PORCENTAJE</strong>
-                                </p>
-                                <div class="progress-group">
-                                    Dato 1
-                                    <span class="float-right"><b>160</b>/200</span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-primary" style="width: 80%"></div>
-                                    </div>
-                                </div>
-
-                                <div class="progress-group">
-                                    Dato 2
-                                    <span class="float-right"><b>310</b>/400</span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-danger" style="width: 75%"></div>
-                                    </div>
-                                </div>
-
-                                <div class="progress-group">
-                                    <span class="progress-text">Dato 3</span>
-                                    <span class="float-right"><b>480</b>/800</span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-success" style="width: 60%"></div>
-                                    </div>
-                                </div>
-
-                                <div class="progress-group">
-                                    Dato 4
-                                    <span class="float-right"><b>250</b>/500</span>
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-warning" style="width: 50%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                        <span class="description-percentage text-success">
-                                            <i class="fas fa-caret-up"></i> 17%</span>
-                                    <h5 class="description-header">$35,210.43</h5>
-                                    <span class="description-text">TOTAL REVENUE</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                        <span class="description-percentage text-warning"><i
-                                                class="fas fa-caret-left"></i> 0%</span>
-                                    <h5 class="description-header">$10,390.90</h5>
-                                    <span class="description-text">TOTAL COST</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                        <span class="description-percentage text-success"><i
-                                                class="fas fa-caret-up"></i> 20%</span>
-                                    <h5 class="description-header">$24,813.53</h5>
-                                    <span class="description-text">TOTAL PROFIT</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block">
-                                        <span class="description-percentage text-danger"><i
-                                                class="fas fa-caret-down"></i> 18%</span>
-                                    <h5 class="description-header">1200</h5>
-                                    <span class="description-text">GOAL COMPLETIONS</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -231,5 +120,75 @@
     <script src="{% static 'acciones/app_index/js/Control_Sistema_PSM_BIO.js' %}"></script>
     <script src="{% static 'acciones/app_index/js/Dashboard_Seguimiento_Mes.js' %}"></script>
 
-{% endblock %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener todas las tarjetas de empresa
+            const empresaCards = document.querySelectorAll('.empresa-card');
 
+            // Añadir evento de clic a cada tarjeta
+            empresaCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Obtener el tipo de empresa (psm o bio)
+                    const empresa = this.getAttribute('data-empresa');
+
+                    // Actualizar el sidebar según la empresa seleccionada
+                    actualizarSidebar(empresa);
+
+                    // Si también quieres redireccionar después de actualizar el sidebar
+                    if (empresa === 'psm') {
+                        window.location.href = "{% url 'app_stock:listar_stock_psm' %}";
+                    } else if (empresa === 'bio') {
+                        window.location.href = "{% url 'app_stock:listar_stock_bio' %}";
+                    }
+                });
+            });
+
+            // Función para actualizar el sidebar según la empresa seleccionada
+            function actualizarSidebar(empresa) {
+                // Guardar la selección en localStorage para mantenerla entre páginas
+                localStorage.setItem('empresaSeleccionada', empresa);
+
+                // Enviar la selección al servidor mediante una petición AJAX
+                fetch('/actualizar-sidebar/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ empresa: empresa })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Sidebar actualizado:', data);
+                })
+                .catch(error => {
+                    console.error('Error al actualizar sidebar:', error);
+                });
+            }
+
+            // Función para obtener el token CSRF
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Verificar si hay una empresa seleccionada previamente en localStorage
+            const empresaGuardada = localStorage.getItem('empresaSeleccionada');
+            if (empresaGuardada) {
+                // Aplicar la selección guardada al cargar la página
+                actualizarSidebar(empresaGuardada);
+            }
+        });
+    </script>
+
+{% endblock %}

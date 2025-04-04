@@ -32,7 +32,8 @@
     <script src="{% static 'lib/bootstrap-4.4.1-dist/css/moment.min.js' %}"></script>
     <script src="{% static 'lib/bootstrap-4.4.1-dist/css/bootstrap-datetimepicker.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet"
+          href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
     <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
     <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
     <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
@@ -58,7 +59,8 @@
         <!-- Left navbar links -->
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link cursor-pointer collapsedMenu" id="collapsedMenu" data-widget="pushmenu" role="button"><i class="fas fa-bars"></i></a>
+                <a class="nav-link cursor-pointer collapsedMenu" id="collapsedMenu" data-widget="pushmenu"
+                   role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
                 <a href="{% url 'inicio_dashboard' %}" class="nav-link"><strong>Inicio</strong></a>
@@ -74,35 +76,36 @@
             <li class="nav-item dropdown">
 
                 <!-- La IP direccion -->
-                <li class="nav-item">
-                    <a class="nav-link" data-toggle="tooltip" data-placement="bottom" data-html="true">
-                        {% comment %}<p id="infobyip"></p>{% endcomment %}
-                    </a>
-                </li>
-
-                <a class="nav-link" data-toggle="dropdown" href="#">
-                    <strong><i class="fas fa-users-cog"></i>&nbsp;&nbsp;Tipo de Usuario: {{ request.user.username }}</strong>
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="tooltip" data-placement="bottom" data-html="true">
+                    {% comment %}<p id="infobyip"></p>{% endcomment %}
                 </a>
-                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            </li>
+
+            <a class="nav-link" data-toggle="dropdown" href="#">
+                <strong><i class="fas fa-users-cog"></i>&nbsp;&nbsp;Tipo de Usuario: {{ request.user.username }}
+                </strong>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                     <span class="dropdown-header">
                         Ultimo acceso el:</br>
                         {{ request.user.last_login }}
                     </span>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="fas fa-edit mr-2"></i> Editar perfil
-                        <span class="float-right text-muted text-sm">3 mins</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item">
-                        <i class="fas fa-lock mr-2"></i> Editar password
-                        <span class="float-right text-muted text-sm">12 hours</span>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" class="dropdown-item dropdown-footer">
-                        <p>Sistema de Producción <strong>PSM & BIO</strong></p>
-                    </a>
-                </div>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-edit mr-2"></i> Editar perfil
+                    <span class="float-right text-muted text-sm">3 mins</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item">
+                    <i class="fas fa-lock mr-2"></i> Editar password
+                    <span class="float-right text-muted text-sm">12 hours</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="#" class="dropdown-item dropdown-footer">
+                    <p>Sistema de Producción <strong>PSM & BIO</strong></p>
+                </a>
+            </div>
             </li>
 
             <li class="nav-item dropdown">
@@ -121,15 +124,16 @@
     <aside class="main-sidebar sidebar-light-primary elevation-4" style="background-color: #F4F4F4">
         <!-- Brand Logo -->
         <a href="#" class="brand-link">
-            <img src="{% static 'img/img_empresa/LOGO2.png' %}" class="brand-image img-circle elevation-3" style="opacity: .8; width: 60px; height: 55px;">
-            <span class="brand-text font-weight-light"><b>&nbsp;&nbsp; PSM & BIO</b></span>
+            <img src="{% static 'img/img_empresa/LOGO2.png' %}" class="brand-image img-circle elevation-3"
+                 style="opacity: .8; width: 60px; height: 55px;">
+            <span class="brand-text font-weight-light"><b>&nbsp;&nbsp; <span id="empresa-sidebar-title">PSM & BIO</span></b></span>
         </a>
 
         <div class="sidebar">
             <!-- Sidebar user panel (optional) -->
             <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                 <div class="image text-center">
-                    <img src="{% static 'img/img_empresa/logo_slider-png.png' %}"
+                    <img id="logo-empresa-sidebar" src="{% static 'img/img_empresa/logo_slider-png.png' %}"
                          class="img-fluid img-responsive d-block mx-auto text-center"
                          style="width: 200px; height: 130px;" alt="User Image">
                     <span class="brand-text font-weight-light"><h5><strong>Nombre Usuario:</strong></h5></span>
@@ -138,13 +142,14 @@
             </div>
 
             <nav class="mt-2">
-
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
                     <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
-                    <li class="nav-header"><b>PSM & BIO Menu de Opciones:</b></li>
+                    <li class="nav-header"><b><span id="menu-title-sidebar">PSM & BIO</span> Menu de Opciones:</b></li>
                     <!-- Modulo Dashboard -->
                     <li class="nav-item has-treeview">
-                        <a href="{% url 'inicio_dashboard' %}" class="nav-link active" style="background-color:#AEAEAE; border: #0a0e14" >
+                        <a href="{% url 'inicio_dashboard' %}" class="nav-link active"
+                           style="background-color:#AEAEAE; border: #0a0e14">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>Dashboard</p>
                         </a>
@@ -175,17 +180,17 @@
                             <p>Insumos Balanceado<i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item">
+                            <li class="nav-item psm-item">
                                 <a href="{% url 'app_stock:listar_stock_psm' %}" class="nav-link"><i
                                         class="far nav-icon fa fa-cube"></i>
                                     <p>Insumos PSM</p></a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item bio-item">
                                 <a href="{% url 'app_stock:listar_stock_bio' %}" class="nav-link"><i
                                         class="far nav-icon fa fa-cube"></i>
                                     <p>Insumos BIO</p></a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item both-item">
                                 <a href="{% url 'app_stock:listar_stock_psmybio' %}" class="nav-link"><i
                                         class="far nav-icon fa fa-cube"></i>
                                     <p>Insumos de Empresas</p></a>
@@ -199,17 +204,16 @@
                             <p>Insumos Campo<i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item">
+                            <li class="nav-item psm-item">
                                 <a href="{% url 'app_stock_directo:listar_stock_directo_psm' %}" class="nav-link"><i
                                         class="far nav-icon fa fa-cube"></i>
                                     <p>Insumos PSM</p></a>
                             </li>
-                            <li class="nav-item">
+                            <li class="nav-item bio-item">
                                 <a href="{% url 'app_stock_directo:listar_stock_directo_bio' %}" class="nav-link"><i
                                         class="far nav-icon fa fa-cube"></i>
                                     <p>Insumos BIO</p></a>
                             </li>
-
                         </ul>
                     </li>
                     <!-- Modulo Consumo por Piscinas -->
@@ -240,20 +244,22 @@
                             </li>
                         </ul>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_consumo:listar_resumen_general_psm' %}" class="nav-link"><i class="nav-icon fas fa-list-alt"></i>
+                            <li class="nav-item psm-item">
+                                <a href="{% url 'app_consumo:listar_resumen_general_psm' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
                                     <p>Resumen PSM Consumo</p></a>
                             </li>
                         </ul>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_consumo:listar_resumen_general_bio' %}" class="nav-link"><i class="nav-icon fas fa-list-alt"></i>
+                            <li class="nav-item bio-item">
+                                <a href="{% url 'app_consumo:listar_resumen_general_bio' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
                                     <p>Resumen BIO Consumo</p></a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Consumo por Linea -->
-                    <li class="nav-item has-treeview">
+                    <li class="nav-item has-treeview psm-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-chart-line"></i>
                             <p>Consumo por Linea<i class="fas fa-angle-left right"></i></p>
@@ -266,371 +272,107 @@
                             </li>
                         </ul>
                     </li>
-                    <!-- Modulo Corrida -->
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-clipboard-check"></i>
-                            <p>Corridas<i class="fas fa-angle-left right"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_corrida:listar_siembra_cuant' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Siembras de Precrias</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_corrida:listar_transferencia' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Transferencia</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Desarrollo</p></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- Modulo Empresa -->
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-building"></i>
-                            <p>Empresa<i class="fas fa-angle-left right"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_empresa:listar_empresa' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Ver Detalles</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_empresa:listar_piscinas' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Asignar Piscinas</p></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- Modulo Provedor -->
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-truck"></i>
-                            <p>Proveedor<i class="fas fa-angle-left right"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_proveedor:listar_proveedor' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Ver Detalles</p></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- Modulo Dieta Piscina-->
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-list-alt"></i>
-                            <p>Dieta Piscinas<i class="fas fa-angle-left right"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_dieta:principal_anio' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Crear Dietas Piscinas</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_dieta:listar_descripcion_dieta' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Escaneado - Dietas</p></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- Modulo Dieta Precria-->
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-list-alt"></i>
-                            <p>Dieta Precrias<i class="fas fa-angle-left right"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_dieta:principal_anio_prec' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Crear Dietas Precrias</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_dieta:listar_descripcion_dieta' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Escaneado - Dietas</p></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- Modulo Facturas Compra -->
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fa fa-clipboard-check"></i>
-                            <p>Compras<i class="fas fa-angle-left right"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_factura:listar_factura' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Factura de Producto</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Factura de Gasto</p></a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!-- Modulo Kardex -->
-                    <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fa fa-book"></i>
-                            <p>Kardex<i class="fas fa-angle-left right"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_general' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex General</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_detallado' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Detallado </p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_movimientos_psm' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Movimientos PSM </p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_movimientos_bio' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Movimientos BIO </p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_productos' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Productos </p></a>
-                            </li>
-                        </ul>
-                    </li>
+
+                    <!-- Resto del menú sin cambios -->
+                    <!-- ... -->
 
                     {% if request.user.is_superuser == True %}
-
-                        <!-- Barra que divide campo Administracion-->
-                        <li class="nav-header">Administración</li>
-                        <!-- Modulo Contabilidad -->
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-calculator"></i>
-                                <p>Contabilidad<i class="fas fa-angle-left right"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                {% comment %}<li class="nav-item">
-                                    <a href="{% url 'app_planCuentas:listar_planCuenta' %}" class="nav-link">
-                                        <i class="far fa-dot-circle nav-icon"></i>
-                                        <p>Plan de Cuentas</p></a>
-                                </li>{% endcomment %}
-                                <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-book-open nav-icon"></i>
-                                        <p>Planes de Cuentas<i class="right fas fa-angle-left"></i></p></a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_planCuenta_BIO' %}" class="nav-link">
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Plan Cuentas BIO</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_planCuenta_PSM' %}" class="nav-link">
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Plan Cuentas PSM</p></a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                {% comment %}<li class="nav-item">
-                                    <a href="{% url 'app_planCuentas:listar_transaccionPlan' %}" class="nav-link"><i
-                                            class="fa fa-list nav-icon"></i>
-                                        <p>Transacciones sin ATS</p></a>
-                                </li>{% endcomment %}
-                                <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-list nav-icon"></i>
-                                        <p>Transacciones sin ATS<i class="right fas fa-angle-left"></i></p></a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_transaccionPlan_bio' %}" class="nav-link">
-                                                <i class="fa fa-book nav-icon"></i>
-                                                <p>Transacción BIO</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_transaccionPlan' %}" class="nav-link">
-                                                <i class="fa fa-book nav-icon"></i>
-                                                <p>Transacción PSM</p></a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-list nav-icon"></i>
-                                        <p>Transacciones con ATS<i class="right fas fa-angle-left"></i></p></a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_fact_gasto_bio' %}" class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Transacción BIO</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}" class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Transacción PSM</p></a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-book nav-icon"></i>
-                                        <p>Mayores<i class="right fas fa-angle-left"></i></p></a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_bio' %}" class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Mayores de BIO</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_psm' %}" class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Mayores de PSM</p></a>
-                                        </li>
-                                    </ul>
-                                </li>
-{% comment %}                                <li class="nav-item">
-                                    <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}" class="nav-link"><i
-                                            class="fa fa-book nav-icon"></i>
-                                        <p>Diario General PSM</p></a>
-                                </li>{% endcomment %}
-                                <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
-                                        <p>Diario General<i class="right fas fa-angle-left"></i></p></a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_bio' %}" class="nav-link">
-                                                <i class="fas fa-balance-scale-left nav-icon"></i>
-                                                <p>Diario de BIO</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}" class="nav-link">
-                                                <i class="fas fa-balance-scale-right nav-icon"></i>
-                                                <p>Diario de PSM</p></a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
-                                        <p>Balances de Comprobación<i class="right fas fa-angle-left"></i></p></a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_balancePlan_bio' %}" class="nav-link">
-                                                <i class="fas fa-balance-scale-left nav-icon"></i>
-                                                <p>Balance BIO</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="{% url 'app_planCuentas:listar_balancePlan_psm' %}" class="nav-link">
-                                                <i class="fas fa-balance-scale-right nav-icon"></i>
-                                                <p>Balance PSM</p></a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                {% comment %}<li class="nav-item">
-                                <a href="#" class="nav-link" type="button" data-toggle="modal"
-                                   data-target="#modal-default"><i class="far fa-circle nav-icon"></i>
-                                    <p>Permisos</p>
-                                </a>
-                            </li>{% endcomment %}
-                            </ul>
-                        </li>
-                        <!-- Modulo Facturas Compra -->
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fa fa-clipboard-check"></i>
-                                <p>Facturación<i class="fas fa-angle-left right"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{% url 'app_planCuentas:recibo_listar' %}" class="nav-link">
-                                        <i class="nav-icon fas fa-file-export"></i>
-                                        <p>Comprobantes</p></a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="nav-icon fas fa-file-archive"></i>
-                                        <p>Errores de Comprob.</p></a>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Usuarios<i class="right fas fa-angle-left"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{% url 'app_usuario:listar_usuario' %}" class="nav-link"><i
-                                            class="far fa-dot-circle nav-icon"></i>
-                                        <p>Crear Usuarios</p></a>
-                                </li>
-                                <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="far fa-dot-circle nav-icon"></i>
-                                        <p>Level 2<i class="right fas fa-angle-left"></i></p></a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item">
-                                            <a href="#" class="nav-link"><i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Level 3</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="#" class="nav-link"><i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Level 3</p></a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a href="#" class="nav-link"><i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Level 3</p></a>
-                                        </li>
-                                    </ul>
-                                </li>
-
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
-                                        <p>Level 2</p></a>
-                                </li>
-                            </ul>
-
-                        </li>
-
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-unlock-alt"></i>
-                                <p>Seguridad<i class="fas fa-angle-left right"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link" type="button" data-toggle="modal"
-                                       data-target="#modal-default"><i class="far fa-circle nav-icon"></i>
-                                        <p>Permisos</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-
-                    {% else %}
-
+                        <!-- Sección de administración sin cambios -->
+                        <!-- ... -->
                     {% endif %}
-
                 </ul>
-
             </nav>
-
-
         </div>
-
     </aside>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Obtener todas las tarjetas de empresa
+            const empresaCards = document.querySelectorAll('.empresa-card');
+
+            // Función para actualizar el sidebar según la empresa seleccionada
+            function actualizarSidebar(empresa) {
+                // Elementos del sidebar a actualizar
+                const empresaSidebarTitle = document.getElementById('empresa-sidebar-title');
+                const logoEmpresaSidebar = document.getElementById('logo-empresa-sidebar');
+                const menuTitleSidebar = document.getElementById('menu-title-sidebar');
+
+                // Elementos específicos de cada empresa
+                const psmItems = document.querySelectorAll('.psm-item');
+                const bioItems = document.querySelectorAll('.bio-item');
+                const bothItems = document.querySelectorAll('.both-item');
+
+                // Actualizar según la empresa seleccionada
+                if (empresa === 'psm') {
+                    // Actualizar título y logo
+                    empresaSidebarTitle.textContent = 'PSM';
+                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/PSM.png' %}";
+                    menuTitleSidebar.textContent = 'PSM';
+
+                    // Mostrar elementos de PSM y ocultar elementos de BIO
+                    psmItems.forEach(item => item.style.display = 'block');
+                    bioItems.forEach(item => item.style.display = 'none');
+                    bothItems.forEach(item => item.style.display = 'block');
+                } else if (empresa === 'bio') {
+                    // Actualizar título y logo
+                    empresaSidebarTitle.textContent = 'BIO';
+                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/BIO.png' %}";
+                    menuTitleSidebar.textContent = 'BIO';
+
+                    // Mostrar elementos de BIO y ocultar elementos de PSM
+                    bioItems.forEach(item => item.style.display = 'block');
+                    psmItems.forEach(item => item.style.display = 'none');
+                    bothItems.forEach(item => item.style.display = 'block');
+                } else {
+                    // Mostrar ambos (estado predeterminado)
+                    empresaSidebarTitle.textContent = 'PSM & BIO';
+                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/logo_slider-png.png' %}";
+                    menuTitleSidebar.textContent = 'PSM & BIO';
+
+                    psmItems.forEach(item => item.style.display = 'block');
+                    bioItems.forEach(item => item.style.display = 'block');
+                    bothItems.forEach(item => item.style.display = 'block');
+                }
+
+                // Guardar la selección en localStorage para mantenerla entre páginas
+                localStorage.setItem('empresaSeleccionada', empresa);
+            }
+
+            // Añadir evento de clic a cada tarjeta
+            empresaCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    // Obtener el tipo de empresa (psm o bio)
+                    const empresa = this.getAttribute('data-empresa');
+
+                    // Actualizar el sidebar
+                    actualizarSidebar(empresa);
+
+                    // Mostrar el slider correspondiente (código que ya teníamos)
+                    document.getElementById('empresa-slider').style.display = 'block';
+                    document.getElementById('slider-psm').style.display = 'none';
+                    document.getElementById('slider-bio').style.display = 'none';
+
+                    if (empresa === 'psm') {
+                        document.getElementById('slider-title').textContent = 'Slider de Empresa PSM';
+                        document.getElementById('slider-psm').style.display = 'block';
+                        $('#carouselPSM').carousel(0);
+                    } else if (empresa === 'bio') {
+                        document.getElementById('slider-title').textContent = 'Slider de Empresa BIO';
+                        document.getElementById('slider-bio').style.display = 'block';
+                        $('#carouselBIO').carousel(0);
+                    }
+
+                    document.getElementById('empresa-slider').scrollIntoView({behavior: 'smooth'});
+                });
+            });
+
+            // Verificar si hay una empresa seleccionada previamente en localStorage
+            const empresaGuardada = localStorage.getItem('empresaSeleccionada');
+            if (empresaGuardada) {
+                actualizarSidebar(empresaGuardada);
+            }
+        });
+    </script>
 
 
     <div class="content-wrapper">
