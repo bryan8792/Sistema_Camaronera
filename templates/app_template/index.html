@@ -148,6 +148,48 @@
                 // Guardar la selección en localStorage para mantenerla entre páginas
                 localStorage.setItem('empresaSeleccionada', empresa);
 
+                // Elementos del sidebar a actualizar
+                const empresaSidebarTitle = document.getElementById('empresa-sidebar-title');
+                const logoEmpresaSidebar = document.getElementById('logo-empresa-sidebar');
+                const menuTitleSidebar = document.getElementById('menu-title-sidebar');
+
+                // Elementos específicos de cada empresa
+                const psmItems = document.querySelectorAll('.psm-item');
+                const bioItems = document.querySelectorAll('.bio-item');
+                const bothItems = document.querySelectorAll('.both-item');
+
+                // Actualizar según la empresa seleccionada
+                if (empresa === 'psm') {
+                    // Actualizar título y logo
+                    if (empresaSidebarTitle) empresaSidebarTitle.textContent = 'PSM';
+                    if (logoEmpresaSidebar) logoEmpresaSidebar.src = "{% static 'img/img_empresa/PSM.png' %}";
+                    if (menuTitleSidebar) menuTitleSidebar.textContent = 'PSM';
+
+                    // Mostrar elementos de PSM y ocultar elementos de BIO
+                    psmItems.forEach(item => item.style.display = 'block');
+                    bioItems.forEach(item => item.style.display = 'none');
+                    bothItems.forEach(item => item.style.display = 'block');
+                } else if (empresa === 'bio') {
+                    // Actualizar título y logo
+                    if (empresaSidebarTitle) empresaSidebarTitle.textContent = 'BIO';
+                    if (logoEmpresaSidebar) logoEmpresaSidebar.src = "{% static 'img/img_empresa/BIO.png' %}";
+                    if (menuTitleSidebar) menuTitleSidebar.textContent = 'BIO';
+
+                    // Mostrar elementos de BIO y ocultar elementos de PSM
+                    bioItems.forEach(item => item.style.display = 'block');
+                    psmItems.forEach(item => item.style.display = 'none');
+                    bothItems.forEach(item => item.style.display = 'block');
+                } else {
+                    // Mostrar ambos (estado predeterminado)
+                    if (empresaSidebarTitle) empresaSidebarTitle.textContent = 'PSM & BIO';
+                    if (logoEmpresaSidebar) logoEmpresaSidebar.src = "{% static 'img/img_empresa/logo_slider-png.png' %}";
+                    if (menuTitleSidebar) menuTitleSidebar.textContent = 'PSM & BIO';
+
+                    psmItems.forEach(item => item.style.display = 'block');
+                    bioItems.forEach(item => item.style.display = 'block');
+                    bothItems.forEach(item => item.style.display = 'block');
+                }
+
                 // Enviar la selección al servidor mediante una petición AJAX
                 fetch('/actualizar-sidebar/', {
                     method: 'POST',
