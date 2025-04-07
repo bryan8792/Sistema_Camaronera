@@ -142,6 +142,7 @@
             </div>
 
             <nav class="mt-2">
+
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                     data-accordion="false">
                     <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
@@ -214,6 +215,7 @@
                                         class="far nav-icon fa fa-cube"></i>
                                     <p>Insumos BIO</p></a>
                             </li>
+
                         </ul>
                     </li>
                     <!-- Modulo Consumo por Piscinas -->
@@ -272,17 +274,344 @@
                             </li>
                         </ul>
                     </li>
-
-                    <!-- Resto del menú sin cambios -->
-                    <!-- ... -->
+                    <!-- Modulo Corrida -->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-clipboard-check"></i>
+                            <p>Corridas<i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'app_corrida:listar_siembra_cuant' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Siembras de Precrias</p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'app_corrida:listar_transferencia' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Transferencia</p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Desarrollo</p></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Modulo Empresa -->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-building"></i>
+                            <p>Empresa<i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'app_empresa:listar_empresa' %}" class="nav-link"><i
+                                        class="far fa-dot-circle nav-icon"></i>
+                                    <p>Ver Detalles</p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'app_empresa:listar_piscinas' %}" class="nav-link"><i
+                                        class="far fa-dot-circle nav-icon"></i>
+                                    <p>Asignar Piscinas</p></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Modulo Provedor -->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-truck"></i>
+                            <p>Proveedor<i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'app_proveedor:listar_proveedor' %}" class="nav-link"><i
+                                        class="far fa-dot-circle nav-icon"></i>
+                                    <p>Ver Detalles</p></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Modulo Dieta Piscina-->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-list-alt"></i>
+                            <p>Dieta Piscinas<i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'app_dieta:principal_anio' %}" class="nav-link"><i
+                                        class="far fa-dot-circle nav-icon"></i>
+                                    <p>Crear Dietas Piscinas</p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'app_dieta:listar_descripcion_dieta' %}" class="nav-link"><i
+                                        class="far fa-dot-circle nav-icon"></i>
+                                    <p>Escaneado - Dietas</p></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Modulo Dieta Precria-->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-list-alt"></i>
+                            <p>Dieta Precrias<i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'app_dieta:principal_anio_prec' %}" class="nav-link"><i
+                                        class="far fa-dot-circle nav-icon"></i>
+                                    <p>Crear Dietas Precrias</p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'app_dieta:listar_descripcion_dieta' %}" class="nav-link"><i
+                                        class="far fa-dot-circle nav-icon"></i>
+                                    <p>Escaneado - Dietas</p></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Modulo Facturas Compra -->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fa fa-clipboard-check"></i>
+                            <p>Compras<i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'app_factura:listar_factura' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Factura de Producto</p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Factura de Gasto</p></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- Modulo Kardex -->
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fa fa-book"></i>
+                            <p>Kardex<i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'app_kardex:listar_kardex_general' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Kardex General</p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'app_kardex:listar_kardex_detallado' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Kardex Detallado </p></a>
+                            </li>
+                            <li class="nav-item psm-item">
+                                <a href="{% url 'app_kardex:listar_kardex_movimientos_psm' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Kardex Movimientos PSM </p></a>
+                            </li>
+                            <li class="nav-item bio-item">
+                                <a href="{% url 'app_kardex:listar_kardex_movimientos_bio' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Kardex Movimientos BIO </p></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'app_kardex:listar_kardex_productos' %}" class="nav-link"><i
+                                        class="nav-icon fas fa-list-alt"></i>
+                                    <p>Kardex Productos </p></a>
+                            </li>
+                        </ul>
+                    </li>
 
                     {% if request.user.is_superuser == True %}
-                        <!-- Sección de administración sin cambios -->
-                        <!-- ... -->
+
+                        <!-- Barra que divide campo Administracion-->
+                        <li class="nav-header">Administración</li>
+                        <!-- Modulo Contabilidad -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-calculator"></i>
+                                <p>Contabilidad<i class="fas fa-angle-left right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                {% comment %}<li class="nav-item">
+                                <a href="{% url 'app_planCuentas:listar_planCuenta' %}" class="nav-link">
+                                    <i class="far fa-dot-circle nav-icon"></i>
+                                    <p>Plan de Cuentas</p></a>
+                            </li>{% endcomment %}
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-book-open nav-icon"></i>
+                                        <p>Planes de Cuentas<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item bio-item">
+                                            <a href="{% url 'app_planCuentas:listar_planCuenta_BIO' %}"
+                                               class="nav-link">
+                                                <i class="far fa-dot-circle nav-icon"></i>
+                                                <p>Plan Cuentas BIO</p></a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a href="{% url 'app_planCuentas:listar_planCuenta_PSM' %}"
+                                               class="nav-link">
+                                                <i class="far fa-dot-circle nav-icon"></i>
+                                                <p>Plan Cuentas PSM</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                {% comment %}<li class="nav-item">
+                                <a href="{% url 'app_planCuentas:listar_transaccionPlan' %}" class="nav-link"><i
+                                        class="fa fa-list nav-icon"></i>
+                                    <p>Transacciones sin ATS</p></a>
+                            </li>{% endcomment %}
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-list nav-icon"></i>
+                                        <p>Transacciones sin ATS<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item bio-item">
+                                            <a href="{% url 'app_planCuentas:listar_transaccionPlan_bio' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-book nav-icon"></i>
+                                                <p>Transacción BIO</p></a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a href="{% url 'app_planCuentas:listar_transaccionPlan' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-book nav-icon"></i>
+                                                <p>Transacción PSM</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-list nav-icon"></i>
+                                        <p>Transacciones con ATS<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item bio-item">
+                                            <a href="{% url 'app_planCuentas:listar_fact_gasto_bio' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-book-reader nav-icon"></i>
+                                                <p>Transacción BIO</p></a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-book-reader nav-icon"></i>
+                                                <p>Transacción PSM</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-book nav-icon"></i>
+                                        <p>Mayores<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item bio-item">
+                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_bio' %}" class="nav-link">
+                                                <i class="fa fa-book-reader nav-icon"></i>
+                                                <p>Mayores de BIO</p></a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_psm' %}" class="nav-link">
+                                                <i class="fa fa-book-reader nav-icon"></i>
+                                                <p>Mayores de PSM</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
+                                        <p>Diario General<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item bio-item">
+                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_bio' %}"
+                                               class="nav-link">
+                                                <i class="fas fa-balance-scale-left nav-icon"></i>
+                                                <p>Diario de BIO</p></a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}"
+                                               class="nav-link">
+                                                <i class="fas fa-balance-scale-right nav-icon"></i>
+                                                <p>Diario de PSM</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
+                                        <p>Balances de Comprobación<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item bio-item">
+                                            <a href="{% url 'app_planCuentas:listar_balancePlan_bio' %}"
+                                               class="nav-link">
+                                                <i class="fas fa-balance-scale-left nav-icon"></i>
+                                                <p>Balance BIO</p></a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a href="{% url 'app_planCuentas:listar_balancePlan_psm' %}"
+                                               class="nav-link">
+                                                <i class="fas fa-balance-scale-right nav-icon"></i>
+                                                <p>Balance PSM</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- Modulo Facturas Compra -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fa fa-clipboard-check"></i>
+                                <p>Facturación<i class="fas fa-angle-left right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{% url 'app_planCuentas:recibo_listar' %}" class="nav-link">
+                                        <i class="nav-icon fas fa-file-export"></i>
+                                        <p>Comprobantes</p></a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">
+                                        <i class="nav-icon fas fa-file-archive"></i>
+                                        <p>Errores de Comprob.</p></a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Usuarios<i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{% url 'app_usuario:listar_usuario' %}" class="nav-link"><i
+                                            class="far fa-dot-circle nav-icon"></i>
+                                        <p>Crear Usuarios</p></a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-unlock-alt"></i>
+                                <p>Seguridad<i class="fas fa-angle-left right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link" type="button" data-toggle="modal"
+                                       data-target="#modal-default"><i class="far fa-circle nav-icon"></i>
+                                        <p>Permisos</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                    {% else %}
+
                     {% endif %}
+
                 </ul>
+
             </nav>
+
+
         </div>
+
     </aside>
 
     <script>
