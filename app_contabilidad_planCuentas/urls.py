@@ -23,9 +23,10 @@ urlpatterns = [
     path('export/excelPSM/', PlanExportExcelPSMView.as_view(), name='plan_export_excel_psm'),
 
     # REQUISITOS PARA EL MODULO TRANSACCION DEL PLAN DE CUENTAS
-    path('transaccion/listar/', listarTransaccionPlanView.as_view(), name='listar_transaccionPlan'),
+    path('transaccionpsm/listar/', listarTransaccionPlanView.as_view(), name='listar_transaccionPlan'),
     path('transaccionbio/listar/', listarTransaccionPlanBIOView.as_view(), name='listar_transaccionPlan_bio'),
     path('transaccion/crear/', crearTransaccionPlanView.as_view(), name='crear_transaccionPlan'),
+    path('transaccionbio/crear/', crearTransaccionPlanBIOView.as_view(), name='crear_transaccionPlan_bio'),
     path('transaccion/editar/<int:pk>/', editarTransaccionPlanView.as_view(), name='editar_transaccionPlan'),
 
     # REQUISITOS PARA EL MODULO TRANSACCION EN FACTURA DE GASTO EN EL PLAN DE CUENTAS

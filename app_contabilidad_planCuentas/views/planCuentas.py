@@ -605,6 +605,89 @@ class crearTransaccionPlanView(CreateView):
         context['det'] = []
         return context
 
+# CREAR TRANSACCIONES DEL PLAN DE CUENTAS
+class crearTransaccionPlanBIOView(CreateView):
+    model = EncabezadoCuentasPlanCuenta
+    form_class = EncabezadoCuentasPlanCuentaForm
+    template_name = 'app_contabilidad_planCuentas/transaccion_Plan/transaccionPlan_crearBIO.html'
+    success_url = reverse_lazy('app_planCuentas:listar_transaccionPlan_bio')
+    url_redirect = success_url
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'search_plan':
+                data = []
+                empresa = request.POST['empresa']
+                print('empresa de search plan')
+                print(empresa)
+                queryset = PlanCuenta.objects.all()
+                ids_exclude = json.loads(request.POST['ids'])
+                queryset = queryset.filter(empresa__siglas=empresa).exclude(id__in=ids_exclude)
+                # if len(ids_exclude):
+                #     queryset = queryset.filter().exclude(id__in=ids_exclude)
+                for i in queryset:
+                    item = i.toJSON()
+                    item['detalle'] = ""
+                    data.append(item)
+
+            elif action == 'search_autocomplete':
+                data = []
+                ids_exclude = json.loads(request.POST['ids'])
+                term = request.POST['term'].strip()
+                data.append({'codigo': term, 'text': term})
+                plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
+                for i in plan_detail[0:50]:
+                    item = i.toJSON()
+                    item['codigo'] = i.codigo
+                    item['text'] = i.nombre
+                    data.append(item)
+
+            elif action == 'create':
+                with transaction.atomic():
+                    items = json.loads(request.POST['items'])
+                    encabezado = EncabezadoCuentasPlanCuenta()
+                    encabezado.codigo = request.POST['codigo']
+                    encabezado.tip_cuenta = request.POST['tip_cuenta']
+                    encabezado.fecha = request.POST['fecha']
+                    encabezado.comprobante = request.POST['comprobante']
+                    encabezado.descripcion = request.POST['descripcion']
+                    encabezado.direccion = request.POST['direccion']
+                    encabezado.empresa_id = request.POST['empresa']
+                    encabezado.save()
+                    for i in items:
+                        cuerpo = DetalleCuentasPlanCuenta()
+                        cuerpo.encabezadocuentaplan_id = encabezado.pk
+                        cuerpo.cuenta_id = int(i['id'])
+                        cuerpo.detalle = i['detalle']
+                        cuerpo.debe = int(i['debe']) if i.get('debe') else 0
+                        cuerpo.haber = int(i['haber']) if i.get('haber') else 0
+                        cuerpo.save()
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = 'el error es : ' + str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Formulario de Registro de Transacción'
+        context['list_url'] = self.success_url
+        context['action'] = 'create'
+        planCuenta = PlanCuenta.objects.filter(parentId=None)
+        context['planCuenta'] = planCuenta
+        planCuenta2 = PlanCuenta.objects.all()
+        context['planCuenta2'] = planCuenta2
+        context['empresa'] = 'BIO'
+        context['det'] = []
+        return context
+
 # EDITAR TRANSACCIONES DEL PLAN DE CUENTAS
 class editarTransaccionPlanView(UpdateView):
     model = EncabezadoCuentasPlanCuenta
