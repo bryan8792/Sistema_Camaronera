@@ -86,7 +86,7 @@ class crearPlanCuentaView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Formulario de Registro de Plan de Cuenta'
+        context['nombre'] = 'Formulario de Registro de Plan de Cuenta Empresa BIO'
         context['action'] = 'add'
         context['list_url'] = self.success_url
         return context
