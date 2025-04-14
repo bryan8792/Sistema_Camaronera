@@ -87,16 +87,16 @@ class Folder(models.Model):
 
 class PlanCuenta(models.Model):
     codigo = models.CharField(max_length=50, default=0)
-    nombre = models.CharField(max_length=150, verbose_name='Nombre de la Cuenta', null=True, blank=True)
+    nombre = models.CharField(max_length=150, verbose_name='Nombre de la Cuenta')
     nivel = models.SmallIntegerField(default=1)
-    tipo_cuenta = models.CharField(max_length=150, verbose_name='Tipo de Cuenta', null=True, blank=True)
+    tipo_cuenta = models.CharField(max_length=150, verbose_name='Tipo de Cuenta')
     estado = models.BooleanField(default=True, verbose_name='Estado ')
     band_deudor = models.BooleanField(default=False)
     band_total = models.BooleanField(default=False, verbose_name='Cuenta de Total')
     band_valida = models.BooleanField(default=False)
     band_gastoDistribuido = models.BooleanField(default=False)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, verbose_name="Empresa ", null=True, blank=True)
-    periodo = models.CharField(max_length=150, verbose_name='Periodo (Año)', null=True, blank=True)
+    periodo = models.CharField(max_length=150, verbose_name='Periodo (Año)')
     parentId = models.ForeignKey('self', db_column='idparentId', null=True, blank=True, on_delete=models.CASCADE,
                                  related_name='idparentId', verbose_name='Cuenta Raiz o Cuenta Padre')
 

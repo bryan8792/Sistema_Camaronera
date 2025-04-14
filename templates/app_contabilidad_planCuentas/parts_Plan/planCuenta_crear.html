@@ -50,6 +50,7 @@
                         <div class="card-body">
 
                             {% csrf_token %}
+                            <input type="hidden" name="action" value="{{ action }}">
 
                             <div class="form-group">
                                 <label for="{{ form.codigo.label }}">{{ form.codigo.label }}:</label>
@@ -153,7 +154,7 @@
 
 {% block scripts %}
 
-    <script type="application/javascript">
+    {% comment %}<script type="application/javascript">
         $(function () {
             $('.btnTest').on('click', function () {
                 $.ajax({
@@ -182,6 +183,40 @@
                 })
             })
         })
+    </script>{% endcomment %}
+
+    <script>
+        $('form').on('submit', function (e) {
+           e.preventDefault();
+           var parameters = $(this).serializeArray();
+           console.log(parameters);
+            $.ajax({
+                url: '{% url 'app_planCuentas:crear_planCuenta_bio' %}',
+                type: 'POST',
+                data: parameters,
+                dataType: 'json'
+            }).done(function (data) {
+                console.log('guardada')
+                {% comment %}Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Información registrada correctamente',
+                    showConfirmButton: false,
+                    timer: 95000
+                });{% endcomment %}
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.log('EXISTE UN ERROR')
+                console.log(textStatus + ' : ' + errorThrown)
+            }).always(function (data) {
+                {% comment %}Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Información registrada correctamente',
+                    showConfirmButton: false,
+                    timer: 95000
+                });{% endcomment %}
+            });
+        });
     </script>
 
 {% endblock %}
