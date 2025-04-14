@@ -84,10 +84,29 @@ class crearPlanCuentaView(CreateView):
     template_name = 'app_contabilidad_planCuentas/parts_Plan/planCuenta_crear.html'
     success_url = reverse_lazy('app_planCuentas:listar_planCuenta_BIO')
 
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'create':
+                form = self.get_form()
+                data = form.save()
+            else:
+                data['error'] = 'No ha ingresado a ninguna opción'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Formulario de Registro de Plan de Cuenta Empresa BIO'
-        context['action'] = 'add'
+        context['action'] = 'create'
         context['list_url'] = self.success_url
         return context
 
