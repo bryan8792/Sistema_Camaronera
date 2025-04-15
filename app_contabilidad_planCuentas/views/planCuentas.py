@@ -30,6 +30,7 @@ from django.db.models.functions import Coalesce
 from datetime import datetime, timedelta
 from decimal import Decimal
 import logging
+from django.forms.models import model_to_dict
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ class crearPlanCuentaView(CreateView):
     form_class = PlanCuentaForm
     template_name = 'app_contabilidad_planCuentas/parts_Plan/planCuenta_crear.html'
     success_url = reverse_lazy('app_planCuentas:listar_planCuenta_BIO')
-
+    url_redirect = success_url
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
@@ -96,7 +97,11 @@ class crearPlanCuentaView(CreateView):
             action = request.POST['action']
             if action == 'create':
                 form = self.get_form()
-                data = form.save()
+                if form.is_valid():
+                    plan = form.save()
+                    data = model_to_dict(plan)
+                else:
+                    data['error'] = form.errors.as_json()
             else:
                 data['error'] = 'No ha ingresado a ninguna opción'
         except Exception as e:
@@ -116,6 +121,30 @@ class actualizarPlanCuentaView(UpdateView):
     form_class = PlanCuentaForm
     template_name = 'app_contabilidad_planCuentas/parts_Plan/planCuenta_crear.html'
     success_url = reverse_lazy('app_planCuentas:listar_planCuenta_BIO')
+    url_redirect = success_url
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'edit':
+                form = self.get_form()
+                if form.is_valid():
+                    plan = form.save()
+                    data = model_to_dict(plan)
+                else:
+                    data['error'] = form.errors.as_json()
+            else:
+                data['error'] = 'No ha ingresado a ninguna opción'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -127,9 +156,21 @@ class actualizarPlanCuentaView(UpdateView):
 # ELIMINAR PLAN DE CUENTAS
 class eliminarPlanCuentaView(DeleteView):
     model = PlanCuenta
-    form_class = PlanCuentaForm
     template_name = 'app_contabilidad_planCuentas/parts_Plan/planCuenta_eliminar.html'
     success_url = reverse_lazy('app_planCuentas:listar_planCuenta_BIO')
+    url_redirect = success_url
+
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            self.object.delete()
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

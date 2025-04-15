@@ -37,6 +37,7 @@
                         <div class="card-body">
 
                             {% csrf_token %}
+                            <input type="hidden" name="action" value="{{ action }}">
 
                             <div class="alert alert-default-danger alert-dismissible" style="text-align: center">
 
@@ -61,7 +62,7 @@
                             <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
                                 <i class="fas fa-check-circle"></i> SI, ACEPTAR
                             </button>
-                            <a href="{% url 'app_proveedor:listar_proveedor' %}" class="btn btn-danger btn-file">
+                            <a href="{{ list_url }}" class="btn btn-danger btn-file">
                                 <i class="fas fa-times"></i> CANCELAR
                             </a>
                         </div>
@@ -81,23 +82,24 @@
 
 {% block scripts %}
 
-    <script type="application/javascript">
-        $(function () {
-            $('.btnTest').on('click', function () {
-                $.ajax({
-                    url: '{% url 'app_planCuentas:listar_planCuenta' %}',
-                    type: 'POST',
-                    data: {id: 1},
-                    dataType: 'json'
-                }).done(function (data) {
+    <script>
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            var parameters = new FormData(this);
+            submit_with_ajax(window.location.pathname, 'Notificación', '¿Esta seguro de eliminar la siguiente cuenta?', parameters, function () {
+                Swal.fire({
+                    title: 'Alerta',
+                    text: 'Registro eliminado correctamente',
+                    icon: 'success',
+                    timer: 2000,
+                    onClose: () => {
+                        location.href = '{{ list_url }}';
+                    }
+                }).then((result) => {
 
-                }).fail(function (data) {
-                    toastr.error('Error verificar por favor')
-                }).always(function (data) {
-                    toastr.info('Procesando datos')
-                })
-            })
-        })
+                });
+            });
+        });
     </script>
 
 {% endblock %}

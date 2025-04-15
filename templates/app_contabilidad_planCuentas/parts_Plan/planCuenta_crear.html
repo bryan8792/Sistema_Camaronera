@@ -102,7 +102,7 @@
 
                         </div>
                         <div class="card-footer navbar-white">
-                            <button type="submit" class="btn btn-primary btn-flat btnTest">
+                            <button type="submit" class="btn btn-primary btn-flat">
                                 <i class="fas fa-save"></i> Guardar registro
                             </button>
                             <a href="{{ list_url }}" class="btn btn-danger btn-file">
@@ -191,19 +191,20 @@
            var parameters = $(this).serializeArray();
            console.log(parameters);
             $.ajax({
-                url: '{% url 'app_planCuentas:crear_planCuenta_bio' %}',
+                url: window.location.pathname,
                 type: 'POST',
                 data: parameters,
                 dataType: 'json'
             }).done(function (data) {
                 console.log('guardada')
-                {% comment %}Swal.fire({
+                Swal.fire({
                     position: 'top-end',
                     icon: 'success',
-                    title: 'Información registrada correctamente',
+                    title: 'Cuenta de Plan creada correctamente',
                     showConfirmButton: false,
-                    timer: 95000
-                });{% endcomment %}
+                    timer: 1500
+                });
+                location.href = '{{ list_url }}';
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.log('EXISTE UN ERROR')
                 console.log(textStatus + ' : ' + errorThrown)
