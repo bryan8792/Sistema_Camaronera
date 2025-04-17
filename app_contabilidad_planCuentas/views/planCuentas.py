@@ -1,4 +1,3 @@
-
 import json
 import os
 from datetime import datetime
@@ -16,7 +15,8 @@ from django.views.generic.base import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from app_contabilidad_planCuentas.forms import PlanCuentaForm, EncabezadoCuentasPlanCuentaForm
-from app_contabilidad_planCuentas.models import PlanCuenta, Folder, EncabezadoCuentasPlanCuenta, DetalleCuentasPlanCuenta
+from app_contabilidad_planCuentas.models import PlanCuenta, Folder, EncabezadoCuentasPlanCuenta, \
+    DetalleCuentasPlanCuenta
 from app_empresa.app_reg_empresa.models import Empresa
 from collections import defaultdict
 from django.views.generic import ListView
@@ -91,6 +91,31 @@ class crearPlanCuentaView(CreateView):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
+    def get_initial(self):
+        initial = super().get_initial()
+        parent_id = self.request.GET.get('parent_id')
+        if parent_id:
+            try:
+                padre = PlanCuenta.objects.get(pk=parent_id)
+                hijos = PlanCuenta.objects.filter(parentId=padre).order_by('codigo')
+                if hijos.exists():
+                    ultimo_codigo = hijos.last().codigo
+                    nuevo_codigo = str(int(ultimo_codigo) + 1).zfill(len(ultimo_codigo))
+                else:
+                    nuevo_codigo = padre.codigo + '01'
+
+                initial['codigo'] = nuevo_codigo
+                initial['parentId'] = padre.id
+
+            except PlanCuenta.DoesNotExist:
+                pass
+
+            siglas = self.request.GET.get('siglas', 'BIO')
+            empresa = Empresa.objects.filter(siglas=siglas).first()
+            if empresa:
+                initial['empresa'] = empresa.id
+        return initial
+
     def post(self, request, *args, **kwargs):
         data = {}
         try:
@@ -113,7 +138,10 @@ class crearPlanCuentaView(CreateView):
         context['nombre'] = 'Formulario de Registro de Plan de Cuenta Empresa BIO'
         context['action'] = 'create'
         context['list_url'] = self.success_url
+        context['codigo_padre'] = self.request.GET.get('codigo_padre', '')
+        context['parent_id'] = self.request.GET.get('parent_id', '')
         return context
+
 
 # ACTUALIZAR PLAN DE CUENTAS
 class actualizarPlanCuentaView(UpdateView):
@@ -151,7 +179,17 @@ class actualizarPlanCuentaView(UpdateView):
         context['nombre'] = 'Actualizar Plan de Cuenta'
         context['action'] = 'edit'
         context['list_url'] = self.success_url
+
+        # Mostrar también el código del padre (si aplica)
+        if self.object.parentId:
+            context['codigo_padre'] = self.object.parentId.codigo
+            context['parent_id'] = self.object.parentId.id
+        else:
+            context['codigo_padre'] = ''
+            context['parent_id'] = ''
+
         return context
+
 
 # ELIMINAR PLAN DE CUENTAS
 class eliminarPlanCuentaView(DeleteView):
@@ -178,6 +216,7 @@ class eliminarPlanCuentaView(DeleteView):
         context['list_url'] = self.success_url
         return context
 
+
 # LISTAR PLAN DE CUENTAS
 class listarPlanCuentaBIOView(TemplateView):
     model = PlanCuenta
@@ -188,16 +227,6 @@ class listarPlanCuentaBIOView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         # _inicializar()
         return super().dispatch(request, *args, **kwargs)
-
-    # def post(self, request, *args, **kwargs):
-    #     data = {}
-    #     try:
-    #         data = PlanCuenta.objects.get(pk=request.POST['id']).toJSON()
-    #         print('data')
-    #         print(data)
-    #     except Exception as e:
-    #         data['error'] = str(e)
-    #     return JsonResponse(data)
 
     def post(self, request, *args, **kwargs):
         data = {}
@@ -210,6 +239,59 @@ class listarPlanCuentaBIOView(TemplateView):
                 queryset = queryset.filter(empresa__siglas=empresa).order_by('codigo')
                 for i in queryset:
                     data.append(i.toJSON())
+
+            # if action == 'get_children':
+            #     data = []
+            #     empresa_sigla = request.POST.get('empresa')
+            #     parent_id = request.POST.get('parent_id')  # puede ser vacío o un ID
+            #
+            #     # Raíz (padre null)
+            #     if parent_id == "#":
+            #         cuentas = PlanCuenta.objects.filter(parentId__isnull=True, empresa__siglas=empresa_sigla).order_by(
+            #             'codigo')
+            #     else:
+            #         cuentas = PlanCuenta.objects.filter(parentId_id=parent_id, empresa__siglas=empresa_sigla).order_by(
+            #             'codigo')
+            #
+            #     for cuenta in cuentas:
+            #         has_children = PlanCuenta.objects.filter(parentId=cuenta).exists()
+            #         data.append({
+            #             "id": str(cuenta.id),
+            #             "text": f"<strong>{cuenta.codigo}</strong> &nbsp; {cuenta.nombre}",
+            #             "children": has_children,  # Esto le dice a JSTree si debe seguir cargando al expandir
+            #             "data": {
+            #                 "nivel": cuenta.nivel
+            #             }
+            #         })
+
+            if action == 'get_plan':
+                data = []
+                empresa_sigla = request.POST.get('empresa')
+                parent_id = request.POST.get('parent_id')
+
+                if parent_id == "#":
+                    cuentas = PlanCuenta.objects.filter(parentId__isnull=True, empresa__siglas=empresa_sigla).order_by(
+                        'codigo')
+                else:
+                    cuentas = PlanCuenta.objects.filter(parentId_id=parent_id, empresa__siglas=empresa_sigla).order_by(
+                        'codigo')
+
+                for cuenta in cuentas:
+                    has_children = PlanCuenta.objects.filter(parentId=cuenta).exists()
+                    icon_type = 'jstree-folder' if has_children else 'jstree-file'
+
+                    data.append({
+                        "id": str(cuenta.id),
+                        "text": f"""
+                            <span class='context-menu-one'>
+                                <strong>{cuenta.codigo}</strong> &nbsp; {cuenta.nombre}
+                            </span>
+                            <span class='nivel-info' style="position: absolute; right: 0;"><b>Nivel {cuenta.nivel}</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> 
+                        """,
+                        "children": has_children,
+                        "icon": icon_type
+                    })
+
 
             elif action == 'upload_excel':
                 print('llego a Upload excell empezo a recorrer en el python desde ajax')
@@ -229,7 +311,8 @@ class listarPlanCuentaBIOView(TemplateView):
                             }
                         )
 
-                        print(f"{'Nueva empresa creada' if created else 'Empresa existente'}: {empresa.nombre} con siglas {empresa.siglas}")
+                        print(
+                            f"{'Nueva empresa creada' if created else 'Empresa existente'}: {empresa.nombre} con siglas {empresa.siglas}")
 
                         # Buscar o inicializar la cuenta contable
                         codigo_cuenta = excel.cell(row=row, column=2).value
@@ -259,7 +342,8 @@ class listarPlanCuentaBIOView(TemplateView):
                                 product.parentId = padre
                             except PlanCuenta.DoesNotExist:
                                 # Si no existe el padre, mostrar un mensaje o manejar el error
-                                print(f"Cuenta padre con código {codigo_padre} no existe para la empresa {empresa.siglas}")
+                                print(
+                                    f"Cuenta padre con código {codigo_padre} no existe para la empresa {empresa.siglas}")
 
                         product.save()
             else:
@@ -277,6 +361,7 @@ class listarPlanCuentaBIOView(TemplateView):
         context['folders'] = folders
         return context
 
+
 # PLAN DE CUENTAS DE LA EMPRESA PSM CREAR
 class crearPlanCuentaPSMView(CreateView):
     model = PlanCuenta
@@ -290,6 +375,7 @@ class crearPlanCuentaPSMView(CreateView):
         context['action'] = 'add'
         context['list_url'] = self.success_url
         return context
+
 
 # ACTUALIZAR PLAN DE CUENTAS
 class actualizarPlanCuentaPSMView(UpdateView):
@@ -305,6 +391,7 @@ class actualizarPlanCuentaPSMView(UpdateView):
         context['list_url'] = self.success_url
         return context
 
+
 # ELIMINAR PLAN DE CUENTAS
 class eliminarPlanCuentaPSMView(DeleteView):
     model = PlanCuenta
@@ -317,6 +404,7 @@ class eliminarPlanCuentaPSMView(DeleteView):
         context['nombre'] = 'Eliminar Plan de Cuenta'
         context['list_url'] = self.success_url
         return context
+
 
 #     LISTAR PLAN DE CUENTAS PSM
 class listarPlanCuentaPSMView(TemplateView):
@@ -369,7 +457,8 @@ class listarPlanCuentaPSMView(TemplateView):
                             }
                         )
 
-                        print(f"{'Nueva empresa creada' if created else 'Empresa existente'}: {empresa.nombre} con siglas {empresa.siglas}")
+                        print(
+                            f"{'Nueva empresa creada' if created else 'Empresa existente'}: {empresa.nombre} con siglas {empresa.siglas}")
 
                         # Buscar o inicializar la cuenta contable
                         codigo_cuenta = excel.cell(row=row, column=2).value
@@ -399,7 +488,8 @@ class listarPlanCuentaPSMView(TemplateView):
                                 product.parentId = padre
                             except PlanCuenta.DoesNotExist:
                                 # Si no existe el padre, mostrar un mensaje o manejar el error
-                                print(f"Cuenta padre con código {codigo_padre} no existe para la empresa {empresa.siglas}")
+                                print(
+                                    f"Cuenta padre con código {codigo_padre} no existe para la empresa {empresa.siglas}")
 
                         product.save()
             else:
@@ -519,7 +609,6 @@ class PlanExportExcelPSMView(View):
         return HttpResponseRedirect(reverse_lazy('app_planCuentas:listar_planCuenta'))
 
 
-
 # LISTAR TRANSACCIONES DEL PLAN DE CUENTAS
 class listarTransaccionPlanView(ListView):
     model = EncabezadoCuentasPlanCuenta
@@ -536,7 +625,8 @@ class listarTransaccionPlanView(ListView):
             action = request.POST['action']
             if action == 'searchdata':
                 data = []
-                for i in EncabezadoCuentasPlanCuenta.objects.filter(reg_control__exact='RT', empresa__siglas__exact='PSM'):
+                for i in EncabezadoCuentasPlanCuenta.objects.filter(reg_control__exact='RT',
+                                                                    empresa__siglas__exact='PSM'):
                     data.append(i.toJSON())
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -567,7 +657,8 @@ class listarTransaccionPlanBIOView(ListView):
             action = request.POST['action']
             if action == 'searchdata_bio':
                 data = []
-                for i in EncabezadoCuentasPlanCuenta.objects.filter(reg_control__exact='RT', empresa__siglas__exact='BIO'):
+                for i in EncabezadoCuentasPlanCuenta.objects.filter(reg_control__exact='RT',
+                                                                    empresa__siglas__exact='BIO'):
                     data.append(i.toJSON())
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -665,6 +756,7 @@ class crearTransaccionPlanView(CreateView):
         context['det'] = []
         return context
 
+
 # CREAR TRANSACCIONES DEL PLAN DE CUENTAS
 class crearTransaccionPlanBIOView(CreateView):
     model = EncabezadoCuentasPlanCuenta
@@ -747,6 +839,7 @@ class crearTransaccionPlanBIOView(CreateView):
         context['empresa'] = 'BIO'
         context['det'] = []
         return context
+
 
 # EDITAR TRANSACCIONES DEL PLAN DE CUENTAS
 class editarTransaccionPlanView(UpdateView):
@@ -842,6 +935,8 @@ class editarTransaccionPlanView(UpdateView):
         context['planCuenta2'] = planCuenta2
         context['det'] = self.get_detalle()
         return context
+
+
 #
 # class eliminarTransaccionPlanView(DeleteView):
 #     model = InvoiceStock
@@ -947,6 +1042,7 @@ class listarAnexoTransaccionalView(ListView):
         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
         return context
 
+
 # CREAR ANEXO-TRANSACCIONAL
 class crearAnexoTransaccionalView(CreateView):
     model = EncabezadoCuentasPlanCuenta
@@ -1023,6 +1119,7 @@ class crearAnexoTransaccionalView(CreateView):
         context['planCuenta2'] = planCuenta2
         context['det'] = []
         return context
+
 
 class editarAnexoTransaccionalView(UpdateView):
     model = EncabezadoCuentasPlanCuenta
@@ -1137,7 +1234,8 @@ class listarMayorPlanView(ListView):
                 empresa = request.POST['empresa']
                 print('empresa')
                 print(empresa)
-                detallecuenta = DetalleCuentasPlanCuenta.objects.filter(cuenta__empresa__siglas__exact=empresa).order_by('cuenta__codigo')
+                detallecuenta = DetalleCuentasPlanCuenta.objects.filter(
+                    cuenta__empresa__siglas__exact=empresa).order_by('cuenta__codigo')
                 for i in detallecuenta:
                     data.append(i.toJSON())
 
@@ -1236,7 +1334,8 @@ class listarMayorPlanViewBIO(ListView):
                 empresa = request.POST['empresa']
                 print('empresa')
                 print(empresa)
-                detallecuenta = DetalleCuentasPlanCuenta.objects.filter(cuenta__empresa__siglas__exact=empresa).order_by('cuenta__codigo')
+                detallecuenta = DetalleCuentasPlanCuenta.objects.filter(
+                    cuenta__empresa__siglas__exact=empresa).order_by('cuenta__codigo')
                 for i in detallecuenta:
                     data.append(i.toJSON())
 
@@ -1520,7 +1619,6 @@ class listarMayorPlanViewBIO(ListView):
 #         context['title'] = 'Balance de Comprobación'
 #         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
 #         return context
-
 
 
 class listarBalancePlanView(ListView):
@@ -1986,7 +2084,6 @@ class listarBalancePlanView(ListView):
 #         return context
 
 
-
 # class listarBalancePlanView(ListView):
 #     model = DetalleCuentasPlanCuenta
 #     template_name = 'app_contabilidad_planCuentas/balance_Plan/balance_mayorizacion_psm.html'
@@ -2298,6 +2395,7 @@ class listarBalancePlanBIOView(ListView):
         context['title'] = 'Balance de Comprobación'
         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
         return context
+
 
 # class listarBalancePlanBIOView(ListView):
 #     model = DetalleCuentasPlanCuenta

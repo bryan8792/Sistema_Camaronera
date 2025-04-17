@@ -127,6 +127,7 @@ class PlanCuenta(models.Model):
 
     def toJSON(self):
         item = model_to_dict(self)
+        item['id'] = self.id
         item['empresa'] = self.empresa.toJSON()
         item['full_name'] = '{} / {}'.format(self.codigo, self.nombre)
         item['full_name_2'] = '{} /  {} /  Nivel: {}'.format(self.codigo, self.nombre, self.nivel)
@@ -134,6 +135,7 @@ class PlanCuenta(models.Model):
         item['cuenta_padre2'] = '{} '.format(self.parentId)
         item['jerarquia_completa'] = self.get_full_hierarchy()
         item['get_name'] = self.get_name()
+        item['parentId'] = self.parentId.id if self.parentId else None
         return item
 
     class Meta:
