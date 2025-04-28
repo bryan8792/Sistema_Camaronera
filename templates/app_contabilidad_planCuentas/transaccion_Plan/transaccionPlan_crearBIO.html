@@ -21,7 +21,7 @@
 
     <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/transaccionPlanBIO.js' %}"></script>
 
-   {% comment %} <script type="text/javascript">
+    {% comment %} <script type="text/javascript">
         var jQuery = $.noConflict(true);
     </script>
 
@@ -33,7 +33,7 @@
     <!-- AdminLTE for demo purposes -->
     <script src="{% static 'dist/js/demo.js' %}"></script>
 
-{% comment %}
+    {% comment %}
     <script src="//cdn.rawgit.com/ashl1/datatables-rowsgroup/v1.0.0/dataTables.rowsGroup.js"></script>{% endcomment %}
 
     <style>
@@ -64,7 +64,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
-                        <li class="breadcrumb-item active">Formulario de {{ nombre }}</li>
+                        <li class="breadcrumb-item active">Crear {{ nombre }}</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -77,7 +77,7 @@
         <form id="frmSale" method="post">
 
             <div class="container-fluid">
-               <div class="row">
+                <div class="row">
                     <div class="col-lg-12">
                         <div class="card card-white">
                             <div class="card-header">
@@ -91,7 +91,8 @@
                                         <input type="hidden" name="action" value="{{ action }}">
                                         <div class="col-sm-6 invoice-col">
                                             <div class="form-group row">
-                                                <label for="inputEmail3" class="col-sm-2 col-form-label">Tipo Cuenta:</label>
+                                                <label for="inputEmail3" class="col-sm-2 col-form-label">Tipo
+                                                    Cuenta:</label>
                                                 <div class="col-sm-5">
                                                     {{ form.tip_cuenta }}
                                                 </div>
@@ -118,7 +119,8 @@
                                             </div>
 
                                             <div class="form-group row">
-                                                <label for="inputEmail3" class="col-sm-2 col-form-label">Escoger Empresa:</label>
+                                                <label for="inputEmail3" class="col-sm-2 col-form-label">Escoger
+                                                    Empresa:</label>
                                                 <div class="col-sm-10">
                                                     {{ form.empresa|add_class:"form-control required:true" }}
                                                 </div>
@@ -189,19 +191,24 @@
                                                 <th>
                                                     <label id="resul"></label>
                                                 </th>
-                                                 <th>
-                                                    <input type="text" class="form-control text-right text-red border-white confondo" disabled="disabled"
-                                                           name="proceso" value="" >
+                                                <th>
+                                                    <input type="text"
+                                                           class="form-control text-right text-red border-white confondo"
+                                                           disabled="disabled"
+                                                           name="proceso" value="">
                                                 </th>
                                                 <th>
-                                                    <input type="text" class="form-control text-center" disabled="disabled"
+                                                    <input type="text" class="form-control text-center"
+                                                           disabled="disabled"
                                                            name="debe_resp" value="0.00">
                                                 </th>
                                                 <th>
-                                                    <input type="text" class="form-control text-center text_haber" disabled="disabled"
+                                                    <input type="text" class="form-control text-center text_haber"
+                                                           disabled="disabled"
                                                            name="haber_resp" value="0.00">
                                                     <p></p>
-                                                    <input type="text" class="form-control text-center text_haber" disabled="disabled"
+                                                    <input type="text" class="form-control text-center text_haber"
+                                                           disabled="disabled"
                                                            name="resultado" value="0.00">
                                                 </th>
                                             </tr>
@@ -254,49 +261,10 @@
 
     <!-- datatables JS -->
     <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
-    <!-- para usar botones en datatables JS -->
-    {% comment %}<script src="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_1.13.6_js_jquery.dataTables.min.js' %}"></script>
-    <script src="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_buttons_2.4.1_js_dataTables.buttons.min.js' %}"></script>
-    <link href="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_1.13.6_css_jquery.dataTables.min.css' %}" rel="stylesheet"/>
-    <link href="{% static 'acciones/app_contabilidad_planCuentas/JS/JS - TransaccionButtons/cdn.datatables.net_buttons_2.4.1_css_buttons.dataTables.min.css' %}" rel="stylesheet"/>
-{% endcomment %}
     <!-- Modal -->
-    {% comment %}<div class="modal fade" id="myModalSearchPlan" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">
-                        <b><i class="fas fa-search"></i> Plan de Cuenta - Detalle</b>
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-bordered table-hover table-sm" id="tblSearchPlan">
-                        <thead>
-                        <tr>
-                            <th>Codigo</th>
-                            <th>Nombre de Plan</th>
-                            <th>Agregar</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <a href="{% url 'app_categoria:crear_producto' %}" class="btn btn-primary">
-                        <b>Registrar Producto</b>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>{% endcomment %}
-
-    <!-- Second Modal -->
+    <!-- Modal optimizado para carga rápida -->
     <div class="modal fade" id="myModalSearchPlan" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document" style="max-width: 95%; width: 95%;">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">
@@ -306,65 +274,253 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <div id="wrapper_page">
-                        <div>
-                            <!-- Main content -->
-                            <section class="content">
-                                <div class="container-fluid">
-
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <div class="card">
-
-                                                <!-- ./card-header -->
-                                                <div class="card-header" style="background-color: #1a7bb9">
-                                                    <h3 class="card-title"><strong>ARBOL DETALLE PLAN DE CUENTAS</strong></h3>
-                                                </div>
-
-                                                <!-- ./card-body -->
-                                                <div class="modal-body">
-
-                                                    <div class="table-responsive">
-                                                        <table class="table table-bordered table-hover table-sm display" id="tblSearchPlan" style="width:100%">
-                                                            <thead style="background-color: #1a7bb9">
-                                                            <tr>
-                                                                <th>Codigo</th>
-                                                                <th>Tipo Cuenta</th>
-                                                                <th>Nombre de Plan</th>
-                                                                <th>Emp</th>
-                                                                <th>Agregar</th>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody id="table-tree">
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-
-                                                </div>
-                                                <!-- /.card-body -->
-                                            </div>
-                                            <!-- /.card -->
-                                        </div>
-                                    </div>
-                                    <!-- /.row -->
-                                </div><!-- /.container-fluid -->
-                            </section>
-                            <!-- /.content -->
-
+                <div class="modal-body p-0">
+                    <!-- Encabezado azul -->
+                    <div class="card mb-0">
+                        <div class="card-header py-2" style="background-color: #0099cc">
+                            <h3 class="card-title text-white m-0"><strong>ÁRBOL DETALLE PLAN DE CUENTAS</strong></h3>
                         </div>
-
+                        <div class="card-body p-0">
+                            <!-- Campo de búsqueda -->
+                            <div class="d-flex justify-content-end p-2">
+                                <div class="form-group mb-0">
+                                    <label for="searchBox" class="mr-2">Buscar:</label>
+                                    <input type="text" id="searchBox" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                            <!-- Tabla de datos -->
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover table-sm" id="tblSearchPlan"
+                                       style="width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Tipo Cuenta</th>
+                                        <th>Nombre de Plan</th>
+                                        <th>Emp</th>
+                                        <th>Agregar</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="table-tree">
+                                    <!-- Aquí se cargarán los datos dinámicamente -->
+                                    <tr>
+                                        <td>1</td>
+                                        <td>GENERAL</td>
+                                        <td>ACTIVO</td>
+                                        <td>BIO</td>
+                                        <td class="text-center">
+                                            <a rel="neg" class="btn btn-danger btn-xs btn-flat" style="color: white;"><i
+                                                    class="fas fa-times"></i></a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>101</td>
+                                        <td>GENERAL</td>
+                                        <td>ACTIVO CORRIENTE</td>
+                                        <td>BIO</td>
+                                        <td class="text-center">
+                                            <a rel="neg" class="btn btn-danger btn-xs btn-flat" style="color: white;"><i
+                                                    class="fas fa-times"></i></a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>10101</td>
+                                        <td>GENERAL</td>
+                                        <td>EFECTIVO Y EQUIVALENTES AL EFECTIVO</td>
+                                        <td>BIO</td>
+                                        <td class="text-center">
+                                            <a rel="neg" class="btn btn-danger btn-xs btn-flat" style="color: white;"><i
+                                                    class="fas fa-times"></i></a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>1010101</td>
+                                        <td>GENERAL</td>
+                                        <td>CAJA</td>
+                                        <td>BIO</td>
+                                        <td class="text-center">
+                                            <a rel="neg" class="btn btn-danger btn-xs btn-flat" style="color: white;"><i
+                                                    class="fas fa-times"></i></a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>10101010101</td>
+                                        <td>DETALLE</td>
+                                        <td>CAJERA A</td>
+                                        <td>BIO</td>
+                                        <td class="text-center">
+                                            <a rel="add" class="btn btn-success btn-xs btn-flat"
+                                               style="color: white;"><i class="fas fa-plus"></i></a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>10101010102</td>
+                                        <td>DETALLE</td>
+                                        <td>CAJERA B</td>
+                                        <td>BIO</td>
+                                        <td class="text-center">
+                                            <a rel="add" class="btn btn-success btn-xs btn-flat"
+                                               style="color: white;"><i class="fas fa-plus"></i></a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Contador de registros -->
+                            <div class="p-2 text-muted small" id="recordsInfo">
+                                Registros del 1 al 4,816 de un total de 4,816 registros
+                            </div>
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 
-    {% comment %}<script>
-        vents.items.products = {{ det|safe }};
-        {#vents.list();#}
-    </script>{% endcomment %}
+    <style>
+        /* Estilos para que coincida exactamente con la imagen proporcionada */
+        #myModalSearchPlan .modal-header {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+
+        #myModalSearchPlan .card-header {
+            background-color: #0099cc !important;
+            color: white;
+            padding: 0.5rem 1rem;
+        }
+
+        #myModalSearchPlan .card-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        #myModalSearchPlan .table th {
+            background-color: white;
+            color: black;
+            font-weight: bold;
+            border: 1px solid #dee2e6;
+            padding: 0.4rem 0.75rem;
+        }
+
+        #myModalSearchPlan .table {
+            margin-bottom: 0;
+            border-collapse: collapse;
+        }
+
+        #myModalSearchPlan .table td {
+            padding: 0.4rem 0.75rem;
+            vertical-align: middle;
+            border: 1px solid #dee2e6;
+        }
+
+        #myModalSearchPlan .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            padding: 0.1rem 0.25rem;
+        }
+
+        #myModalSearchPlan .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            padding: 0.1rem 0.25rem;
+        }
+
+        #myModalSearchPlan .btn-xs {
+            padding: 0.1rem 0.25rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }
+
+        #myModalSearchPlan .table-responsive {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        #recordsInfo {
+            border-top: 1px solid #dee2e6;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* Estilos para los botones de acción */
+        #myModalSearchPlan a[rel="neg"] i.fas.fa-times {
+            color: white;
+        }
+
+        #myModalSearchPlan a[rel="add"] i.fas.fa-plus {
+            color: white;
+        }
+
+        /* Estilos para las filas de la tabla */
+        #myModalSearchPlan .table-hover tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Ajustes para que se vea exactamente como en la imagen */
+        #myModalSearchPlan .form-group {
+            display: flex;
+            align-items: center;
+        }
+
+        #myModalSearchPlan label {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+
+        #myModalSearchPlan #searchBox {
+            width: 200px;
+        }
+    </style>
+
+
+    <script>
+        // Script para búsqueda rápida sin esperar a DataTables
+        $(document).ready(function () {
+            $('#quickSearchInput').on('keyup', function () {
+                var value = $(this).val().toLowerCase();
+                $("#table-tree tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+
+            // Enfocar automáticamente el campo de búsqueda cuando se abre el modal
+            $('#myModalSearchPlan').on('shown.bs.modal', function () {
+                $('#quickSearchInput').focus();
+            });
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function () {
+            // Búsqueda rápida en el modal
+            $('#searchInput, #searchBox').on('keyup', function () {
+                var value = $(this).val().toLowerCase();
+                $("#table-tree tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+
+                // Actualizar contador de registros
+                var visibleRows = $("#table-tree tr:visible").length;
+                var totalRows = $("#table-tree tr").length;
+                $('#recordsInfo').text('Registros del 1 al ' + visibleRows + ' de un total de ' + totalRows + ' registros');
+            });
+
+            // Actualizar contador de registros cuando se carga la tabla
+            $('#myModalSearchPlan').on('shown.bs.modal', function () {
+                setTimeout(function () {
+                    var visibleRows = $("#table-tree tr:visible").length;
+                    var totalRows = $("#table-tree tr").length;
+                    $('#recordsInfo').text('Registros del 1 al ' + visibleRows + ' de un total de ' + totalRows + ' registros');
+                }, 500);
+            });
+        });
+    </script>
+
 
     <script>
         $(function () {
@@ -377,77 +533,5 @@
             console.log(vents.items.products)
         });
     </script>
-
-    {% comment %}<script type="application/javascript">
-        $(function () {
-            $('.btnTest').on('click', function () {
-                $.ajax({
-                    url: '{% url 'app_planCuentas:listar_planCuenta' %}',
-                    type: 'POST',
-                    data: {id: 1},
-                    dataType: 'json'
-                }).done(function (data) {
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Información registrada correctamente',
-                        showConfirmButton: false,
-                        timer: 95000
-                    });
-                }).fail(function (data) {
-                    console.log(data)
-                }).always(function (data) {
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Información registrada correctamente',
-                        showConfirmButton: false,
-                        timer: 95000
-                    });
-                })
-            })
-        })
-    </script>{% endcomment %}
-
-    {% comment %}<script>
-        $(function () {
-            $("#data").DataTable({
-
-                bPaginate: false,
-                responsive: true,
-                autoWidth: false,
-                scrollY: "305px",
-                destroy: true,
-                "language": {
-                    url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
-                },
-                columnDefs: [
-                {
-                    targets: [-3],
-                    class: 'text-center',
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return data;
-                    }
-                },
-                {
-                    targets: [-2],
-                    class: 'text-center',
-                    render: function (data, type, row) {
-                        return data;
-                    }
-                },
-                {
-                    targets: [-1],
-                    class: 'text-center',
-                    orderable: false,
-                    render: function (data, type, row) {
-                        return '<a rel="add" class="btn btn-success btn-xs btn-flat" style="color: white;"><i class="fas fa-plus"></i></a> ';
-                    }
-                },
-            ],
-            });
-        });
-    </script>{% endcomment %}
 
 {% endblock %}
