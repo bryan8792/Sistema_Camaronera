@@ -410,7 +410,6 @@
     </style>
 
 
-
     <script>
         // Script para búsqueda rápida sin esperar a DataTables
         $(document).ready(function () {
@@ -467,5 +466,326 @@
             console.log(vents.items.products)
         });
     </script>
+
+    <script>
+        // Función para preseleccionar la empresa BIO
+        function preseleccionarEmpresaBIO() {
+            console.log("Intentando preseleccionar empresa BIO...");
+
+            // Buscar la opción que contiene "BIOCASCAJAL" o "BIO"
+            var empresaSelect = $('select[name="empresa"]');
+
+            // Verificar si el select existe
+            if (empresaSelect.length === 0) {
+                console.log("No se encontró el select de empresa");
+                return;
+            }
+
+            // Primero intentamos encontrar la opción por su texto
+            var encontrada = false;
+            empresaSelect.find('option').each(function () {
+                if ($(this).text().includes("BIOCASCAJAL") || $(this).text() === "BIO") {
+                    empresaSelect.val($(this).val()).trigger('change');
+                    encontrada = true;
+                    console.log("Empresa BIO seleccionada por texto:", $(this).text());
+                    return false; // Salir del bucle
+                }
+            });
+
+            // Si no se encontró por texto, intentamos por el valor de la opción
+            if (!encontrada) {
+                // Buscar por ID o valor específico (ajustar según tu estructura de datos)
+                empresaSelect.find('option').each(function () {
+                    var valor = $(this).val();
+                    // Verificar si el valor corresponde a la empresa BIO
+                    if (valor && (valor === "BIO" || valor.includes("BIO"))) {
+                        empresaSelect.val(valor).trigger('change');
+                        console.log("Empresa BIO seleccionada por valor:", valor);
+                        return false; // Salir del bucle
+                    }
+                });
+            }
+
+            // Si aún no se encontró, intentar seleccionar la primera opción que no sea vacía
+            if (!encontrada && empresaSelect.val() === "") {
+                var primeraOpcion = empresaSelect.find('option').filter(function () {
+                    return $(this).val() !== "";
+                }).first();
+
+                if (primeraOpcion.length > 0) {
+                    empresaSelect.val(primeraOpcion.val()).trigger('change');
+                    console.log("Seleccionada primera opción disponible:", primeraOpcion.text());
+                }
+            }
+        }
+
+        // Ejecutar la función cuando el documento esté listo
+        $(document).ready(function () {
+            // Esperar un momento para asegurarse de que select2 esté inicializado
+            setTimeout(preseleccionarEmpresaBIO, 500);
+        });
+
+        // También intentar ejecutar cuando se inicialice select2
+        $(document).on('select2:open', function () {
+            setTimeout(preseleccionarEmpresaBIO, 100);
+        });
+    </script>
+
+
+    {% comment %}
+    <script>
+        // Función para generar el código secuencial basado en el tipo de cuenta
+        function generarCodigoSecuencial(tipoCuenta) {
+            // Obtener el mes actual (1-12)
+            const fechaActual = new Date();
+            let mes = fechaActual.getMonth() + 1; // getMonth() devuelve 0-11
+
+            // Formatear el mes con dos dígitos (01-12)
+            mes = mes < 10 ? '0' + mes : mes.toString();
+
+            // Determinar el dígito según el tipo de cuenta
+            let digitoTipo = '1'; // Por defecto DIARIO CONTABLE
+
+            if (tipoCuenta === 'COMPROBANTE PAGO') {
+                digitoTipo = '2';
+            } else if (tipoCuenta === 'INGRESO A CAJA') {
+                digitoTipo = '3';
+            } else if (tipoCuenta === 'EGRESO DE CAJA') {
+                digitoTipo = '4';
+            }
+
+            // Clave para almacenar/recuperar la secuencia
+            const clave = `${mes}${digitoTipo}`;
+
+            // Obtener secuencias guardadas
+            const secuencias = obtenerSecuenciasGuardadas();
+
+            // Obtener la última secuencia para este tipo y mes, o usar 0 si no existe
+            let ultimaSecuencia = secuencias[clave] || 0;
+
+            // Incrementar la secuencia
+            ultimaSecuencia++;
+
+            // Guardar la nueva secuencia
+            secuencias[clave] = ultimaSecuencia;
+            guardarSecuencias(secuencias);
+
+            // Formatear la secuencia con tres dígitos (001-999)
+            const secuenciaFormateada = ultimaSecuencia < 10 ? '00' + ultimaSecuencia :
+                ultimaSecuencia < 100 ? '0' + ultimaSecuencia : ultimaSecuencia.toString();
+
+            // Construir el código completo: MES + TIPO + SECUENCIA
+            return mes + digitoTipo + secuenciaFormateada;
+        }
+
+        // Función para obtener secuencias almacenadas en localStorage
+        function obtenerSecuenciasGuardadas() {
+            const secuenciasGuardadas = localStorage.getItem('secuenciasCodigos');
+            return secuenciasGuardadas ? JSON.parse(secuenciasGuardadas) : {};
+        }
+
+        // Función para guardar secuencias en localStorage
+        function guardarSecuencias(secuencias) {
+            localStorage.setItem('secuenciasCodigos', JSON.stringify(secuencias));
+        }
+
+        // Función para actualizar el código cuando cambia el tipo de cuenta
+        function actualizarCodigo() {
+            const tipoCuenta = $('select[name="tip_cuenta"]').val();
+            const codigo = generarCodigoSecuencial(tipoCuenta);
+            $('input[name="codigo"]').val(codigo);
+        }
+
+        // Inicializar eventos cuando el documento esté listo
+        $(function () {
+            // Generar código inicial basado en el tipo de cuenta seleccionado
+            setTimeout(function () {
+                actualizarCodigo();
+            }, 500);
+
+            // Actualizar código cuando cambie el tipo de cuenta
+            $('select[name="tip_cuenta"]').on('change', function () {
+                actualizarCodigo();
+            });
+        });
+    </script>
+{% endcomment %}
+
+
+    <script>
+
+        // Función para generar el código secuencial basado en el tipo de cuenta
+        // VERSIÓN CORREGIDA: Manejo de errores mejorado
+        function generarCodigoSecuencial(tipoCuenta) {
+            // Mostrar indicador de carga
+            $('input[name="codigo"]').val("Generando...");
+
+            // Obtener el mes actual (1-12)
+            const fechaActual = new Date();
+            let mes = fechaActual.getMonth() + 1; // getMonth() devuelve 0-11
+
+            // Formatear el mes con dos dígitos (01-12)
+            mes = mes < 10 ? '0' + mes : mes.toString();
+
+            // Determinar el dígito según el tipo de cuenta
+            let digitoTipo = '1'; // Por defecto DIARIO CONTABLE
+
+            // Obtener el texto visible del select, no el valor
+            const tipoCuentaTexto = $('select[name="tip_cuenta"] option:selected').text().trim();
+            console.log("Tipo de cuenta seleccionado:", tipoCuentaTexto);
+
+            if (tipoCuentaTexto === 'COMPROBANTE PAGO') {
+                digitoTipo = '2';
+            } else if (tipoCuentaTexto === 'INGRESO A CAJA') {
+                digitoTipo = '3';
+            } else if (tipoCuentaTexto === 'EGRESO DE CAJA') {
+                digitoTipo = '4';
+            }
+
+            console.log("Dígito asignado:", digitoTipo);
+
+            // Realizar la petición AJAX para obtener la última secuencia
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: window.location.pathname,
+                    type: "POST",
+                    data: {
+                        action: "obtener_ultima_secuencia",
+                        mes: mes,
+                        tipo: digitoTipo,
+                    },
+                    dataType: "json",
+                    success: (response) => {
+                        console.log("Respuesta del servidor:", response);
+
+                        // MEJORA: Verificar si la respuesta es válida
+                        if (!response) {
+                            console.error("Respuesta vacía del servidor");
+                            // Usar un valor predeterminado
+                            const codigoFinal = mes + digitoTipo + "001";
+                            console.log("Usando código predeterminado:", codigoFinal);
+                            resolve(codigoFinal);
+                            return;
+                        }
+
+                        if (response.error) {
+                            console.error("Error del servidor:", response.error);
+                            // No rechazar la promesa, usar un valor predeterminado
+                            const codigoFinal = mes + digitoTipo + "001";
+                            console.log("Usando código predeterminado debido a error:", codigoFinal);
+                            resolve(codigoFinal);
+                            return;
+                        }
+
+                        // Obtener la última secuencia y sumar 1 para obtener la siguiente
+                        let ultimaSecuencia = 0;
+                        if (response.secuencia !== undefined) {
+                            ultimaSecuencia = parseInt(response.secuencia);
+                        }
+
+                        // Incrementar para obtener la siguiente secuencia
+                        const siguienteSecuencia = ultimaSecuencia + 1;
+                        console.log("Última secuencia:", ultimaSecuencia);
+                        console.log("Siguiente secuencia:", siguienteSecuencia);
+
+                        // Formatear la secuencia con tres dígitos (001-999)
+                        const secuenciaFormateada =
+                            siguienteSecuencia < 10
+                                ? "00" + siguienteSecuencia
+                                : siguienteSecuencia < 100
+                                    ? "0" + siguienteSecuencia
+                                    : siguienteSecuencia.toString();
+
+                        // Construir el código completo: MES + TIPO + SECUENCIA
+                        const codigoFinal = mes + digitoTipo + secuenciaFormateada;
+                        console.log("Código generado:", codigoFinal);
+
+                        resolve(codigoFinal);
+                    },
+                    error: (error) => {
+                        console.error("Error al obtener secuencia:", error);
+                        // No rechazar la promesa, usar un valor predeterminado
+                        const codigoFinal = mes + digitoTipo + "001";
+                        console.log("Usando código predeterminado debido a error de red:", codigoFinal);
+                        resolve(codigoFinal);
+                    }
+                });
+            });
+        }
+
+        // Función para obtener cookies (para CSRF)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Función para actualizar el código cuando cambia el tipo de cuenta
+        function actualizarCodigo() {
+            const tipoCuenta = $('select[name="tip_cuenta"]').val();
+
+            // Mostrar indicador de carga
+            $('input[name="codigo"]').val("Generando...");
+
+            // Generar el código secuencial
+            generarCodigoSecuencial(tipoCuenta)
+                .then((codigo) => {
+                    $('input[name="codigo"]').val(codigo);
+                })
+                .catch((error) => {
+                    console.error("Error al generar código:", error);
+
+                    // MEJORA: Generar un código predeterminado en caso de error
+                    const fechaActual = new Date();
+                    let mes = fechaActual.getMonth() + 1;
+                    mes = mes < 10 ? '0' + mes : mes.toString();
+
+                    let digitoTipo = '1'; // Por defecto
+                    const tipoCuentaTexto = $('select[name="tip_cuenta"] option:selected').text().trim();
+                    if (tipoCuentaTexto === 'COMPROBANTE PAGO') {
+                        digitoTipo = '2';
+                    } else if (tipoCuentaTexto === 'INGRESO A CAJA') {
+                        digitoTipo = '3';
+                    } else if (tipoCuentaTexto === 'EGRESO DE CAJA') {
+                        digitoTipo = '4';
+                    }
+
+                    const codigoPredeterminado = mes + digitoTipo + "001";
+                    $('input[name="codigo"]').val(codigoPredeterminado);
+
+                    // Mostrar alerta de error
+                    if (typeof Swal !== "undefined") {
+                        Swal.fire({
+                            title: "Advertencia",
+                            text: "No se pudo obtener la última secuencia. Se ha generado un código predeterminado.",
+                            icon: "warning",
+                        });
+                    } else {
+                        alert("No se pudo obtener la última secuencia. Se ha generado un código predeterminado.");
+                    }
+                });
+        }
+
+        // Inicializar eventos cuando el documento esté listo
+        $(document).ready(function () {
+            // Generar código inicial basado en el tipo de cuenta seleccionado
+            setTimeout(actualizarCodigo, 1500);
+
+            // Actualizar código cuando cambie el tipo de cuenta
+            $('select[name="tip_cuenta"]').on('change', function () {
+                actualizarCodigo();
+            });
+        });
+    </script>
+
 
 {% endblock %}
