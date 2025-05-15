@@ -757,12 +757,124 @@ class crearTransaccionPlanView(CreateView):
         return context
 
 
+# # CREAR TRANSACCIONES DEL PLAN DE CUENTAS
+# class crearTransaccionPlanBIOView(CreateView):
+#     model = EncabezadoCuentasPlanCuenta
+#     form_class = EncabezadoCuentasPlanCuentaForm
+#     template_name = 'app_contabilidad_planCuentas/transaccion_Plan/transaccionPlan_crearBIO.html'
+#     success_url = reverse_lazy('app_planCuentas:listar_transaccionPlan_bio')
+#     url_redirect = success_url
+#
+#     @method_decorator(csrf_exempt)
+#     @method_decorator(login_required)
+#     def dispatch(self, request, *args, **kwargs):
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     def post(self, request, *args, **kwargs):
+#         data = {}
+#         try:
+#             action = request.POST['action']
+#             if action == 'search_plan':
+#                 data = []
+#                 empresa = request.POST['empresa']
+#                 print('empresa de search plan')
+#                 print(empresa)
+#                 queryset = PlanCuenta.objects.all()
+#                 ids_exclude = json.loads(request.POST['ids'])
+#                 queryset = queryset.filter(empresa__siglas=empresa).exclude(id__in=ids_exclude)
+#                 # if len(ids_exclude):
+#                 #     queryset = queryset.filter().exclude(id__in=ids_exclude)
+#                 for i in queryset:
+#                     item = i.toJSON()
+#                     item['detalle'] = ""
+#                     data.append(item)
+#
+#             elif action == 'search_autocomplete':
+#                 data = []
+#                 ids_exclude = json.loads(request.POST['ids'])
+#                 term = request.POST['term'].strip()
+#                 data.append({'codigo': term, 'text': term})
+#                 plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
+#                 for i in plan_detail[0:50]:
+#                     item = i.toJSON()
+#                     item['codigo'] = i.codigo
+#                     item['text'] = i.nombre
+#                     data.append(item)
+#
+#
+#             elif action == 'obtener_ultima_secuencia':
+#                 mes = request.POST.get('mes')
+#                 tipo = request.POST.get('tipo')
+#                 patron_codigo = f"{mes}{tipo}%"
+#                 ultimo_encabezado = EncabezadoCuentasPlanCuenta.objects.filter(
+#                     codigo__ilike=patron_codigo
+#                 ).order_by('-codigo').first()
+#                 if ultimo_encabezado:
+#                     ultima_secuencia = int(ultimo_encabezado.codigo[-3:])
+#                     data['secuencia'] = ultima_secuencia
+#                 else:
+#                     data['secuencia'] = 0
+#
+#             elif action == 'create':
+#                 with transaction.atomic():
+#                     items = json.loads(request.POST['items'])
+#                     encabezado = EncabezadoCuentasPlanCuenta()
+#                     encabezado.codigo = request.POST['codigo']
+#                     encabezado.tip_cuenta = request.POST['tip_cuenta']
+#                     encabezado.fecha = request.POST['fecha']
+#                     encabezado.comprobante = request.POST['comprobante']
+#                     encabezado.descripcion = request.POST['descripcion']
+#                     encabezado.direccion = request.POST['direccion']
+#                     encabezado.empresa_id = request.POST['empresa']
+#                     encabezado.save()
+#                     for i in items:
+#                         cuerpo = DetalleCuentasPlanCuenta()
+#                         cuerpo.encabezadocuentaplan_id = encabezado.pk
+#                         cuerpo.cuenta_id = int(i['id'])
+#                         cuerpo.detalle = i['detalle']
+#                         cuerpo.debe = int(i['debe']) if i.get('debe') else 0
+#                         cuerpo.haber = int(i['haber']) if i.get('haber') else 0
+#                         cuerpo.save()
+#             else:
+#                 data['error'] = 'Ha ocurrido un error'
+#         except Exception as e:
+#             data['error'] = 'el error es : ' + str(e)
+#         return JsonResponse(data, safe=False)
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['nombre'] = 'Formulario de Registro de Transacción'
+#         context['list_url'] = self.success_url
+#         context['action'] = 'create'
+#         planCuenta = PlanCuenta.objects.filter(parentId=None)
+#         context['planCuenta'] = planCuenta
+#         planCuenta2 = PlanCuenta.objects.all()
+#         context['planCuenta2'] = planCuenta2
+#         context['empresa'] = 'BIO'
+#         context['det'] = []
+#
+#         try:
+#             empresa_bio = Empresa.objects.get(siglas='BIO')
+#             # Modificar el formulario para preseleccionar la empresa BIO
+#             form = self.get_form()
+#             form.fields['empresa'].initial = empresa_bio.id
+#             context['form'] = form
+#         except Exception as e:
+#             print(f"Error al preseleccionar empresa BIO: {e}")
+#
+#         return context
+
+
+# EDITAR TRANSACCIONES DEL PLAN DE CUENTAS
+
 # CREAR TRANSACCIONES DEL PLAN DE CUENTAS
+
+# CREAR TRANSACCIONES DEL PLAN DE CUENTAS - VERSIÓN CORREGIDA PARA EL ERROR DE TIPO
 class crearTransaccionPlanBIOView(CreateView):
     model = EncabezadoCuentasPlanCuenta
     form_class = EncabezadoCuentasPlanCuentaForm
     template_name = 'app_contabilidad_planCuentas/transaccion_Plan/transaccionPlan_crearBIO.html'
-    success_url = reverse_lazy('app_planCuentas:listar_transaccionPlan_bio')
+    success_url = reverse_lazy('app_planCuentas:listar_transaccionPlan')
     url_redirect = success_url
 
     @method_decorator(csrf_exempt)
@@ -782,8 +894,6 @@ class crearTransaccionPlanBIOView(CreateView):
                 queryset = PlanCuenta.objects.all()
                 ids_exclude = json.loads(request.POST['ids'])
                 queryset = queryset.filter(empresa__siglas=empresa).exclude(id__in=ids_exclude)
-                # if len(ids_exclude):
-                #     queryset = queryset.filter().exclude(id__in=ids_exclude)
                 for i in queryset:
                     item = i.toJSON()
                     item['detalle'] = ""
@@ -793,13 +903,121 @@ class crearTransaccionPlanBIOView(CreateView):
                 data = []
                 ids_exclude = json.loads(request.POST['ids'])
                 term = request.POST['term'].strip()
-                data.append({'codigo': term, 'text': term})
+                data.append({'codigo': term, 'text': term, 'id': None})
                 plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
                 for i in plan_detail[0:50]:
                     item = i.toJSON()
                     item['codigo'] = i.codigo
                     item['text'] = i.nombre
+                    item['id'] = int(i.id) if i.id else None
                     data.append(item)
+
+
+            # Versión corregida del método obtener_ultima_secuencia para manejar tipos de datos
+
+            elif action == 'obtener_ultima_secuencia':
+
+                mes = request.POST.get('mes')
+
+                tipo = request.POST.get('tipo')
+
+                # Imprimir para depuración
+
+                print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
+
+                try:
+
+                    # Versión simplificada que solo busca la última secuencia sin normalizar
+
+                    from django.db.models import Q
+
+                    import re
+
+                    # Buscar patrones que coincidan con el mes y tipo, independientemente del formato
+
+                    patron_mes = mes.lstrip('0')  # Quitar ceros iniciales: "05" -> "5"
+
+                    # Construir patrones para buscar
+
+                    patron1 = f"{mes}{tipo}"  # Con cero inicial: "051"
+
+                    patron2 = f"{patron_mes}{tipo}"  # Sin cero inicial: "51"
+
+                    # Buscar usando el ORM de Django (más seguro que SQL directo)
+
+                    encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+
+                        Q(codigo__startswith=patron1) | Q(codigo__startswith=patron2)
+
+                    ).order_by('-codigo')
+
+                    ultima_secuencia = 0
+
+                    if encabezados.exists():
+
+                        # Procesar todos los códigos encontrados para extraer la secuencia más alta
+
+                        for encabezado in encabezados:
+
+                            # CORRECCIÓN: Asegurarse de que codigo sea una cadena de texto
+
+                            codigo = str(encabezado.codigo) if encabezado.codigo is not None else ""
+
+                            print(f"Analizando código: {codigo}")
+
+                            # Extraer los últimos 3 dígitos, independientemente del formato
+
+                            match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
+
+                            if match:
+
+                                mes_encontrado = match.group(1)
+
+                                tipo_encontrado = match.group(2)
+
+                                secuencia_str = match.group(3)
+
+                                # Verificar que coincidan mes y tipo
+
+                                if (mes_encontrado == mes or mes_encontrado == patron_mes) and tipo_encontrado == tipo:
+
+                                    try:
+
+                                        secuencia = int(secuencia_str)
+
+                                        ultima_secuencia = max(ultima_secuencia, secuencia)
+
+                                        print(f"Secuencia encontrada: {secuencia}")
+
+                                    except ValueError:
+
+                                        print(f"Error al convertir secuencia: {secuencia_str}")
+
+                        print(f"Secuencia más alta encontrada: {ultima_secuencia}")
+
+                    else:
+
+                        print(f"No se encontraron registros para los patrones {patron1} o {patron2}")
+
+                    # Devolver la secuencia actual
+
+                    data['secuencia'] = ultima_secuencia
+
+                    print(f"Secuencia devuelta: {ultima_secuencia}")
+
+
+                except Exception as e:
+
+                    import traceback
+
+                    print(f"Error al buscar secuencia: {str(e)}")
+
+                    print(traceback.format_exc())
+
+                    data['secuencia'] = 0
+
+                    data['error'] = str(e)
+
 
             elif action == 'create':
                 with transaction.atomic():
@@ -813,17 +1031,34 @@ class crearTransaccionPlanBIOView(CreateView):
                     encabezado.direccion = request.POST['direccion']
                     encabezado.empresa_id = request.POST['empresa']
                     encabezado.save()
+
+                    # Validar los IDs de cuenta antes de crear los detalles
                     for i in items:
-                        cuerpo = DetalleCuentasPlanCuenta()
-                        cuerpo.encabezadocuentaplan_id = encabezado.pk
-                        cuerpo.cuenta_id = int(i['id'])
-                        cuerpo.detalle = i['detalle']
-                        cuerpo.debe = int(i['debe']) if i.get('debe') else 0
-                        cuerpo.haber = int(i['haber']) if i.get('haber') else 0
-                        cuerpo.save()
+                        try:
+                            # Verificar si la cuenta existe
+                            cuenta_id = int(i['id'])
+                            if not PlanCuenta.objects.filter(id=cuenta_id).exists():
+                                raise ValueError(f"La cuenta con ID {cuenta_id} no existe en el plan de cuentas")
+
+                            cuerpo = DetalleCuentasPlanCuenta()
+                            cuerpo.encabezadocuentaplan_id = encabezado.pk
+                            cuerpo.cuenta_id = cuenta_id
+                            cuerpo.detalle = i['detalle']
+                            cuerpo.debe = int(i['debe']) if i.get('debe') else 0
+                            cuerpo.haber = int(i['haber']) if i.get('haber') else 0
+                            cuerpo.save()
+                        except Exception as e:
+                            # Si hay un error, revertir la transacción y devolver el error
+                            transaction.set_rollback(True)
+                            data['error'] = f"Error al guardar el detalle: {str(e)}"
+                            print(f"Error al guardar detalle: {str(e)}")
+                            return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
+            import traceback
+            print("Error en la vista:")
+            print(traceback.format_exc())
             data['error'] = 'el error es : ' + str(e)
         return JsonResponse(data, safe=False)
 
@@ -838,10 +1073,19 @@ class crearTransaccionPlanBIOView(CreateView):
         context['planCuenta2'] = planCuenta2
         context['empresa'] = 'BIO'
         context['det'] = []
+
+        try:
+            empresa_bio = Empresa.objects.get(siglas='BIO')
+            # Modificar el formulario para preseleccionar la empresa BIO
+            form = self.get_form()
+            form.fields['empresa'].initial = empresa_bio.id
+            context['form'] = form
+        except Exception as e:
+            print(f"Error al preseleccionar empresa BIO: {e}")
+
         return context
 
 
-# EDITAR TRANSACCIONES DEL PLAN DE CUENTAS
 class editarTransaccionPlanView(UpdateView):
     model = EncabezadoCuentasPlanCuenta
     form_class = EncabezadoCuentasPlanCuentaForm

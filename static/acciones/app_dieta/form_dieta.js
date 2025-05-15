@@ -29,10 +29,14 @@ var vents = {
             dataType: 'json',
         }).done(function (data) {
             if (!data.hasOwnProperty('error')) {
+                console.log('data');
                 console.log(data);
                 $.each(data, function (key, value) {
-                    //console.log(value);
-                    if (value.categoria === 2) {
+                    console.log('value');
+                    console.log(value);
+                    console.log('value.categoria');
+                    console.log(value.categoria);
+                    if (value.categoria && value.categoria.id === 2) {
                         balanced.push({'id': value.id, 'text': value.nombre});
                     } else {
                         if (value.gramaje != null) {
