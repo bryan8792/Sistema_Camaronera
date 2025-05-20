@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">Costos&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">{{ title }}&nbsp
+                            <i class="far nav-icon fa fa-tags"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">{{ title }}</h3>
+                    </div>
+                    <!-- /.card-body -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                                <ul>
+                                    {% for field in form %}
+                                    {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            <div class="form-group">
+                                <label>{{ form.nombre.label }}:</label>
+                                {{ form.nombre|add_class:"form-control" }}
+                            </div>
+
+                            <div class="form-group">
+                                <label>{{ form.descripcion.label }}:</label>
+                                {{ form.descripcion|add_class:"form-control" }}
+                            </div>
+                        </div>
+                        <!-- /.card-footer -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary btn-flat">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <a href="{% url 'app_empresa:tipo_costo_list' %}" class="btn btn-danger btn-flat">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

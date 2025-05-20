@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ title }}</h3>
+                    <div class="card-tools">
+                        <a href="{% url 'app_empresa:costo_operativo_create' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Registrar Costo
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filter-form">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Piscina:</label>
+                                    <select name="piscina_id" class="form-control select2" style="width: 100%;">
+                                        <option value="">Todas las piscinas</option>
+                                        {% for piscina in piscinas %}
+                                            <option value="{{ piscina.id }}" {% if piscina_id == piscina.id|stringformat:"i" %}selected{% endif %}>
+                                                {{ piscina.empresa.nombre }} - Piscina {{ piscina.numero }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Tipo de Costo:</label>
+                                    <select name="tipo_costo_id" class="form-control select2" style="width: 100%;">
+                                        <option value="">Todos los tipos</option>
+                                        {% for tipo in tipos_costo %}
+                                            <option value="{{ tipo.id }}" {% if tipo_costo_id == tipo.id|stringformat:"i" %}selected{% endif %}>
+                                                {{ tipo.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Fecha Inicio:</label>
+                                    <div class="input-group date" id="fecha_inicio_picker" data-target-input="nearest">
+                                        <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Fecha Fin:</label>
+                                    <div class="input-group date" id="fecha_fin_picker" data-target-input="nearest">
+                                        <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Filtrar
+                                </button>
+                                <a href="{% url 'app_empresa:costo_operativo_list' %}" class="btn btn-default">
+                                    <i class="fas fa-sync"></i> Limpiar filtros
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr>
+
+                    <table id="costos-table" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Piscina</th>
+                                <th>Tipo de Costo</th>
+                                <th>Fecha</th>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for costo in costos %}
+                                <tr>
+                                    {% if costo.piscina.empresa.nombre %}
+                                        <td>{{ costo.piscina.empresa.nombre }} - Piscina {{ costo.piscina.numero }}</td>
+                                    {% else %}
+                                        <td>{{ costo.piscina }} - Piscina {{ costo.piscina.numero }}</td>
+                                    {% endif %}
+
+                                    {% if costo.tipo_costo.nombre %}
+                                        <td>{{ costo.tipo_costo.nombre }}</td>
+                                    {% else %}
+                                        <td>{{ costo.tipo_costo }}</td>
+                                    {% endif %}
+
+                                    {% if costo.fecha|date:"d/m/Y" %}
+                                        <td>{{ costo.fecha|date:"d/m/Y" }}</td>
+                                    {% else %}
+                                        <td>{{ costo.fecha }}</td>
+                                    {% endif %}
+
+                                    <td>{{ costo.descripcion }}</td>
+
+                                    {% if costo.monto|floatformat:2 %}
+                                        <td>${{ costo.monto|floatformat:2 }}</td>
+                                    {% else %}
+                                        <td>${{ costo.monto }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'app_empresa:costo_operativo_update' costo.id %}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'app_empresa:costo_operativo_delete' costo.id %}" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No hay costos operativos registrados</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Piscina</th>
+                                <th>Tipo de Costo</th>
+                                <th>Fecha</th>
+                                <th>Descripción</th>
+                                <th>Monto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $(function () {
+        // Inicializar Select2
+        $('.select2').select2({
+            theme: 'bootstrap4'
+        });
+
+        // Inicializar DataTables
+        $("#costos-table").DataTable({
+            "responsive": true,
+            "lengthChange": true,
+            "autoWidth": false,
+            "language": {
+                "url": "{% static 'lib/datatables/Spanish.json' %}"
+            },
+            "buttons": [
+                "copy", "csv", "excel", "pdf", "print", "colvis"
+            ]
+        }).buttons().container().appendTo('#costos-table_wrapper .col-md-6:eq(0)');
+    });
+</script>
+
+{% if debug %}
+<script>
+    console.log("Modo de depuración activado");
+    console.log("Costos:", {{ costos|safe }});
+</script>
+{% endif %}
+{% endblock %}

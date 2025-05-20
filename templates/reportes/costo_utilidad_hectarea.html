@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <!-- Filtros -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ title }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filter-form">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Empresa:</label>
+                                    <select name="empresa_id" class="form-control select2" style="width: 100%;">
+                                        <option value="">Todas las empresas</option>
+                                        {% for empresa in empresas %}
+                                            <option value="{{ empresa.id }}" {% if empresa_id == empresa.id|stringformat:"i" %}selected{% endif %}>
+                                                {{ empresa.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Fecha Inicio:</label>
+                                    <div class="input-group date">
+                                        <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Fecha Fin:</label>
+                                    <div class="input-group date">
+                                        <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Filtrar
+                                </button>
+                                <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}" class="btn btn-default">
+                                    <i class="fas fa-sync"></i> Limpiar filtros
+                                </a>
+                                <div class="float-right">
+                                    <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}?{{ request.GET.urlencode }}&export=excel" class="btn btn-success">
+                                        <i class="fas fa-file-excel"></i> Exportar a Excel
+                                    </a>
+                                    <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}?{{ request.GET.urlencode }}&export=pdf" class="btn btn-danger">
+                                        <i class="fas fa-file-pdf"></i> Exportar a PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>${{ totales.costo_por_hectarea|floatformat:2 }}</h3>
+                    <p>Costo por Hectárea</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-money-bill"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>${{ totales.ingreso_por_hectarea|floatformat:2 }}</h3>
+                    <p>Ingreso por Hectárea</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>${{ totales.utilidad_por_hectarea|floatformat:2 }}</h3>
+                    <p>Utilidad por Hectárea</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+                <div class="inner">
+                    <h3>{{ totales.rentabilidad|floatformat:2 }}%</h3>
+                    <p>Rentabilidad</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de resultados -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Resultados por Piscina</h3>
+                </div>
+                <div class="card-body">
+                    <table id="resultados-table" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Piscina</th>
+                                <th>Hectáreas</th>
+                                <th>Costos Totales</th>
+                                <th>Ingresos Totales</th>
+                                <th>Utilidad Total</th>
+                                <th>Costo/Ha</th>
+                                <th>Ingreso/Ha</th>
+                                <th>Utilidad/Ha</th>
+                                <th>Rentabilidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for resultado in resultados %}
+                                <tr>
+                                    <td>{{ resultado.piscina }}</td>
+                                    <td>{{ resultado.hectareas|floatformat:2 }}</td>
+                                    <td>${{ resultado.costos_totales|floatformat:2 }}</td>
+                                    <td>${{ resultado.ingresos_totales|floatformat:2 }}</td>
+                                    <td>${{ resultado.utilidad_total|floatformat:2 }}</td>
+                                    <td>${{ resultado.costo_por_hectarea|floatformat:2 }}</td>
+                                    <td>${{ resultado.ingreso_por_hectarea|floatformat:2 }}</td>
+                                    <td>${{ resultado.utilidad_por_hectarea|floatformat:2 }}</td>
+                                    <td>{{ resultado.rentabilidad|floatformat:2 }}%</td>
+                                    <td>
+                                        <button type="button" class="btn btn-info btn-sm ver-desglose" data-piscina-id="{{ resultado.id }}">
+                                            <i class="fas fa-chart-pie"></i> Ver Desglose
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="10" class="text-center">No hay resultados disponibles</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-light font-weight-bold">
+                                <td>TOTALES</td>
+                                <td>{{ totales.hectareas|floatformat:2 }}</td>
+                                <td>${{ totales.costos_totales|floatformat:2 }}</td>
+                                <td>${{ totales.ingresos_totales|floatformat:2 }}</td>
+                                <td>${{ totales.utilidad_total|floatformat:2 }}</td>
+                                <td>${{ totales.costo_por_hectarea|floatformat:2 }}</td>
+                                <td>${{ totales.ingreso_por_hectarea|floatformat:2 }}</td>
+                                <td>${{ totales.utilidad_por_hectarea|floatformat:2 }}</td>
+                                <td>{{ totales.rentabilidad|floatformat:2 }}%</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para desglose de costos -->
+<div class="modal fade" id="modal-desglose">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Desglose de Costos por Tipo</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="chart-container">
+                    <canvas id="desglose-chart"></canvas>
+                </div>
+                <div class="table-responsive mt-3">
+                    <table class="table table-bordered table-striped" id="desglose-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Costo</th>
+                                <th>Monto</th>
+                                <th>Porcentaje</th>
+                            </tr>
+                        </thead>
+                        <tbody id="desglose-body">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(function () {
+        // Inicializar Select2
+        $('.select2').select2({
+            theme: 'bootstrap4'
+        });
+
+        // Inicializar DataTables
+        $("#resultados-table").DataTable({
+            "responsive": true,
+            "lengthChange": true,
+            "autoWidth": false,
+            "language": {
+                "url": "{% static 'lib/datatables/Spanish.json' %}"
+            },
+            "buttons": [
+                "copy", "csv", "excel", "pdf", "print", "colvis"
+            ]
+        }).buttons().container().appendTo('#resultados-table_wrapper .col-md-6:eq(0)');
+
+        // Manejar clic en "Ver Desglose"
+        $('.ver-desglose').on('click', function() {
+            const piscinaId = $(this).data('piscina-id');
+            const fechaInicio = $('input[name="fecha_inicio"]').val();
+            const fechaFin = $('input[name="fecha_fin"]').val();
+
+            // Solicitar datos de desglose
+            $.ajax({
+                url: "{% url 'app_empresa:costo_utilidad_hectarea_api' %}",
+                type: 'POST',
+                data: {
+                    action: 'get_desglose_costos',
+                    piscina_id: piscinaId,
+                    fecha_inicio: fechaInicio,
+                    fecha_fin: fechaFin
+                },
+                success: function(data) {
+                    // Preparar datos para el gráfico
+                    const labels = [];
+                    const valores = [];
+                    const colores = [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)',
+                        'rgba(83, 102, 255, 0.7)',
+                        'rgba(40, 159, 64, 0.7)',
+                        'rgba(210, 99, 132, 0.7)'
+                    ];
+
+                    // Calcular total para porcentajes
+                    let total = 0;
+                    data.forEach(item => {
+                        total += item.total;
+                    });
+
+                    // Llenar tabla de desglose
+                    $('#desglose-body').empty();
+                    data.forEach((item, index) => {
+                        labels.push(item.tipo_costo);
+                        valores.push(item.total);
+
+                        const porcentaje = ((item.total / total) * 100).toFixed(2);
+                        $('#desglose-body').append(`
+                            <tr>
+                                <td>${item.tipo_costo}</td>
+                                <td>$${item.total.toFixed(2)}</td>
+                                <td>${porcentaje}%</td>
+                            </tr>
+                        `);
+                    });
+
+                    // Crear gráfico de desglose
+                    if (window.desgloseChart) {
+                        window.desgloseChart.destroy();
+                    }
+
+                    const desgloseCtx = document.getElementById('desglose-chart').getContext('2d');
+                    window.desgloseChart = new Chart(desgloseCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: valores,
+                                backgroundColor: colores,
+                                borderColor: colores.map(color => color.replace('0.7', '1')),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            tooltips: {
+                                callbacks: {
+                                    label: function(tooltipItem, data) {
+                                        const dataset = data.datasets[tooltipItem.datasetIndex];
+                                        const total = dataset.data.reduce((acc, val) => acc + val, 0);
+                                        const currentValue = dataset.data[tooltipItem.index];
+                                        const percentage = ((currentValue / total) * 100).toFixed(2);
+                                        return data.labels[tooltipItem.index] + ': $' + currentValue.toFixed(2) + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Mostrar modal
+                    $('#modal-desglose').modal('show');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al obtener desglose:", error);
+                    alert("Error al obtener el desglose de costos. Por favor, intente nuevamente.");
+                }
+            });
+        });
+    });
+</script>
+
+{% if debug %}
+<script>
+    console.log("Modo de depuración activado");
+    console.log("Resultados:", {{ resultados|safe }});
+    console.log("Totales:", {{ totales|safe }});
+</script>
+{% endif %}
+{% endblock %}

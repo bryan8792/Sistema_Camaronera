@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ title }}</h3>
+                    <div class="card-tools">
+                        <a href="{% url 'app_empresa:produccion_create' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Registrar Producción
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filter-form">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Piscina:</label>
+                                    <select name="piscina_id" class="form-control select2" style="width: 100%;">
+                                        <option value="">Todas las piscinas</option>
+                                        {% for piscina in piscinas %}
+                                            <option value="{{ piscina.id }}" {% if piscina_id == piscina.id|stringformat:"i" %}selected{% endif %}>
+                                                {{ piscina.empresa.nombre }} - Piscina {{ piscina.numero }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Ciclo:</label>
+                                    <select name="ciclo_id" class="form-control select2" style="width: 100%;">
+                                        <option value="">Todos los ciclos</option>
+                                        {% for ciclo in ciclos %}
+                                            <option value="{{ ciclo.id }}" {% if ciclo_id == ciclo.id|stringformat:"i" %}selected{% endif %}>
+                                                {{ ciclo.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Fecha Inicio:</label>
+                                    <div class="input-group date" id="fecha_inicio_picker" data-target-input="nearest">
+                                        <input type="date" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Fecha Fin:</label>
+                                    <div class="input-group date" id="fecha_fin_picker" data-target-input="nearest">
+                                        <input type="date" name="fecha_fin" class="form-control" value="{{ fecha_fin }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Filtrar
+                                </button>
+                                <a href="{% url 'app_empresa:produccion_list' %}" class="btn btn-default">
+                                    <i class="fas fa-sync"></i> Limpiar filtros
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+
+                    <hr>
+
+                    <table id="producciones-table" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Piscina</th>
+                                <th>Ciclo</th>
+                                <th>Fecha Cosecha</th>
+                                <th>Cantidad (kg)</th>
+                                <th>Precio/kg</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produccion in producciones %}
+                                <tr>
+                                    {% if produccion.piscina.empresa.nombre %}
+                                        <td>{{ produccion.piscina.empresa.nombre }} - Piscina {{ produccion.piscina.numero }}</td>
+                                    {% else %}
+                                        <td>{{ produccion.piscina }}</td>
+                                    {% endif %}
+
+                                    {% if produccion.ciclo.nombre %}
+                                        <td>{{ produccion.ciclo.nombre }}</td>
+                                    {% else %}
+                                        <td>{{ produccion.ciclo }}</td>
+                                    {% endif %}
+
+                                    {% if produccion.fecha_cosecha|date:"d/m/Y" %}
+                                        <td>{{ produccion.fecha_cosecha|date:"d/m/Y" }}</td>
+                                    {% else %}
+                                        <td>{{ produccion.fecha_cosecha }}</td>
+                                    {% endif %}
+
+                                    {% if produccion.cantidad_kg|floatformat:2 %}
+                                        <td>{{ produccion.cantidad_kg|floatformat:2 }}</td>
+                                    {% else %}
+                                        <td>{{ produccion.cantidad_kg }}</td>
+                                    {% endif %}
+
+                                    {% if produccion.precio_venta_kg|floatformat:2 %}
+                                        <td>${{ produccion.precio_venta_kg|floatformat:2 }}</td>
+                                    {% else %}
+                                        <td>${{ produccion.precio_venta_kg }}</td>
+                                    {% endif %}
+
+                                    {% if produccion.total|floatformat:2 %}
+                                        <td>${{ produccion.total|floatformat:2 }}</td>
+                                    {% else %}
+                                        <td>${{ produccion.total }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'app_empresa:produccion_update' produccion.id %}" class="btn btn-info btn-sm">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{% url 'app_empresa:produccion_delete' produccion.id %}" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No hay producciones registradas</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Piscina</th>
+                                <th>Ciclo</th>
+                                <th>Fecha Cosecha</th>
+                                <th>Cantidad (kg)</th>
+                                <th>Precio/kg</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(function () {
+        // Inicializar Select2
+        $('.select2').select2({
+            theme: 'bootstrap4'
+        });
+
+        // Inicializar DataTables
+        $("#producciones-table").DataTable({
+            "responsive": true,
+            "lengthChange": true,
+            "autoWidth": false,
+            "language": {
+                "url": "{% static 'lib/datatables/Spanish.json' %}"
+            },
+            "buttons": [
+                "copy", "csv", "excel", "pdf", "print", "colvis"
+            ]
+        }).buttons().container().appendTo('#producciones-table_wrapper .col-md-6:eq(0)');
+    });
+</script>
+
+{% if debug %}
+<script>
+    console.log("Modo de depuración activado");
+    console.log("Producciones:", {{ producciones|safe }});
+</script>
+{% endif %}
+{% endblock %}

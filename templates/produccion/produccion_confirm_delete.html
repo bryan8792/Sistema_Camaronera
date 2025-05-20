@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">Producciones&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Eliminar Producción&nbsp
+                            <i class="far nav-icon fa fa-trash-alt"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Eliminar Producción</h3>
+                    </div>
+                    <!-- /.card-body -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <p class="alert alert-danger">
+                                ¿Está seguro que desea eliminar la producción de {{ object.cantidad_kg|floatformat:2 }} kg
+                                de la piscina {{ object.piscina.numero }} - {{ object.piscina.nombre }} del {{ object.fecha_cosecha|date:"d/m/Y" }}?
+                            </p>
+                            <p><strong>Esta acción no se puede deshacer.</strong></p>
+
+                            <div class="alert alert-info">
+                                <h5><i class="icon fas fa-info"></i> Información</h5>
+                                <ul>
+                                    <li><strong>Cliente:</strong> {{ object.cliente|default:"No especificado" }}</li>
+                                    <li><strong>Factura:</strong> {{ object.factura|default:"No especificado" }}</li>
+                                    <li><strong>Valor total:</strong> ${{ object.valor_total|floatformat:2 }}</li>
+                                    <li><strong>Talla promedio:</strong> {{ object.talla_promedio|default:"No especificado"|floatformat:2 }} g</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- /.card-footer -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-danger btn-flat">
+                                <i class="fas fa-trash-alt"></i> Sí, eliminar
+                            </button>
+                            <a href="{% url 'app_empresa:produccion_list' %}" class="btn btn-secondary btn-flat">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
