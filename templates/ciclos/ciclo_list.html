@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">Ciclos&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de Ciclos&nbsp
+                            <i class="far nav-icon fa fa-sync-alt"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Listado de: <strong>Ciclos de Producción</strong></h3>
+                        <div class="card-tools">
+                            <ul class="pagination pagination-sm float-right">
+                                <li class="page-item">
+                                    <a href="{% url 'app_empresa:ciclo_create' %}"
+                                       class="btn btn-block btn-default btn-sm">
+                                        <strong><i class="fas fa-plus"></i> NUEVO CICLO</strong>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-body">
+                        <table id="tb_ciclos" class="table table-striped table-bordered">
+                            <thead>
+                            <tr role="row">
+                                <th style="width: 5%;" class="text-center">#</th>
+                                <th style="width: 20%;" class="text-left">Piscina</th>
+                                <th style="width: 15%;" class="text-left">Nombre</th>
+                                <th style="width: 15%;" class="text-center">Fecha Inicio</th>
+                                <th style="width: 15%;" class="text-center">Fecha Fin</th>
+                                <th style="width: 10%;" class="text-center">Densidad</th>
+                                <th style="width: 10%;" class="text-center">Estado</th>
+                                <th style="width: 10%;" class="text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for ciclo in ciclos %}
+                                <tr role="row" class="odd">
+                                    <td><strong>{{ ciclo.id }}</strong></td>
+                                    <td>{{ ciclo.piscina.numero }} - {{ ciclo.piscina.nombre }}</td>
+                                    <td>{{ ciclo.nombre }}</td>
+                                    <td class="text-center">{{ ciclo.fecha_inicio|date:"d/m/Y" }}</td>
+                                    <td class="text-center">{% if ciclo.fecha_fin %}{{ ciclo.fecha_fin|date:"d/m/Y" }}{% else %}En curso{% endif %}</td>
+                                    <td class="text-center">{{ ciclo.densidad_siembra }} larvas/m²</td>
+                                    <td class="text-center">
+                                        {% if ciclo.activo %}
+                                        <span class="badge badge-success">Activo</span>
+                                        {% else %}
+                                        <span class="badge badge-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{% url 'app_empresa:ciclo_update' ciclo.id %}"
+                                           class="btn btn-primary btn-xs btn-flat">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'app_empresa:ciclo_delete' ciclo.id %}"
+                                           class="btn btn-danger btn-xs btn-flat">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">No hay ciclos registrados</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.card-footer -->
+                    <div class="card-footer">
+                        {% block buttons_list %}
+                            <a href="{% url 'app_empresa:ciclo_create' %}"
+                               class="btn btn-primary btn-flat btnTest">
+                                <i class="fas fa-plus"></i> Nuevo ciclo
+                            </a>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(function () {
+            $("#tb_ciclos").DataTable({
+                "responsive": true,
+                "autoWidth": false,
+                "language": {
+                    url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
+                }
+            });
+        });
+    </script>
+{% endblock %}

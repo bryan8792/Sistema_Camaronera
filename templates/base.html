@@ -572,6 +572,109 @@
                             </ul>
                         </li>
 
+                        <!-- Costos y Utilidades -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link"><i class="fa fa-chart-line nav-icon"></i>
+                                <p>Costos y Utilidades<i class="right fas fa-angle-left"></i></p></a>
+                            <ul class="nav nav-treeview">
+                                <!-- Reporte de Costo-Utilidad -->
+                                <li class="nav-item">
+                                    <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}"
+                                       class="nav-link">
+                                        <i class="fa fa-chart-bar nav-icon"></i>
+                                        <p>Reporte Costo-Utilidad</p></a>
+                                </li>
+
+                                <!-- Tipos de Costos -->
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-tags nav-icon"></i>
+                                        <p>Tipos de Costos<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:tipo_costo_list' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-list nav-icon"></i>
+                                                <p>Listar Tipos</p></a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:tipo_costo_create' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-plus nav-icon"></i>
+                                                <p>Crear Tipo</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- Costos Operativos -->
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-money-bill nav-icon"></i>
+                                        <p>Costos Operativos<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:costo_operativo_list' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-list nav-icon"></i>
+                                                <p>Listar Costos</p></a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:costo_operativo_create' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-plus nav-icon"></i>
+                                                <p>Registrar Costo</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- Ciclos -->
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-sync-alt nav-icon"></i>
+                                        <p>Ciclos<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:ciclo_list' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-list nav-icon"></i>
+                                                <p>Listar Ciclos</p></a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:ciclo_create' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-plus nav-icon"></i>
+                                                <p>Registrar Ciclo</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- Producciones -->
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link"><i class="fa fa-fish nav-icon"></i>
+                                        <p>Producciones<i class="right fas fa-angle-left"></i></p></a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:produccion_list' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-list nav-icon"></i>
+                                                <p>Listar Producciones</p></a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a href="{% url 'app_empresa:produccion_create' %}"
+                                               class="nav-link">
+                                                <i class="fa fa-plus nav-icon"></i>
+                                                <p>Registrar Producción</p></a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <!-- Cargar Datos Iniciales -->
+                                <li class="nav-item">
+                                    <a href="{% url 'app_empresa:cargar_datos_iniciales' %}"
+                                       class="nav-link">
+                                        <i class="fa fa-database nav-icon"></i>
+                                        <p>Cargar Datos Iniciales</p></a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>

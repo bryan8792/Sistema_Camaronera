@@ -770,7 +770,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Company name
     doc.setFontSize(16)
-    doc.text("PESQUERA SAN MIGUEL C. LTDA.", doc.internal.pageSize.width / 2, 40, { align: "center" })
+    doc.text("BIOCASCAJAL CIA LTDA.", doc.internal.pageSize.width / 2, 40, { align: "center" })
 
     // Report title
     doc.setFontSize(14)

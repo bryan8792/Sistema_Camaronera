@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">Costos&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Eliminar Costo Operativo&nbsp
+                            <i class="far nav-icon fa fa-trash-alt"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Eliminar Costo Operativo</h3>
+                    </div>
+                    <!-- /.card-body -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <p class="alert alert-danger">
+                                ¿Está seguro que desea eliminar el costo operativo de ${{ object.monto|floatformat:2 }}
+                                por concepto de {{ object.tipo_costo.nombre }} para la piscina {{ object.piscina.numero }} - {{ object.piscina.nombre }}?
+                            </p>
+                            <p><strong>Esta acción no se puede deshacer.</strong></p>
+
+                            <div class="alert alert-info">
+                                <h5><i class="icon fas fa-info"></i> Información</h5>
+                                <ul>
+                                    <li><strong>Fecha:</strong> {{ object.fecha|date:"d/m/Y" }}</li>
+                                    <li><strong>Descripción:</strong> {{ object.descripcion }}</li>
+                                    <li><strong>Proveedor:</strong> {{ object.proveedor|default:"No especificado" }}</li>
+                                    <li><strong>Comprobante:</strong> {{ object.comprobante|default:"No especificado" }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- /.card-footer -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-danger btn-flat">
+                                <i class="fas fa-trash-alt"></i> Sí, eliminar
+                            </button>
+                            <a href="{% url 'app_empresa:costo_operativo_list' %}" class="btn btn-secondary btn-flat">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

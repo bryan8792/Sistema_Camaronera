@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">Producciones&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">{{ title }}&nbsp
+                            <i class="far nav-icon fa fa-fish"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">{{ title }}</h3>
+                    </div>
+                    <!-- /.card-body -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible">
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                <h5><i class="icon fas fa-ban"></i> Error</h5>
+                                <ul>
+                                    {% for field in form %}
+                                    {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.piscina.label }}:</label>
+                                        {{ form.piscina|add_class:"form-control select2" }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.ciclo.label }}:</label>
+                                        {{ form.ciclo|add_class:"form-control select2" }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.fecha_cosecha.label }}:</label>
+                                        {{ form.fecha_cosecha|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.cantidad_kg.label }}:</label>
+                                        {{ form.cantidad_kg|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.precio_venta_kg.label }}:</label>
+                                        {{ form.precio_venta_kg|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.talla_promedio.label }}:</label>
+                                        {{ form.talla_promedio|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.cliente.label }}:</label>
+                                        {{ form.cliente|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>{{ form.factura.label }}:</label>
+                                        {{ form.factura|add_class:"form-control" }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>{{ form.observaciones.label }}:</label>
+                                {{ form.observaciones|add_class:"form-control" }}
+                            </div>
+                        </div>
+                        <!-- /.card-footer -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary btn-flat">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <a href="{% url 'app_empresa:produccion_list' %}" class="btn btn-danger btn-flat">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(function () {
+            $('.select2').select2({
+                theme: 'bootstrap4'
+            });
+
+            // Filtrar ciclos por piscina seleccionada
+            $('#id_piscina').change(function() {
+                var piscinaId = $(this).val();
+                if (piscinaId) {
+                    $.ajax({
+                        url: '{% url "app_empresa:ciclos_por_piscina" %}',
+                        data: {
+                            'piscina_id': piscinaId
+                        },
+                        dataType: 'json',
+                        success: function(data) {
+                            var options = '<option value="">---------</option>';
+                            $.each(data, function(index, item) {
+                                options += '<option value="' + item.id + '">' + item.nombre + '</option>';
+                            });
+                            $('#id_ciclo').html(options);
+                            $('#id_ciclo').trigger('change');
+                        }
+                    });
+                } else {
+                    $('#id_ciclo').html('<option value="">---------</option>');
+                    $('#id_ciclo').trigger('change');
+                }
+            });
+
+            // Calcular valor total automáticamente
+            $('#id_cantidad_kg, #id_precio_venta_kg').change(function() {
+                var cantidad = $('#id_cantidad_kg').val();
+                var precio = $('#id_precio_venta_kg').val();
+
+                if (cantidad && precio) {
+                    var total = cantidad * precio;
+                    $('#valor_total').text('$' + total.toFixed(2));
+                } else {
+                    $('#valor_total').text('$0.00');
+                }
+            });
+        });
+    </script>
+{% endblock %}
