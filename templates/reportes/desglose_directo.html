@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Desglose de Costos</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.1/dist/chart.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Desglose de Costos por Tipo</h1>
+
+        <div class="chart-container">
+            <canvas id="desglose-chart"></canvas>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Tipo de Costo</th>
+                        <th>Monto</th>
+                        <th>Porcentaje</th>
+                    </tr>
+                </thead>
+                <tbody id="desglose-body">
+                    <tr>
+                        <td>Alimento</td>
+                        <td>$1,000.00</td>
+                        <td>45.45%</td>
+                    </tr>
+                    <tr>
+                        <td>Mano de obra</td>
+                        <td>$800.00</td>
+                        <td>36.36%</td>
+                    </tr>
+                    <tr>
+                        <td>Insumos</td>
+                        <td>$400.00</td>
+                        <td>18.18%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="button" class="btn btn-primary" onclick="window.print()">Imprimir</button>
+            <button type="button" class="btn btn-secondary" onclick="window.close()">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo
+        const data = [
+            {tipo_costo: 'Alimento', total: 1000.0},
+            {tipo_costo: 'Mano de obra', total: 800.0},
+            {tipo_costo: 'Insumos', total: 400.0}
+        ];
+
+        // Preparar datos para el gráfico
+        const labels = data.map(item => item.tipo_costo);
+        const valores = data.map(item => item.total);
+        const colores = [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)'
+        ];
+
+        // Crear gráfico
+        const ctx = document.getElementById('desglose-chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: valores,
+                    backgroundColor: colores,
+                    borderColor: colores.map(color => color.replace('0.7', '1')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

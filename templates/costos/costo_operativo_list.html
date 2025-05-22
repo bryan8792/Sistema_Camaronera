@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
+
 {% load static %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block contenido %}
 
-{% block content %}
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -67,7 +67,7 @@
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-filter"></i> Filtrar
                                 </button>
-                                <a href="{% url 'app_empresa:costo_operativo_list' %}" class="btn btn-default">
+                                <a href="{% url 'app_empresa:costo_operativo_list' %}" class="btn btn-success">
                                     <i class="fas fa-sync"></i> Limpiar filtros
                                 </a>
                             </div>
@@ -133,7 +133,7 @@
                                 </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot>
+                        {% comment %}<tfoot>
                             <tr>
                                 <th>Piscina</th>
                                 <th>Tipo de Costo</th>
@@ -142,7 +142,7 @@
                                 <th>Monto</th>
                                 <th>Acciones</th>
                             </tr>
-                        </tfoot>
+                        </tfoot>{% endcomment %}
                     </table>
                 </div>
             </div>
@@ -151,7 +151,7 @@
 </div>
 {% endblock %}
 
-{% block javascript %}
+{% block scripts %}
 <script>
     $(function () {
         // Inicializar Select2
@@ -161,12 +161,14 @@
 
         // Inicializar DataTables
         $("#costos-table").DataTable({
-            "responsive": true,
-            "lengthChange": true,
-            "autoWidth": false,
+            responsive: true,
+            lengthChange: true,
+            autoWidth: false,
+            destroy: true,
             "language": {
-                "url": "{% static 'lib/datatables/Spanish.json' %}"
+                url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
             },
+            deferRender: true,
             "buttons": [
                 "copy", "csv", "excel", "pdf", "print", "colvis"
             ]

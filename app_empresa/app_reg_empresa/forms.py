@@ -127,7 +127,7 @@ class CostoOperativoForm(ModelForm):
             'monto': NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
             'descripcion': Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'comprobante': TextInput(attrs={'class': 'form-control'}),
-            'proveedor': TextInput(attrs={'class': 'form-control'}),
+            'proveedor': Select(attrs={'class': 'form-control select2'}),
         }
 
 

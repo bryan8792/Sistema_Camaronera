@@ -1,16 +1,8 @@
 from django.urls import path
-
-from .views.crear_transaccion import CostoUtilidadHectareaView, CostoUtilidadHectareaAPIView, TipoCostoListView, \
-    TipoCostoCreateView, TipoCostoUpdateView, TipoCostoDeleteView, CostoOperativoCreateView, CostoOperativoListView, \
-    CostoOperativoUpdateView, CostoOperativoDeleteView, ProduccionListView, ProduccionCreateView, ProduccionUpdateView, \
-    ProduccionDeleteView, cargar_datos_iniciales, CicloListView, CiclosPorPiscinaView, PiscinaInfoView, CicloCreateView, \
-    CicloUpdateView, CicloDeleteView
-from .views.debug_view import DebugCostoUtilidadHectareaView, DebugCostoUtilidadHectareaAPIView, DebugTemplateView, \
-    DebugBlocksView, DebugCostoOperativoListView, DebugProduccionListView
+from .views.crear_transaccion import *
+from .views.debug_view import *
 from .views.empresa import *
 from .views.piscinas import *
-from .views.cargar_datos import *
-from django.views.decorators.csrf import csrf_exempt
 
 app_name = 'app_empresa'
 
@@ -64,8 +56,8 @@ urlpatterns = [
     path('debug/blocks/', DebugBlocksView.as_view(), name='debug_blocks'),
     path('debug/costo-utilidad-hectarea/', DebugCostoUtilidadHectareaView.as_view(),
          name='debug_costo_utilidad_hectarea'),
-    path('debug/costo-utilidad-hectarea/api/', DebugCostoUtilidadHectareaAPIView.as_view(),
-         name='debug_costo_utilidad_hectarea_api'),
     path('debug/costos-operativos/', DebugCostoOperativoListView.as_view(), name='debug_costo_operativo_list'),
     path('debug/producciones/', DebugProduccionListView.as_view(), name='debug_produccion_list'),
+
+    path('desglose-costos/', DesgloseCostosView.as_view(), name='desglose_costos'),
 ]
