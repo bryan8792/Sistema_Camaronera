@@ -1,0 +1,52 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Desglose de Costos por Tipo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h4>Desglose de Costos por Tipo</h4>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <div class="alert alert-info">
+        Esta es una vista de respaldo que se muestra cuando la API no responde correctamente.
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Tipo de Costo</th>
+                <th>Monto</th>
+                <th>Porcentaje</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in datos %}
+                <tr>
+                    <td>{{ item.tipo_costo }}</td>
+                    <td>${{ item.total|floatformat:2|intcomma }}</td>
+                    <td>{{ item.porcentaje|floatformat:2 }}%</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="3">No hay datos disponibles</td></tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr class="bg-light font-weight-bold">
+                <td>TOTAL</td>
+                <td>${{ total|floatformat:2|intcomma }}</td>
+                <td>100.00%</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+</body>
+</html>

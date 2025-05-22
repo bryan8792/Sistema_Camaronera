@@ -9,6 +9,7 @@ from django.db import models
 from datetime import datetime
 from django.forms import model_to_dict
 from Sistema_Camaronera.settings import MEDIA_URL, STATIC_URL, BASE_DIR
+from app_proveedor.models import *
 from utilities.choices import *
 from utilities import printer
 from utilities.sri import SRI
@@ -169,7 +170,7 @@ class CostoOperativo(models.Model):
     monto = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Monto')
     descripcion = models.TextField(blank=True, null=True, verbose_name='Descripción')
     comprobante = models.CharField(max_length=50, blank=True, null=True, verbose_name='Número de factura o comprobante')
-    proveedor = models.CharField(max_length=100, blank=True, null=True, verbose_name='Proveedor')
+    proveedor = models.ForeignKey('app_proveedor.Proveedor', on_delete=models.CASCADE, related_name='costos_operativos')
     usuario_registro = models.CharField(max_length=100, blank=True, null=True, verbose_name='Usuario que registra')
     fecha_registro = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de registro')
 
@@ -179,6 +180,7 @@ class CostoOperativo(models.Model):
     def toJSON(self):
         item = model_to_dict(self)
         item['piscina'] = self.piscina.toJSON()
+        item['proveedor'] = self.proveedor.toJSON()
         item['tipo_costo'] = self.tipo_costo.toJSON()
         item['fecha'] = self.fecha.strftime('%Y-%m-%d')
         item['monto'] = float(self.monto)
