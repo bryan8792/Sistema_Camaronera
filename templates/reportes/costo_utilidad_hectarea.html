@@ -3,7 +3,6 @@
 {% load widget_tweaks %}
 
 {% block head %}
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 {% endblock %}
@@ -11,6 +10,24 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item">
+                            <a href="#">Costo-Utilidad&nbsp;<i class="far nav-icon fa fa-home"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active">Reporte de Costo-Utilidad por Hectárea&nbsp;
+                            <i class="far nav-icon fa fa-tags"></i>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid">
         <!-- Filtros -->
         <div class="row">
@@ -58,19 +75,19 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-filter"></i> Filtrar
+                                        <i class="fas fa-filter"></i>&nbsp; Filtrar
                                     </button>
                                     <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}" class="btn btn-success">
-                                        <i class="fas fa-sync"></i> Limpiar filtros
+                                        <i class="fas fa-sync"></i>&nbsp; Limpiar filtros
                                     </a>
                                     <div class="float-right">
                                         <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}?{{ request.GET.urlencode }}&export=excel"
                                            class="btn btn-success">
-                                            <i class="fas fa-file-excel"></i> Exportar a Excel
+                                            <i class="fas fa-file-excel"></i>&nbsp; Exportar a Excel
                                         </a>
                                         <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}?{{ request.GET.urlencode }}&export=pdf"
                                            class="btn btn-danger">
-                                            <i class="fas fa-file-pdf"></i> Exportar a PDF
+                                            <i class="fas fa-file-pdf"></i>&nbsp; Exportar a PDF
                                         </a>
                                     </div>
                                 </div>
@@ -165,8 +182,9 @@
                                     <td>${{ resultado.utilidad_por_hectarea|floatformat:2 }}</td>
                                     <td>{{ resultado.rentabilidad|floatformat:2 }}%</td>
                                     <td>
-                                        <button type="button" class="btn btn-info btn-sm ver-desglose" data-piscina-id="{{ resultado.id }}">
-                                            <i class="fas fa-chart-pie"></i> Ver Desglose
+                                        <button type="button" class="btn btn-info btn-sm ver-desglose"
+                                                data-piscina-id="{{ resultado.id }}">
+                                            <i class="fas fa-chart-pie"></i>&nbsp; Ver Desglose
                                         </button>
                                         {% comment %}<a href="{% url 'app_empresa:desglose_costo' resultado.id %}?fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}"
                                            class="btn btn-info btn-sm">
