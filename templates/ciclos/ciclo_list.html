@@ -11,7 +11,7 @@
                     <ol class="breadcrumb float-sm-left">
                         <li class="breadcrumb-item"><a href="#">Ciclos&nbsp
                             <i class="far nav-icon fa fa-home"></i></a></li>
-                        <li class="breadcrumb-item active">Listado de Ciclos&nbsp
+                        <li class="breadcrumb-item active">Listado de Ciclos &nbsp;
                             <i class="far nav-icon fa fa-sync-alt"></i></li>
                     </ol>
                 </div>
@@ -24,14 +24,14 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header" style="background-color:#3498DB">
+                    <div class="card-header">
                         <h3 class="card-title">Listado de: <strong>Ciclos de Producción</strong></h3>
                         <div class="card-tools">
                             <ul class="pagination pagination-sm float-right">
                                 <li class="page-item">
                                     <a href="{% url 'app_empresa:ciclo_create' %}"
-                                       class="btn btn-block btn-default btn-sm">
-                                        <strong><i class="fas fa-plus"></i> NUEVO CICLO</strong>
+                                       class="btn btn-block btn-primary btn-sm">
+                                        <strong><i class="fas fa-plus"></i>&nbsp; NUEVO CICLO</strong>
                                     </a>
                                 </li>
                             </ul>
@@ -92,7 +92,7 @@
                         {% block buttons_list %}
                             <a href="{% url 'app_empresa:ciclo_create' %}"
                                class="btn btn-primary btn-flat btnTest">
-                                <i class="fas fa-plus"></i> Nuevo ciclo
+                                <i class="fas fa-plus"></i>&nbsp; Nuevo Ciclo
                             </a>
                         {% endblock %}
                     </div>
