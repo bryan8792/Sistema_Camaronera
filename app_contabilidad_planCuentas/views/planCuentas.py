@@ -657,8 +657,7 @@ class listarTransaccionPlanBIOView(ListView):
             action = request.POST['action']
             if action == 'searchdata_bio':
                 data = []
-                for i in EncabezadoCuentasPlanCuenta.objects.filter(reg_control__exact='RT',
-                                                                    empresa__siglas__exact='BIO'):
+                for i in EncabezadoCuentasPlanCuenta.objects.filter(reg_control__exact='RT', empresa__siglas__exact='BIO'):
                     data.append(i.toJSON())
             else:
                 data['error'] = 'Ha ocurrido un error'
@@ -668,7 +667,7 @@ class listarTransaccionPlanBIOView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Transaccion de Plan de Cuentas Empresa BIO'
+        context['nombre'] = 'Transacciones Sin ATS del Plan de Cuentas Empresa BIO'
         context['title'] = 'Transaccion de Plan de Cuentas Empresa BIO'
         context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
         return context
