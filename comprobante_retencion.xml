@@ -3,24 +3,24 @@
   <infoTributaria>
     <ambiente>1</ambiente>
     <tipoEmision>1</tipoEmision>
-    <razonSocial>PESQUERA SAN MIGUEL</razonSocial>
-    <nombreComercial>PESQUERA SAN MIGUEL</nombreComercial>
-    <ruc>0790046617001</ruc>
-    <claveAcceso>2401202507079004661700110010020000000431473223611</claveAcceso>
+    <razonSocial>BIOCASCAJAL</razonSocial>
+    <nombreComercial>BIOCASCAJAL</nombreComercial>
+    <ruc>0790101804001</ruc>
+    <claveAcceso>0606202507079010180400110010020000000033046487919</claveAcceso>
     <codDoc>07</codDoc>
     <estab>001</estab>
     <ptoEmi>002</ptoEmi>
-    <secuencial>000000043</secuencial>
-    <dirMatriz>GUAYAS 1811 E/SUCRE Y 25 JUNIO</dirMatriz>
+    <secuencial>000000003</secuencial>
+    <dirMatriz>GUAYAS / SUCRE Y 25 DE JUNIO</dirMatriz>
   </infoTributaria>
   <infoCompRetencion>
-    <fechaEmision>24/01/2025</fechaEmision>
-    <dirEstablecimiento>GUAYAS 1811 E/ SUCRE Y 25 DE JUNIO</dirEstablecimiento>
-    <obligadoContabilidad>SI</obligadoContabilidad>
+    <fechaEmision>06/06/2025</fechaEmision>
+    <dirEstablecimiento>GUAYAS / SUCRE Y 25 DE JUNIO</dirEstablecimiento>
+    <obligadoContabilidad>NO</obligadoContabilidad>
     <tipoIdentificacionSujetoRetenido>04</tipoIdentificacionSujetoRetenido>
     <parteRel>NO</parteRel>
-    <razonSocialSujetoRetenido>TAPIA VELOZ CARMEN DEL ROCIO</razonSocialSujetoRetenido>
-    <identificacionSujetoRetenido>1709704397001</identificacionSujetoRetenido>
+    <razonSocialSujetoRetenido>BIOCASCAJAL</razonSocialSujetoRetenido>
+    <identificacionSujetoRetenido>0790046617001</identificacionSujetoRetenido>
     <periodoFiscal>12/2024</periodoFiscal>
   </infoCompRetencion>
   <docsSustento>
@@ -28,8 +28,8 @@
       <codSustento>02</codSustento>
       <codDocSustento>01</codDocSustento>
       <numDocSustento>001002000000313</numDocSustento>
-      <fechaEmisionDocSustento>24/01/2025</fechaEmisionDocSustento>
-      <fechaRegistroContable>24/01/2025</fechaRegistroContable>
+      <fechaEmisionDocSustento>05/06/2025</fechaEmisionDocSustento>
+      <fechaRegistroContable>05/06/2025</fechaRegistroContable>
       <numAutDocSustento>0412202401170970439700120010020000003130000031617</numAutDocSustento>
       <pagoLocExt>01</pagoLocExt>
       <totalSinImpuestos>274.45</totalSinImpuestos>

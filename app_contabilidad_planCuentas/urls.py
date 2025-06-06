@@ -33,7 +33,9 @@ urlpatterns = [
     path('fact_gasto_psm/listar/', listarFacturaGastoPSMView.as_view(), name='listar_fact_gasto_psm'),
     path('fact_gasto_bio/listar/', listarFacturaGastoBIOView.as_view(), name='listar_fact_gasto_bio'),
     path('fact_gasto/crear/', crearFacturaGastoView.as_view(), name='crear_fact_gasto'),
+    path('fact_gasto_bio/crear/', crearFacturaGastoBIOView.as_view(), name='crear_fact_gasto_bio'),
     path('fact_gasto/editar/<int:pk>/', editarFacturaGastoView.as_view(), name='editar_fact_gasto'),
+    path('fact_gasto_bio/editar/<int:pk>/', editarFacturaGastoBIOView.as_view(), name='editar_fact_gasto_bio'),
     # path('fact_gasto/eliminar/<int:pk>/', editarTransaccionPlanView.as_view(), name='eliminar_fact_gasto'),
 
     # REQUISITOS PARA EL MODULO BALANCE DE COMPROBACION DEL PLAN DE CUENTAS
