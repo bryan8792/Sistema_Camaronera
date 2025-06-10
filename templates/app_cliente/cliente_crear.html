@@ -22,16 +22,16 @@
 
     <!-- Main content -->
 
-        <section class="content">
-            <div class="row">
+    <section class="content">
+        <div class="row">
             <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-plus"></i> Nuevo registro de un Cliente</h3>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-plus"></i> Nuevo registro de un Cliente</h3>
+                    </div>
 
-                        <!-- /.card-body -->
-                        <div class="card-body">
+                    <!-- /.card-body -->
+                    <div class="card-body">
 
                         <form method="post" action=".">
 
@@ -44,23 +44,23 @@
                                 </div>
                             {% endfor %}
                         </form>
-                        </div>
-
-                        <div class="card-footer navbar-white">
-                            <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
-                                <i class="fas fa-save"></i> GUARDAR
-                            </button>
-                            <a href="{% url 'app_categoria:listar_categoria' %}" class="btn btn-danger btn-file">
-                                <i class="fas fa-times"></i> CANCELAR
-                            </a>
-                        </div>
-
                     </div>
+
+                    <div class="card-footer navbar-white">
+                        <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
+                            <i class="fas fa-save"></i> GUARDAR
+                        </button>
+                        <a href="{% url 'app_categoria:listar_categoria' %}" class="btn btn-danger btn-file">
+                            <i class="fas fa-times"></i> CANCELAR
+                        </a>
+                    </div>
+
                 </div>
-                <!-- /.col -->
             </div>
-            <!-- /.row -->
-        </section>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </section>
 
 
     <!-- /.row -->
