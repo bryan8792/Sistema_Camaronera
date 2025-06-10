@@ -15,7 +15,7 @@ from app_inventario.app_categoria.models import Categoria
  #       'nombre': 'Categoria',
  #       'categorias': Categoria.objects.all()
  #   }
- #   return render(request, 'app_inventario/app_categoria/categoria_listar.html', data)
+ #   return render(request, 'app_inventario/app_categoria/cliente_listar.html', data)
 
 
 #CREAREMOS EL INGRESO BASADO EN CLASES
@@ -82,7 +82,6 @@ class listarCategoriaView(ListView):
         except Exception as e:
             data['error'] = str(e)
         return JsonResponse(data)
-
 
     # defino el dicionario para enviar variables a mi plantilla
     def get_context_data(self, **kwargs):
