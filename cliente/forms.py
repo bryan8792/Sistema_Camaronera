@@ -35,23 +35,23 @@ class ClientForm(forms.ModelForm):
         }
         exclude = ['usuario']
 
-
-class ClientUserForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for i in self.visible_fields():
-            if type(i.field) in [forms.CharField, forms.ImageField, forms.FileField, forms.EmailField]:
-                i.field.widget.attrs.update({
-                    'class': 'form-control',
-                    'autocomplete': 'off'
-                })
-        self.fields['first_name'].widget.attrs['autofocus'] = True
-
-    class Meta:
-        model = User
-        fields = 'first_name', 'last_name', 'image'
-        widgets = {
-            'first_name': forms.TextInput(attrs={'placeholder': 'Ingrese sus nombres'}),
-            'last_name': forms.TextInput(attrs={'placeholder': 'Ingrese su correo electrónico'}),
-        }
-        exclude = ['username', 'groups', 'is_active', 'is_change_password', 'is_staff', 'user_permissions', 'date_joined', 'last_login', 'is_superuser', 'email_reset_token']
+#
+# class ClientUserForm(forms.ModelForm):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         for i in self.visible_fields():
+#             if type(i.field) in [forms.CharField, forms.ImageField, forms.FileField, forms.EmailField]:
+#                 i.field.widget.attrs.update({
+#                     'class': 'form-control',
+#                     'autocomplete': 'off'
+#                 })
+#         self.fields['first_name'].widget.attrs['autofocus'] = True
+#
+#     class Meta:
+#         model = User
+#         fields = 'first_name', 'last_name', 'image'
+#         widgets = {
+#             'first_name': forms.TextInput(attrs={'placeholder': 'Ingrese sus nombres'}),
+#             'last_name': forms.TextInput(attrs={'placeholder': 'Ingrese su correo electrónico'}),
+#         }
+#         exclude = ['username', 'groups', 'is_active', 'is_change_password', 'is_staff', 'user_permissions', 'date_joined', 'last_login', 'is_superuser', 'email_reset_token']

@@ -30,9 +30,9 @@
                         <div class="card-tools">
                             <ul class="pagination pagination-sm float-right">
                                 <li class="page-item">
-                                    <a href="{% url 'app_categoria:crear_categoria' %}"
+                                    <a href="{% url 'app_cliente:crear_cliente' %}"
                                        class="btn btn-block btn-default btn-sm">
-                                        <strong><i class="fas fa-plus"></i> NUEVA CATEGORIA</strong>
+                                        <strong><i class="fas fa-plus"></i> Nuevo Cliente</strong>
                                     </a>
                                 </li>
                             </ul>
@@ -40,29 +40,31 @@
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
-                        <table id="tb_categoria" class="table table-sm table-striped table-bordered">
+                        <table id="tb_cliente" class="table table-sm table-striped table-bordered">
                             <thead>
                             <tr>
                                 <th style="width: 5%;" class="text-center">Id</th>
-                                <th style="width: 35%;">Nombre</th>
-                                <th style="width: 50%;">Descripción</th>
-                                <th style="width: 10%;" class="text-center">Opciones</th>
+                                <th style="width: 35%;">Usuario</th>
+                                <th style="width: 5%;">Cedula</th>
+                                <th style="width: 50%;">Dirección</th>
+                                <th style="width: 5%;" class="text-center">Opciones</th>
                             </tr>
                             </thead>
                             <tbody>
 
                             <!-- PONEMOS EL OBJETO DE LA PLANTILLA-->
-                            {% for cate in object_list %}
+                            {% for usuario in object_list %}
                                 <tr>
-                                    <td class="text-center">{{ cate.id }} </td>
-                                    <td>{{ cate.nombre }}</td>
-                                    <td>{{ cate.descripcion }}</td>
+                                    <td class="text-center">{{ usuario.id }} </td>
+                                    <td>{{ usuario.usuario }}</td>
+                                    <td>{{ usuario.cedula }}</td>
+                                    <td>{{ usuario.direccion }}</td>
                                     <td class="text-center">
                                         <div class="btn-group-sm">
-                                            <a href="{% url 'app_categoria:actualizar_categoria' cate.id %}" class="btn-primary btn btn-xs">
+                                            <a href="{% url 'app_cliente:actualizar_cliente' usuario.id %}" class="btn-primary btn btn-xs">
                                                 <i class="fas fa-edit"> </i>
                                             </a>
-                                            <a href="{% url 'app_categoria:eliminar_categoria' cate.id %}" class="btn-danger btn btn-sm">
+                                            <a href="{% url 'app_cliente:eliminar_cliente' usuario.id %}" class="btn-danger btn btn-sm">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </div>
@@ -89,7 +91,7 @@
 {% block scripts %}
     <script>
         $(function () {
-            $("#tb_categoria").DataTable({
+            $("#tb_cliente").DataTable({
                 responsive: true,
                 autoWidth: false,
                 destroy: true,
