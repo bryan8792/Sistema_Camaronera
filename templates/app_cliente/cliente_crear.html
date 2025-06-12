@@ -26,34 +26,42 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-plus"></i> Nuevo registro de un Cliente</h3>
-                    </div>
-
-                    <!-- /.card-body -->
-                    <div class="card-body">
-
-                        <form method="post" action=".">
+                    <form method="post" action=".">
+                        <!-- /.card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-plus"></i> Nuevo registro de un Cliente</h3>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-body">
 
                             {% csrf_token %}
-
-                            {% for datos in form.visible_fields %}
+                            <h4>Datos de Usuario</h4>
+                            {% for field in user_form %}
                                 <div class="form-group">
-                                    <label for="nombre">{{ datos.label }}:</label>
-                                    {{ datos }}
+                                    <label>{{ field.label }}</label>
+                                    {{ field }}
                                 </div>
                             {% endfor %}
-                        </form>
-                    </div>
 
-                    <div class="card-footer navbar-white">
-                        <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
-                            <i class="fas fa-save"></i> GUARDAR
-                        </button>
-                        <a href="{% url 'app_categoria:listar_categoria' %}" class="btn btn-danger btn-file">
-                            <i class="fas fa-times"></i> CANCELAR
-                        </a>
-                    </div>
+                            <h4>Datos del Cliente</h4>
+                            {% for field in form %}
+                                <div class="form-group">
+                                    <label>{{ field.label }}</label>
+                                    {{ field }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                        <!-- /.card-footer -->
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
+                                <i class="fas fa-save"></i> GUARDAR
+                            </button>
+                            <a href="{% url 'app_cliente:listar_cliente' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-times"></i> CANCELAR
+                            </a>
+                        </div>
+                    </form>
 
                 </div>
             </div>
@@ -98,7 +106,7 @@
         $(function () {
             $('.btnTest').on('click', function () {
                 $.ajax({
-                    url: '{% url 'app_categoria:listar_categoria' %}',
+                    url: '{% url 'app_cliente:listar_cliente' %}',
                     type: 'POST',
                     data: {id: 1},
                     dataType: 'json'

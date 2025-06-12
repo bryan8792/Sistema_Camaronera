@@ -1043,8 +1043,10 @@ class crearTransaccionPlanBIOView(CreateView):
                             cuerpo.encabezadocuentaplan_id = encabezado.pk
                             cuerpo.cuenta_id = cuenta_id
                             cuerpo.detalle = i['detalle']
-                            cuerpo.debe = int(i['debe']) if i.get('debe') else 0
-                            cuerpo.haber = int(i['haber']) if i.get('haber') else 0
+                            debe_valor = i['debe'].replace(',', '.') if i.get('debe') else '0.00'
+                            cuerpo.debe = Decimal(debe_valor)
+                            haber_valor = i['haber'].replace(',', '.') if i.get('haber') else '0.00'
+                            cuerpo.haber = Decimal(haber_valor)
                             cuerpo.save()
                         except Exception as e:
                             # Si hay un error, revertir la transacción y devolver el error
