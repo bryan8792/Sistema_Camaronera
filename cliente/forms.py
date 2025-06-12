@@ -1,57 +1,41 @@
+# forms.py
 from django import forms
-from .models import *
+from django.contrib.auth.models import User
+from .models import Cliente
 
-class ClientForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class ClienteUserForm(forms.ModelForm):
+    # Campos del modelo User (no relacionados directamente con Cliente)
+    first_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombres'})
+    )
+    last_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Apellidos'})
+    )
 
     class Meta:
         model = Cliente
-        fields = '__all__'
+        fields = ['first_name', 'last_name', 'cedula', 'movil', 'nacimiento', 'direccion', 'identification_type', 'send_email_invoice']
         widgets = {
-            'cedula': forms.TextInput(attrs={
-                'class': 'form-control',
-                'autocomplete': 'off',
-                'placeholder': 'Ingrese un número de cedula o ruc',
-            }),
-            'movil': forms.TextInput(attrs={
-                'class': 'form-control',
-                'autocomplete': 'off',
-                'placeholder': 'Ingrese un número de teléfono',
-            }),
-            'nacimiento': forms.DateInput(format='%Y-%m-%d', attrs={
-                'class': 'form-control datetimepicker-input',
-                'id': 'birthdate',
-                'value': datetime.now().strftime('%Y-%m-%d'),
-                'data-toggle': 'datetimepicker',
-                'data-target': '#birthdate'
-            }),
-            'direccion': forms.TextInput(attrs={
-                'class': 'form-control',
-                'autocomplete': 'off',
-                'placeholder': 'Ingrese una dirección'
-            }),
-            'identification_type': forms.Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
+            'cedula': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Cédula o RUC'}),
+            'movil': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Teléfono'}),
+            'nacimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dirección'}),
+            'identification_type': forms.Select(attrs={'class': 'form-control'}),
+            'send_email_invoice': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
-        exclude = ['usuario']
 
-#
-# class ClientUserForm(forms.ModelForm):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         for i in self.visible_fields():
-#             if type(i.field) in [forms.CharField, forms.ImageField, forms.FileField, forms.EmailField]:
-#                 i.field.widget.attrs.update({
-#                     'class': 'form-control',
-#                     'autocomplete': 'off'
-#                 })
-#         self.fields['first_name'].widget.attrs['autofocus'] = True
-#
-#     class Meta:
-#         model = User
-#         fields = 'first_name', 'last_name', 'image'
-#         widgets = {
-#             'first_name': forms.TextInput(attrs={'placeholder': 'Ingrese sus nombres'}),
-#             'last_name': forms.TextInput(attrs={'placeholder': 'Ingrese su correo electrónico'}),
-#         }
-#         exclude = ['username', 'groups', 'is_active', 'is_change_password', 'is_staff', 'user_permissions', 'date_joined', 'last_login', 'is_superuser', 'email_reset_token']
+    def save(self, commit=True):
+        # Creamos el User primero
+        user = User.objects.create(
+            username=f'user_{self.cleaned_data["cedula"]}',
+            first_name=self.cleaned_data['first_name'],
+            last_name=self.cleaned_data['last_name'],
+        )
+        # Creamos el Cliente y lo asociamos al User
+        cliente = super().save(commit=False)
+        cliente.usuario = user
+        if commit:
+            cliente.save()
+        return cliente
