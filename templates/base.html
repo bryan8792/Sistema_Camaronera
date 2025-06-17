@@ -47,7 +47,7 @@
     <!-- My css -->
     <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
     <!-- Estilos Odoo para formularios -->
-    <link rel="stylesheet" href="{% static 'css/odoo-forms.css' %}">
+    <link rel="stylesheet" href="{% static 'css/odoo_forms.css' %}">
 
     <!-- ESTILOS ODOO PROFESIONALES - MANTIENE FUNCIONALIDAD ADMINLTE -->
     <style>
@@ -839,21 +839,183 @@ table.dataTable thead::after,
 
 /* ===== MOSTRAR MENSAJE "SIN RESULTADOS" CUANDO NO HAY DATOS ===== */
 
-/* Mostrar mensaje "Sin resultados" cuando la tabla está vacía */
+/* ===== OCULTAR CUERPO DE TABLA CUANDO NO HAY DATOS ===== */
+
+/* Ocultar mensaje "Sin resultados" */
 .dataTables_empty,
 table.dataTable tbody .dataTables_empty,
 .dataTables_wrapper .dataTables_empty,
 td.dataTables_empty {
-    display: table-cell !important;
-    text-align: center !important;
-    color: var(--odoo-gray-500) !important;
-    font-style: italic !important;
-    padding: 20px !important;
+    display: none !important;
 }
 
-/* Mostrar información cuando no hay datos */
-.dataTables_wrapper .dataTables_info {
-    display: block !important;
+/* Ocultar fila completa cuando está vacía */
+table.dataTable tbody tr td[colspan]:only-child {
+    display: none !important;
+}
+
+/* Ocultar toda la fila que contiene solo el mensaje de sin resultados */
+table.dataTable tbody tr:has(td[colspan]):only-child,
+table.dataTable tbody tr:has(td.dataTables_empty) {
+    display: none !important;
+}
+
+/* Ocultar celdas con texto "Sin resultados" */
+table.dataTable tbody td:contains("Sin resultados"),
+table.dataTable tbody td:contains("No data available"),
+table.dataTable tbody td:contains("No hay datos disponibles") {
+    display: none !important;
+}
+
+/* Ocultar filas vacías completamente */
+table.dataTable tbody tr:empty {
+    display: none !important;
+}
+
+/* Ocultar el tbody completo cuando está vacío o solo tiene mensajes de "sin datos" */
+table.dataTable tbody:empty,
+.dataTables_wrapper table.dataTable tbody:empty {
+    display: none !important;
+}
+
+/* Ocultar tbody cuando solo contiene filas con mensajes de "sin datos" */
+table.dataTable tbody:has(tr:only-child td[colspan]),
+.dataTables_wrapper table.dataTable tbody:has(tr:only-child td[colspan]) {
+    display: none !important;
+}
+
+/* Alternativa más específica para ocultar tbody vacío */
+table.dataTable tbody tr:only-child td[colspan]:only-child {
+    display: none !important;
+}
+
+table.dataTable tbody:has(tr:only-child td[colspan]:only-child) {
+    display: none !important;
+}
+
+/* Ocultar información de DataTables cuando no hay datos */
+.dataTables_wrapper .dataTables_info:contains("No data available"),
+.dataTables_wrapper .dataTables_info:contains("Sin resultados"),
+.dataTables_wrapper .dataTables_info:contains("No hay datos disponibles"),
+.dataTables_wrapper .dataTables_info:contains("Mostrando 0 a 0 de 0 entradas") {
+    display: none !important;
+}
+
+/* ===== INPUTS INVISIBLES EN DATATABLES ===== */
+
+/* Hacer inputs completamente invisibles dentro de las tablas */
+table.dataTable tbody td input,
+table.dataTable tbody td input[type="text"],
+table.dataTable tbody td input[type="number"],
+table.dataTable tbody td input[type="email"],
+table.dataTable tbody td input[type="password"],
+table.dataTable tbody td input[type="date"],
+table.dataTable tbody td input[type="datetime-local"],
+table.dataTable tbody td textarea,
+table.dataTable tbody td select,
+.dataTables_wrapper table tbody td input,
+.dataTables_wrapper table tbody td input[type="text"],
+.dataTables_wrapper table tbody td input[type="number"],
+.dataTables_wrapper table tbody td input[type="email"],
+.dataTables_wrapper table tbody td input[type="password"],
+.dataTables_wrapper table tbody td input[type="date"],
+.dataTables_wrapper table tbody td input[type="datetime-local"],
+.dataTables_wrapper table tbody td textarea,
+.dataTables_wrapper table tbody td select,
+.content-wrapper table tbody td input,
+.content-wrapper table tbody td input[type="text"],
+.content-wrapper table tbody td input[type="number"],
+.content-wrapper table tbody td input[type="email"],
+.content-wrapper table tbody td input[type="password"],
+.content-wrapper table tbody td input[type="date"],
+.content-wrapper table tbody td input[type="datetime-local"],
+.content-wrapper table tbody td textarea,
+.content-wrapper table tbody td select {
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    font-size: inherit !important;
+    color: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+    text-align: inherit !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+}
+
+/* Eliminar focus de inputs invisibles */
+table.dataTable tbody td input:focus,
+table.dataTable tbody td textarea:focus,
+table.dataTable tbody td select:focus,
+.dataTables_wrapper table tbody td input:focus,
+.dataTables_wrapper table tbody td textarea:focus,
+.dataTables_wrapper table tbody td select:focus,
+.content-wrapper table tbody td input:focus,
+.content-wrapper table tbody td textarea:focus,
+.content-wrapper table tbody td select:focus {
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Eliminar hover de inputs invisibles */
+table.dataTable tbody td input:hover,
+table.dataTable tbody td textarea:hover,
+table.dataTable tbody td select:hover,
+.dataTables_wrapper table tbody td input:hover,
+.dataTables_wrapper table tbody td textarea:hover,
+.dataTables_wrapper table tbody td select:hover,
+.content-wrapper table tbody td input:hover,
+.content-wrapper table tbody td textarea:hover,
+.content-wrapper table tbody td select:hover {
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Eliminar placeholder visible */
+table.dataTable tbody td input::placeholder,
+table.dataTable tbody td textarea::placeholder,
+.dataTables_wrapper table tbody td input::placeholder,
+.dataTables_wrapper table tbody td textarea::placeholder,
+.content-wrapper table tbody td input::placeholder,
+.content-wrapper table tbody td textarea::placeholder {
+    color: transparent !important;
+    opacity: 0 !important;
+}
+
+/* Para selects, eliminar la flecha dropdown */
+table.dataTable tbody td select,
+.dataTables_wrapper table tbody td select,
+.content-wrapper table tbody td select {
+    background-image: none !important;
+    cursor: text !important;
+}
+
+/* Hacer que los inputs se vean exactamente como texto normal */
+table.dataTable tbody td input,
+table.dataTable tbody td textarea,
+table.dataTable tbody td select,
+.dataTables_wrapper table tbody td input,
+.dataTables_wrapper table tbody td textarea,
+.dataTables_wrapper table tbody td select,
+.content-wrapper table tbody td input,
+.content-wrapper table tbody td textarea,
+.content-wrapper table tbody td select {
+    display: inline !important;
+    vertical-align: baseline !important;
+    min-height: auto !important;
+    height: auto !important;
 }
     </style>
 
@@ -927,15 +1089,15 @@ td.dataTables_empty {
 
     <aside class="main-sidebar sidebar-light-lightblue elevation-4">
         <!-- Brand Logo -->
-{#        <a href="#" class="brand-link">#}
-{#            <img src="{% static 'img/img_empresa/LOGO2.png' %}" class="brand-image img-circle elevation-3" style="opacity: .8; width: 50px; height: 45px;">#}
-{#            <span class="brand-text"><span id="empresa-sidebar-title">PSM & BIO</span></span>#}
-{#        </a>#}
+       {% comment %} <a href="#" class="brand-link">
+            <img src="{% static 'img/img_empresa/LOGO2.png' %}" class="brand-image img-circle elevation-3" style="opacity: .8; width: 50px; height: 45px;">
+            <span class="brand-text"><span id="empresa-sidebar-title">PSM & BIO</span></span>
+        </a>{% endcomment %}
 
-        <a href="{% url 'inicio_dashboard' %}" class="brand-link"
-           style="display: flex; align-items: center; justify-content: center; text-align: center;">
-            <img src="{% static 'img/img_empresa/LOGO2.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8; margin-right: 8px;">
-            <span class="brand-text font-weight-light" id="empresa-sidebar-title"><b>PSM & BIO</b></span>
+        <a href="{% url 'inicio_dashboard' %}"
+           class="brand-link d-flex align-items-center justify-content-center text-center">
+            <img src="{% static 'img/img_empresa/LOGO2.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3 me-2" style="opacity: .8; width: 50px; height: 45px;">
+            <span class="brand-text font-weight-light" id="empresa-sidebar-title">PSM & BIO</span>
         </a>
 
         <div class="sidebar">
@@ -946,7 +1108,7 @@ td.dataTables_empty {
                          class="img-fluid img-responsive d-block mx-auto text-center"
                          style="width: 180px; height: 110px; border-radius: 8px;" alt="User Image">
                     <div class="brand-text font-weight-light" style="margin-top: 12px;">
-                        <h6><b>USUARIO:</b></h6>
+                        <h6><strong>USUARIO:</strong></h6>
                         <h6><strong>{{ request.user.first_name }} {{ request.user.last_name }}</strong></h6>
                     </div>
                 </div>

@@ -15,11 +15,11 @@ SQLITE = {
 POSTGRESQL = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'Camaronero_Base',
+        'NAME': 'Otr_Base_Nueva',
         'USER': 'postgres',
         'PASSWORD': 'root',
         'HOST': 'localhost',
-        'PORT': '5432',
+        'PORT': '5434',
         'ATOMIC_REQUESTS': True,
     }
 }
