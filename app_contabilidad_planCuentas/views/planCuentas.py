@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from io import BytesIO
 import xlsxwriter
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from openpyxl import load_workbook
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -886,24 +887,14 @@ class crearTransaccionPlanBIOView(CreateView):
         try:
             action = request.POST['action']
             if action == 'search_plan':
-                data = []
-                empresa = request.POST['empresa']
-                print('empresa de search plan')
-                print(empresa)
-                queryset = PlanCuenta.objects.all()
-                ids_exclude = json.loads(request.POST['ids'])
-                queryset = queryset.filter(empresa__siglas=empresa).exclude(id__in=ids_exclude)
-                for i in queryset:
-                    item = i.toJSON()
-                    item['detalle'] = ""
-                    data.append(item)
+                return self.search_plan_paginated(request)
 
             elif action == 'search_autocomplete':
                 data = []
                 ids_exclude = json.loads(request.POST['ids'])
                 term = request.POST['term'].strip()
                 data.append({'codigo': term, 'text': term, 'id': None})
-                plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
+                plan_detail = PlanCuenta.objects.filter(nombre__icontains=term, empresa__siglas__exact='BIO').exclude(id__in=ids_exclude)
                 for i in plan_detail[0:50]:
                     item = i.toJSON()
                     item['codigo'] = i.codigo
@@ -1060,6 +1051,86 @@ class crearTransaccionPlanBIOView(CreateView):
             print(traceback.format_exc())
             data['error'] = 'el error es : ' + str(e)
         return JsonResponse(data, safe=False)
+
+    def search_plan_paginated(self, request):
+        try:
+            empresa = request.POST.get('empresa', 'BIO')
+            page = int(request.POST.get('page', 1))
+            page_size = int(request.POST.get('page_size', 500))
+            search_term = request.POST.get('search', '').strip()
+
+            print(f'Cargando página {page} con {page_size} registros para empresa: {empresa}')
+
+            # Obtener IDs a excluir
+            ids_exclude = []
+            try:
+                ids_exclude = json.loads(request.POST.get('ids', '[]'))
+            except:
+                ids_exclude = []
+
+            # Construir queryset base
+            queryset = PlanCuenta.objects.filter(
+                empresa__siglas__exact=empresa
+            ).exclude(id__in=ids_exclude)
+
+            # Aplicar filtro de búsqueda si existe
+            if search_term:
+                queryset = queryset.filter(
+                    Q(codigo__icontains=search_term) |
+                    Q(nombre__icontains=search_term) |
+                    Q(tipo_cuenta__icontains=search_term)
+                )
+
+            # Ordenar para consistencia
+            queryset = queryset.order_by('codigo', 'nombre')
+
+            # Aplicar paginación
+            paginator = Paginator(queryset, page_size)
+
+            # Obtener la página solicitada
+            try:
+                page_obj = paginator.get_page(page)
+            except:
+                page_obj = paginator.get_page(1)
+
+            # Convertir a JSON
+            data = []
+            for item in page_obj:
+                item_data = item.toJSON()
+                item_data['detalle'] = ""
+                data.append(item_data)
+
+            # Respuesta con metadatos de paginación
+            response_data = {
+                'data': data,
+                'pagination': {
+                    'current_page': page_obj.number,
+                    'total_pages': paginator.num_pages,
+                    'total_records': paginator.count,
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'page_size': page_size
+                }
+            }
+
+            print(f'Enviando {len(data)} registros de {paginator.count} totales')
+
+            return JsonResponse(response_data, safe=False)
+
+        except Exception as e:
+            print(f'Error en search_plan_paginated: {str(e)}')
+            return JsonResponse({
+                'error': f'Error al cargar datos: {str(e)}',
+                'data': [],
+                'pagination': {
+                    'current_page': 1,
+                    'total_pages': 0,
+                    'total_records': 0,
+                    'has_next': False,
+                    'has_previous': False,
+                    'page_size': page_size
+                }
+            }, status=500)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
