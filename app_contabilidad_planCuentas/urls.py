@@ -28,6 +28,7 @@ urlpatterns = [
     path('transaccion/crear/', crearTransaccionPlanView.as_view(), name='crear_transaccionPlan'),
     path('transaccionbio/crear/', crearTransaccionPlanBIOView.as_view(), name='crear_transaccionPlan_bio'),
     path('transaccion/editar/<int:pk>/', editarTransaccionPlanView.as_view(), name='editar_transaccionPlan'),
+    path('transaccionbio/editar/<int:pk>/', editarTransaccionPlanBIOView.as_view(), name='editar_transaccionPlan_bio'),
 
     # REQUISITOS PARA EL MODULO TRANSACCION EN FACTURA DE GASTO EN EL PLAN DE CUENTAS
     path('fact_gasto_psm/listar/', listarFacturaGastoPSMView.as_view(), name='listar_fact_gasto_psm'),

@@ -1024,18 +1024,27 @@ function showTemporaryMessage(message, type = "info") {
   }, 3000)
 }
 
+// FUNCIÓN COMPLETAMENTE CORREGIDA - NO EJECUTAR EN MODO EDICIÓN
 function generarCodigoSecuencial(tipoCuenta) {
+  const action = $('input[name="action"]').val()
+
+  if (action === 'edit') {
+    console.log("MODO EDICIÓN: NO SE EJECUTA GENERACIÓN DE CÓDIGO")
+    const codigoOriginal = $('input[name="codigo"]').val()
+    console.log("Código original mantenido:", codigoOriginal)
+    return Promise.resolve(codigoOriginal)
+  }
+
+  // SOLO EN MODO CREACIÓN
+  console.log("MODO CREACIÓN: Generando nuevo código...")
   $('input[name="codigo"]').val("Generando...")
 
   const fechaActual = new Date()
   let mes = fechaActual.getMonth() + 1
-
   mes = mes < 10 ? "0" + mes : mes.toString()
 
   let digitoTipo = "1"
-
   const tipoCuentaTexto = $('select[name="tip_cuenta"] option:selected').text().trim()
-  console.log("Tipo de cuenta seleccionado:", tipoCuentaTexto)
 
   if (tipoCuentaTexto === "COMPROBANTE PAGO") {
     digitoTipo = "2"
@@ -1044,8 +1053,6 @@ function generarCodigoSecuencial(tipoCuenta) {
   } else if (tipoCuentaTexto === "EGRESO DE CAJA") {
     digitoTipo = "4"
   }
-
-  console.log("Dígito asignado:", digitoTipo)
 
   return new Promise((resolve, reject) => {
     $.ajax({
@@ -1061,21 +1068,9 @@ function generarCodigoSecuencial(tipoCuenta) {
         "X-CSRFToken": getCookie("csrftoken"),
       },
       success: (response) => {
-        console.log("Respuesta del servidor:", response)
-
-        if (!response) {
-          console.error("Respuesta vacía del servidor")
-          const codigoFinal = mes + digitoTipo + "001"
-          console.log("Usando código predeterminado:", codigoFinal)
-          resolve(codigoFinal)
-          return
-        }
-
-        if (response.error) {
-          console.error("Error del servidor:", response.error)
-          const codigoFinal = mes + digitoTipo + "001"
-          console.log("Usando código predeterminado debido a error:", codigoFinal)
-          resolve(codigoFinal)
+        if (response.es_edicion) {
+          console.log("Respuesta de edición - manteniendo código original")
+          resolve(response.codigo_original)
           return
         }
 
@@ -1085,9 +1080,6 @@ function generarCodigoSecuencial(tipoCuenta) {
         }
 
         const siguienteSecuencia = ultimaSecuencia + 1
-        console.log("Última secuencia:", ultimaSecuencia)
-        console.log("Siguiente secuencia:", siguienteSecuencia)
-
         const secuenciaFormateada =
           siguienteSecuencia < 10
             ? "00" + siguienteSecuencia
@@ -1096,14 +1088,11 @@ function generarCodigoSecuencial(tipoCuenta) {
               : siguienteSecuencia.toString()
 
         const codigoFinal = mes + digitoTipo + secuenciaFormateada
-        console.log("Código generado:", codigoFinal)
-
         resolve(codigoFinal)
       },
       error: (error) => {
         console.error("Error al obtener secuencia:", error)
         const codigoFinal = mes + digitoTipo + "001"
-        console.log("Usando código predeterminado debido a error de red:", codigoFinal)
         resolve(codigoFinal)
       },
     })
@@ -1125,44 +1114,31 @@ function getCookie(name) {
   return cookieValue
 }
 
+// FUNCIÓN CORREGIDA - NO EJECUTAR EN MODO EDICIÓN
 function actualizarCodigo() {
+  const action = $('input[name="action"]').val()
+
+  if (action === 'edit') {
+    console.log("MODO EDICIÓN: NO se actualiza el código")
+    return Promise.resolve()
+  }
+
+  console.log("MODO CREACIÓN: Actualizando código...")
   const tipoCuenta = $('select[name="tip_cuenta"]').val()
 
-  $('input[name="codigo"]').val("Generando...")
-
-  generarCodigoSecuencial(tipoCuenta)
+  return generarCodigoSecuencial(tipoCuenta)
     .then((codigo) => {
       $('input[name="codigo"]').val(codigo)
+      return codigo
     })
     .catch((error) => {
       console.error("Error al generar código:", error)
-
       const fechaActual = new Date()
       let mes = fechaActual.getMonth() + 1
       mes = mes < 10 ? "0" + mes : mes.toString()
-
-      let digitoTipo = "1"
-      const tipoCuentaTexto = $('select[name="tip_cuenta"] option:selected').text().trim()
-      if (tipoCuentaTexto === "COMPROBANTE PAGO") {
-        digitoTipo = "2"
-      } else if (tipoCuentaTexto === "INGRESO A CAJA") {
-        digitoTipo = "3"
-      } else if (tipoCuentaTexto === "EGRESO DE CAJA") {
-        digitoTipo = "4"
-      }
-
-      const codigoPredeterminado = mes + digitoTipo + "001"
+      const codigoPredeterminado = mes + "1001"
       $('input[name="codigo"]').val(codigoPredeterminado)
-
-      if (typeof window.Swal !== "undefined") {
-        window.Swal.fire({
-          title: "Advertencia",
-          text: "No se pudo obtener la última secuencia. Se ha generado un código predeterminado.",
-          icon: "warning",
-        })
-      } else {
-        alert("No se pudo obtener la última secuencia. Se ha generado un código predeterminado.")
-      }
+      return codigoPredeterminado
     })
 }
 
@@ -1179,6 +1155,7 @@ function depurarSelect() {
 }
 
 function preseleccionarEmpresaBIO() {
+  console.log("Intentando preseleccionar empresa BIO...")
   var empresaSelect = $('select[name="empresa"]')
 
   var encontrada = false
@@ -1211,7 +1188,32 @@ $(document).ready(() => {
 
   setTimeout(depurarSelect, 1000)
 
-  setTimeout(actualizarCodigo, 1500)
+  // CORRECCIÓN PRINCIPAL: Solo generar código en modo creación
+  setTimeout(function() {
+    const action = $('input[name="action"]').val()
+    console.log("Acción detectada:", action)
+
+    if (action === 'create') {
+      console.log("MODO CREACIÓN: Generando código inicial")
+      actualizarCodigo()
+    } else if (action === 'edit') {
+      console.log("MODO EDICIÓN: Manteniendo código original")
+      const codigoOriginal = $('input[name="codigo"]').val()
+      console.log("Código original:", codigoOriginal)
+
+      // IMPORTANTE: Hacer el campo readonly y evitar cambios
+      $('input[name="codigo"]').prop('readonly', true)
+        .css('background-color', '#f8f9fa')
+        .css('border', '1px solid #ced4da')
+        .attr('title', 'Código original - No se puede modificar en edición')
+
+      // BLOQUEAR CUALQUIER INTENTO DE CAMBIO
+      $('input[name="codigo"]').on('focus', function() {
+        $(this).blur()
+        console.log("Campo código bloqueado en modo edición")
+      })
+    }
+  }, 1500)
 
   $(".select2").select2({
     theme: "bootstrap4",
@@ -1273,8 +1275,18 @@ $(document).ready(() => {
     showTemporaryMessage(`Cuenta ${item.codigo} agregada correctamente`, "success")
   })
 
-  $('select[name="tip_cuenta"]').on("change", () => {
-    actualizarCodigo()
+  // CORRECCIÓN: BLOQUEAR COMPLETAMENTE cambios de código en edición
+  $('select[name="tip_cuenta"]').off('change').on('change', function() {
+    const action = $('input[name="action"]').val()
+    console.log("Cambio en tipo de cuenta, acción:", action)
+
+    if (action === 'create') {
+      console.log("MODO CREACIÓN: Actualizando código por cambio de tipo")
+      actualizarCodigo()
+    } else {
+      console.log("MODO EDICIÓN: CAMBIO BLOQUEADO - No se actualiza el código")
+      // ABSOLUTAMENTE NADA en modo edición
+    }
   })
 
   $("#tbl_transaccionPlan tbody")
