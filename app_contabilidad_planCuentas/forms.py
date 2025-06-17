@@ -181,11 +181,11 @@ class PlanCuentaForm(ModelForm):
                 }
             ),
             'tipo_cuenta': Select(choices=OPCIONES_CUENTA,
-                attrs={
-                    'class': 'form-control select2'
+                                  attrs={
+                                      'class': 'form-control select2'
 
-                }
-            ),
+                                  }
+                                  ),
             'empresa': Select(
                 attrs={
                     'class': 'form-control select2',
@@ -194,10 +194,10 @@ class PlanCuentaForm(ModelForm):
                 }
             ),
             'nivel': Select(choices=OPCIONES_NIVEL,
-                attrs={
-                    'class': 'form-control select2'
-                }
-            ),
+                            attrs={
+                                'class': 'form-control select2'
+                            }
+                            ),
             'parentId': Select(
                 attrs={
                     'class': 'form-control select2',
@@ -206,7 +206,6 @@ class PlanCuentaForm(ModelForm):
             ),
 
         }
-
 
 
 class EncabezadoCuentasPlanCuentaForm(ModelForm):
@@ -221,16 +220,18 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
                     'autocomplete': 'off'
                 }
             ),
-            'tip_cuenta': Select(choices=OPCIONES_ENCABEZADO_PLAN,
+            'tip_cuenta': Select(
+                choices=OPCIONES_ENCABEZADO_PLAN,
                 attrs={
-                    'class': 'form-control select2'
+                    'class': 'form-control select2',
+                    'style': 'width: 100%;'
                 }
             ),
             'tip_transa': Select(choices=OPCIONES_TRANSACCION_PLAN,
-                 attrs={
-                     'class': 'form-control select2'
-                 }
-                 ),
+                                 attrs={
+                                     'class': 'form-control select2'
+                                 }
+                                 ),
             'fecha': TextInput(
                 attrs={
                     'class': 'form-control',
@@ -261,7 +262,8 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
             'empresa': Select(
                 attrs={
                     'class': 'form-control select2',
-                    'autocomplete': 'off'
+                    'autocomplete': 'off',
+                    'style': 'width: 100%;'
                 }
             ),
             'reg_ats': TextInput(
@@ -291,7 +293,6 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
         }
 
 
-
 class DetalleCuentasPlanCuentaForm(ModelForm):
     class Meta:
         model = DetalleCuentasPlanCuenta
@@ -319,10 +320,10 @@ class DetalleCuentasPlanCuentaForm(ModelForm):
                 }
             ),
             'tipo_comp': Select(choices=OPCIONES_CUENTA,
-                attrs={
-                    'class': 'form-control select2'
-                }
-            ),
+                                attrs={
+                                    'class': 'form-control select2'
+                                }
+                                ),
             'empresa': Select(
                 attrs={
                     'class': 'form-control select2',
@@ -331,10 +332,10 @@ class DetalleCuentasPlanCuentaForm(ModelForm):
                 }
             ),
             'nivel': Select(choices=OPCIONES_NIVEL,
-                attrs={
-                    'class': 'form-control select2'
-                }
-            ),
+                            attrs={
+                                'class': 'form-control select2'
+                            }
+                            ),
             'cuentasuma': Select(
                 attrs={
                     'class': 'form-control select2',
@@ -345,14 +346,12 @@ class DetalleCuentasPlanCuentaForm(ModelForm):
         }
 
 
-
 class ReportForm(Form):
     rango_dias = CharField(widget=TextInput(attrs={
         'class': 'form-control',
         'autocomplete': 'off',
         'id': 'rango_dias'
     }))
-
 
 
 class ReciboForm(ModelForm):
@@ -393,7 +392,7 @@ class AnextoTransaccionalForm(ModelForm):
         self.fields['receipt'].queryset = Recibo.objects.filter(
             voucher_type__in=[VOUCHER_TYPE[0][0], VOUCHER_TYPE[-1][0]], empresa_id=self.instance.company_id
         )
-        #self.fields['receipt'].choices = tuple((code, label) for code, label in VOUCHER_TYPE if code != VOUCHER_TYPE[-1][0])
+        # self.fields['receipt'].choices = tuple((code, label) for code, label in VOUCHER_TYPE if code != VOUCHER_TYPE[-1][0])
 
     class Meta:
         model = AnexoTransaccional
@@ -407,10 +406,10 @@ class AnextoTransaccionalForm(ModelForm):
                 }
             ),
             'tip_cuenta': Select(choices=OPCIONES_ENCABEZADO_PLAN,
-                attrs={
-                    'class': 'form-control select2'
-                }
-            ),
+                                 attrs={
+                                     'class': 'form-control select2'
+                                 }
+                                 ),
             'company': Select(
                 attrs={
                     'class': 'form-control select2', 'style': 'width: 100%;'
@@ -427,10 +426,10 @@ class AnextoTransaccionalForm(ModelForm):
                 }
             ),
             'tipo_comp': Select(choices=OPCIONES_TIPO_COMPROBANTE,
-                 attrs={
-                     'class': 'form-control select2'
-                 }
-            ),
+                                attrs={
+                                    'class': 'form-control select2'
+                                }
+                                ),
             'fecha': TextInput(
                 attrs={
                     'class': 'form-control',
@@ -479,95 +478,94 @@ class AnextoTransaccionalForm(ModelForm):
                 }
             ),
             'base_cero_bruto_fcientocuatro': Select(choices=OPCIONES_FORM_CIENTOCUATRO_BASE_CERO,
-                attrs={
-                    'class': 'form-control select2'
-                }
-            ),
+                                                    attrs={
+                                                        'class': 'form-control select2'
+                                                    }
+                                                    ),
             'base_iva_normal_bruto_fcientocuatro': Select(choices=OPCIONES_FORM_CIENTOCUATRO_BASE_IVA_NORMAL,
-                attrs={
-                    'class': 'form-control select2'
-                }
-            ),
+                                                          attrs={
+                                                              'class': 'form-control select2'
+                                                          }
+                                                          ),
             'base_iva_normal_porcen': Select(choices=OPCIONES_IVA_NORMAL_PORCEN,
-                attrs={
-                   'class': 'form-control select2'
-                }
-            ),
+                                             attrs={
+                                                 'class': 'form-control select2'
+                                             }
+                                             ),
             'base_iva_bienes_bruto_fcientocuatro': Select(choices=OPCIONES_FORM_CIENTOCUATRO_BASE_IVA_BIENES,
-                attrs={
-                   'class': 'form-control select2'
-                }
-            ),
+                                                          attrs={
+                                                              'class': 'form-control select2'
+                                                          }
+                                                          ),
             'base_iva_bienes_porcen': Select(choices=OPCIONES_IVA_BIENES_PORCEN,
-                 attrs={
-                     'class': 'form-control select2'
-                 }
-            ),
+                                             attrs={
+                                                 'class': 'form-control select2'
+                                             }
+                                             ),
             'porcent_ice': Select(choices=OPCIONES_ICE_PORCEN,
-                 attrs={
-                     'class': 'form-control select2'
-                 }
-            ),
+                                  attrs={
+                                      'class': 'form-control select2'
+                                  }
+                                  ),
             'ret_iva_cero': Select(choices=OPCIONES_RET_IVA_CERO,
-                  attrs={
-                      'class': 'form-control select2'
-                  }
-            ),
+                                   attrs={
+                                       'class': 'form-control select2'
+                                   }
+                                   ),
             'ret_iva_diez': Select(choices=OPCIONES_RET_IVA_DIEZ,
-                   attrs={
-                       'class': 'form-control select2'
-                   }
-            ),
+                                   attrs={
+                                       'class': 'form-control select2'
+                                   }
+                                   ),
             'ret_iva_veint': Select(choices=OPCIONES_RET_IVA_VEINT,
-                   attrs={
-                       'class': 'form-control select2'
-                   }
-            ),
+                                    attrs={
+                                        'class': 'form-control select2'
+                                    }
+                                    ),
             'ret_iva_treint': Select(choices=OPCIONES_RET_IVA_TREINT,
-                    attrs={
-                        'class': 'form-control select2'
-                    }
-            ),
+                                     attrs={
+                                         'class': 'form-control select2'
+                                     }
+                                     ),
             'ret_iva_cinc': Select(choices=OPCIONES_RET_IVA_CINC,
-                     attrs={
-                         'class': 'form-control select2'
-                     }
-            ),
+                                   attrs={
+                                       'class': 'form-control select2'
+                                   }
+                                   ),
             'ret_iva_setn': Select(choices=OPCIONES_RET_IVA_SETEN,
-                    attrs={
-                        'class': 'form-control select2'
-                    }
-            ),
+                                   attrs={
+                                       'class': 'form-control select2'
+                                   }
+                                   ),
             'ret_iva_cien': Select(choices=OPCIONES_RET_IVA_CIEN,
-                    attrs={
-                        'class': 'form-control select2'
-                    }
-            ),
+                                   attrs={
+                                       'class': 'form-control select2'
+                                   }
+                                   ),
             'ret_fue_iva_anexo_uno': Select(choices=OPCIONES_RET_FUEN_ANEXO_UNO,
-                   attrs={
-                       'class': 'form-control select2'
-                   }
-            ),
+                                            attrs={
+                                                'class': 'form-control select2'
+                                            }
+                                            ),
             'ret_fue_iva_anexo_dos': Select(choices=OPCIONES_RET_FUEN_ANEXO_DOS,
-                    attrs={
-                        'class': 'form-control select2'
-                    }
-            ),
+                                            attrs={
+                                                'class': 'form-control select2'
+                                            }
+                                            ),
             'ret_fue_iva_anexo_tres': Select(choices=OPCIONES_RET_FUEN_ANEXO_TRES,
-                    attrs={
-                        'class': 'form-control select2'
-                    }
-            ),
+                                             attrs={
+                                                 'class': 'form-control select2'
+                                             }
+                                             ),
             'tip_form': Select(choices=OPCIONES_F_PAGO,
-                     attrs={
-                         'class': 'form-control select2'
-                     }
-            ),
+                               attrs={
+                                   'class': 'form-control select2'
+                               }
+                               ),
             'det_form': Select(choices=OPCIONES_T_F_PAGO,
-                     attrs={
-                         'class': 'form-control select2'
-                     }
-            ),
-
+                               attrs={
+                                   'class': 'form-control select2'
+                               }
+                               ),
 
         }

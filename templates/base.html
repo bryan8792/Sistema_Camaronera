@@ -46,6 +46,816 @@
     <script src="{% static 'js/functions.js' %}"></script>
     <!-- My css -->
     <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
+    <!-- Estilos Odoo para formularios -->
+    <link rel="stylesheet" href="{% static 'css/odoo-forms.css' %}">
+
+    <!-- ESTILOS ODOO PROFESIONALES - MANTIENE FUNCIONALIDAD ADMINLTE -->
+    <style>
+        /* Importar fuente moderna */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        /* Variables de color profesionales */
+        :root {
+            --odoo-primary: #3498DB;
+            --odoo-primary-dark: #2980B9;
+            --odoo-primary-light: #5DADE2;
+            --odoo-gray-50: #f8f9fa;
+            --odoo-gray-100: #f1f3f4;
+            --odoo-gray-200: #e8eaed;
+            --odoo-gray-300: #dadce0;
+            --odoo-gray-400: #bdc1c6;
+            --odoo-gray-500: #9aa0a6;
+            --odoo-gray-600: #5f6368;
+            --odoo-gray-700: #3c4043;
+            --odoo-gray-800: #202124;
+            --odoo-gray-900: #1a1a1a;
+        }
+
+        /* Fuente global más moderna */
+        body, .sidebar, .main-header, .content-wrapper {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-weight: 400;
+        }
+
+        /* HEADER ESTILO ODOO */
+        .main-header.navbar {
+            background: linear-gradient(135deg, var(--odoo-primary) 0%, var(--odoo-primary-light) 100%) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+            height: 56px !important;
+        }
+
+        .main-header .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            font-weight: 500 !important;
+            padding: 8px 16px !important;
+            border-radius: 6px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .main-header .navbar-nav .nav-link:hover {
+            background-color: rgba(255,255,255,0.1) !important;
+            color: white !important;
+        }
+
+        /* SIDEBAR ESTILO ODOO PROFESIONAL */
+        .main-sidebar {
+            background: white !important;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1) !important;
+            border-right: 1px solid var(--odoo-gray-200) !important;
+        }
+
+        /* Brand link más elegante */
+        .brand-link {
+            background: var(--odoo-gray-50) !important;
+            border-bottom: 1px solid var(--odoo-gray-200) !important;
+            padding: 16px 20px !important;
+            height: auto !important;
+        }
+
+        .brand-link .brand-text {
+            color: var(--odoo-gray-800) !important;
+            font-weight: 600 !important;
+            font-size: 18px !important;
+        }
+
+        /* User panel más moderno */
+        .user-panel {
+            background: var(--odoo-gray-50) !important;
+            border-bottom: 1px solid var(--odoo-gray-200) !important;
+            margin: 0 !important;
+            padding: 20px !important;
+        }
+
+        .user-panel .brand-text {
+            color: var(--odoo-gray-700) !important;
+            font-weight: 500 !important;
+        }
+
+        /* NAVEGACIÓN SIDEBAR ESTILO ODOO */
+        .nav-sidebar {
+            padding: 8px 0 !important;
+        }
+
+        .nav-sidebar .nav-header {
+            color: var(--odoo-gray-600) !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            padding: 16px 24px 8px 24px !important;
+            margin: 0 !important;
+        }
+
+        .nav-sidebar .nav-item .nav-link {
+            color: var(--odoo-gray-700) !important;
+            padding: 12px 24px !important;
+            border-radius: 0 !important;
+            border-left: 3px solid transparent !important;
+            font-weight: 500 !important;
+            font-size: 14px !important;
+            transition: all 0.2s ease !important;
+            position: relative !important;
+        }
+
+        .nav-sidebar .nav-item .nav-link:hover {
+            background-color: var(--odoo-gray-100) !important;
+            color: var(--odoo-primary) !important;
+            border-left-color: var(--odoo-primary) !important;
+        }
+
+        .nav-sidebar .nav-item .nav-link.active {
+            background-color: rgba(52, 152, 219, 0.08) !important;
+            color: var(--odoo-primary) !important;
+            border-left-color: var(--odoo-primary) !important;
+            font-weight: 600 !important;
+        }
+
+        /* Iconos del sidebar más elegantes */
+        .nav-sidebar .nav-icon {
+            width: 20px !important;
+            text-align: center !important;
+            margin-right: 12px !important;
+            font-size: 16px !important;
+            color: var(--odoo-gray-500) !important;
+        }
+
+        .nav-sidebar .nav-link:hover .nav-icon,
+        .nav-sidebar .nav-link.active .nav-icon {
+            color: var(--odoo-primary) !important;
+        }
+
+        /* Submenús más elegantes */
+        .nav-treeview {
+            background-color: var(--odoo-gray-50) !important;
+        }
+
+        .nav-treeview .nav-link {
+            padding-left: 60px !important;
+            font-size: 13px !important;
+            color: var(--odoo-gray-600) !important;
+        }
+
+        .nav-treeview .nav-link:hover {
+            background-color: var(--odoo-gray-100) !important;
+            color: var(--odoo-primary) !important;
+        }
+
+        /* BOTONES ESTILO ODOO */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--odoo-primary) 0%, var(--odoo-primary-dark) 100%) !important;
+            border: none !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+            padding: 8px 20px !important;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3) !important;
+        }
+
+        .btn-secondary {
+            background: var(--odoo-gray-100) !important;
+            color: var(--odoo-gray-700) !important;
+            border: 1px solid var(--odoo-gray-300) !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+        }
+
+        /* FORMULARIOS ESTILO ODOO */
+        .form-control {
+            border: 1px solid var(--odoo-gray-300) !important;
+            border-radius: 6px !important;
+            padding: 10px 12px !important;
+            font-size: 14px !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .form-control:focus {
+            border-color: var(--odoo-primary) !important;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1) !important;
+        }
+
+        /* CARDS Y CONTENIDO */
+        .card {
+            border: 1px solid var(--odoo-gray-200) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+        }
+
+        .card-header {
+            background: var(--odoo-gray-50) !important;
+            border-bottom: 1px solid var(--odoo-gray-200) !important;
+            padding: 16px 20px !important;
+            font-weight: 600 !important;
+            color: var(--odoo-gray-800) !important;
+        }
+
+        .content-wrapper {
+            background: var(--odoo-gray-50) !important;
+        }
+
+        /* TABLAS ESTILO ODOO */
+        .table {
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+
+        .table thead th {
+            background: var(--odoo-gray-100) !important;
+            color: var(--odoo-gray-700) !important;
+            font-weight: 600 !important;
+            border-bottom: 2px solid var(--odoo-gray-200) !important;
+            padding: 12px 16px !important;
+        }
+
+        .table tbody td {
+            padding: 12px 16px !important;
+            border-bottom: 1px solid var(--odoo-gray-200) !important;
+        }
+
+        /* DROPDOWNS ESTILO ODOO */
+        .dropdown-menu {
+            border: 1px solid var(--odoo-gray-200) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+            padding: 8px 0 !important;
+        }
+
+        .dropdown-item {
+            padding: 8px 16px !important;
+            font-size: 14px !important;
+            color: var(--odoo-gray-700) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--odoo-gray-100) !important;
+            color: var(--odoo-primary) !important;
+        }
+
+        /* BREADCRUMBS ESTILO ODOO */
+        .breadcrumb {
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 0 16px 0 !important;
+        }
+
+        .breadcrumb-item {
+            color: var(--odoo-gray-600) !important;
+            font-size: 14px !important;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--odoo-gray-800) !important;
+            font-weight: 500 !important;
+        }
+
+        /* FOOTER ESTILO ODOO */
+        .main-footer {
+            background: white !important;
+            border-top: 1px solid var(--odoo-gray-200) !important;
+            color: var(--odoo-gray-600) !important;
+            font-size: 13px !important;
+        }
+
+        /* ALERTAS ESTILO ODOO */
+        .alert {
+            border-radius: 8px !important;
+            border: none !important;
+            padding: 12px 16px !important;
+        }
+
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1) !important;
+            color: var(--odoo-primary-dark) !important;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.1) !important;
+            color: #155724 !important;
+        }
+
+        /* BADGES ESTILO ODOO */
+        .badge {
+            border-radius: 12px !important;
+            font-weight: 500 !important;
+            padding: 4px 8px !important;
+        }
+
+        .badge-primary {
+            background: var(--odoo-primary) !important;
+        }
+
+        /* PAGINACIÓN ESTILO ODOO */
+        .page-link {
+            border: 1px solid var(--odoo-gray-300) !important;
+            color: var(--odoo-gray-700) !important;
+            padding: 8px 12px !important;
+        }
+
+        .page-item.active .page-link {
+            background: var(--odoo-primary) !important;
+            border-color: var(--odoo-primary) !important;
+        }
+
+        /* MODALES ESTILO ODOO */
+        .modal-content {
+            border-radius: 12px !important;
+            border: none !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+        }
+
+        .modal-header {
+            background: var(--odoo-gray-50) !important;
+            border-bottom: 1px solid var(--odoo-gray-200) !important;
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        /* MEJORAS RESPONSIVE */
+        @media (max-width: 768px) {
+            .main-sidebar {
+                transform: translateX(-100%) !important;
+            }
+
+            .sidebar-open .main-sidebar {
+                transform: translateX(0) !important;
+            }
+        }
+
+        /* ANIMACIONES SUAVES */
+        * {
+            transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease !important;
+        }
+
+        /* SCROLLBAR PERSONALIZADO */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: var(--odoo-gray-100);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--odoo-gray-400);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--odoo-gray-500);
+        }
+
+        /* ===== ESTILOS DATATABLES MEJORADOS ===== */
+
+        /* Integración de estilos existentes con mejoras Odoo */
+        .table-bordered {
+            border: 1px solid var(--odoo-gray-200) !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+        }
+
+        .table-bordered > thead > tr > th {
+            border: 0 !important;
+            border-bottom: 2px solid var(--odoo-gray-200) !important;
+            background: var(--odoo-gray-100) !important;
+            color: var(--odoo-gray-700) !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            padding: 8px 12px !important;
+        }
+
+        table.table-bordered.dataTable tbody td {
+            border-bottom: 1px solid var(--odoo-gray-200) !important;
+            border-right: 1px solid var(--odoo-gray-200) !important;
+            font-size: 13px !important;
+            padding: 8px 12px !important;
+            color: var(--odoo-gray-700) !important;
+        }
+
+        table.table-bordered.dataTable tbody td:last-child {
+            border-right: none !important;
+        }
+
+        .table-bordered > tbody > tr > td {
+            border: 0 !important;
+            border-bottom: 1px solid var(--odoo-gray-200) !important;
+            font-size: 13px !important;
+            padding: 8px 12px !important;
+        }
+
+        /* Tamaños de tabla responsivos */
+        .table-sm th, .table-sm td {
+            padding: 6px 10px !important;
+            font-size: 12px !important;
+        }
+
+        .table-md th, .table-md td {
+            padding: 8px 12px !important;
+            font-size: 13px !important;
+        }
+
+        .table-lg th, .table-lg td {
+            padding: 10px 14px !important;
+            font-size: 14px !important;
+        }
+
+        /* DataTables wrapper mejorado */
+        .dataTables_wrapper {
+            font-size: 13px !important;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-size: 12px !important;
+            color: var(--odoo-gray-600) !important;
+        }
+
+        .dataTables_wrapper .dataTables_length select,
+        .dataTables_wrapper .dataTables_filter input {
+            font-size: 12px !important;
+            padding: 4px 8px !important;
+            border: 1px solid var(--odoo-gray-300) !important;
+            border-radius: 4px !important;
+        }
+
+        /* Paginación DataTables estilo Odoo */
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 4px 8px !important;
+            margin: 0 2px !important;
+            border: 1px solid var(--odoo-gray-300) !important;
+            border-radius: 4px !important;
+            font-size: 12px !important;
+            color: var(--odoo-gray-700) !important;
+            background: white !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: var(--odoo-gray-100) !important;
+            border-color: var(--odoo-gray-400) !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: var(--odoo-primary) !important;
+            border-color: var(--odoo-primary) !important;
+            color: white !important;
+        }
+
+        /* Scroll horizontal mejorado */
+        .dataTables_scroll {
+            overflow: auto !important;
+            border: 1px solid var(--odoo-gray-200) !important;
+            border-radius: 8px !important;
+        }
+
+        /* Headers de tabla mejorados - AZUL AUTOMÁTICO PARA DATATABLES */
+        .table thead tr {
+            background: var(--odoo-gray-100) !important;
+            color: var(--odoo-gray-700) !important;
+        }
+
+        .table thead th {
+            border-top-width: 0 !important;
+            border-bottom: 2px solid var(--odoo-gray-200) !important;
+            font-weight: 600 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        /* ===== DATATABLES - HEADERS AZULES AUTOMÁTICOS - FORZADO ===== */
+
+/* Todos los headers de DataTables - Máxima especificidad */
+table.dataTable thead,
+table.dataTable thead tr,
+.dataTables_wrapper table.dataTable thead,
+.dataTables_wrapper table.dataTable thead tr,
+.table-bordered > thead,
+table.table-bordered.dataTable thead,
+table.table-bordered.dataTable thead tr,
+.content-wrapper table thead,
+.content-wrapper table thead tr,
+.card-body table thead,
+.card-body table thead tr {
+    background: #3498DB !important;
+    background-color: #3498DB !important;
+    border-bottom: none !important;
+    border-top: none !important;
+}
+
+/* Todos los TH de headers de DataTables */
+table.dataTable thead th,
+table.dataTable thead tr th,
+.dataTables_wrapper table.dataTable thead th,
+.dataTables_wrapper table.dataTable thead tr th,
+.table-bordered > thead > tr > th,
+table.table-bordered.dataTable thead th,
+table.table-bordered.dataTable thead tr th,
+.content-wrapper table thead th,
+.content-wrapper table thead tr th,
+.card-body table thead th,
+.card-body table thead tr th,
+.table thead th,
+.table thead tr th {
+    background: #3498DB !important;
+    background-color: #3498DB !important;
+    color: white !important;
+    border-bottom: none !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 12px 16px !important;
+}
+
+/* Hover en headers de DataTables */
+table.dataTable thead th:hover,
+table.dataTable thead tr th:hover,
+.dataTables_wrapper table.dataTable thead th:hover,
+.dataTables_wrapper table.dataTable thead tr th:hover,
+.table-bordered > thead > tr > th:hover,
+table.table-bordered.dataTable thead th:hover,
+.content-wrapper table thead th:hover,
+.card-body table thead th:hover,
+.table thead th:hover {
+    background: #2980B9 !important;
+    background-color: #2980B9 !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Sorting en DataTables con fondo azul */
+table.dataTable thead .sorting,
+table.dataTable thead .sorting_asc,
+table.dataTable thead .sorting_desc,
+table.dataTable thead .sorting_asc_disabled,
+table.dataTable thead .sorting_desc_disabled,
+.dataTables_wrapper table.dataTable thead .sorting,
+.dataTables_wrapper table.dataTable thead .sorting_asc,
+.dataTables_wrapper table.dataTable thead .sorting_desc {
+    background: #3498DB !important;
+    background-color: #3498DB !important;
+    color: white !important;
+    border: none !important;
+}
+
+table.dataTable thead .sorting:hover,
+table.dataTable thead .sorting_asc:hover,
+table.dataTable thead .sorting_desc:hover,
+.dataTables_wrapper table.dataTable thead .sorting:hover,
+.dataTables_wrapper table.dataTable thead .sorting_asc:hover,
+.dataTables_wrapper table.dataTable thead .sorting_desc:hover {
+    background: #2980B9 !important;
+    background-color: #2980B9 !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Iconos de sorting en blanco */
+table.dataTable thead .sorting:after,
+table.dataTable thead .sorting_asc:after,
+table.dataTable thead .sorting_desc:after,
+table.dataTable thead .sorting:before,
+table.dataTable thead .sorting_asc:before,
+table.dataTable thead .sorting_desc:before {
+    color: white !important;
+    opacity: 0.8 !important;
+}
+
+/* Forzar estilos en cualquier tabla dentro del content-wrapper */
+.content-wrapper .table thead,
+.content-wrapper .table thead tr,
+.content-wrapper .table thead th,
+.content-wrapper table thead,
+.content-wrapper table thead tr,
+.content-wrapper table thead th {
+    background: #3498DB !important;
+    background-color: #3498DB !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* ELIMINAR COMPLETAMENTE CUALQUIER LÍNEA DEBAJO DE HEADERS */
+table.dataTable,
+.dataTables_wrapper table.dataTable,
+.table-bordered,
+table.table-bordered.dataTable {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+/* Eliminar bordes de la tabla completa */
+table.dataTable thead tr:after,
+table.dataTable thead:after,
+.dataTables_wrapper table.dataTable thead tr:after,
+.dataTables_wrapper table.dataTable thead:after {
+    display: none !important;
+}
+
+/* Eliminar cualquier pseudo-elemento que pueda crear líneas */
+table.dataTable thead tr::after,
+table.dataTable thead::after,
+.dataTables_wrapper table.dataTable thead tr::after,
+.dataTables_wrapper table.dataTable thead::after {
+    content: none !important;
+    display: none !important;
+}
+
+        /* ===== BOTONES CORREGIDOS ===== */
+
+        /* Botones primarios */
+        .btn-primary,
+        .content-wrapper .btn-primary,
+        .card-body .btn-primary {
+            background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%) !important;
+            background-color: #3498DB !important;
+            border: none !important;
+            border-color: #3498DB !important;
+            color: white !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+            padding: 8px 20px !important;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .btn-primary:hover,
+        .content-wrapper .btn-primary:hover,
+        .card-body .btn-primary:hover {
+            background: linear-gradient(135deg, #2980B9 0%, #1f5f8b 100%) !important;
+            background-color: #2980B9 !important;
+            border-color: #2980B9 !important;
+            color: white !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3) !important;
+        }
+
+        .btn-primary:focus,
+        .btn-primary:active,
+        .content-wrapper .btn-primary:focus,
+        .content-wrapper .btn-primary:active {
+            background: #2980B9 !important;
+            background-color: #2980B9 !important;
+            border-color: #2980B9 !important;
+            color: white !important;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25) !important;
+        }
+
+        /* Botones secundarios */
+        .btn-secondary,
+        .content-wrapper .btn-secondary,
+        .card-body .btn-secondary {
+            background: #6c757d !important;
+            background-color: #6c757d !important;
+            border: 1px solid #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-secondary:hover,
+        .content-wrapper .btn-secondary:hover,
+        .card-body .btn-secondary:hover {
+            background: #5a6268 !important;
+            background-color: #5a6268 !important;
+            border-color: #5a6268 !important;
+            color: white !important;
+        }
+
+        /* Botones de éxito */
+        .btn-success,
+        .content-wrapper .btn-success,
+        .card-body .btn-success {
+            background: #28a745 !important;
+            background-color: #28a745 !important;
+            border: 1px solid #28a745 !important;
+            border-color: #28a745 !important;
+            color: white !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-success:hover,
+        .content-wrapper .btn-success:hover,
+        .card-body .btn-success:hover {
+            background: #218838 !important;
+            background-color: #218838 !important;
+            border-color: #218838 !important;
+            color: white !important;
+        }
+
+        /* Botones de peligro */
+        .btn-danger,
+        .content-wrapper .btn-danger,
+        .card-body .btn-danger {
+            background: #dc3545 !important;
+            background-color: #dc3545 !important;
+            border: 1px solid #dc3545 !important;
+            border-color: #dc3545 !important;
+            color: white !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-danger:hover,
+        .content-wrapper .btn-danger:hover,
+        .card-body .btn-danger:hover {
+            background: #c82333 !important;
+            background-color: #c82333 !important;
+            border-color: #c82333 !important;
+            color: white !important;
+        }
+
+        /* Botones de advertencia */
+        .btn-warning,
+        .content-wrapper .btn-warning,
+        .card-body .btn-warning {
+            background: #ffc107 !important;
+            background-color: #ffc107 !important;
+            border: 1px solid #ffc107 !important;
+            border-color: #ffc107 !important;
+            color: #212529 !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-warning:hover,
+        .content-wrapper .btn-warning:hover,
+        .card-body .btn-warning:hover {
+            background: #e0a800 !important;
+            background-color: #e0a800 !important;
+            border-color: #e0a800 !important;
+            color: #212529 !important;
+        }
+
+        /* Botones de información */
+        .btn-info,
+        .content-wrapper .btn-info,
+        .card-body .btn-info {
+            background: #17a2b8 !important;
+            background-color: #17a2b8 !important;
+            border: 1px solid #17a2b8 !important;
+            border-color: #17a2b8 !important;
+            color: white !important;
+            border-radius: 6px !important;
+            font-weight: 500 !important;
+        }
+
+        .btn-info:hover,
+        .content-wrapper .btn-info:hover,
+        .card-body .btn-info:hover {
+            background: #138496 !important;
+            background-color: #138496 !important;
+            border-color: #138496 !important;
+            color: white !important;
+        }
+
+        /* Botones outline */
+        .btn-outline-primary,
+        .content-wrapper .btn-outline-primary {
+            color: #3498DB !important;
+            border-color: #3498DB !important;
+            background: transparent !important;
+        }
+
+        .btn-outline-primary:hover,
+        .content-wrapper .btn-outline-primary:hover {
+            background: #3498DB !important;
+            background-color: #3498DB !important;
+            border-color: #3498DB !important;
+            color: white !important;
+        }
+
+        /* ===== OCULTAR MENSAJES DE DATATABLES VACÍAS ===== */
+
+/* ===== MOSTRAR MENSAJE "SIN RESULTADOS" CUANDO NO HAY DATOS ===== */
+
+/* Mostrar mensaje "Sin resultados" cuando la tabla está vacía */
+.dataTables_empty,
+table.dataTable tbody .dataTables_empty,
+.dataTables_wrapper .dataTables_empty,
+td.dataTables_empty {
+    display: table-cell !important;
+    text-align: center !important;
+    color: var(--odoo-gray-500) !important;
+    font-style: italic !important;
+    padding: 20px !important;
+}
+
+/* Mostrar información cuando no hay datos */
+.dataTables_wrapper .dataTables_info {
+    display: block !important;
+}
+    </style>
 
     {% block head %}
     {% endblock %}
@@ -65,9 +875,6 @@
             <li class="nav-item d-none d-sm-inline-block">
                 <a href="{% url 'inicio_dashboard' %}" class="nav-link"><strong>Inicio</strong></a>
             </li>
-            {% comment %}<li class="nav-item d-none d-sm-inline-block">
-                <a href="#" class="nav-link"><strong>Contact</strong></a>
-            </li>{% endcomment %}
         </ul>
 
         <!-- Right navbar links -->
@@ -78,32 +885,29 @@
                 <!-- La IP direccion -->
             <li class="nav-item">
                 <a class="nav-link" data-toggle="tooltip" data-placement="bottom" data-html="true">
-                    {% comment %}<p id="infobyip"></p>{% endcomment %}
                 </a>
             </li>
 
             <a class="nav-link" data-toggle="dropdown" href="#">
-                <strong><i class="fas fa-users-cog"></i>&nbsp;&nbsp;Tipo de Usuario: {{ request.user.username }}
+                <strong><i class="fas fa-users-cog"></i>&nbsp;&nbsp;{{ request.user.username }}
                 </strong>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                     <span class="dropdown-header">
-                        Ultimo acceso el:</br>
+                        Último acceso:<br>
                         {{ request.user.last_login }}
                     </span>
                 <div class="dropdown-divider"></div>
                 <a href="#" class="dropdown-item">
                     <i class="fas fa-edit mr-2"></i> Editar perfil
-                    <span class="float-right text-muted text-sm">3 mins</span>
                 </a>
                 <div class="dropdown-divider"></div>
                 <a href="#" class="dropdown-item">
-                    <i class="fas fa-lock mr-2"></i> Editar password
-                    <span class="float-right text-muted text-sm">12 hours</span>
+                    <i class="fas fa-lock mr-2"></i> Cambiar contraseña
                 </a>
                 <div class="dropdown-divider"></div>
                 <a href="#" class="dropdown-item dropdown-footer">
-                    <p>Sistema de Producción <strong>PSM & BIO</strong></p>
+                    <strong>PSM & BIO</strong> - Sistema de Producción
                 </a>
             </div>
             </li>
@@ -114,19 +918,18 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                     <a href="{% url 'logout' %}" class="dropdown-item dropdown-footer">
-                        <i class="fas fa-sign-in-alt"></i> Cerrar Sesión
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                     </a>
                 </div>
             </li>
         </ul>
     </nav>
 
-    <aside class="main-sidebar sidebar-light-primary elevation-4" style="background-color: #F4F4F4">
+    <aside class="main-sidebar sidebar-light-lightblue elevation-4">
         <!-- Brand Logo -->
         <a href="#" class="brand-link">
-            <img src="{% static 'img/img_empresa/LOGO2.png' %}" class="brand-image img-circle elevation-3"
-                 style="opacity: .8; width: 60px; height: 55px;">
-            <span class="brand-text font-weight-light"><b>&nbsp;&nbsp; <span id="empresa-sidebar-title">PSM & BIO</span></b></span>
+            <img src="{% static 'img/img_empresa/LOGO2.png' %}" class="brand-image img-circle elevation-3" style="opacity: .8; width: 50px; height: 45px;">
+            <span class="brand-text"><span id="empresa-sidebar-title">PSM & BIO</span></span>
         </a>
 
         <div class="sidebar">
@@ -135,9 +938,10 @@
                 <div class="image text-center">
                     <img id="logo-empresa-sidebar" src="{% static 'img/img_empresa/logo_slider-png.png' %}"
                          class="img-fluid img-responsive d-block mx-auto text-center"
-                         style="width: 200px; height: 130px;" alt="User Image">
-                    <span class="brand-text font-weight-light"><h5><strong>Nombre Usuario:</strong></h5></span>
-                    <span class="brand-text font-weight-light"><h6>{{ request.user.first_name }} {{ request.user.last_name }}</h6></span>
+                         style="width: 180px; height: 110px; border-radius: 8px;" alt="User Image">
+                    <div class="brand-text font-weight-light" style="margin-top: 12px;">
+                        <h6><strong>{{ request.user.first_name }} {{ request.user.last_name }}</strong></h6>
+                    </div>
                 </div>
             </div>
 
@@ -146,11 +950,10 @@
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                     data-accordion="false">
                     <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
-                    <li class="nav-header"><b><span id="menu-title-sidebar">PSM & BIO</span> Menu de Opciones:</b></li>
+                    <li class="nav-header"><span id="menu-title-sidebar">PSM & BIO</span> - Menú Principal</li>
                     <!-- Modulo Dashboard -->
                     <li class="nav-item has-treeview">
-                        <a href="{% url 'inicio_dashboard' %}" class="nav-link active"
-                           style="background-color:#AEAEAE; border: #0a0e14">
+                        <a href="{% url 'inicio_dashboard' %}" class="nav-link active">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>Dashboard</p>
                         </a>
@@ -165,7 +968,7 @@
                             <li class="nav-item">
                                 <a href="{% url 'app_categoria:listar_categoria' %}" class="nav-link"><i
                                         class="far nav-icon fa fa-archive"></i>
-                                    <p>Categorias</p></a>
+                                    <p>Categorías</p></a>
                             </li>
                             <li class="nav-item">
                                 <a href="{% url 'app_categoria:listar_producto' %}" class="nav-link"><i
@@ -264,7 +1067,7 @@
                     <li class="nav-item has-treeview psm-item">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-chart-line"></i>
-                            <p>Consumo por Linea<i class="fas fa-angle-left right"></i></p>
+                            <p>Consumo por Línea<i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
@@ -317,7 +1120,7 @@
                             </li>
                         </ul>
                     </li>
-                    <!-- Modulo Provedor -->
+                    <!-- Modulo Proveedor -->
                     <li class="nav-item has-treeview">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-truck"></i>
@@ -448,11 +1251,6 @@
                                 <p>Contabilidad<i class="fas fa-angle-left right"></i></p>
                             </a>
                             <ul class="nav nav-treeview">
-                                {% comment %}<li class="nav-item">
-                                <a href="{% url 'app_planCuentas:listar_planCuenta' %}" class="nav-link">
-                                    <i class="far fa-dot-circle nav-icon"></i>
-                                    <p>Plan de Cuentas</p></a>
-                            </li>{% endcomment %}
                                 <li class="nav-item has-treeview">
                                     <a href="#" class="nav-link"><i class="fa fa-book-open nav-icon"></i>
                                         <p>Planes de Cuentas<i class="right fas fa-angle-left"></i></p></a>
@@ -471,11 +1269,6 @@
                                         </li>
                                     </ul>
                                 </li>
-                                {% comment %}<li class="nav-item">
-                                <a href="{% url 'app_planCuentas:listar_transaccionPlan' %}" class="nav-link"><i
-                                        class="fa fa-list nav-icon"></i>
-                                    <p>Transacciones sin ATS</p></a>
-                            </li>{% endcomment %}
                                 <li class="nav-item has-treeview">
                                     <a href="#" class="nav-link"><i class="fa fa-list nav-icon"></i>
                                         <p>Transacciones sin ATS<i class="right fas fa-angle-left"></i></p></a>
@@ -794,21 +1587,23 @@
                     actualizarSidebar(empresa);
 
                     // Mostrar el slider correspondiente (código que ya teníamos)
-                    document.getElementById('empresa-slider').style.display = 'block';
-                    document.getElementById('slider-psm').style.display = 'none';
-                    document.getElementById('slider-bio').style.display = 'none';
+                    if (document.getElementById('empresa-slider')) {
+                        document.getElementById('empresa-slider').style.display = 'block';
+                        document.getElementById('slider-psm').style.display = 'none';
+                        document.getElementById('slider-bio').style.display = 'none';
 
-                    if (empresa === 'psm') {
-                        document.getElementById('slider-title').textContent = 'Slider de Empresa PSM';
-                        document.getElementById('slider-psm').style.display = 'block';
-                        $('#carouselPSM').carousel(0);
-                    } else if (empresa === 'bio') {
-                        document.getElementById('slider-title').textContent = 'Slider de Empresa BIO';
-                        document.getElementById('slider-bio').style.display = 'block';
-                        $('#carouselBIO').carousel(0);
+                        if (empresa === 'psm') {
+                            document.getElementById('slider-title').textContent = 'Slider de Empresa PSM';
+                            document.getElementById('slider-psm').style.display = 'block';
+                            $('#carouselPSM').carousel(0);
+                        } else if (empresa === 'bio') {
+                            document.getElementById('slider-title').textContent = 'Slider de Empresa BIO';
+                            document.getElementById('slider-bio').style.display = 'block';
+                            $('#carouselBIO').carousel(0);
+                        }
+
+                        document.getElementById('empresa-slider').scrollIntoView({behavior: 'smooth'});
                     }
-
-                    document.getElementById('empresa-slider').scrollIntoView({behavior: 'smooth'});
                 });
             });
 
@@ -836,8 +1631,8 @@
     </aside>
 
     <footer class="main-footer">
-        <strong>Copyright &copy; 2022 <a href="#">PSM & BIO</a>.</strong>Derechos reservados.
-        <div class="float-right d-none d-sm-inline-block"><b>Version</b> 1.0</div>
+        <strong>Copyright &copy; 2022 <a href="#">PSM & BIO</a>.</strong> Derechos reservados.
+        <div class="float-right d-none d-sm-inline-block"><b>Versión</b> 1.0</div>
     </footer>
 
 </div>
@@ -850,7 +1645,6 @@
 <script src="{% static 'lib/adminlte-3.0.4/plugins/chart.js/Chart.min.js' %}"></script>
 <script src="{% static 'lib/adminlte-3.0.4/js/demo.js' %}"></script>
 
-{% comment %}<script src="{% static "lib/bootstrap-validator/validator.min.js" %}" type="text/javascript"></script>{% endcomment %}
 <script src="{% static 'lib/toastr/toastr.min.js' %}"></script>
 <script src="{% static 'acciones/alertas.js' %}"></script>
 <!-- Bootstrap 4 -->
@@ -861,11 +1655,6 @@
 <script src="{% static 'lib/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
 <script src="{% static 'lib/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
 <script src="{% static 'lib/jquery-loading-overlay-2.1.7/js/loadingoverlay.min.js' %}"></script>
-{% comment %}<script src="{% static 'acciones/verIP.js' %}"></script>{% endcomment %}
-
-{#<script>#}
-{#    document.getElementById("titulo").style.textTransform = "uppercase";#}
-{#</script>#}
 
 {% block scripts %}
 
@@ -881,7 +1670,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Ud no cuenta con los Privilegios Suficientes para realizar esta acción </br> Muchas Gracias
+                <p>Ud no cuenta con los Privilegios Suficientes para realizar esta acción <br> Muchas Gracias
                     &hellip;</p>
             </div>
             <div class="modal-footer justify-content-between">
