@@ -1251,6 +1251,158 @@ class editarTransaccionPlanView(UpdateView):
         return context
 
 
+class editarTransaccionPlanBIOView(UpdateView):
+    model = EncabezadoCuentasPlanCuenta
+    form_class = EncabezadoCuentasPlanCuentaForm
+    template_name = 'app_contabilidad_planCuentas/transaccion_Plan/transaccionPlan_crearBIO.html'
+    success_url = reverse_lazy('app_planCuentas:listar_planCuenta_BIO')
+    url_redirect = success_url
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'search_plan':
+                data = []
+                # CORRECCIÓN: Aplicar filtro BIO desde el inicio
+                queryset = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
+                ids_exclude = json.loads(request.POST['ids'])
+                if len(ids_exclude):
+                    queryset = queryset.exclude(id__in=ids_exclude)
+
+                # Ordenar por código
+                queryset = queryset.order_by('codigo')
+
+                print(f"Cuentas BIO encontradas: {queryset.count()}")
+
+                for i in queryset:
+                    item = i.toJSON()
+                    item['detalle'] = ""
+                    data.append(item)
+
+            elif action == 'search_autocomplete':
+                data = []
+                ids_exclude = json.loads(request.POST['ids'])
+                term = request.POST['term'].strip()
+                data.append({'codigo': term, 'text': term})
+
+                # CORRECCIÓN: Filtrar solo cuentas BIO en autocomplete
+                plan_detail = PlanCuenta.objects.filter(
+                    empresa__siglas__exact='BIO',
+                    nombre__icontains=term
+                ).exclude(id__in=ids_exclude)
+
+                for i in plan_detail[0:50]:
+                    item = i.toJSON()
+                    item['codigo'] = i.codigo
+                    item['text'] = i.nombre
+                    data.append(item)
+
+            elif action == 'obtener_ultima_secuencia':
+                # CORRECCIÓN: En modo edición, NUNCA generar nuevo código
+                encabezado_actual = self.get_object()
+                codigo_original = str(encabezado_actual.codigo) if encabezado_actual.codigo else ""
+
+                print(f"MODO EDICIÓN - Código original: {codigo_original}")
+                print("IMPORTANTE: NO se debe generar nuevo código en edición")
+
+                # SIEMPRE devolver el código original en edición
+                data = {
+                    'codigo_original': codigo_original,
+                    'mantener_codigo': True,
+                    'es_edicion': True,
+                    'secuencia': 0,  # No importa en edición
+                    'mensaje': 'Código original mantenido'
+                }
+
+                print(f"Devolviendo código original sin cambios: {codigo_original}")
+
+            elif action == 'edit':
+                with transaction.atomic():
+                    items = json.loads(request.POST['items'])
+                    encabezado = self.get_object()
+
+                    # CORRECCIÓN: NUNCA cambiar el código en edición
+                    codigo_original = str(encabezado.codigo) if encabezado.codigo else ""
+                    print(f"Manteniendo código original: {codigo_original}")
+
+                    # Actualizar otros campos (NO el código)
+                    encabezado.tip_cuenta = request.POST['tip_cuenta']
+                    encabezado.fecha = request.POST['fecha']
+                    encabezado.comprobante = request.POST['comprobante']
+                    encabezado.descripcion = request.POST['descripcion']
+                    encabezado.direccion = request.POST['direccion']
+                    encabezado.empresa_id = request.POST['empresa']
+                    encabezado.save()
+
+                    # Eliminar detalles existentes y crear nuevos
+                    encabezado.detallecuentasplancuenta_set.all().delete()
+
+                    for i in items:
+                        cuerpo = DetalleCuentasPlanCuenta()
+                        cuerpo.encabezadocuentaplan_id = encabezado.pk
+                        cuerpo.cuenta_id = int(i['id'])
+                        cuerpo.detalle = i['detalle']
+
+                        # CORRECCIÓN: Manejar valores decimales correctamente
+                        try:
+                            debe_value = str(i.get('debe', '0')).replace(',', '.')
+                            haber_value = str(i.get('haber', '0')).replace(',', '.')
+
+                            cuerpo.debe = float(debe_value) if debe_value else 0
+                            cuerpo.haber = float(haber_value) if haber_value else 0
+                        except (ValueError, TypeError) as e:
+                            print(
+                                f"Error al convertir valores: debe={i.get('debe')}, haber={i.get('haber')}, error={e}")
+                            cuerpo.debe = 0
+                            cuerpo.haber = 0
+
+                        cuerpo.save()
+
+            else:
+                data['error'] = 'Ha ocurrido un error'
+
+        except Exception as e:
+            data['error'] = 'el error es : ' + str(e)
+            print(f"Error en vista editar: {str(e)}")
+
+        return JsonResponse(data, safe=False)
+
+    def get_detalle(self):
+        data = []
+        for i in DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan_id=self.kwargs['pk']):
+            item = i.cuenta.toJSON()
+            item['detalle'] = i.detalle
+            item['debe'] = format(i.debe, '.2f')
+            item['haber'] = format(i.haber, '.2f')
+            data.append(item)
+        return json.dumps(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Formulario de Edición de Transacción'
+        context['list_url'] = self.success_url
+        context['action'] = 'edit'
+
+        # CORRECCIÓN: Filtrar solo cuentas BIO
+        planCuenta = PlanCuenta.objects.filter(parentId=None, empresa__siglas__exact='BIO')
+        context['planCuenta'] = planCuenta
+        planCuenta2 = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
+        context['planCuenta2'] = planCuenta2
+        context['det'] = self.get_detalle()
+
+        # Pasar el código original al contexto
+        context['codigo_original'] = str(self.object.codigo) if self.object.codigo else ""
+
+        return context
+
+
 #
 # class eliminarTransaccionPlanView(DeleteView):
 #     model = InvoiceStock
