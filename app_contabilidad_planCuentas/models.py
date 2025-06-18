@@ -206,7 +206,7 @@ class DetalleCuentasPlanCuenta(models.Model):
     # estado = models.BooleanField(default=True, verbose_name='Estado ')
 
     def __str__(self):
-        return self.encabezadocuentaplan
+        return str(self.encabezadocuentaplan)
 
     def get_full_hierarchy(self):
         """
