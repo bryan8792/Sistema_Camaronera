@@ -23,20 +23,12 @@
 
     <link href="{% static 'acciones/app_contabilidad_planCuentas/css/plan_cuentas_styles.css' %}" rel="stylesheet"/>
 
-    {% comment %} <script type="text/javascript">
-        var jQuery = $.noConflict(true);
-    </script>
-
-    <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>{% endcomment %}
     <!-- Bootstrap 4 -->
     <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <!-- AdminLTE App -->
     <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="{% static 'dist/js/demo.js' %}"></script>
-
-    {% comment %}
-    <script src="//cdn.rawgit.com/ashl1/datatables-rowsgroup/v1.0.0/dataTables.rowsGroup.js"></script>{% endcomment %}
 
     <style>
         .confondo {
@@ -47,17 +39,18 @@
             background: #ffffff;
         }
 
-        {% comment %}input:disabled {
-            color: black;
-        }{% endcomment %}
+        .search-container {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 15px;
+        }
 
         .buscar-container {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
             margin-bottom: 10px;
         }
 
@@ -66,11 +59,62 @@
             color: #495057;
             white-space: nowrap;
             margin: 0;
+            min-width: 80px;
         }
 
         .buscar-input {
             flex: 1;
             min-width: 200px;
+        }
+
+        .search-buttons {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .search-status {
+            text-align: center;
+            padding: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .table-warning {
+            background-color: #fff3cd !important;
+        }
+
+        .table-success {
+            background-color: #d4edda !important;
+            border-color: #c3e6cb !important;
+        }
+
+        .table-info {
+            background-color: #d1ecf1 !important;
+            border-color: #bee5eb !important;
+        }
+
+        mark {
+            background-color: #ffeb3b;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+
+        #tblSearchPlan tbody tr:hover {
+            background-color: #f5f5f5 !important;
+        }
+
+        #tblSearchPlan tbody tr.table-warning:hover {
+            background-color: #ffeaa7 !important;
+        }
+
+        #tblSearchPlan tbody tr.table-success:hover {
+            background-color: #c3e6cb !important;
+        }
+
+        #tblSearchPlan tbody tr.table-info:hover {
+            background-color: #bee5eb !important;
         }
 
         #load-more-indicator {
@@ -100,10 +144,48 @@
             background: #a8a8a8;
         }
 
-        #tblSearchPlan tbody tr:hover {
-            background-color: #f5f5f5;
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
         }
 
+        .btn-xs {
+            padding: 0.15rem 0.3rem;
+            font-size: 0.7rem;
+            line-height: 1;
+            border-radius: 0.2rem;
+        }
+
+        .text-danger i {
+            font-size: 2rem;
+            color: #dc3545;
+        }
+
+        .btn-sm {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .temporary-alert {
+            margin-bottom: 10px;
+        }
+
+        .search-type-buttons {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .search-type-buttons .btn {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+        }
+
+        .readonly-field {
+            background-color: #f8f9fa !important;
+            border: 1px solid #ced4da !important;
+            cursor: not-allowed !important;
+        }
     </style>
 
 {% endblock %}
@@ -115,15 +197,17 @@
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0 text-dark">{{ nombre }}</h1>
-                </div><!-- /.col -->
+                </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
-                        <li class="breadcrumb-item active">Crear {{ nombre }}</li>
+                        <li class="breadcrumb-item active">
+                            {% if action == 'create' %}Crear{% else %}Editar{% endif %} {{ nombre }}
+                        </li>
                     </ol>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Main content -->
@@ -137,7 +221,7 @@
                         <div class="card card-white">
                             <div class="card-header">
                                 <h1 class="card-title"><i class="fas fa-calculator"></i>
-                                    &nbsp; <strong>Plan de Cuentas:</strong>
+                                    &nbsp; <strong>Plan de Cuentas BIO:</strong>
                                 </h1>
                             </div>
                             <div class="card-body">
@@ -146,22 +230,48 @@
                                     <label>Buscar Cuenta del Plan:</label>
                                     <div class="input-group">
                                         <select class="form-control select2" name="search"></select>
-                                        {% comment %}<small class="float-right">
-                                            <button class="btn btn-primary" type="button" id="btnBuscarPlanBIO">
-                                                <i class="fas fa-search"></i> &nbsp;<strong>Plan de Cuentas Bio</strong>
-                                            </button>
-                                        </small>{% endcomment %}
                                     </div>
                                 </div>
+
                                 <hr>
+
+                                <!-- Contenedor de búsqueda mejorado -->
+                                <div id="searchContainer" class="search-container" style="display: none;">
+                                    <div class="buscar-container">
+                                        <label class="buscar-label">BUSCAR:</label>
+                                        <input type="search"
+                                               class="form-control form-control-sm buscar-input"
+                                               id="searchPlanInput"
+                                               placeholder="Ej: 201070101001 o nombre de cuenta...">
+                                        <div class="search-buttons">
+                                            <button type="button" class="btn btn-sm btn-warning" id="clearSearchBtn" style="display: none;">
+                                                <i class="fas fa-times"></i> Limpiar
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="search-type-buttons">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="searchExactBtn">
+                                            <i class="fas fa-bullseye"></i> Exacta
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info btn-sm" id="searchPartialBtn">
+                                            <i class="fas fa-search"></i> Parcial
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success btn-sm" id="searchAllBtn">
+                                            <i class="fas fa-list"></i> Todas
+                                        </button>
+                                    </div>
+
+                                    <div class="search-status mt-2" id="searchStatus" style="display: none;"></div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-12 table-responsive">
-
                                         <table id="tblSearchPlan" class="table table-sm table-striped table-bordered">
                                             <thead>
                                             <tr>
                                                 <th>Código</th>
-                                                <th>Cuenta</th>
+                                                <th>Tipo</th>
                                                 <th>Nombre Cuenta</th>
                                                 <th>Agregar</th>
                                             </tr>
@@ -243,7 +353,6 @@
                                                        class="col-sm-3 col-form-label">Dirección:</label>
                                                 <div class="col-sm-9">
                                                     {{ form.direccion }}
-                                                    {#                                                    <small class="form-text text-muted">Ingrese una Dirección ..</small>#}
                                                 </div>
                                             </div>
 
@@ -251,23 +360,13 @@
 
                                     </div>
                                 </div>
-                                {% comment %}<hr>
-                                <div class="form-group">
-                                    <label>Buscar Cuenta del Plan:</label>
-                                    <div class="input-group">
-                                        <select class="form-control select2" name="search"></select>
-                                        <small class="float-right">
-                                            <button class="btn btn-primary" type="button" id="btnBuscarPlanBIO">
-                                                <i class="fas fa-search"></i> &nbsp;<strong>Plan de Cuentas Bio</strong>
-                                            </button>
-                                        </small>
-                                    </div>
-                                </div>{% endcomment %}
+
                                 <hr>
+
                                 <div class="row">
                                     <div class="col-12 table-responsive">
 
-                                        <table class="table table-sm  table-sm" id="tbl_transaccionPlan">
+                                        <table class="table table-sm" id="tbl_transaccionPlan">
                                             <thead style="background-color:#3498DB">
                                             <tr class="text-center">
                                                 <th><i class="fas fa-list"></i></th>
@@ -360,199 +459,6 @@
 
     <!-- datatables JS -->
     <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
-    <!-- Modal -->
-    <!-- Modal optimizado para carga rápida -->
-    <!-- Ejemplo de estructura del modal con las clases aplicadas -->{% comment %}
-    <div class="modal fade modal-compacto" id="myModalSearchPlan" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Plan de Cuenta - Detalle</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="buscar-container">
-                        <label class="buscar-label">BUSCAR:</label>
-                        <input type="search" class="form-control form-control-sm buscar-input">
-                    </div>
-
-                    <div class="table-responsive">
-                        <table id="tblSearchPlan" class="table table-sm table-striped table-bordered">
-                            <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Tipo Cuenta</th>
-                                <th>Nombre de Plan</th>
-                                <th>Emp</th>
-                                <th>Agregar</th>
-                            </tr>
-                            </thead>
-                            <tbody id="table-tree">
-                            <!-- Contenido de la tabla -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="registros-info">
-                        Registros del 1 al 8 de un total de 4816 registros
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>{% endcomment %}
-
-
-    <style>
-        /* Estilos para hacer el modal más compacto */
-        .modal-compacto {
-            max-width: 90%;
-            margin: 0.5rem auto;
-        }
-
-        .modal-compacto .modal-header {
-            padding: 0.4rem 0.75rem;
-            background-color: #0099cc;
-            color: white;
-        }
-
-        .modal-compacto .modal-title {
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        .modal-compacto .modal-body {
-            padding: 0.5rem;
-            max-height: 65vh;
-            overflow-y: auto;
-        }
-
-        .modal-compacto .modal-footer {
-            padding: 0.4rem;
-        }
-
-        /* Estilos para la tabla dentro del modal */
-        .modal-compacto table {
-            font-size: 0.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .modal-compacto table th,
-        .modal-compacto table td {
-            padding: 0.25rem 0.5rem !important;
-            vertical-align: middle;
-        }
-
-        .modal-compacto .form-control {
-            height: calc(1.5em + 0.5rem + 2px);
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        .modal-compacto .btn {
-            padding: 0.15rem 0.4rem;
-            font-size: 0.75rem;
-        }
-
-        /* Ajustes para la barra de búsqueda */
-        .modal-compacto .buscar-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .modal-compacto .buscar-label {
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-right: 0.5rem;
-            white-space: nowrap;
-        }
-
-        .modal-compacto .buscar-input {
-            flex: 1;
-        }
-
-        /* Ajustes para los botones de acción */
-        .modal-compacto .btn-xs {
-            padding: 0.1rem 0.25rem;
-            font-size: 0.7rem;
-            line-height: 1;
-        }
-
-        /* Ajustes para el footer con información de registros */
-        .modal-compacto .registros-info {
-            font-size: 0.75rem;
-            padding: 0.25rem;
-            text-align: center;
-            color: #666;
-        }
-
-        /* Ajustes para DataTables */
-        .modal-compacto .dataTables_wrapper .dataTables_length,
-        .modal-compacto .dataTables_wrapper .dataTables_filter {
-            padding: 0.25rem 0;
-            font-size: 0.8rem;
-        }
-
-        .modal-compacto .dataTables_wrapper .dataTables_info,
-        .modal-compacto .dataTables_wrapper .dataTables_paginate {
-            padding-top: 0.25rem;
-            font-size: 0.75rem;
-        }
-
-        .modal-compacto .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 0.1rem 0.4rem;
-            font-size: 0.75rem;
-        }
-
-    </style>
-
-
-    <script>
-        // Script para búsqueda rápida sin esperar a DataTables
-        $(document).ready(function () {
-            $('#quickSearchInput').on('keyup', function () {
-                var value = $(this).val().toLowerCase();
-                $("#table-tree tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-                });
-            });
-
-            // Enfocar automáticamente el campo de búsqueda cuando se abre el modal
-            $('#myModalSearchPlan').on('shown.bs.modal', function () {
-                $('#quickSearchInput').focus();
-            });
-        });
-    </script>
-
-
-    <script>
-        $(document).ready(function () {
-            // Búsqueda rápida en el modal
-            $('#searchInput, #searchBox').on('keyup', function () {
-                var value = $(this).val().toLowerCase();
-                $("#table-tree tr").filter(function () {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-                });
-
-                // Actualizar contador de registros
-                var visibleRows = $("#table-tree tr:visible").length;
-                var totalRows = $("#table-tree tr").length;
-                $('#recordsInfo').text('Registros del 1 al ' + visibleRows + ' de un total de ' + totalRows + ' registros');
-            });
-
-            // Actualizar contador de registros cuando se carga la tabla
-            $('#myModalSearchPlan').on('shown.bs.modal', function () {
-                setTimeout(function () {
-                    var visibleRows = $("#table-tree tr:visible").length;
-                    var totalRows = $("#table-tree tr").length;
-                    $('#recordsInfo').text('Registros del 1 al ' + visibleRows + ' de un total de ' + totalRows + ' registros');
-                }, 500);
-            });
-        });
-    </script>
-
 
     <script>
         $(function () {
@@ -571,320 +477,42 @@
         function preseleccionarEmpresaBIO() {
             console.log("Intentando preseleccionar empresa BIO...");
 
-            // Buscar la opción que contiene "BIOCASCAJAL" o "BIO"
             var empresaSelect = $('select[name="empresa"]');
 
-            // Verificar si el select existe
             if (empresaSelect.length === 0) {
                 console.log("No se encontró el select de empresa");
                 return;
             }
 
-            // Primero intentamos encontrar la opción por su texto
             var encontrada = false;
             empresaSelect.find('option').each(function () {
                 if ($(this).text().includes("BIOCASCAJAL") || $(this).text() === "BIO") {
                     empresaSelect.val($(this).val()).trigger('change');
                     encontrada = true;
                     console.log("Empresa BIO seleccionada por texto:", $(this).text());
-                    return false; // Salir del bucle
+                    return false;
                 }
             });
 
-            // Si no se encontró por texto, intentamos por el valor de la opción
             if (!encontrada) {
-                // Buscar por ID o valor específico (ajustar según tu estructura de datos)
                 empresaSelect.find('option').each(function () {
                     var valor = $(this).val();
-                    // Verificar si el valor corresponde a la empresa BIO
                     if (valor && (valor === "BIO" || valor.includes("BIO"))) {
                         empresaSelect.val(valor).trigger('change');
                         console.log("Empresa BIO seleccionada por valor:", valor);
-                        return false; // Salir del bucle
+                        return false;
                     }
                 });
             }
-
-            // Si aún no se encontró, intentar seleccionar la primera opción que no sea vacía
-            if (!encontrada && empresaSelect.val() === "") {
-                var primeraOpcion = empresaSelect.find('option').filter(function () {
-                    return $(this).val() !== "";
-                }).first();
-
-                if (primeraOpcion.length > 0) {
-                    empresaSelect.val(primeraOpcion.val()).trigger('change');
-                    console.log("Seleccionada primera opción disponible:", primeraOpcion.text());
-                }
-            }
         }
 
-        // Ejecutar la función cuando el documento esté listo
         $(document).ready(function () {
-            // Esperar un momento para asegurarse de que select2 esté inicializado
             setTimeout(preseleccionarEmpresaBIO, 500);
         });
 
-        // También intentar ejecutar cuando se inicialice select2
         $(document).on('select2:open', function () {
             setTimeout(preseleccionarEmpresaBIO, 100);
         });
     </script>
-
-
-    {% comment %}
-    <script>
-        // Función para generar el código secuencial basado en el tipo de cuenta
-        function generarCodigoSecuencial(tipoCuenta) {
-            // Obtener el mes actual (1-12)
-            const fechaActual = new Date();
-            let mes = fechaActual.getMonth() + 1; // getMonth() devuelve 0-11
-
-            // Formatear el mes con dos dígitos (01-12)
-            mes = mes < 10 ? '0' + mes : mes.toString();
-
-            // Determinar el dígito según el tipo de cuenta
-            let digitoTipo = '1'; // Por defecto DIARIO CONTABLE
-
-            if (tipoCuenta === 'COMPROBANTE PAGO') {
-                digitoTipo = '2';
-            } else if (tipoCuenta === 'INGRESO A CAJA') {
-                digitoTipo = '3';
-            } else if (tipoCuenta === 'EGRESO DE CAJA') {
-                digitoTipo = '4';
-            }
-
-            // Clave para almacenar/recuperar la secuencia
-            const clave = `${mes}${digitoTipo}`;
-
-            // Obtener secuencias guardadas
-            const secuencias = obtenerSecuenciasGuardadas();
-
-            // Obtener la última secuencia para este tipo y mes, o usar 0 si no existe
-            let ultimaSecuencia = secuencias[clave] || 0;
-
-            // Incrementar la secuencia
-            ultimaSecuencia++;
-
-            // Guardar la nueva secuencia
-            secuencias[clave] = ultimaSecuencia;
-            guardarSecuencias(secuencias);
-
-            // Formatear la secuencia con tres dígitos (001-999)
-            const secuenciaFormateada = ultimaSecuencia < 10 ? '00' + ultimaSecuencia :
-                ultimaSecuencia < 100 ? '0' + ultimaSecuencia : ultimaSecuencia.toString();
-
-            // Construir el código completo: MES + TIPO + SECUENCIA
-            return mes + digitoTipo + secuenciaFormateada;
-        }
-
-        // Función para obtener secuencias almacenadas en localStorage
-        function obtenerSecuenciasGuardadas() {
-            const secuenciasGuardadas = localStorage.getItem('secuenciasCodigos');
-            return secuenciasGuardadas ? JSON.parse(secuenciasGuardadas) : {};
-        }
-
-        // Función para guardar secuencias en localStorage
-        function guardarSecuencias(secuencias) {
-            localStorage.setItem('secuenciasCodigos', JSON.stringify(secuencias));
-        }
-
-        // Función para actualizar el código cuando cambia el tipo de cuenta
-        function actualizarCodigo() {
-            const tipoCuenta = $('select[name="tip_cuenta"]').val();
-            const codigo = generarCodigoSecuencial(tipoCuenta);
-            $('input[name="codigo"]').val(codigo);
-        }
-
-        // Inicializar eventos cuando el documento esté listo
-        $(function () {
-            // Generar código inicial basado en el tipo de cuenta seleccionado
-            setTimeout(function () {
-                actualizarCodigo();
-            }, 500);
-
-            // Actualizar código cuando cambie el tipo de cuenta
-            $('select[name="tip_cuenta"]').on('change', function () {
-                actualizarCodigo();
-            });
-        });
-    </script>
-{% endcomment %}
-
-
-    <script>
-
-        // Función para generar el código secuencial basado en el tipo de cuenta
-        // VERSIÓN CORREGIDA: Manejo de errores mejorado
-        function generarCodigoSecuencial(tipoCuenta) {
-            // Mostrar indicador de carga
-            $('input[name="codigo"]').val("Generando...");
-
-            // Obtener el mes actual (1-12)
-            const fechaActual = new Date();
-            let mes = fechaActual.getMonth() + 1; // getMonth() devuelve 0-11
-
-            // Formatear el mes con dos dígitos (01-12)
-            mes = mes < 10 ? '0' + mes : mes.toString();
-
-            // Determinar el dígito según el tipo de cuenta
-            let digitoTipo = '1'; // Por defecto DIARIO CONTABLE
-
-            // Obtener el texto visible del select, no el valor
-            const tipoCuentaTexto = $('select[name="tip_cuenta"] option:selected').text().trim();
-            console.log("Tipo de cuenta seleccionado:", tipoCuentaTexto);
-
-            if (tipoCuentaTexto === 'COMPROBANTE PAGO') {
-                digitoTipo = '2';
-            } else if (tipoCuentaTexto === 'INGRESO A CAJA') {
-                digitoTipo = '3';
-            } else if (tipoCuentaTexto === 'EGRESO DE CAJA') {
-                digitoTipo = '4';
-            }
-
-            console.log("Dígito asignado:", digitoTipo);
-
-            // Realizar la petición AJAX para obtener la última secuencia
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: window.location.pathname,
-                    type: "POST",
-                    data: {
-                        action: "obtener_ultima_secuencia",
-                        mes: mes,
-                        tipo: digitoTipo,
-                    },
-                    dataType: "json",
-                    success: (response) => {
-                        console.log("Respuesta del servidor:", response);
-
-                        // MEJORA: Verificar si la respuesta es válida
-                        if (!response) {
-                            console.error("Respuesta vacía del servidor");
-                            // Usar un valor predeterminado
-                            const codigoFinal = mes + digitoTipo + "001";
-                            console.log("Usando código predeterminado:", codigoFinal);
-                            resolve(codigoFinal);
-                            return;
-                        }
-
-                        if (response.error) {
-                            console.error("Error del servidor:", response.error);
-                            // No rechazar la promesa, usar un valor predeterminado
-                            const codigoFinal = mes + digitoTipo + "001";
-                            console.log("Usando código predeterminado debido a error:", codigoFinal);
-                            resolve(codigoFinal);
-                            return;
-                        }
-
-                        // Obtener la última secuencia y sumar 1 para obtener la siguiente
-                        let ultimaSecuencia = 0;
-                        if (response.secuencia !== undefined) {
-                            ultimaSecuencia = parseInt(response.secuencia);
-                        }
-
-                        // Incrementar para obtener la siguiente secuencia
-                        const siguienteSecuencia = ultimaSecuencia + 1;
-                        console.log("Última secuencia:", ultimaSecuencia);
-                        console.log("Siguiente secuencia:", siguienteSecuencia);
-
-                        // Formatear la secuencia con tres dígitos (001-999)
-                        const secuenciaFormateada =
-                            siguienteSecuencia < 10
-                                ? "00" + siguienteSecuencia
-                                : siguienteSecuencia < 100
-                                    ? "0" + siguienteSecuencia
-                                    : siguienteSecuencia.toString();
-
-                        // Construir el código completo: MES + TIPO + SECUENCIA
-                        const codigoFinal = mes + digitoTipo + secuenciaFormateada;
-                        console.log("Código generado:", codigoFinal);
-
-                        resolve(codigoFinal);
-                    },
-                    error: (error) => {
-                        console.error("Error al obtener secuencia:", error);
-                        // No rechazar la promesa, usar un valor predeterminado
-                        const codigoFinal = mes + digitoTipo + "001";
-                        console.log("Usando código predeterminado debido a error de red:", codigoFinal);
-                        resolve(codigoFinal);
-                    }
-                });
-            });
-        }
-
-        // Función para obtener cookies (para CSRF)
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Función para actualizar el código cuando cambia el tipo de cuenta
-        function actualizarCodigo() {
-            const tipoCuenta = $('select[name="tip_cuenta"]').val();
-
-            // Mostrar indicador de carga
-            $('input[name="codigo"]').val("Generando...");
-
-            // Generar el código secuencial
-            generarCodigoSecuencial(tipoCuenta)
-                .then((codigo) => {
-                    $('input[name="codigo"]').val(codigo);
-                })
-                .catch((error) => {
-                    console.error("Error al generar código:", error);
-
-                    // MEJORA: Generar un código predeterminado en caso de error
-                    const fechaActual = new Date();
-                    let mes = fechaActual.getMonth() + 1;
-                    mes = mes < 10 ? '0' + mes : mes.toString();
-
-                    let digitoTipo = '1'; // Por defecto
-                    const tipoCuentaTexto = $('select[name="tip_cuenta"] option:selected').text().trim();
-                    if (tipoCuentaTexto === 'COMPROBANTE PAGO') {
-                        digitoTipo = '2';
-                    } else if (tipoCuentaTexto === 'INGRESO A CAJA') {
-                        digitoTipo = '3';
-                    } else if (tipoCuentaTexto === 'EGRESO DE CAJA') {
-                        digitoTipo = '4';
-                    }
-
-                    const codigoPredeterminado = mes + digitoTipo + "001";
-                    $('input[name="codigo"]').val(codigoPredeterminado);
-
-                    // Mostrar alerta de error
-                    if (typeof Swal !== "undefined") {
-                        Swal.fire({
-                            title: "Advertencia",
-                            text: "No se pudo obtener la última secuencia. Se ha generado un código predeterminado.",
-                            icon: "warning",
-                        });
-                    } else {
-                        alert("No se pudo obtener la última secuencia. Se ha generado un código predeterminado.");
-                    }
-                });
-        }
-
-        // Inicializar eventos cuando el documento esté listo
-        $(document).ready(function () {
-            // Generar código inicial basado en el tipo de cuenta seleccionado
-            setTimeout(actualizarCodigo, 1500);
-
-            // Actualizar código cuando cambie el tipo de cuenta
-            $('select[name="tip_cuenta"]').on('change', function () {
-                actualizarCodigo();
-            });
-        });
-    </script>
-
 
 {% endblock %}

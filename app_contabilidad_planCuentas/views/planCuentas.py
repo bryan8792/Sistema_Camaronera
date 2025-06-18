@@ -32,6 +32,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import logging
 from django.forms.models import model_to_dict
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -886,128 +887,75 @@ class crearTransaccionPlanBIOView(CreateView):
         data = {}
         try:
             action = request.POST['action']
+
             if action == 'search_plan':
-                return self.search_plan_paginated(request)
+                return self.search_plan_improved(request)
 
             elif action == 'search_autocomplete':
                 data = []
-                ids_exclude = json.loads(request.POST['ids'])
-                term = request.POST['term'].strip()
+                ids_exclude = json.loads(request.POST.get('ids', '[]'))
+                term = request.POST.get('term', '').strip()
+
+                # Agregar el término de búsqueda como primera opción
                 data.append({'codigo': term, 'text': term, 'id': None})
-                plan_detail = PlanCuenta.objects.filter(nombre__icontains=term, empresa__siglas__exact='BIO').exclude(id__in=ids_exclude)
-                for i in plan_detail[0:50]:
+
+                # Buscar cuentas que coincidan con el término
+                plan_detail = PlanCuenta.objects.filter(
+                    Q(nombre__icontains=term) | Q(codigo__icontains=term),
+                    empresa__siglas__exact='BIO'
+                ).exclude(id__in=ids_exclude).order_by('codigo')[:50]
+
+                for i in plan_detail:
                     item = i.toJSON()
                     item['codigo'] = i.codigo
-                    item['text'] = i.nombre
+                    item['text'] = f"{i.codigo} - {i.nombre}"
                     item['id'] = int(i.id) if i.id else None
                     data.append(item)
 
-
-            # Versión corregida del método obtener_ultima_secuencia para manejar tipos de datos
-
             elif action == 'obtener_ultima_secuencia':
-
                 mes = request.POST.get('mes')
-
                 tipo = request.POST.get('tipo')
-
-                # Imprimir para depuración
 
                 print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
 
                 try:
-
-                    # Versión simplificada que solo busca la última secuencia sin normalizar
-
-                    from django.db.models import Q
-
-                    import re
-
-                    # Buscar patrones que coincidan con el mes y tipo, independientemente del formato
-
-                    patron_mes = mes.lstrip('0')  # Quitar ceros iniciales: "05" -> "5"
-
-                    # Construir patrones para buscar
-
-                    patron1 = f"{mes}{tipo}"  # Con cero inicial: "051"
-
-                    patron2 = f"{patron_mes}{tipo}"  # Sin cero inicial: "51"
-
-                    # Buscar usando el ORM de Django (más seguro que SQL directo)
+                    patron_mes = mes.lstrip('0')
+                    patron1 = f"{mes}{tipo}"
+                    patron2 = f"{patron_mes}{tipo}"
 
                     encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
-
                         Q(codigo__startswith=patron1) | Q(codigo__startswith=patron2)
-
                     ).order_by('-codigo')
 
                     ultima_secuencia = 0
-
                     if encabezados.exists():
-
-                        # Procesar todos los códigos encontrados para extraer la secuencia más alta
-
                         for encabezado in encabezados:
-
-                            # CORRECCIÓN: Asegurarse de que codigo sea una cadena de texto
-
                             codigo = str(encabezado.codigo) if encabezado.codigo is not None else ""
-
                             print(f"Analizando código: {codigo}")
 
-                            # Extraer los últimos 3 dígitos, independientemente del formato
-
                             match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
-
                             if match:
-
                                 mes_encontrado = match.group(1)
-
                                 tipo_encontrado = match.group(2)
-
                                 secuencia_str = match.group(3)
 
-                                # Verificar que coincidan mes y tipo
-
                                 if (mes_encontrado == mes or mes_encontrado == patron_mes) and tipo_encontrado == tipo:
-
                                     try:
-
                                         secuencia = int(secuencia_str)
-
                                         ultima_secuencia = max(ultima_secuencia, secuencia)
-
                                         print(f"Secuencia encontrada: {secuencia}")
-
                                     except ValueError:
-
                                         print(f"Error al convertir secuencia: {secuencia_str}")
 
-                        print(f"Secuencia más alta encontrada: {ultima_secuencia}")
-
-                    else:
-
-                        print(f"No se encontraron registros para los patrones {patron1} o {patron2}")
-
-                    # Devolver la secuencia actual
-
                     data['secuencia'] = ultima_secuencia
-
                     print(f"Secuencia devuelta: {ultima_secuencia}")
 
-
                 except Exception as e:
-
                     import traceback
-
                     print(f"Error al buscar secuencia: {str(e)}")
-
                     print(traceback.format_exc())
-
                     data['secuencia'] = 0
-
                     data['error'] = str(e)
-
 
             elif action == 'create':
                 with transaction.atomic():
@@ -1022,10 +970,8 @@ class crearTransaccionPlanBIOView(CreateView):
                     encabezado.empresa_id = request.POST['empresa']
                     encabezado.save()
 
-                    # Validar los IDs de cuenta antes de crear los detalles
                     for i in items:
                         try:
-                            # Verificar si la cuenta existe
                             cuenta_id = int(i['id'])
                             if not PlanCuenta.objects.filter(id=cuenta_id).exists():
                                 raise ValueError(f"La cuenta con ID {cuenta_id} no existe en el plan de cuentas")
@@ -1034,32 +980,37 @@ class crearTransaccionPlanBIOView(CreateView):
                             cuerpo.encabezadocuentaplan_id = encabezado.pk
                             cuerpo.cuenta_id = cuenta_id
                             cuerpo.detalle = i['detalle']
-                            cuerpo.debe = Decimal(i['debe']) if i.get('debe') else Decimal('0.00')
-                            cuerpo.haber = Decimal(i['haber']) if i.get('haber') else Decimal('0.00')
+                            cuerpo.debe = Decimal(str(i.get('debe', '0')).replace(',', '.')) if i.get(
+                                'debe') else Decimal('0.00')
+                            cuerpo.haber = Decimal(str(i.get('haber', '0')).replace(',', '.')) if i.get(
+                                'haber') else Decimal('0.00')
                             cuerpo.save()
                         except Exception as e:
-                            # Si hay un error, revertir la transacción y devolver el error
                             transaction.set_rollback(True)
                             data['error'] = f"Error al guardar el detalle: {str(e)}"
                             print(f"Error al guardar detalle: {str(e)}")
                             return JsonResponse(data, safe=False)
             else:
                 data['error'] = 'Ha ocurrido un error'
+
         except Exception as e:
             import traceback
             print("Error en la vista:")
             print(traceback.format_exc())
-            data['error'] = 'el error es : ' + str(e)
+            data['error'] = f'Error: {str(e)}'
+
         return JsonResponse(data, safe=False)
 
-    def search_plan_paginated(self, request):
+    def search_plan_improved(self, request):
+        """Función mejorada para búsqueda del plan de cuentas"""
         try:
             empresa = request.POST.get('empresa', 'BIO')
             page = int(request.POST.get('page', 1))
             page_size = int(request.POST.get('page_size', 500))
             search_term = request.POST.get('search', '').strip()
+            search_type = request.POST.get('search_type', 'all')  # 'all', 'exact', 'partial'
 
-            print(f'Cargando página {page} con {page_size} registros para empresa: {empresa}')
+            print(f'Búsqueda: página={page}, tamaño={page_size}, término="{search_term}", tipo={search_type}')
 
             # Obtener IDs a excluir
             ids_exclude = []
@@ -1073,21 +1024,34 @@ class crearTransaccionPlanBIOView(CreateView):
                 empresa__siglas__exact=empresa
             ).exclude(id__in=ids_exclude)
 
-            # Aplicar filtro de búsqueda si existe
+            # Aplicar filtros de búsqueda
             if search_term:
-                queryset = queryset.filter(
-                    Q(codigo__icontains=search_term) |
-                    Q(nombre__icontains=search_term) |
-                    Q(tipo_cuenta__icontains=search_term)
-                )
+                if search_type == 'exact':
+                    # Búsqueda exacta por código
+                    queryset = queryset.filter(codigo__exact=search_term)
+                elif search_type == 'partial':
+                    # Búsqueda parcial
+                    queryset = queryset.filter(
+                        Q(codigo__icontains=search_term) |
+                        Q(nombre__icontains=search_term)
+                    )
+                else:
+                    # Búsqueda general (por defecto)
+                    queryset = queryset.filter(
+                        Q(codigo__icontains=search_term) |
+                        Q(nombre__icontains=search_term) |
+                        Q(tipo_cuenta__icontains=search_term)
+                    )
 
             # Ordenar para consistencia
             queryset = queryset.order_by('codigo', 'nombre')
 
+            total_count = queryset.count()
+            print(f'Total de registros encontrados: {total_count}')
+
             # Aplicar paginación
             paginator = Paginator(queryset, page_size)
 
-            # Obtener la página solicitada
             try:
                 page_obj = paginator.get_page(page)
             except:
@@ -1106,19 +1070,26 @@ class crearTransaccionPlanBIOView(CreateView):
                 'pagination': {
                     'current_page': page_obj.number,
                     'total_pages': paginator.num_pages,
-                    'total_records': paginator.count,
+                    'total_records': total_count,
                     'has_next': page_obj.has_next(),
                     'has_previous': page_obj.has_previous(),
                     'page_size': page_size
+                },
+                'search_info': {
+                    'term': search_term,
+                    'type': search_type,
+                    'found_count': total_count
                 }
             }
 
-            print(f'Enviando {len(data)} registros de {paginator.count} totales')
-
+            print(f'Enviando {len(data)} registros de {total_count} totales')
             return JsonResponse(response_data, safe=False)
 
         except Exception as e:
-            print(f'Error en search_plan_paginated: {str(e)}')
+            print(f'Error en search_plan_improved: {str(e)}')
+            import traceback
+            print(traceback.format_exc())
+
             return JsonResponse({
                 'error': f'Error al cargar datos: {str(e)}',
                 'data': [],
@@ -1137,21 +1108,247 @@ class crearTransaccionPlanBIOView(CreateView):
         context['nombre'] = 'Formulario de Registro de Transacción'
         context['list_url'] = self.success_url
         context['action'] = 'create'
-        planCuenta = PlanCuenta.objects.filter(parentId=None)
+
+        # Filtrar solo cuentas BIO
+        planCuenta = PlanCuenta.objects.filter(parentId=None, empresa__siglas__exact='BIO')
         context['planCuenta'] = planCuenta
-        planCuenta2 = PlanCuenta.objects.all()
+        planCuenta2 = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
         context['planCuenta2'] = planCuenta2
         context['empresa'] = 'BIO'
         context['det'] = []
 
         try:
             empresa_bio = Empresa.objects.get(siglas='BIO')
-            # Modificar el formulario para preseleccionar la empresa BIO
             form = self.get_form()
             form.fields['empresa'].initial = empresa_bio.id
             context['form'] = form
         except Exception as e:
             print(f"Error al preseleccionar empresa BIO: {e}")
+
+        return context
+
+
+class editarTransaccionPlanBIOView(UpdateView):
+    model = EncabezadoCuentasPlanCuenta
+    form_class = EncabezadoCuentasPlanCuentaForm
+    template_name = 'app_contabilidad_planCuentas/transaccion_Plan/transaccionPlan_crearBIO.html'
+    success_url = reverse_lazy('app_planCuentas:listar_planCuenta_BIO')
+    url_redirect = success_url
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+
+            if action == 'search_plan':
+                # Usar la misma función mejorada de búsqueda
+                return self.search_plan_improved(request)
+
+            elif action == 'search_autocomplete':
+                data = []
+                ids_exclude = json.loads(request.POST.get('ids', '[]'))
+                term = request.POST.get('term', '').strip()
+
+                data.append({'codigo': term, 'text': term, 'id': None})
+
+                plan_detail = PlanCuenta.objects.filter(
+                    Q(nombre__icontains=term) | Q(codigo__icontains=term),
+                    empresa__siglas__exact='BIO'
+                ).exclude(id__in=ids_exclude).order_by('codigo')[:50]
+
+                for i in plan_detail:
+                    item = i.toJSON()
+                    item['codigo'] = i.codigo
+                    item['text'] = f"{i.codigo} - {i.nombre}"
+                    item['id'] = int(i.id) if i.id else None
+                    data.append(item)
+
+            elif action == 'obtener_ultima_secuencia':
+                # En modo edición, NUNCA generar nuevo código
+                encabezado_actual = self.get_object()
+                codigo_original = str(encabezado_actual.codigo) if encabezado_actual.codigo else ""
+
+                print(f"MODO EDICIÓN - Código original: {codigo_original}")
+                print("IMPORTANTE: NO se debe generar nuevo código en edición")
+
+                data = {
+                    'codigo_original': codigo_original,
+                    'mantener_codigo': True,
+                    'es_edicion': True,
+                    'secuencia': 0,
+                    'mensaje': 'Código original mantenido'
+                }
+
+                print(f"Devolviendo código original sin cambios: {codigo_original}")
+
+            elif action == 'edit':
+                with transaction.atomic():
+                    items = json.loads(request.POST['items'])
+                    encabezado = self.get_object()
+
+                    # NUNCA cambiar el código en edición
+                    codigo_original = str(encabezado.codigo) if encabezado.codigo else ""
+                    print(f"Manteniendo código original: {codigo_original}")
+
+                    # Actualizar otros campos (NO el código)
+                    encabezado.tip_cuenta = request.POST['tip_cuenta']
+                    encabezado.fecha = request.POST['fecha']
+                    encabezado.comprobante = request.POST['comprobante']
+                    encabezado.descripcion = request.POST['descripcion']
+                    encabezado.direccion = request.POST['direccion']
+                    encabezado.empresa_id = request.POST['empresa']
+                    encabezado.save()
+
+                    # Eliminar detalles existentes y crear nuevos
+                    encabezado.detallecuentasplancuenta_set.all().delete()
+
+                    for i in items:
+                        cuerpo = DetalleCuentasPlanCuenta()
+                        cuerpo.encabezadocuentaplan_id = encabezado.pk
+                        cuerpo.cuenta_id = int(i['id'])
+                        cuerpo.detalle = i['detalle']
+
+                        try:
+                            debe_value = str(i.get('debe', '0')).replace(',', '.')
+                            haber_value = str(i.get('haber', '0')).replace(',', '.')
+
+                            cuerpo.debe = float(debe_value) if debe_value else 0
+                            cuerpo.haber = float(haber_value) if haber_value else 0
+                        except (ValueError, TypeError) as e:
+                            print(
+                                f"Error al convertir valores: debe={i.get('debe')}, haber={i.get('haber')}, error={e}")
+                            cuerpo.debe = 0
+                            cuerpo.haber = 0
+
+                        cuerpo.save()
+
+            else:
+                data['error'] = 'Ha ocurrido un error'
+
+        except Exception as e:
+            data['error'] = f'Error: {str(e)}'
+            print(f"Error en vista editar: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+
+        return JsonResponse(data, safe=False)
+
+    def search_plan_improved(self, request):
+        """Función mejorada para búsqueda del plan de cuentas (compartida con crear)"""
+        try:
+            empresa = request.POST.get('empresa', 'BIO')
+            page = int(request.POST.get('page', 1))
+            page_size = int(request.POST.get('page_size', 500))
+            search_term = request.POST.get('search', '').strip()
+            search_type = request.POST.get('search_type', 'all')
+
+            print(f'Búsqueda (edición): página={page}, término="{search_term}", tipo={search_type}')
+
+            ids_exclude = []
+            try:
+                ids_exclude = json.loads(request.POST.get('ids', '[]'))
+            except:
+                ids_exclude = []
+
+            queryset = PlanCuenta.objects.filter(
+                empresa__siglas__exact=empresa
+            ).exclude(id__in=ids_exclude)
+
+            if search_term:
+                if search_type == 'exact':
+                    queryset = queryset.filter(codigo__exact=search_term)
+                elif search_type == 'partial':
+                    queryset = queryset.filter(
+                        Q(codigo__icontains=search_term) |
+                        Q(nombre__icontains=search_term)
+                    )
+                else:
+                    queryset = queryset.filter(
+                        Q(codigo__icontains=search_term) |
+                        Q(nombre__icontains=search_term) |
+                        Q(tipo_cuenta__icontains=search_term)
+                    )
+
+            queryset = queryset.order_by('codigo', 'nombre')
+            total_count = queryset.count()
+
+            paginator = Paginator(queryset, page_size)
+            try:
+                page_obj = paginator.get_page(page)
+            except:
+                page_obj = paginator.get_page(1)
+
+            data = []
+            for item in page_obj:
+                item_data = item.toJSON()
+                item_data['detalle'] = ""
+                data.append(item_data)
+
+            response_data = {
+                'data': data,
+                'pagination': {
+                    'current_page': page_obj.number,
+                    'total_pages': paginator.num_pages,
+                    'total_records': total_count,
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'page_size': page_size
+                },
+                'search_info': {
+                    'term': search_term,
+                    'type': search_type,
+                    'found_count': total_count
+                }
+            }
+
+            return JsonResponse(response_data, safe=False)
+
+        except Exception as e:
+            print(f'Error en search_plan_improved (edición): {str(e)}')
+            return JsonResponse({
+                'error': f'Error al cargar datos: {str(e)}',
+                'data': [],
+                'pagination': {
+                    'current_page': 1,
+                    'total_pages': 0,
+                    'total_records': 0,
+                    'has_next': False,
+                    'has_previous': False,
+                    'page_size': page_size
+                }
+            }, status=500)
+
+    def get_detalle(self):
+        data = []
+        for i in DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan_id=self.kwargs['pk']):
+            item = i.cuenta.toJSON()
+            item['detalle'] = i.detalle
+            item['debe'] = format(i.debe, '.2f')
+            item['haber'] = format(i.haber, '.2f')
+            data.append(item)
+        return json.dumps(data)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Formulario de Edición de Transacción'
+        context['list_url'] = self.success_url
+        context['action'] = 'edit'
+
+        # Filtrar solo cuentas BIO
+        planCuenta = PlanCuenta.objects.filter(parentId=None, empresa__siglas__exact='BIO')
+        context['planCuenta'] = planCuenta
+        planCuenta2 = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
+        context['planCuenta2'] = planCuenta2
+        context['det'] = self.get_detalle()
+
+        # Pasar el código original al contexto
+        context['codigo_original'] = str(self.object.codigo) if self.object.codigo else ""
 
         return context
 
@@ -1251,156 +1448,6 @@ class editarTransaccionPlanView(UpdateView):
         return context
 
 
-class editarTransaccionPlanBIOView(UpdateView):
-    model = EncabezadoCuentasPlanCuenta
-    form_class = EncabezadoCuentasPlanCuentaForm
-    template_name = 'app_contabilidad_planCuentas/transaccion_Plan/transaccionPlan_crearBIO.html'
-    success_url = reverse_lazy('app_planCuentas:listar_planCuenta_BIO')
-    url_redirect = success_url
-
-    @method_decorator(csrf_exempt)
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        data = {}
-        try:
-            action = request.POST['action']
-            if action == 'search_plan':
-                data = []
-                # CORRECCIÓN: Aplicar filtro BIO desde el inicio
-                queryset = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
-                ids_exclude = json.loads(request.POST['ids'])
-                if len(ids_exclude):
-                    queryset = queryset.exclude(id__in=ids_exclude)
-
-                # Ordenar por código
-                queryset = queryset.order_by('codigo')
-
-                print(f"Cuentas BIO encontradas: {queryset.count()}")
-
-                for i in queryset:
-                    item = i.toJSON()
-                    item['detalle'] = ""
-                    data.append(item)
-
-            elif action == 'search_autocomplete':
-                data = []
-                ids_exclude = json.loads(request.POST['ids'])
-                term = request.POST['term'].strip()
-                data.append({'codigo': term, 'text': term})
-
-                # CORRECCIÓN: Filtrar solo cuentas BIO en autocomplete
-                plan_detail = PlanCuenta.objects.filter(
-                    empresa__siglas__exact='BIO',
-                    nombre__icontains=term
-                ).exclude(id__in=ids_exclude)
-
-                for i in plan_detail[0:50]:
-                    item = i.toJSON()
-                    item['codigo'] = i.codigo
-                    item['text'] = i.nombre
-                    data.append(item)
-
-            elif action == 'obtener_ultima_secuencia':
-                # CORRECCIÓN: En modo edición, NUNCA generar nuevo código
-                encabezado_actual = self.get_object()
-                codigo_original = str(encabezado_actual.codigo) if encabezado_actual.codigo else ""
-
-                print(f"MODO EDICIÓN - Código original: {codigo_original}")
-                print("IMPORTANTE: NO se debe generar nuevo código en edición")
-
-                # SIEMPRE devolver el código original en edición
-                data = {
-                    'codigo_original': codigo_original,
-                    'mantener_codigo': True,
-                    'es_edicion': True,
-                    'secuencia': 0,  # No importa en edición
-                    'mensaje': 'Código original mantenido'
-                }
-
-                print(f"Devolviendo código original sin cambios: {codigo_original}")
-
-            elif action == 'edit':
-                with transaction.atomic():
-                    items = json.loads(request.POST['items'])
-                    encabezado = self.get_object()
-
-                    # CORRECCIÓN: NUNCA cambiar el código en edición
-                    codigo_original = str(encabezado.codigo) if encabezado.codigo else ""
-                    print(f"Manteniendo código original: {codigo_original}")
-
-                    # Actualizar otros campos (NO el código)
-                    encabezado.tip_cuenta = request.POST['tip_cuenta']
-                    encabezado.fecha = request.POST['fecha']
-                    encabezado.comprobante = request.POST['comprobante']
-                    encabezado.descripcion = request.POST['descripcion']
-                    encabezado.direccion = request.POST['direccion']
-                    encabezado.empresa_id = request.POST['empresa']
-                    encabezado.save()
-
-                    # Eliminar detalles existentes y crear nuevos
-                    encabezado.detallecuentasplancuenta_set.all().delete()
-
-                    for i in items:
-                        cuerpo = DetalleCuentasPlanCuenta()
-                        cuerpo.encabezadocuentaplan_id = encabezado.pk
-                        cuerpo.cuenta_id = int(i['id'])
-                        cuerpo.detalle = i['detalle']
-
-                        # CORRECCIÓN: Manejar valores decimales correctamente
-                        try:
-                            debe_value = str(i.get('debe', '0')).replace(',', '.')
-                            haber_value = str(i.get('haber', '0')).replace(',', '.')
-
-                            cuerpo.debe = float(debe_value) if debe_value else 0
-                            cuerpo.haber = float(haber_value) if haber_value else 0
-                        except (ValueError, TypeError) as e:
-                            print(
-                                f"Error al convertir valores: debe={i.get('debe')}, haber={i.get('haber')}, error={e}")
-                            cuerpo.debe = 0
-                            cuerpo.haber = 0
-
-                        cuerpo.save()
-
-            else:
-                data['error'] = 'Ha ocurrido un error'
-
-        except Exception as e:
-            data['error'] = 'el error es : ' + str(e)
-            print(f"Error en vista editar: {str(e)}")
-
-        return JsonResponse(data, safe=False)
-
-    def get_detalle(self):
-        data = []
-        for i in DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan_id=self.kwargs['pk']):
-            item = i.cuenta.toJSON()
-            item['detalle'] = i.detalle
-            item['debe'] = format(i.debe, '.2f')
-            item['haber'] = format(i.haber, '.2f')
-            data.append(item)
-        return json.dumps(data)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Formulario de Edición de Transacción'
-        context['list_url'] = self.success_url
-        context['action'] = 'edit'
-
-        # CORRECCIÓN: Filtrar solo cuentas BIO
-        planCuenta = PlanCuenta.objects.filter(parentId=None, empresa__siglas__exact='BIO')
-        context['planCuenta'] = planCuenta
-        planCuenta2 = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
-        context['planCuenta2'] = planCuenta2
-        context['det'] = self.get_detalle()
-
-        # Pasar el código original al contexto
-        context['codigo_original'] = str(self.object.codigo) if self.object.codigo else ""
-
-        return context
 
 
 #

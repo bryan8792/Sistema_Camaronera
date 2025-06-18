@@ -6,12 +6,13 @@ var deb = 0.0,
 var date_now = new Date().toISOString().split("T")[0]
 const fecha_actual = new Date()
 
-// Variables globales para paginación y optimización
+// Variables globales para paginación y búsqueda mejorada
 var currentPage = 1
 var totalPages = 1
 var isLoadingMore = false
-var allPlanData = [] // Array para almacenar todos los datos cargados
+var allPlanData = []
 var currentSearchTerm = ""
+var currentSearchType = "all" // 'all', 'exact', 'partial'
 var planCuentasCache = null
 var lastLoadTime = null
 var CACHE_DURATION = 3600000 // 1 hora en milisegundos
@@ -20,138 +21,6 @@ var isLoadingPlan = false
 // Variables para búsqueda mejorada
 var isSearchActive = false
 var originalSearchTerm = ""
-
-// Estilos CSS completos
-const compactStyles = `
-.search-container {
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  padding: 10px;
-  border: 1px solid #dee2e6;
-  margin-bottom: 10px;
-}
-
-.buscar-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.search-buttons {
-  display: flex;
-  align-items: center;
-}
-
-.search-status {
-  text-align: center;
-  padding: 5px;
-}
-
-.table-warning {
-  background-color: #fff3cd !important;
-}
-
-.table-success {
-  background-color: #d4edda !important;
-  border-color: #c3e6cb !important;
-}
-
-.table-info {
-  background-color: #d1ecf1 !important;
-  border-color: #bee5eb !important;
-}
-
-mark {
-  background-color: #ffeb3b;
-  padding: 1px 2px;
-  border-radius: 2px;
-}
-
-#tblSearchPlan tbody tr.table-warning:hover {
-  background-color: #ffeaa7 !important;
-}
-
-#tblSearchPlan tbody tr.table-success:hover {
-  background-color: #c3e6cb !important;
-}
-
-#tblSearchPlan tbody tr.table-info:hover {
-  background-color: #bee5eb !important;
-}
-
-.buscar-label {
-  font-weight: bold;
-  color: #495057;
-  white-space: nowrap;
-  margin: 0;
-}
-
-.buscar-input {
-  flex: 1;
-  min-width: 200px;
-}
-
-#load-more-indicator {
-  background-color: #f8f9fa;
-  border-top: 1px solid #dee2e6;
-}
-
-#load-more-indicator td {
-  padding: 15px !important;
-}
-
-.dataTables_scrollBody::-webkit-scrollbar {
-  width: 8px;
-}
-
-.dataTables_scrollBody::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.dataTables_scrollBody::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-.dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-.spinner-border-sm {
-  width: 1rem;
-  height: 1rem;
-}
-
-.btn-xs {
-  padding: 0.15rem 0.3rem;
-  font-size: 0.7rem;
-  line-height: 1;
-  border-radius: 0.2rem;
-}
-
-#tblSearchPlan tbody tr:hover {
-  background-color: #f5f5f5;
-}
-
-.text-danger i {
-  font-size: 2rem;
-  color: #dc3545;
-}
-
-.btn-sm {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.temporary-alert {
-  margin-bottom: 10px;
-}
-
-.search-buttons .btn {
-  margin-left: 5px;
-}
-`
 
 var $ = window.jQuery
 
@@ -329,19 +198,24 @@ function formatRepo(repo) {
   return option
 }
 
-// Función optimizada para cargar el plan de cuentas con paginación
-function loadPlanCuentasBIO(resetData = true, searchTerm = "") {
+// Función principal para cargar el plan de cuentas con búsqueda mejorada
+function loadPlanCuentasBIO(resetData = true, searchTerm = "", searchType = "all") {
+  console.log(`loadPlanCuentasBIO: reset=${resetData}, term="${searchTerm}", type=${searchType}`)
+
   if (resetData) {
     currentPage = 1
     allPlanData = []
     currentSearchTerm = searchTerm
+    currentSearchType = searchType
+    isSearchActive = searchTerm.length > 0
+    originalSearchTerm = searchTerm
 
     $("#table-tree").html(
       '<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary spinner-border-sm" role="status"></div><p class="mt-1 small">Cargando datos...</p></td></tr>',
     )
   }
 
-  // Verificar caché
+  // Verificar caché solo para carga inicial sin búsqueda
   if (
     currentPage === 1 &&
     !searchTerm &&
@@ -374,6 +248,7 @@ function loadPlanCuentasBIO(resetData = true, searchTerm = "") {
       page: currentPage,
       page_size: 500,
       search: searchTerm || "",
+      search_type: searchType || "all",
     },
     dataType: "json",
     timeout: 30000,
@@ -391,6 +266,7 @@ function loadPlanCuentasBIO(resetData = true, searchTerm = "") {
 
       const data = response.data || response
       const pagination = response.pagination
+      const searchInfo = response.search_info
 
       if (pagination) {
         totalPages = pagination.total_pages
@@ -410,6 +286,13 @@ function loadPlanCuentasBIO(resetData = true, searchTerm = "") {
 
       renderPlanCuentasOptimized()
 
+      // Actualizar información de búsqueda
+      if (searchInfo && searchInfo.found_count !== undefined) {
+        updateSearchStatus(
+          `Búsqueda "${searchTerm}" (${searchType}): ${searchInfo.found_count} resultado(s) encontrado(s)`,
+        )
+      }
+
       console.log(`Total de registros cargados: ${allPlanData.length}`)
     },
     error: (error) => {
@@ -421,145 +304,6 @@ function loadPlanCuentasBIO(resetData = true, searchTerm = "") {
       isLoadingMore = false
     },
   })
-}
-
-// Nueva función para cargar todas las cuentas y posicionar en la encontrada
-function loadPlanCuentasAndPosition(searchTerm) {
-  currentPage = 1
-  allPlanData = []
-
-  $("#table-tree").html(
-    '<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary spinner-border-sm" role="status"></div><p class="mt-1 small">Buscando cuenta y cargando plan completo...</p></td></tr>',
-  )
-
-  if (isLoadingPlan) return
-  isLoadingPlan = true
-
-  var ids = vents.get_ids()
-
-  $.ajax({
-    url: window.location.pathname,
-    type: "POST",
-    data: {
-      action: "search_plan",
-      ids: JSON.stringify(ids),
-      empresa: "BIO",
-      page: 1,
-      page_size: 5000, // Cargar muchos más registros para encontrar la secuencia
-      search: "", // No filtrar en el servidor
-    },
-    dataType: "json",
-    timeout: 60000, // Más tiempo para cargar más datos
-    headers: {
-      "X-CSRFToken": getCookie("csrftoken"),
-    },
-    success: (response) => {
-      console.log("Datos cargados para posicionamiento:", response)
-
-      if (response.error) {
-        console.error("Error del servidor:", response.error)
-        showErrorMessage(response.error)
-        return
-      }
-
-      const data = response.data || response
-      allPlanData = [...data]
-
-      // Buscar la posición de la cuenta específica
-      const foundIndex = findAccountPosition(searchTerm)
-
-      if (foundIndex !== -1) {
-        // Renderizar desde la posición encontrada
-        renderFromPosition(foundIndex, searchTerm)
-      } else {
-        // Si no se encuentra, mostrar todo pero resaltar coincidencias parciales
-        renderPlanCuentasOptimized()
-        updateSearchStatus(`Cuenta "${searchTerm}" no encontrada exactamente. Mostrando coincidencias parciales.`)
-      }
-    },
-    error: (error) => {
-      console.error("Error al cargar datos:", error)
-      showErrorMessage("Error al cargar los datos. Por favor, intente nuevamente.")
-    },
-    complete: () => {
-      isLoadingPlan = false
-    },
-  })
-}
-
-// Función para encontrar la posición exacta de una cuenta
-function findAccountPosition(searchTerm) {
-  for (let i = 0; i < allPlanData.length; i++) {
-    if (allPlanData[i].codigo === searchTerm) {
-      return i
-    }
-  }
-
-  // Si no encuentra exacta, buscar la más cercana
-  for (let i = 0; i < allPlanData.length; i++) {
-    if (allPlanData[i].codigo.startsWith(searchTerm)) {
-      return i
-    }
-  }
-
-  return -1
-}
-
-// Función para renderizar desde una posición específica
-function renderFromPosition(startIndex, searchTerm) {
-  // Tomar un rango de cuentas desde la posición encontrada
-  const rangeSize = 50 // Mostrar 50 cuentas desde la posición encontrada
-  const endIndex = Math.min(startIndex + rangeSize, allPlanData.length)
-  const displayData = allPlanData.slice(startIndex, endIndex)
-
-  // Limpiar tabla
-  $("#table-tree").empty()
-
-  if ($.fn.DataTable.isDataTable("#tblSearchPlan")) {
-    $("#tblSearchPlan").DataTable().destroy()
-    $("#tblSearchPlan tbody").empty()
-  }
-
-  // Generar HTML para el rango de datos
-  var html = ""
-  for (var i = 0; i < displayData.length; i++) {
-    var item = displayData[i]
-    var actualIndex = startIndex + i
-
-    // Resaltar la cuenta buscada y las siguientes
-    var shouldHighlight = item.codigo === searchTerm
-    var isNext = item.codigo > searchTerm && item.codigo.startsWith(searchTerm.substring(0, 8)) // Misma serie
-
-    var rowClass = shouldHighlight ? "table-success" : isNext ? "table-info" : ""
-
-    html += `
-            <tr data-id="${item.id}" data-index="${actualIndex}" class="${rowClass}">
-                <td>${item.codigo}</td>
-                <td>${item.tipo_cuenta || ""}</td>
-                <td>${item.nombre}</td>
-                <td class="text-center">
-                    ${
-                      item.tipo_cuenta === "GENERAL" || item.tipo_cuenta === "G" || item.tipo_cuenta === "GEN"
-                        ? '<a rel="neg" class="btn btn-danger btn-xs btn-flat" style="color: white;"><i class="fas fa-times"></i></a>'
-                        : '<a rel="add" class="btn btn-success btn-xs btn-flat" style="color: white;"><i class="fas fa-plus"></i></a>'
-                    }
-                </td>
-            </tr>
-        `
-  }
-
-  $("#table-tree").html(html)
-
-  // Reinicializar DataTable
-  initializeDataTableForRange()
-
-  // Actualizar estado
-  updateSearchStatus(`Cuenta "${searchTerm}" encontrada. Mostrando ${displayData.length} cuentas desde esta posición.`)
-
-  // Scroll a la cuenta encontrada
-  setTimeout(() => {
-    scrollToFoundAccount(searchTerm)
-  }, 500)
 }
 
 // Función para renderizar los datos con resaltado mejorado
@@ -579,10 +323,14 @@ function renderPlanCuentasOptimized() {
 
     var shouldHighlight = false
     if (originalSearchTerm && originalSearchTerm.length > 0) {
-      shouldHighlight =
-        item.codigo.toLowerCase().includes(originalSearchTerm.toLowerCase()) ||
-        item.nombre.toLowerCase().includes(originalSearchTerm.toLowerCase()) ||
-        (item.tipo_cuenta && item.tipo_cuenta.toLowerCase().includes(originalSearchTerm.toLowerCase()))
+      if (currentSearchType === "exact") {
+        shouldHighlight = item.codigo === originalSearchTerm
+      } else {
+        shouldHighlight =
+          item.codigo.toLowerCase().includes(originalSearchTerm.toLowerCase()) ||
+          item.nombre.toLowerCase().includes(originalSearchTerm.toLowerCase()) ||
+          (item.tipo_cuenta && item.tipo_cuenta.toLowerCase().includes(originalSearchTerm.toLowerCase()))
+      }
     }
 
     var rowClass = shouldHighlight ? "table-warning" : ""
@@ -590,9 +338,7 @@ function renderPlanCuentasOptimized() {
     html += `
             <tr data-id="${item.id}" class="${rowClass}">
                 <td>${highlightText(item.codigo, originalSearchTerm)}</td>
-                <td>
-                  ${highlightText(item.tipo_cuenta === "GENERAL" ? "GEN" : "DET", originalSearchTerm)}
-                </td>
+                <td>${highlightText(item.tipo_cuenta === "GENERAL" ? "GEN" : "DET", originalSearchTerm)}</td>
                 <td>${highlightText(item.nombre, originalSearchTerm)}</td>
                 <td class="text-center">
                     ${
@@ -611,16 +357,6 @@ function renderPlanCuentasOptimized() {
     initializeDataTable()
   }
 
-  // Actualizar estado de búsqueda
-  if (isSearchActive && currentSearchTerm) {
-    const foundCount = allPlanData.length
-    updateSearchStatus(`Búsqueda: "${originalSearchTerm}" - ${foundCount} resultado(s) encontrado(s)`)
-  } else if (isSearchActive && !currentSearchTerm) {
-    updateSearchStatus(
-      `Búsqueda: "${originalSearchTerm}" - Mostrando todas las cuentas (${allPlanData.length} registros)`,
-    )
-  }
-
   if (currentPage < totalPages) {
     addLoadMoreIndicator()
   } else {
@@ -628,7 +364,7 @@ function renderPlanCuentasOptimized() {
   }
 
   // Scroll al primer resultado resaltado
-  if (shouldHighlight && originalSearchTerm) {
+  if (isSearchActive && originalSearchTerm) {
     setTimeout(() => {
       scrollToFirstHighlighted()
     }, 500)
@@ -639,8 +375,13 @@ function renderPlanCuentasOptimized() {
 function highlightText(text, searchTerm) {
   if (!searchTerm || !text) return text
 
-  const regex = new RegExp(`(${searchTerm})`, "gi")
+  const regex = new RegExp(`(${escapeRegExp(searchTerm)})`, "gi")
   return text.replace(regex, "<mark>$1</mark>")
+}
+
+// Función para escapar caracteres especiales en regex
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 // Función para scroll al primer resultado resaltado
@@ -657,22 +398,6 @@ function scrollToFirstHighlighted() {
         scrollTop: scrollTop,
       },
       300,
-    )
-  }
-}
-
-// Función para hacer scroll a la cuenta encontrada
-function scrollToFoundAccount(searchTerm) {
-  const $foundRow = $("#tblSearchPlan tbody tr.table-success").first()
-  if ($foundRow.length > 0) {
-    const scrollContainer = $("#tblSearchPlan_wrapper .dataTables_scrollBody")
-    const elementTop = $foundRow.position().top
-
-    scrollContainer.animate(
-      {
-        scrollTop: elementTop - 50, // Dejar un poco de espacio arriba
-      },
-      500,
     )
   }
 }
@@ -704,26 +429,6 @@ function initializeDataTable() {
   })
 }
 
-// Función para inicializar DataTable para rango específico
-function initializeDataTableForRange() {
-  tblSearchPlan = $("#tblSearchPlan").DataTable({
-    ordering: false,
-    searching: false,
-    paging: false,
-    scrollY: "850px",
-    scrollCollapse: true,
-    autoWidth: false,
-    language: {
-      zeroRecords: "Sin resultados",
-      sInfo: "_START_-_END_ de _TOTAL_",
-      infoEmpty: "Tabla vacía",
-    },
-    dom: "rtip",
-    destroy: true,
-    deferRender: true,
-  })
-}
-
 // Función para configurar scroll infinito
 function setupScrollInfinito() {
   const scrollContainer = $("#tblSearchPlan_wrapper .dataTables_scrollBody")
@@ -748,7 +453,7 @@ function loadMoreData() {
   showLoadingMoreIndicator()
 
   currentPage++
-  loadPlanCuentasBIO(false, currentSearchTerm)
+  loadPlanCuentasBIO(false, currentSearchTerm, currentSearchType)
 }
 
 // Función para agregar indicador de "cargar más"
@@ -764,7 +469,7 @@ function addLoadMoreIndicator() {
                 <td colspan="4" class="text-center p-2">
                     <small class="text-muted">
                         ${totalText}
-                        Haz scroll hacia abajo para cargar más...
+                        ${currentPage < totalPages ? "Haz scroll hacia abajo para cargar más..." : "Todos los registros cargados."}
                     </small>
                 </td>
             </tr>
@@ -788,52 +493,16 @@ function removeLoadMoreIndicator() {
   $("#load-more-indicator").remove()
 }
 
-// Función para configurar búsqueda personalizada mejorada SIN MODAL
+// Función para configurar búsqueda personalizada mejorada
 function setupCustomSearchImproved() {
-  const $searchContainer = $("<div>").addClass("search-container mb-3")
+  // Mostrar el contenedor de búsqueda
+  $("#searchContainer").show()
 
-  const $buscarContainer = $("<div>").addClass("buscar-container")
-  const $buscarLabel = $("<label>").addClass("buscar-label").text("BUSCAR:")
-  const $buscarInput = $("<input>")
-    .attr("type", "search")
-    .addClass("form-control form-control-sm buscar-input")
-    .attr("placeholder", "Buscar cuenta específica (ej: 201030101104)...")
-    .attr("id", "searchPlanInput")
-
-  const $buttonContainer = $("<div>").addClass("search-buttons ml-2")
-
-  const $clearButton = $("<button>")
-    .attr("type", "button")
-    .addClass("btn btn-sm btn-warning")
-    .attr("id", "clearSearchBtn")
-    .html('<i class="fas fa-times"></i> Limpiar')
-    .css("display", "none")
-
-  const $showAllButton = $("<button>")
-    .attr("type", "button")
-    .addClass("btn btn-sm btn-success ml-1")
-    .attr("id", "showAllBtn")
-    .html('<i class="fas fa-eye"></i> Mostrar Todas')
-    .css("display", "none")
-
-  // Nuevo botón para buscar desde posición encontrada
-  const $continueButton = $("<button>")
-    .attr("type", "button")
-    .addClass("btn btn-sm btn-info ml-1")
-    .attr("id", "continueFromBtn")
-    .html('<i class="fas fa-arrow-down"></i> Continuar desde aquí')
-    .css("display", "none")
-
-  $buttonContainer.append($clearButton).append($showAllButton).append($continueButton)
-  $buscarContainer.append($buscarLabel).append($buscarInput).append($buttonContainer)
-  $searchContainer.append($buscarContainer)
-
-  const $searchStatus = $("<div>").addClass("search-status mt-2").attr("id", "searchStatus").css("display", "none")
-
-  $searchContainer.append($searchStatus)
-
-  // Agregar ANTES de la tabla, no dentro de un modal
-  $("#tblSearchPlan_wrapper").prepend($searchContainer)
+  const $buscarInput = $("#searchPlanInput")
+  const $clearButton = $("#clearSearchBtn")
+  const $searchExactBtn = $("#searchExactBtn")
+  const $searchPartialBtn = $("#searchPartialBtn")
+  const $searchAllBtn = $("#searchAllBtn")
 
   // Eventos de búsqueda mejorados
   let searchTimeout
@@ -845,7 +514,7 @@ function setupCustomSearchImproved() {
       if (searchTerm !== currentSearchTerm) {
         if (searchTerm.length > 0) {
           console.log("Realizando búsqueda:", searchTerm)
-          performSearchAndPosition(searchTerm)
+          performSearch(searchTerm, currentSearchType)
         } else {
           clearSearch()
         }
@@ -857,12 +526,31 @@ function setupCustomSearchImproved() {
     clearSearch()
   })
 
-  $showAllButton.on("click", () => {
-    showAllAccountsFromPosition()
+  // Botones de tipo de búsqueda
+  $searchExactBtn.on("click", () => {
+    const searchTerm = $buscarInput.val().trim()
+    if (searchTerm.length > 0) {
+      performSearch(searchTerm, "exact")
+    }
+    updateSearchTypeButtons("exact")
   })
 
-  $continueButton.on("click", () => {
-    continueFromFoundPosition()
+  $searchPartialBtn.on("click", () => {
+    const searchTerm = $buscarInput.val().trim()
+    if (searchTerm.length > 0) {
+      performSearch(searchTerm, "partial")
+    }
+    updateSearchTypeButtons("partial")
+  })
+
+  $searchAllBtn.on("click", () => {
+    const searchTerm = $buscarInput.val().trim()
+    if (searchTerm.length > 0) {
+      performSearch(searchTerm, "all")
+    } else {
+      clearSearch()
+    }
+    updateSearchTypeButtons("all")
   })
 
   $buscarInput.on("keypress", function (e) {
@@ -870,94 +558,46 @@ function setupCustomSearchImproved() {
       e.preventDefault()
       const searchTerm = $(this).val().trim()
       if (searchTerm.length > 0) {
-        performSearchAndPosition(searchTerm)
+        performSearch(searchTerm, currentSearchType)
       }
     }
   })
+
+  // Inicializar botones
+  updateSearchTypeButtons("all")
 }
 
-// Nueva función para buscar y posicionar (no filtrar)
-function performSearchAndPosition(searchTerm) {
+// Función para actualizar el estado visual de los botones de búsqueda
+function updateSearchTypeButtons(activeType) {
+  $("#searchExactBtn, #searchPartialBtn, #searchAllBtn").removeClass("btn-primary").addClass("btn-outline-primary")
+
+  switch (activeType) {
+    case "exact":
+      $("#searchExactBtn").removeClass("btn-outline-primary").addClass("btn-primary")
+      break
+    case "partial":
+      $("#searchPartialBtn").removeClass("btn-outline-primary").addClass("btn-primary")
+      break
+    case "all":
+      $("#searchAllBtn").removeClass("btn-outline-primary").addClass("btn-primary")
+      break
+  }
+
+  currentSearchType = activeType
+}
+
+// Función para realizar búsqueda
+function performSearch(searchTerm, searchType) {
   isSearchActive = true
   originalSearchTerm = searchTerm
-  currentSearchTerm = "" // No filtrar, solo buscar posición
+  currentSearchTerm = searchTerm
+  currentSearchType = searchType
 
-  $("#clearSearchBtn, #showAllBtn, #continueFromBtn").show()
+  $("#clearSearchBtn").show()
 
-  updateSearchStatus(`Buscando posición de: "${searchTerm}"...`)
+  updateSearchStatus(`Buscando: "${searchTerm}" (${searchType})...`)
 
-  // Cargar todas las cuentas pero buscar la posición específica
-  loadPlanCuentasAndPosition(searchTerm)
-}
-
-// Función para mostrar todas las cuentas desde la posición encontrada
-function showAllAccountsFromPosition() {
-  console.log("Mostrando todas las cuentas desde la posición encontrada...")
-
-  // Encontrar el índice de la cuenta original
-  const foundIndex = findAccountPosition(originalSearchTerm)
-
-  if (foundIndex !== -1) {
-    // Mostrar más cuentas desde esa posición
-    const rangeSize = 200 // Mostrar 200 cuentas
-    const endIndex = Math.min(foundIndex + rangeSize, allPlanData.length)
-    const displayData = allPlanData.slice(foundIndex, endIndex)
-
-    renderExpandedRange(displayData, foundIndex)
-    updateSearchStatus(`Mostrando ${displayData.length} cuentas desde "${originalSearchTerm}".`)
-  }
-}
-
-// Función para continuar desde la posición encontrada
-function continueFromFoundPosition() {
-  console.log("Continuando desde la posición encontrada...")
-
-  const foundIndex = findAccountPosition(originalSearchTerm)
-
-  if (foundIndex !== -1) {
-    // Mostrar cuentas siguientes
-    const startIndex = foundIndex + 1 // Empezar desde la siguiente
-    const rangeSize = 100
-    const endIndex = Math.min(startIndex + rangeSize, allPlanData.length)
-    const displayData = allPlanData.slice(startIndex, endIndex)
-
-    renderExpandedRange(displayData, startIndex)
-    updateSearchStatus(`Mostrando ${displayData.length} cuentas siguientes a "${originalSearchTerm}".`)
-  }
-}
-
-// Función para renderizar rango expandido
-function renderExpandedRange(displayData, startIndex) {
-  $("#table-tree").empty()
-
-  if ($.fn.DataTable.isDataTable("#tblSearchPlan")) {
-    $("#tblSearchPlan").DataTable().destroy()
-    $("#tblSearchPlan tbody").empty()
-  }
-
-  var html = ""
-  for (var i = 0; i < displayData.length; i++) {
-    var item = displayData[i]
-    var actualIndex = startIndex + i
-
-    html += `
-            <tr data-id="${item.id}" data-index="${actualIndex}">
-                <td>${item.codigo}</td>
-                <td>${item.tipo_cuenta || ""}</td>
-                <td>${item.nombre}</td>
-                <td class="text-center">
-                    ${
-                      item.tipo_cuenta === "GENERAL" || item.tipo_cuenta === "G" || item.tipo_cuenta === "GEN"
-                        ? '<a rel="neg" class="btn btn-danger btn-xs btn-flat" style="color: white;"><i class="fas fa-times"></i></a>'
-                        : '<a rel="add" class="btn btn-success btn-xs btn-flat" style="color: white;"><i class="fas fa-plus"></i></a>'
-                    }
-                </td>
-            </tr>
-        `
-  }
-
-  $("#table-tree").html(html)
-  initializeDataTableForRange()
+  loadPlanCuentasBIO(true, searchTerm, searchType)
 }
 
 // Función mejorada para limpiar búsqueda
@@ -967,11 +607,11 @@ function clearSearch() {
   originalSearchTerm = ""
 
   $("#searchPlanInput").val("")
-  $("#clearSearchBtn, #showAllBtn, #continueFromBtn").hide()
+  $("#clearSearchBtn").hide()
   $("#searchStatus").hide()
 
   console.log("Limpiando búsqueda - cargando todas las cuentas")
-  loadPlanCuentasBIO(true, "")
+  loadPlanCuentasBIO(true, "", "all")
 }
 
 // Función para actualizar el estado de búsqueda
@@ -1016,8 +656,7 @@ function showTemporaryMessage(message, type = "info") {
     </div>
   `)
 
-  // Agregar al inicio del contenedor de la tabla
-  $(".table-responsive").prepend($alert)
+  $(".table-responsive").first().prepend($alert)
 
   setTimeout(() => {
     $alert.fadeOut(() => $alert.remove())
@@ -1028,7 +667,7 @@ function showTemporaryMessage(message, type = "info") {
 function generarCodigoSecuencial(tipoCuenta) {
   const action = $('input[name="action"]').val()
 
-  if (action === 'edit') {
+  if (action === "edit") {
     console.log("MODO EDICIÓN: NO SE EJECUTA GENERACIÓN DE CÓDIGO")
     const codigoOriginal = $('input[name="codigo"]').val()
     console.log("Código original mantenido:", codigoOriginal)
@@ -1118,7 +757,7 @@ function getCookie(name) {
 function actualizarCodigo() {
   const action = $('input[name="action"]').val()
 
-  if (action === 'edit') {
+  if (action === "edit") {
     console.log("MODO EDICIÓN: NO se actualiza el código")
     return Promise.resolve()
   }
@@ -1181,34 +820,31 @@ function preseleccionarEmpresaBIO() {
 }
 
 $(document).ready(() => {
-  // Agregar estilos
-  $("<style>").text(compactStyles).appendTo("head")
-
   preseleccionarEmpresaBIO()
 
   setTimeout(depurarSelect, 1000)
 
   // CORRECCIÓN PRINCIPAL: Solo generar código en modo creación
-  setTimeout(function() {
+  setTimeout(() => {
     const action = $('input[name="action"]').val()
     console.log("Acción detectada:", action)
 
-    if (action === 'create') {
+    if (action === "create") {
       console.log("MODO CREACIÓN: Generando código inicial")
       actualizarCodigo()
-    } else if (action === 'edit') {
+    } else if (action === "edit") {
       console.log("MODO EDICIÓN: Manteniendo código original")
       const codigoOriginal = $('input[name="codigo"]').val()
       console.log("Código original:", codigoOriginal)
 
       // IMPORTANTE: Hacer el campo readonly y evitar cambios
-      $('input[name="codigo"]').prop('readonly', true)
-        .css('background-color', '#f8f9fa')
-        .css('border', '1px solid #ced4da')
-        .attr('title', 'Código original - No se puede modificar en edición')
+      $('input[name="codigo"]')
+        .prop("readonly", true)
+        .addClass("readonly-field")
+        .attr("title", "Código original - No se puede modificar en edición")
 
       // BLOQUEAR CUALQUIER INTENTO DE CAMBIO
-      $('input[name="codigo"]').on('focus', function() {
+      $('input[name="codigo"]').on("focus", function () {
         $(this).blur()
         console.log("Campo código bloqueado en modo edición")
       })
@@ -1222,10 +858,6 @@ $(document).ready(() => {
 
   // Cargar plan de cuentas automáticamente
   loadPlanCuentasBIO()
-
-  $("#btnBuscarPlanBIO").on("click", () => {
-    loadPlanCuentasBIO(true)
-  })
 
   // Evento mejorado para agregar cuenta
   $(document).on("click", '#tblSearchPlan tbody a[rel="add"]', function () {
@@ -1276,18 +908,20 @@ $(document).ready(() => {
   })
 
   // CORRECCIÓN: BLOQUEAR COMPLETAMENTE cambios de código en edición
-  $('select[name="tip_cuenta"]').off('change').on('change', function() {
-    const action = $('input[name="action"]').val()
-    console.log("Cambio en tipo de cuenta, acción:", action)
+  $('select[name="tip_cuenta"]')
+    .off("change")
+    .on("change", () => {
+      const action = $('input[name="action"]').val()
+      console.log("Cambio en tipo de cuenta, acción:", action)
 
-    if (action === 'create') {
-      console.log("MODO CREACIÓN: Actualizando código por cambio de tipo")
-      actualizarCodigo()
-    } else {
-      console.log("MODO EDICIÓN: CAMBIO BLOQUEADO - No se actualiza el código")
-      // ABSOLUTAMENTE NADA en modo edición
-    }
-  })
+      if (action === "create") {
+        console.log("MODO CREACIÓN: Actualizando código por cambio de tipo")
+        actualizarCodigo()
+      } else {
+        console.log("MODO EDICIÓN: CAMBIO BLOQUEADO - No se actualiza el código")
+        // ABSOLUTAMENTE NADA en modo edición
+      }
+    })
 
   $("#tbl_transaccionPlan tbody")
     .on("click", 'a[rel="remove"]', function () {
