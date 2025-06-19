@@ -157,6 +157,8 @@ class EncabezadoCuentasPlanCuenta(models.Model):
     reg_ats = models.CharField(max_length=400, verbose_name='Es ATS', default='SIN REGISTRO DE ATS')
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, verbose_name="Seleccionar Empresa:")
     reg_control = models.CharField(max_length=400, verbose_name='Tipo de Registro', default='RT')
+    proveedor = models.ForeignKey('app_proveedor.Proveedor', on_delete=models.PROTECT, verbose_name="Seleccionar Proveedor ",
+                                  null=True, blank=True)
 
     def __str__(self):
         return str(self.codigo)
@@ -168,6 +170,7 @@ class EncabezadoCuentasPlanCuenta(models.Model):
     def toJSON(self):
         item = model_to_dict(self)
         item['empresa'] = self.empresa.toJSON()
+        item['proveedor'] = self.proveedor.toJSON() if self.proveedor else None
         item['det'] = [i.toJSON() for i in self.detallecuentasplancuenta_set.all()]
         item['detATS'] = [ats.toJSON() for ats in self.anexotransaccional_set.all()]
         return item

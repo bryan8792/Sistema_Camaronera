@@ -875,7 +875,7 @@ class crearTransaccionPlanBIOView(CreateView):
     model = EncabezadoCuentasPlanCuenta
     form_class = EncabezadoCuentasPlanCuentaForm
     template_name = 'app_contabilidad_planCuentas/transaccion_Plan/transaccionPlan_crearBIO.html'
-    success_url = reverse_lazy('app_planCuentas:listar_transaccionPlan')
+    success_url = reverse_lazy('app_planCuentas:listar_transaccionPlan_bio')
     url_redirect = success_url
 
     @method_decorator(csrf_exempt)
@@ -968,6 +968,7 @@ class crearTransaccionPlanBIOView(CreateView):
                     encabezado.descripcion = request.POST['descripcion']
                     encabezado.direccion = request.POST['direccion']
                     encabezado.empresa_id = request.POST['empresa']
+                    encabezado.proveedor_id = request.POST['proveedor']
                     encabezado.save()
 
                     for i in items:
@@ -1193,6 +1194,7 @@ class editarTransaccionPlanBIOView(UpdateView):
                     encabezado.descripcion = request.POST['descripcion']
                     encabezado.direccion = request.POST['direccion']
                     encabezado.empresa_id = request.POST['empresa']
+                    encabezado.proveedor_id = request.POST['proveedor']
                     encabezado.save()
 
                     # Eliminar detalles existentes y crear nuevos

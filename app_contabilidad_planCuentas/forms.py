@@ -266,6 +266,13 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
                     'style': 'width: 100%;'
                 }
             ),
+            'proveedor': Select(
+                attrs={
+                    'class': 'form-control select2',
+                    'autocomplete': 'off',
+                    'style': 'width: 100%;'
+                }
+            ),
             'reg_ats': TextInput(
                 attrs={
                     'class': 'form-control',
