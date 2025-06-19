@@ -198,6 +198,68 @@ function formatRepo(repo) {
   return option
 }
 
+// FUNCIÓN COMPLETAMENTE CORREGIDA PARA ARREGLAR EL SELECT SIN DUPLICADOS
+function arreglarDisplaySelect() {
+  console.log("=== ARREGLANDO DISPLAY DEL SELECT TIP_CUENTA (SIN DUPLICADOS) ===")
+
+  var tipoCuentaSelect = $('select[name="tip_cuenta"]')
+
+  if (tipoCuentaSelect.length === 0) {
+    console.log("Select tip_cuenta no encontrado")
+    return
+  }
+
+  // PASO 1: Limpiar completamente cualquier instancia de Select2
+  if (tipoCuentaSelect.hasClass("select2-hidden-accessible")) {
+    console.log("Destruyendo Select2 existente...")
+    tipoCuentaSelect.select2('destroy')
+  }
+
+  // PASO 2: Limpiar elementos DOM duplicados de Select2
+  tipoCuentaSelect.siblings('.select2-container').remove()
+
+  // PASO 3: Asegurar que el select original esté visible
+  tipoCuentaSelect.show().removeClass('select2-hidden-accessible')
+
+  // PASO 4: Pequeña pausa antes de reinicializar
+  setTimeout(() => {
+    // PASO 5: Reinicializar Select2 con configuración limpia
+    tipoCuentaSelect.select2({
+      theme: "bootstrap4",
+      language: "es",
+      placeholder: "Seleccione tipo de cuenta",
+      allowClear: false,
+      width: '100%',
+      dropdownAutoWidth: true,
+      // Configuración para mostrar texto correcto
+      templateSelection: function(option) {
+        if (!option.id) {
+          return option.text
+        }
+        return option.text
+      },
+      templateResult: function(option) {
+        if (!option.id) {
+          return option.text
+        }
+        return option.text
+      },
+      escapeMarkup: function(markup) {
+        return markup
+      }
+    })
+
+    console.log("Select2 reinicializado correctamente")
+
+    // PASO 6: Verificar el valor actual
+    var valorActual = tipoCuentaSelect.val()
+    if (valorActual) {
+      var textoOpcion = tipoCuentaSelect.find('option:selected').text()
+      console.log("Valor actual después de reinicializar:", valorActual, "Texto:", textoOpcion)
+    }
+  }, 50)
+}
+
 // Función principal para cargar el plan de cuentas con búsqueda mejorada
 function loadPlanCuentasBIO(resetData = true, searchTerm = "", searchType = "all") {
   console.log(`loadPlanCuentasBIO: reset=${resetData}, term="${searchTerm}", type=${searchType}`)
@@ -851,10 +913,18 @@ $(document).ready(() => {
     }
   }, 1500)
 
-  $(".select2").select2({
+  // INICIALIZACIÓN CORREGIDA DE SELECT2
+  // Primero inicializar todos los selects EXCEPTO tip_cuenta
+  $(".select2").not('select[name="tip_cuenta"]').select2({
     theme: "bootstrap4",
     language: "es",
   })
+
+  // CORRECCIÓN PRINCIPAL: Arreglar el display del select tip_cuenta UNA SOLA VEZ
+  setTimeout(() => {
+    console.log("Inicializando select tip_cuenta por primera vez...")
+    arreglarDisplaySelect()
+  }, 1000)
 
   // Cargar plan de cuentas automáticamente
   loadPlanCuentasBIO()
