@@ -1,4 +1,3 @@
-
 from django.urls import path
 from .views.categoria import *
 from .views.producto import *
@@ -6,7 +5,7 @@ from .views.producto import *
 app_name = 'app_categoria'
 
 urlpatterns = [
-   # muestrame esa vista
+    # muestrame esa vista
     path('categoria/crear/', crearCategoriaView.as_view(), name='crear_categoria'),
     path('categoria/actualizar/<int:pk>/', actualizarCategoriaView.as_view(), name='actualizar_categoria'),
     path('categoria/eliminar/<int:pk>/', eliminarCategoriaView.as_view(), name='eliminar_categoria'),

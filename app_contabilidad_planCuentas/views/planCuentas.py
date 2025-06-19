@@ -1009,21 +1009,17 @@ class crearTransaccionPlanBIOView(CreateView):
             page_size = int(request.POST.get('page_size', 500))
             search_term = request.POST.get('search', '').strip()
             search_type = request.POST.get('search_type', 'all')  # 'all', 'exact', 'partial'
-
             print(f'Búsqueda: página={page}, tamaño={page_size}, término="{search_term}", tipo={search_type}')
-
             # Obtener IDs a excluir
             ids_exclude = []
             try:
                 ids_exclude = json.loads(request.POST.get('ids', '[]'))
             except:
                 ids_exclude = []
-
             # Construir queryset base
             queryset = PlanCuenta.objects.filter(
                 empresa__siglas__exact=empresa
             ).exclude(id__in=ids_exclude)
-
             # Aplicar filtros de búsqueda
             if search_term:
                 if search_type == 'exact':
@@ -1042,28 +1038,22 @@ class crearTransaccionPlanBIOView(CreateView):
                         Q(nombre__icontains=search_term) |
                         Q(tipo_cuenta__icontains=search_term)
                     )
-
             # Ordenar para consistencia
             queryset = queryset.order_by('codigo', 'nombre')
-
             total_count = queryset.count()
             print(f'Total de registros encontrados: {total_count}')
-
             # Aplicar paginación
             paginator = Paginator(queryset, page_size)
-
             try:
                 page_obj = paginator.get_page(page)
             except:
                 page_obj = paginator.get_page(1)
-
             # Convertir a JSON
             data = []
             for item in page_obj:
                 item_data = item.toJSON()
                 item_data['detalle'] = ""
                 data.append(item_data)
-
             # Respuesta con metadatos de paginación
             response_data = {
                 'data': data,

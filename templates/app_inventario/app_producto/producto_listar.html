@@ -2,6 +2,10 @@
 
 {% load static %}
 
+{% block head %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+{% endblock %}
+
 {% block contenido %}
 
     <div class="content-header">
@@ -32,8 +36,8 @@
                         <div class="card-tools">
                             <ul class="pagination pagination-sm float-right">
                                 <li class="page-item">
-                                    <a href="{% url 'app_categoria:crear_producto' %}" class="btn btn-block btn-default btn-sm">
-                                        <strong><i class="fas fa-plus"></i> NUEVO PRODUCTO</strong>
+                                    <a href="{% url 'app_categoria:crear_producto' %}" class="btn btn-block btn-primary btn-sm">
+                                        <strong><i class="fas fa-plus"></i>&nbsp; NUEVO PRODUCTO</strong>
                                     </a>
                                 </li>
                             </ul>
@@ -117,12 +121,23 @@
                     imageWidth: 1000,
                     imageHeight: 500,
                     imageAlt: 'Custom image',
-                    animation: true,
+                    confirmButtonText: 'OK',
+                    allowOutsideClick: false,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown'
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log('Modal cerrado con OK');
+                    }
                 });
             });
-        });
 
-        $(function () {
+
+
             $("#tb_categoria").DataTable({
                 "responsive": true,
                 "autoWidth": false,
