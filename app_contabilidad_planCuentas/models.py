@@ -27,7 +27,6 @@ from utilities.sri import SRI
 from datetime import datetime
 from django.core.files.base import ContentFile
 from app_empresa.app_reg_empresa.models import Empresa
-from app_proveedor.models import Proveedor
 import base64
 import tempfile
 from io import BytesIO
