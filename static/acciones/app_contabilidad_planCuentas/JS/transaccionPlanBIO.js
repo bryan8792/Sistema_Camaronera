@@ -1035,6 +1035,7 @@ $(document).ready(() => {
         fecha: $('input[name="fecha"]').val(),
         descripcion: $('input[name="descripcion"]').val(),
         empresa: $('select[name="empresa"]').val(),
+        proveedor: $('select[name="proveedor"]').val(),
         comprobante: $('input[name="comprobante"]').val(),
         direccion: $('textarea[name="direccion"]').val(),
         items: JSON.stringify(items),
