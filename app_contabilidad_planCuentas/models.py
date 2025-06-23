@@ -131,6 +131,7 @@ class PlanCuenta(models.Model):
         item['empresa'] = self.empresa.toJSON()
         item['full_name'] = '{} / {}'.format(self.codigo, self.nombre)
         item['full_name_2'] = '{} /  {} /  Nivel: {}'.format(self.codigo, self.nombre, self.nivel)
+        item['full_name_total'] = '{} /  {} /  Nivel: {} / Empresa: {} '.format(self.codigo, self.nombre, self.nivel, self.empresa)
         item['cuenta_padre'] = '{} '.format(self.parentId)
         item['cuenta_padre2'] = '{} '.format(self.parentId)
         item['jerarquia_completa'] = self.get_full_hierarchy()

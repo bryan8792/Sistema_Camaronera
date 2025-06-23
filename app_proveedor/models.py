@@ -25,7 +25,7 @@ class Proveedor(models.Model):
 
     def toJSON(self):
         item = model_to_dict(self)
-        item['cod_contable'] = self.cod_contable.toJSON()
+        item['cod_contable'] = self.cod_contable.toJSON() if self.cod_contable else None
         return item
 
     class Meta:
