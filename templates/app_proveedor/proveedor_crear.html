@@ -46,7 +46,7 @@
                         <!-- /.card-body -->
                         <div class="card-body">
 
-{#                            {% csrf_token %}#}
+                            {% comment %}{% csrf_token %}{% endcomment %}
                             <input type="hidden" name="action" value="{{ action }}">
 
                             <div class="form-group">
@@ -74,7 +74,7 @@
                                 <div class="input-group">
                                     {{ form.cod_contable }}
                                     <div class="input-group-append">
-                                        <button class="btn btn-success btn-flat btnAddClient" type="button">
+                                        <button class="btn btn-success btn-flat btnAddClient" id="regPlan" type="button">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
@@ -270,11 +270,16 @@
 
 {% block scripts %}
 
+    <script>
+        // Desactivar
+        document.getElementById('regPlan').disabled = {{ estado_activo }};
+    </script>
+
     <script type="application/javascript">
         $(function () {
             $('.btnTest').on('click', function () {
                 $.ajax({
-                    url: '{% url 'app_empresa:listar_empresa' %}',
+                    url: '{% url 'app_proveedor:listar_proveedor' %}',
                     type: 'POST',
                     data: {id: 1},
                     dataType: 'json'
