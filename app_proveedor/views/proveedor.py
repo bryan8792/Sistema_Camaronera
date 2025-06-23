@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -17,7 +18,7 @@ class crearProveedorView(CreateView):
     form_class = ProveedorForm
     template_name = 'app_proveedor/proveedor_crear.html'
     success_url = reverse_lazy('app_proveedor:listar_proveedor')
-    # url_redirect = success_url
+    url_redirect = success_url
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
@@ -37,16 +38,27 @@ class crearProveedorView(CreateView):
                     item['text'] = i.get_full_name()
                     data.append(item)
 
+            elif action == 'create_client':
+                with transaction.atomic():
+                    frmClient = PlanCuentaForm(request.POST)
+                    if frmClient.is_valid():
+                        plan = frmClient.save()
+                        data = plan.toJSON()
+                        data['message'] = 'Plan de cuenta creado exitosamente'
+                    else:
+                        data['error'] = frmClient.errors
+
             elif action == 'create':
                 print('LLEGÓ A CREATE')
                 # Procesa los datos enviados para crear un nuevo proveedor
                 form = self.form_class(request.POST)
                 if form.is_valid():
-                    proveedor = form.save()  # Guarda el nuevo proveedor en la base de datos
+                    proveedor = form.save()
                     data['message'] = 'Proveedor creado exitosamente'
                     data['id'] = proveedor.id
                 else:
                     data['error'] = form.errors  # Devuelve los errores del formulario si no es válido
+
             else:
                 data['error'] = 'No ha ingresado a ninguna opción'
         except Exception as e:

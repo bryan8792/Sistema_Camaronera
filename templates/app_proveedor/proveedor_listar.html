@@ -46,8 +46,8 @@
                                 <th style="width: 23%;" class="text-left">Nombre Comercial</th>
                                 <th style="width: 10%;" class="text-center">RUC</th>
                                 <th style="width: 30%;" class="text-left">Dirección</th>
-                                <th style="width: 32%;" class="text-left">Actividad comercial</th>
-                                <th style="width: 3%;" class="text-center">Acciones</th>
+                                <th style="width: 22%;" class="text-left">Actividad comercial</th>
+                                <th style="width: 8%;" class="text-center">Acciones</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -60,7 +60,7 @@
                                     <td>{{ prov.actividad_com }}</td>
                                     <td class="text-center">
                                         <a href="{% url 'app_proveedor:actualizar_proveedor' prov.id %}"
-                                           class="btn btn-primary btn-xs btn-flat">
+                                           class="btn btn-xs" style="background-color: #3498DB">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <a href="{% url 'app_proveedor:eliminar_proveedor' prov.id %}"

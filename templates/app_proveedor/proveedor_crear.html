@@ -33,12 +33,10 @@
     </div>
 
     <!-- Main content -->
-    <form method="post" action="." enctype="multipart/form-data">
-        <section class="content">
+    <section class="content">
+        <form method="post" action="." enctype="multipart/form-data">
             <div class="row">
-                <div class="col-1">
-                </div>
-                <div class="col-10">
+                <div class="col-12">
                     <!-- /.card -->
                     <div class="card">
                         <div class="card-header" style="background-color:#3498DB">
@@ -174,8 +172,9 @@
                 <!-- /.col -->
             </div>
             <!-- /.row -->
-        </section>
-    </form>
+        </form>
+    </section>
+
 
     <div class="modal fade" id="myModalClient" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
          aria-hidden="true">
@@ -191,7 +190,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-
+{#                        <input type="hidden" name="action" value="{{ action }}">#}
                         <div class="form-group">
                             <label for="email">{{ frmPlan.codigo.label }}:</label>
                             {{  frmPlan.codigo|add_class:'form-control'|attr:'autocomplete:off' }}
