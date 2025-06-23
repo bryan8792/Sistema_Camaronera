@@ -425,7 +425,7 @@
                                                             {% if dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
                                                                 <div class="btn-group-sm">
                                                                     <a href="{% url 'app_stock:crear_stock_bio' dato.id %}"
-                                                                       class="btn-primary btn btn-xs">
+                                                                       class="btn btn-xs" style="background-color: #3498DB">
                                                                         <i class="fas fa-plus"> </i>
                                                                     </a>
                                                                     <a href="{% url 'app_stock:listar_stock_unico_bio' dato.id %}"

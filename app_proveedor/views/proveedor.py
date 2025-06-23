@@ -56,8 +56,11 @@ class crearProveedorView(CreateView):
                     proveedor = form.save()
                     data['message'] = 'Proveedor creado exitosamente'
                     data['id'] = proveedor.id
+                    return redirect(self.success_url)
                 else:
-                    data['error'] = form.errors  # Devuelve los errores del formulario si no es válido
+                    context = self.get_context_data()
+                    context['form'] = form
+                    return render(request, self.template_name, context)
 
             else:
                 data['error'] = 'No ha ingresado a ninguna opción'
@@ -68,11 +71,12 @@ class crearProveedorView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Formulario de  Registro de Proveedor'
+        context['nombre'] = 'Formulario de Registro de Proveedor'
         context['frmPlan'] = PlanCuentaForm()
         # context['list_url'] = self.success_url
         context['entity'] = 'Llego valor'
         context['action'] = 'create'
+        context['estado_activo'] = False
         return context
 
 
@@ -82,9 +86,32 @@ class actualizarProveedorView(UpdateView):
     template_name = 'app_proveedor/proveedor_crear.html'
     success_url = reverse_lazy('app_proveedor:listar_proveedor')
 
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get('action', '')
+        if action == 'edit':
+            form = self.form_class(request.POST, instance=self.get_object())
+            if form.is_valid():
+                form.save()
+                return redirect(self.success_url)
+            else:
+                context = self.get_context_data()
+                context['form'] = form
+                return render(request, self.template_name, context)
+        else:
+            return JsonResponse({'error': 'Acción inválida'}, status=400)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Actualizar Proveedor'
+        context['nombre'] = 'Formulario de Actualización de Proveedor'
+        context['frmPlan'] = PlanCuentaForm()
+        # context['list_url'] = self.success_url
+        context['entity'] = 'Llego valor'
+        context['action'] = 'edit'
+        context['estado_activo'] = 'true'
         return context
 
 

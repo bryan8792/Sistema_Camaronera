@@ -42,7 +42,7 @@ $(function () {
         var parameters = new FormData(this);
         parameters.append('action', 'create_client');
         submit_with_ajax(window.location.pathname, 'Notificación',
-            '¿Estas seguro de crear al siguiente cliente?', parameters, function (response) {
+            '¿Estas seguro de crear al siguiente proveedor?', parameters, function (response) {
                 //console.log(response);
                 var newOption = new Option(response.full_name_total, response.id, false, true);
                 $('select[name="cod_contable"]').append(newOption).trigger('change');
