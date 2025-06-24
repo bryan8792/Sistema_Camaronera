@@ -136,9 +136,9 @@
 
                     // Si también quieres redireccionar después de actualizar el sidebar
                     if (empresa === 'psm') {
-                        window.location.href = "{% url 'app_stock:listar_stock_psm' %}";
+                        window.location.href = "{% url 'app_empresa:dashboard_bio' %}";
                     } else if (empresa === 'bio') {
-                        window.location.href = "{% url 'app_stock:listar_stock_bio' %}";
+                        window.location.href = "{% url 'app_empresa:dashboard_bio' %}";
                     }
                 });
             });

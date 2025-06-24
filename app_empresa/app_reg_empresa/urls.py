@@ -12,6 +12,7 @@ urlpatterns = [
     path('empresa/crear/', crearEmpresaView.as_view(), name='crear_empresa'),
     path('empresa/actualizar/<int:pk>/', actualizarEmpresaView.as_view(), name='actualizar_empresa'),
     path('empresa/eliminar/<int:pk>/', eliminarEmpresaView.as_view(), name='eliminar_empresa'),
+    path('dashboard_bio', listarDashboardBIO.as_view(), name='dashboard_bio'),
 
     path('piscina/listar/', listarPiscinasView.as_view(), name='listar_piscinas'),
     path('piscina/crear/', crearPiscinaView.as_view(), name='crear_piscinas'),
@@ -54,10 +55,10 @@ urlpatterns = [
     # Rutas de depuración
     path('debug/template/', DebugTemplateView.as_view(), name='debug_template'),
     path('debug/blocks/', DebugBlocksView.as_view(), name='debug_blocks'),
-    path('debug/costo-utilidad-hectarea/', DebugCostoUtilidadHectareaView.as_view(),
-         name='debug_costo_utilidad_hectarea'),
+    path('debug/costo-utilidad-hectarea/', DebugCostoUtilidadHectareaView.as_view(), name='debug_costo_utilidad_hectarea'),
     path('debug/costos-operativos/', DebugCostoOperativoListView.as_view(), name='debug_costo_operativo_list'),
     path('debug/producciones/', DebugProduccionListView.as_view(), name='debug_produccion_list'),
 
     path('desglose-costos/', DesgloseCostosView.as_view(), name='desglose_costos'),
+
 ]

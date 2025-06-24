@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Dashboard de Opciones de la Empresa BIO</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Principal</a></li>
+                        <li class="breadcrumb-item active">PSM & BIO Sistema Informático</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <p>¡Bienvenido <strong>{{ user.get_full_name }}</strong>! Este es el panel principal del sistema, acá podrá
+                encontrar atajos para acceder a los distintos listados de cada módulo del sistema.</p>
+
+            <!-- Fila 1 -->
+            <div class="row text-center justify-content-center mb-4">
+
+                <!-- CATEGORÍAS -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_categoria:listar_categoria' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">CATEGORÍAS</div>
+                        <div class="card-body">
+                            <i class="fas fa-tags fa-3x mb-3 text-primary"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ir a Categorías</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUCTOS -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_categoria:listar_producto' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">PRODUCTOS</div>
+                        <div class="card-body">
+                            <i class="fas fa-boxes fa-3x mb-3 text-warning"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ir a Productos</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INSUMOS BALANCEADO BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_stock:listar_stock_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">INSUMOS BALANCEADO BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-box-open fa-3x mb-3 text-info"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ir a Insumos</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INSUMOS CAMPO BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_stock_directo:listar_stock_directo_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">INSUMOS CAMPO BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-seedling fa-3x mb-3 text-success"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ir a Campo</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INSUMOS EMPRESAS (PSM y BIO) -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_stock:listar_stock_psmybio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">INSUMOS EMPRESAS</div>
+                        <div class="card-body">
+                            <i class="fas fa-truck-loading fa-3x mb-3 text-dark"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Insumos</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Fila 2 -->
+            <div class="row text-center justify-content-center mb-4">
+
+                <!-- CONSUMO GENERAL BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_consumo:listar_resumen_general_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">CONSUMO GENERAL BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Resumen</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RESUMEN CONSUMO BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_consumo:listar_resumen_general_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">CONSUMO BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Resumen</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRANSACCIÓN BIO (SIN ATS) -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:listar_transaccionPlan_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">TRANSACCIÓN BIO (sin ATS)</div>
+                        <div class="card-body">
+                            <i class="fas fa-random fa-3x mb-3 text-warning"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Transacciones</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRANSACCIÓN BIO (CON ATS) -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:listar_fact_gasto_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">GASTOS BIO (con ATS)</div>
+                        <div class="card-body">
+                            <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-danger"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Gastos</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FACTURA GASTO BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:listar_fact_gasto_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">FACTURA GASTO BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-info"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Facturas</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Fila 3 -->
+            <div class="row text-center justify-content-center mb-4">
+
+                <!-- PLAN DE CUENTAS BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:listar_planCuenta_BIO' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">PLAN CUENTAS BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-book fa-3x mb-3 text-dark"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Plan</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAYORES BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:listar_mayorPlan_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">MAYORES BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-layer-group fa-3x mb-3 text-primary"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Mayores</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DIARIO GENERAL BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:diario_general_acumulado_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">DIARIO GENERAL BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-journal-whills fa-3x mb-3 text-success"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Diario</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BALANCE BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:listar_balancePlan_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">BALANCE BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-balance-scale fa-3x mb-3 text-info"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Balance</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KARDEX BIO -->
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_kardex:listar_kardex_movimientos_bio' %}'"
+                         style="border-radius: 10px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;"
+                         onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';"
+                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                        <div class="card-header font-weight-bold">KARDEX BIO</div>
+                        <div class="card-body">
+                            <i class="fas fa-warehouse fa-3x mb-3 text-secondary"></i>
+                            <div class="text-muted"><b><a class="btn btn-info">Ver Kardex</a></b></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+{% endblock %}

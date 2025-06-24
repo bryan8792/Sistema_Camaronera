@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render,redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import *
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from app_empresa.app_reg_empresa.forms import EmpresaForm
@@ -81,4 +81,13 @@ class listarEmpresaView(ListView):
         context['empresa'] = Empresa.objects.all()
         return context
 
+
+
+class listarDashboardBIO(TemplateView):
+    template_name = 'app_template/dashboard_bio.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Empresa BIO'
+        return context
 
