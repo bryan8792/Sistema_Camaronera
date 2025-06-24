@@ -229,7 +229,8 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
             ),
             'tip_transa': Select(choices=OPCIONES_TRANSACCION_PLAN,
                                  attrs={
-                                     'class': 'form-control select2'
+                                     'class': 'form-control select2',
+                                     'style': 'width: 100%;'
                                  }
                                  ),
             'fecha': TextInput(
