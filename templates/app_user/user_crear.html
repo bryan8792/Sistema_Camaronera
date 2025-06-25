@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block head %}
+<link rel="stylesheet" href="{% static 'lib/select2-4.0.6-rc.1/css/select2.min.css' %}">
+<link rel="stylesheet" href="{% static 'lib/select2-4.0.6-rc.1/css/select2-bootstrap4.min.css' %}">
 <style>
 .permission-selector {
     border: 1px solid #dee2e6;
@@ -16,21 +18,27 @@
     background: white;
     height: 200px;
     overflow-y: auto;
+    padding: 0;
 }
 
-.permission-panel .list-group-item {
+.permission-item {
     cursor: pointer;
     border: none;
     border-bottom: 1px solid #f1f3f4;
     padding: 8px 12px;
     font-size: 13px;
+    display: block;
+    width: 100%;
+    background: white;
+    transition: all 0.2s;
+    text-align: left;
 }
 
-.permission-panel .list-group-item:hover {
+.permission-item:hover {
     background-color: #e3f2fd;
 }
 
-.permission-panel .list-group-item.selected {
+.permission-item.selected {
     background-color: #2196f3;
     color: white;
 }
@@ -40,6 +48,8 @@
     flex-direction: column;
     justify-content: center;
     gap: 10px;
+    align-items: center;
+    height: 200px;
 }
 
 .arrow-btn {
@@ -54,7 +64,7 @@
     transition: all 0.2s;
 }
 
-.arrow-btn:hover {
+.arrow-btn:hover:not(:disabled) {
     background: #0056b3;
     transform: scale(1.1);
 }
@@ -73,6 +83,9 @@
     font-size: 12px;
     text-transform: uppercase;
     color: #495057;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .panel-counter {
@@ -82,6 +95,15 @@
     border-radius: 10px;
     padding: 2px 8px;
     font-size: 11px;
+}
+
+.empty-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    color: #6c757d;
+    font-style: italic;
 }
 </style>
 {% endblock %}
@@ -108,307 +130,322 @@
 
 <section class="content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="fas fa-user-plus mr-2"></i>
-                            Información del Nuevo Usuario
-                        </h3>
-                    </div>
-
-                    <form method="post" enctype="multipart/form-data" id="frmUser">
-                        {% csrf_token %}
+        <form method="post" enctype="multipart/form-data" id="frmUser">
+            {% csrf_token %}
+            <div class="row">
+                <!-- Datos Personales -->
+                <div class="col-lg-6">
+                    <div class="card card-outline card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-user mr-2"></i>
+                                Datos Personales
+                            </h3>
+                        </div>
                         <div class="card-body">
-                            <div class="row">
-                                <!-- Datos Personales -->
-                                <div class="col-lg-6">
-                                    <div class="card card-outline card-info">
-                                        <div class="card-header">
-                                            <h3 class="card-title">
-                                                <i class="fas fa-user mr-2"></i>
-                                                Datos Personales
-                                            </h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="form-group">
-                                                <label for="{{ form.first_name.id_for_label }}">
-                                                    <i class="fas fa-user mr-1"></i>
-                                                    Nombres *
-                                                </label>
-                                                {{ form.first_name }}
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.last_name.id_for_label }}">
-                                                    <i class="fas fa-user mr-1"></i>
-                                                    Apellidos *
-                                                </label>
-                                                {{ form.last_name }}
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.email.id_for_label }}">
-                                                    <i class="fas fa-envelope mr-1"></i>
-                                                    Correo Electrónico *
-                                                </label>
-                                                {{ form.email }}
-                                                <small class="form-text text-muted">
-                                                    Ingresa un correo electrónico
-                                                </small>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.image.id_for_label }}">
-                                                    <i class="fas fa-image mr-1"></i>
-                                                    Foto de Perfil
-                                                </label>
-                                                {{ form.image }}
-                                                <small class="form-text text-muted">
-                                                    Formatos permitidos: JPG, PNG. Tamaño máximo: 2MB
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Datos de Acceso -->
-                                <div class="col-lg-6">
-                                    <div class="card card-outline card-warning">
-                                        <div class="card-header">
-                                            <h3 class="card-title">
-                                                <i class="fas fa-key mr-2"></i>
-                                                Datos de Acceso
-                                            </h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="form-group">
-                                                <label for="{{ form.username.id_for_label }}">
-                                                    <i class="fas fa-user-tag mr-1"></i>
-                                                    Nombre de Usuario *
-                                                </label>
-                                                {{ form.username }}
-                                                <small class="form-text text-muted">
-                                                    Solo letras, números y @/./+/-/_ permitidos
-                                                </small>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.password1.id_for_label }}">
-                                                    <i class="fas fa-lock mr-1"></i>
-                                                    Contraseña *
-                                                </label>
-                                                {{ form.password1 }}
-                                                <small class="form-text text-muted">
-                                                    Mínimo 8 caracteres, debe incluir letras y números
-                                                </small>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="{{ form.password2.id_for_label }}">
-                                                    <i class="fas fa-lock mr-1"></i>
-                                                    Confirmar Contraseña *
-                                                </label>
-                                                {{ form.password2 }}
-                                            </div>
-
-                                            <div class="form-group">
-                                                <div class="custom-control custom-switch">
-                                                    {{ form.is_active }}
-                                                    <label class="custom-control-label" for="{{ form.is_active.id_for_label }}">
-                                                        <i class="fas fa-toggle-on mr-1"></i>
-                                                        Usuario Activo
-                                                    </label>
-                                                </div>
-                                                <small class="form-text text-muted">
-                                                    Determina si el usuario puede iniciar sesión
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <label for="{{ form.first_name.id_for_label }}">
+                                    <i class="fas fa-user mr-1"></i>
+                                    Nombres *
+                                </label>
+                                {{ form.first_name }}
                             </div>
 
-                            <!-- Permisos y Roles del Sistema -->
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="card card-outline card-success">
-                                        <div class="card-header">
-                                            <h3 class="card-title">
-                                                <i class="fas fa-shield-alt mr-2"></i>
-                                                Permisos y Roles del Sistema
-                                            </h3>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                    <div class="form-group">
-                                                        <label for="{{ form.groups.id_for_label }}">
-                                                            <i class="fas fa-users mr-1"></i>
-                                                            Grupos de Usuario
-                                                        </label>
-                                                        {{ form.groups }}
-                                                        <small class="form-text text-muted">
-                                                            Selecciona los grupos a los que pertenecerá el usuario
-                                                        </small>
-                                                    </div>
-                                                </div>
+                            <div class="form-group">
+                                <label for="{{ form.last_name.id_for_label }}">
+                                    <i class="fas fa-user mr-1"></i>
+                                    Apellidos *
+                                </label>
+                                {{ form.last_name }}
+                            </div>
 
-                                                <div class="col-lg-6">
-                                                    <div class="form-group">
-                                                        <div class="custom-control custom-switch mb-2">
-                                                            {{ form.is_staff }}
-                                                            <label class="custom-control-label" for="{{ form.is_staff.id_for_label }}">
-                                                                <i class="fas fa-user-cog mr-1"></i>
-                                                                <strong>Personal del Sistema</strong>
-                                                            </label>
-                                                        </div>
-                                                        <small class="form-text text-muted">
-                                                            Permite acceso al panel de administración
-                                                        </small>
+                            <div class="form-group">
+                                <label for="{{ form.email.id_for_label }}">
+                                    <i class="fas fa-envelope mr-1"></i>
+                                    Correo Electrónico *
+                                </label>
+                                {{ form.email }}
+                                <small class="form-text text-muted">
+                                    Ingresa un correo electrónico
+                                </small>
+                            </div>
 
-                                                        <div class="custom-control custom-switch mt-3">
-                                                            {{ form.is_superuser }}
-                                                            <label class="custom-control-label" for="{{ form.is_superuser.id_for_label }}">
-                                                                <i class="fas fa-crown mr-1"></i>
-                                                                <strong>Super Administrador</strong>
-                                                            </label>
-                                                        </div>
-                                                        <small class="form-text text-muted">
-                                                            Acceso completo a todas las funciones del sistema
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Selector de Permisos con Doble Panel -->
-                                            <div class="row mt-3">
-                                                <div class="col-12">
-                                                    <label>
-                                                        <i class="fas fa-key mr-1"></i>
-                                                        Permisos Específicos (Opcional)
-                                                    </label>
-                                                    <small class="form-text text-muted mb-3">
-                                                        Permisos adicionales específicos para este usuario
-                                                    </small>
-
-                                                    <div class="permission-selector">
-                                                        <div class="row">
-                                                            <!-- Panel de Permisos Disponibles -->
-                                                            <div class="col-5">
-                                                                <div class="panel-header">
-                                                                    Permisos Disponibles
-                                                                    <span class="panel-counter" id="availableCounter">0</span>
-                                                                </div>
-                                                                <div class="permission-panel" id="availablePermissions">
-                                                                    <div class="list-group" id="availableList">
-                                                                        <!-- Los permisos se cargarán aquí -->
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Botones de Flecha -->
-                                                            <div class="col-2">
-                                                                <div class="arrow-buttons">
-                                                                    <button type="button" class="arrow-btn" id="addSelected" title="Agregar seleccionados">
-                                                                        <i class="fas fa-chevron-right"></i>
-                                                                    </button>
-                                                                    <button type="button" class="arrow-btn" id="addAll" title="Agregar todos">
-                                                                        <i class="fas fa-angle-double-right"></i>
-                                                                    </button>
-                                                                    <button type="button" class="arrow-btn" id="removeSelected" title="Quitar seleccionados">
-                                                                        <i class="fas fa-chevron-left"></i>
-                                                                    </button>
-                                                                    <button type="button" class="arrow-btn" id="removeAll" title="Quitar todos">
-                                                                        <i class="fas fa-angle-double-left"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Panel de Permisos Asignados -->
-                                                            <div class="col-5">
-                                                                <div class="panel-header">
-                                                                    Permisos Dados
-                                                                    <span class="panel-counter" id="assignedCounter">0</span>
-                                                                </div>
-                                                                <div class="permission-panel" id="assignedPermissions">
-                                                                    <div class="list-group" id="assignedList">
-                                                                        <!-- Los permisos asignados se mostrarán aquí -->
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Campo oculto para enviar los permisos seleccionados -->
-                                                    <select name="user_permissions" id="id_user_permissions" multiple style="display: none;">
-                                                        {% for permission in form.user_permissions.field.queryset %}
-                                                            <option value="{{ permission.pk }}">{{ permission }}</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="form-group">
+                                <label for="{{ form.image.id_for_label }}">
+                                    <i class="fas fa-image mr-1"></i>
+                                    Foto de Perfil
+                                </label>
+                                {{ form.image }}
+                                <small class="form-text text-muted">
+                                    Formatos permitidos: JPG, PNG. Tamaño máximo: 2MB
+                                </small>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div class="card-footer">
-                            <div class="row">
-                                <div class="col-lg-6">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-save mr-2"></i>
-                                        Guardar registro
-                                    </button>
+                <!-- Datos de Acceso -->
+                <div class="col-lg-6">
+                    <div class="card card-outline card-warning">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-key mr-2"></i>
+                                Datos de Acceso
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="{{ form.username.id_for_label }}">
+                                    <i class="fas fa-user-tag mr-1"></i>
+                                    Nombre de Usuario *
+                                </label>
+                                {{ form.username }}
+                                <small class="form-text text-muted">
+                                    Solo letras, números y @/./+/-/_ permitidos
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.password1.id_for_label }}">
+                                    <i class="fas fa-lock mr-1"></i>
+                                    Contraseña *
+                                </label>
+                                {{ form.password1 }}
+                                <small class="form-text text-muted">
+                                    Mínimo 8 caracteres, debe incluir letras y números
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.password2.id_for_label }}">
+                                    <i class="fas fa-lock mr-1"></i>
+                                    Confirmar Contraseña *
+                                </label>
+                                {{ form.password2 }}
+                            </div>
+
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    {{ form.is_active }}
+                                    <label class="custom-control-label" for="{{ form.is_active.id_for_label }}">
+                                        <i class="fas fa-toggle-on mr-1"></i>
+                                        Usuario Activo
+                                    </label>
                                 </div>
-                                <div class="col-lg-6 text-right">
-                                    <a href="{% url 'app_usuario:listar_usuario' %}" class="btn btn-secondary btn-lg">
-                                        <i class="fas fa-times mr-2"></i>
-                                        Cancelar
-                                    </a>
-                                </div>
+                                <small class="form-text text-muted">
+                                    Determina si el usuario puede iniciar sesión
+                                </small>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <!-- Permisos y Roles del Sistema -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-outline card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-shield-alt mr-2"></i>
+                                Permisos y Roles del Sistema
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.groups.id_for_label }}">
+                                            <i class="fas fa-users mr-1"></i>
+                                            Grupos de Usuario
+                                        </label>
+                                        {{ form.groups }}
+                                        <small class="form-text text-muted">
+                                            Selecciona los grupos a los que pertenecerá el usuario
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <div class="custom-control custom-switch mb-2">
+                                            {{ form.is_staff }}
+                                            <label class="custom-control-label" for="{{ form.is_staff.id_for_label }}">
+                                                <i class="fas fa-user-cog mr-1"></i>
+                                                <strong>Personal del Sistema</strong>
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Permite acceso al panel de administración
+                                        </small>
+
+                                        <div class="custom-control custom-switch mt-3">
+                                            {{ form.is_superuser }}
+                                            <label class="custom-control-label" for="{{ form.is_superuser.id_for_label }}">
+                                                <i class="fas fa-crown mr-1"></i>
+                                                <strong>Super Administrador</strong>
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Acceso completo a todas las funciones del sistema
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selector de Permisos con Doble Panel -->
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <label>
+                                        <i class="fas fa-key mr-1"></i>
+                                        Permisos Específicos (Opcional)
+                                    </label>
+                                    <small class="form-text text-muted mb-3">
+                                        Selecciona los permisos específicos para este grupo
+                                    </small>
+
+                                    <div class="permission-selector">
+                                        <div class="row">
+                                            <!-- Panel de Permisos Disponibles -->
+                                            <div class="col-5">
+                                                <div class="permission-panel">
+                                                    <div class="panel-header">
+                                                        PERMISOS DISPONIBLES
+                                                        <span class="panel-counter" id="availableCounter">0</span>
+                                                    </div>
+                                                    <div id="availablePermissions">
+                                                        <!-- Los permisos se cargarán aquí -->
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Botones de Flecha -->
+                                            <div class="col-2">
+                                                <div class="arrow-buttons">
+                                                    <button type="button" class="arrow-btn" id="addSelected" title="Agregar seleccionados">
+                                                        <i class="fas fa-chevron-right"></i>
+                                                    </button>
+                                                    <button type="button" class="arrow-btn" id="addAll" title="Agregar todos">
+                                                        <i class="fas fa-angle-double-right"></i>
+                                                    </button>
+                                                    <button type="button" class="arrow-btn" id="removeSelected" title="Quitar seleccionados">
+                                                        <i class="fas fa-chevron-left"></i>
+                                                    </button>
+                                                    <button type="button" class="arrow-btn" id="removeAll" title="Quitar todos">
+                                                        <i class="fas fa-angle-double-left"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Panel de Permisos Asignados -->
+                                            <div class="col-5">
+                                                <div class="permission-panel">
+                                                    <div class="panel-header">
+                                                        PERMISOS DADOS
+                                                        <span class="panel-counter" id="assignedCounter">0</span>
+                                                    </div>
+                                                    <div id="assignedPermissions">
+                                                        <!-- Los permisos asignados se mostrarán aquí -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Campo oculto para enviar los permisos seleccionados -->
+                                    <div style="display: none;">
+                                        {{ form.user_permissions }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Guardar registro
+                                </button>
+                            </div>
+                            <div class="col-lg-6 text-right">
+                                <a href="{% url 'app_usuario:listar_usuario' %}" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-times mr-2"></i>
+                                    Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </section>
 {% endblock %}
 
 {% block scripts %}
+<script src="{% static 'lib/select2-4.0.6-rc.1/js/select2.min.js' %}"></script>
 <script>
 $(document).ready(function() {
-    // Datos de permisos disponibles
+    console.log('Iniciando aplicación de permisos...');
+
+    // Inicializar Select2
+    $('#id_groups').select2({
+        theme: 'bootstrap4',
+        placeholder: 'Selecciona los grupos...',
+        allowClear: true
+    });
+
+    // Variables para manejar permisos
     let availablePermissions = [];
     let assignedPermissions = [];
 
-    // Cargar permisos desde el select oculto
-    $('#id_user_permissions option').each(function() {
-        availablePermissions.push({
-            id: $(this).val(),
-            name: $(this).text()
-        });
-    });
+    // Función para cargar permisos
+    function loadPermissions() {
+        console.log('Cargando permisos...');
+        availablePermissions = [];
 
-    // Renderizar listas
-    function renderLists() {
-        renderAvailableList();
-        renderAssignedList();
-        updateCounters();
-        updateButtons();
+        // Obtener permisos del select
+        const permissionSelect = $('#id_user_permissions');
+        console.log('Select de permisos encontrado:', permissionSelect.length > 0);
+
+        if (permissionSelect.length > 0) {
+            permissionSelect.find('option').each(function() {
+                const value = $(this).val();
+                const text = $(this).text();
+
+                if (value && value.trim() !== '') {
+                    availablePermissions.push({
+                        id: value,
+                        name: text.trim()
+                    });
+                    console.log('Permiso agregado:', value, text);
+                }
+            });
+        }
+
+        console.log('Total permisos cargados:', availablePermissions.length);
+        renderAll();
     }
 
-    function renderAvailableList() {
-        const list = $('#availableList');
-        list.empty();
+    // Función para renderizar permisos disponibles
+    function renderAvailablePermissions() {
+        const container = $('#availablePermissions');
+        container.empty();
+
+        if (availablePermissions.length === 0) {
+            container.html('<div class="empty-panel">No hay permisos disponibles</div>');
+            return;
+        }
 
         availablePermissions.forEach(function(permission) {
-            list.append(`
-                <div class="list-group-item" data-id="${permission.id}">
+            container.append(`
+                <div class="permission-item" data-id="${permission.id}">
                     <i class="fas fa-key mr-2"></i>
                     ${permission.name}
                 </div>
@@ -416,13 +453,19 @@ $(document).ready(function() {
         });
     }
 
-    function renderAssignedList() {
-        const list = $('#assignedList');
-        list.empty();
+    // Función para renderizar permisos asignados
+    function renderAssignedPermissions() {
+        const container = $('#assignedPermissions');
+        container.empty();
+
+        if (assignedPermissions.length === 0) {
+            container.html('<div class="empty-panel">No hay permisos asignados</div>');
+            return;
+        }
 
         assignedPermissions.forEach(function(permission) {
-            list.append(`
-                <div class="list-group-item" data-id="${permission.id}">
+            container.append(`
+                <div class="permission-item" data-id="${permission.id}">
                     <i class="fas fa-check mr-2 text-success"></i>
                     ${permission.name}
                 </div>
@@ -430,32 +473,53 @@ $(document).ready(function() {
         });
     }
 
+    // Función para actualizar contadores
     function updateCounters() {
         $('#availableCounter').text(availablePermissions.length);
         $('#assignedCounter').text(assignedPermissions.length);
     }
 
+    // Función para actualizar botones
     function updateButtons() {
-        $('#addSelected').prop('disabled', $('#availableList .selected').length === 0);
+        const hasAvailableSelected = $('#availablePermissions .selected').length > 0;
+        const hasAssignedSelected = $('#assignedPermissions .selected').length > 0;
+
+        $('#addSelected').prop('disabled', !hasAvailableSelected);
         $('#addAll').prop('disabled', availablePermissions.length === 0);
-        $('#removeSelected').prop('disabled', $('#assignedList .selected').length === 0);
+        $('#removeSelected').prop('disabled', !hasAssignedSelected);
         $('#removeAll').prop('disabled', assignedPermissions.length === 0);
     }
 
+    // Función para actualizar el select oculto
+    function updateHiddenSelect() {
+        $('#id_user_permissions option').prop('selected', false);
+        assignedPermissions.forEach(function(permission) {
+            $(`#id_user_permissions option[value="${permission.id}"]`).prop('selected', true);
+        });
+    }
+
+    // Función para renderizar todo
+    function renderAll() {
+        renderAvailablePermissions();
+        renderAssignedPermissions();
+        updateCounters();
+        updateButtons();
+    }
+
     // Eventos de selección
-    $(document).on('click', '#availableList .list-group-item', function() {
+    $(document).on('click', '#availablePermissions .permission-item', function() {
         $(this).toggleClass('selected');
         updateButtons();
     });
 
-    $(document).on('click', '#assignedList .list-group-item', function() {
+    $(document).on('click', '#assignedPermissions .permission-item', function() {
         $(this).toggleClass('selected');
         updateButtons();
     });
 
-    // Botón: Agregar seleccionados
+    // Botones de movimiento
     $('#addSelected').click(function() {
-        $('#availableList .selected').each(function() {
+        $('#availablePermissions .selected').each(function() {
             const id = $(this).data('id');
             const permission = availablePermissions.find(p => p.id == id);
 
@@ -464,19 +528,19 @@ $(document).ready(function() {
                 availablePermissions = availablePermissions.filter(p => p.id != id);
             }
         });
-        renderLists();
+        renderAll();
+        updateHiddenSelect();
     });
 
-    // Botón: Agregar todos
     $('#addAll').click(function() {
         assignedPermissions = assignedPermissions.concat(availablePermissions);
         availablePermissions = [];
-        renderLists();
+        renderAll();
+        updateHiddenSelect();
     });
 
-    // Botón: Quitar seleccionados
     $('#removeSelected').click(function() {
-        $('#assignedList .selected').each(function() {
+        $('#assignedPermissions .selected').each(function() {
             const id = $(this).data('id');
             const permission = assignedPermissions.find(p => p.id == id);
 
@@ -485,38 +549,36 @@ $(document).ready(function() {
                 assignedPermissions = assignedPermissions.filter(p => p.id != id);
             }
         });
-        renderLists();
+        renderAll();
+        updateHiddenSelect();
     });
 
-    // Botón: Quitar todos
     $('#removeAll').click(function() {
         availablePermissions = availablePermissions.concat(assignedPermissions);
         assignedPermissions = [];
-        renderLists();
+        renderAll();
+        updateHiddenSelect();
     });
 
-    // Actualizar el select oculto antes de enviar el formulario
+    // Actualizar select antes de enviar
     $('#frmUser').on('submit', function() {
-        $('#id_user_permissions option').prop('selected', false);
-
-        assignedPermissions.forEach(function(permission) {
-            $(`#id_user_permissions option[value="${permission.id}"]`).prop('selected', true);
-        });
+        updateHiddenSelect();
     });
 
-    // Inicializar
-    renderLists();
+    // Cargar permisos cuando esté listo
+    setTimeout(function() {
+        loadPermissions();
+    }, 1000);
 
     // Validación del formulario
     $('#frmUser').on('submit', function(e) {
         let isValid = true;
 
-        // Validar campos requeridos
         const requiredFields = ['first_name', 'last_name', 'email', 'username', 'password1', 'password2'];
 
         requiredFields.forEach(function(field) {
             const input = $(`#id_${field}`);
-            if (!input.val().trim()) {
+            if (!input.val() || !input.val().trim()) {
                 input.addClass('is-invalid');
                 isValid = false;
             } else {
@@ -524,23 +586,21 @@ $(document).ready(function() {
             }
         });
 
-        // Validar que las contraseñas coincidan
         const password1 = $('#id_password1').val();
         const password2 = $('#id_password2').val();
 
         if (password1 !== password2) {
             $('#id_password2').addClass('is-invalid');
-            toastr.error('Las contraseñas no coinciden');
+            alert('Las contraseñas no coinciden');
             isValid = false;
         }
 
         if (!isValid) {
             e.preventDefault();
-            toastr.error('Por favor completa todos los campos requeridos');
+            alert('Por favor completa todos los campos requeridos');
         }
     });
 
-    // Limpiar validación al escribir
     $('input').on('input', function() {
         $(this).removeClass('is-invalid');
     });

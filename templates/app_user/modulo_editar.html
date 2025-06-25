@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">
+                    <i class="fas fa-edit"></i> Editar Módulo
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{% url 'inicio_dashboard' %}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'app_usuario:listar_modulo' %}">Módulos</a></li>
+                    <li class="breadcrumb-item active">Editar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-edit mr-2"></i>
+                            Editar Módulo
+                        </h3>
+                    </div>
+
+                    <form method="post" id="frmModulo">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.nombre.id_for_label }}">
+                                            <i class="fas fa-cube mr-1"></i>
+                                            Nombre del Módulo *
+                                        </label>
+                                        {{ form.nombre }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.tipo.id_for_label }}">
+                                            <i class="fas fa-layer-group mr-1"></i>
+                                            Tipo de Módulo *
+                                        </label>
+                                        {{ form.tipo }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.url.id_for_label }}">
+                                            <i class="fas fa-link mr-1"></i>
+                                            URL
+                                        </label>
+                                        {{ form.url }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.icono.id_for_label }}">
+                                            <i class="fas fa-icons mr-1"></i>
+                                            Icono
+                                        </label>
+                                        {{ form.icono }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save mr-2"></i>
+                                Actualizar
+                            </button>
+                            <a href="{% url 'app_usuario:listar_modulo' %}" class="btn btn-secondary">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -2,89 +2,152 @@
 {% load static %}
 
 {% block contenido %}
-
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                <h1 class="m-0 text-dark">
+                    <i class="fas fa-layer-group"></i> Crear Tipo de Módulo
+                </h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
-                    <li class="breadcrumb-item active">Eliminar {{ nombre }}</li>
+                    <li class="breadcrumb-item"><a href="{% url 'inicio_dashboard' %}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'app_usuario:listar_tipo_modulo' %}">Tipos de Módulo</a></li>
+                    <li class="breadcrumb-item active">Crear</li>
                 </ol>
             </div>
         </div>
     </div>
 </div>
 
-<form method="post" action=".">
-    <section class="content">
+<section class="content">
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-1"></div>
-            <div class="col-10">
-                <div class="card">
-                    <div class="card-header" style="background-color:#3498DB">
-                        <h3 class="card-title">Eliminar: <strong>{{ nombre }}</strong></h3>
+            <div class="col-lg-8">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-layer-group mr-2"></i>
+                            Información del Nuevo Tipo de Módulo
+                        </h3>
                     </div>
-                    <div class="card-body">
-                        {% csrf_token %}
-                        <div class="alert alert-default-danger alert-dismissible" style="text-align: center">
-                            <h4><i class="icon fas fa-ban"> Notificación:</i></h4>
-                            <button class="alert alert-default-danger alert-dismissible btn btn-lg"
-                                    style="text-align: center;height: 180px;width: 145px">
-                                <i class="fas fa-trash-alt fa-6x"></i>
-                            </button>
-                            <br><br>
-                            <h4>
-                                ¿Está seguro de eliminar el registro?<br><br>
-                                Grupo: <strong>&nbsp;&nbsp;{{ object.name }}</strong><br>
-                                <small class="text-muted">
-                                    Este grupo tiene {{ object.user_set.count }} usuario(s) asignado(s)
-                                </small>
-                            </h4>
 
-                            {% if object.user_set.count > 0 %}
-                                <div class="alert alert-warning mt-3">
-                                    <strong>¡Atención!</strong> Al eliminar este grupo, los usuarios perderán los permisos asociados.
+                    <form method="post" id="frmTipoModulo">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h5><i class="fas fa-info-circle mr-2"></i>Información Básica</h5>
+                                    <hr>
                                 </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="{{ form.nombre.id_for_label }}">
+                                    <i class="fas fa-tag mr-1"></i>
+                                    Nombre del Tipo *
+                                </label>
+                                {{ form.nombre }}
+                                <small class="form-text text-muted">
+                                    Ejemplo: Sistema, Reportes, Configuración
+                                </small>
+                            </div>
+
+                            {% if form.descripcion %}
+                            <div class="form-group">
+                                <label for="{{ form.descripcion.id_for_label }}">
+                                    <i class="fas fa-file-alt mr-1"></i>
+                                    Descripción
+                                </label>
+                                {{ form.descripcion }}
+                                <small class="form-text text-muted">
+                                    Describe el propósito de este tipo de módulo
+                                </small>
+                            </div>
                             {% endif %}
+
+                            <div class="alert alert-info">
+                                <h5><i class="fas fa-info-circle mr-2"></i>Información:</h5>
+                                Los tipos de módulo ayudan a organizar y categorizar los diferentes módulos del sistema.
+                                Esto facilita la administración y navegación dentro de la aplicación.
+                            </div>
                         </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>
+                                Crear Tipo de Módulo
+                            </button>
+                            <a href="{% url 'app_usuario:listar_tipo_modulo' %}" class="btn btn-secondary">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-eye mr-2"></i>
+                            Vista Previa
+                        </h3>
                     </div>
-                    <div class="card-footer navbar-white">
-                        <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
-                            <i class="fas fa-check-circle"></i> SÍ, ACEPTAR
-                        </button>
-                        <a href="{% url 'app_usuario:listar_grupo' %}" class="btn btn-danger btn-file">
-                            <i class="fas fa-times"></i> CANCELAR
-                        </a>
+                    <div class="card-body text-center">
+                        <i class="fas fa-layer-group fa-4x text-primary mb-3"></i>
+                        <h4 id="preview-name">Alimentacion</h4>
+                        <p class="text-muted">Tipo: <span id="preview-type">Alimentacion</span></p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-</form>
-
+    </div>
+</section>
 {% endblock %}
 
 {% block scripts %}
-<script type="application/javascript">
-    $(function () {
-        $('.btnTest').on('click', function () {
-            $.ajax({
-                url: '{% url 'app_usuario:listar_grupo' %}',
-                type: 'POST',
-                data: {id: 1},
-                dataType: 'json'
-            }).done(function (data) {
-                // Éxito
-            }).fail(function (data) {
-                toastr.error('Error verificar por favor')
-            }).always(function (data) {
-                toastr.info('Procesando datos')
-            })
-        })
-    })
+<script>
+$(document).ready(function() {
+    // Actualizar vista previa en tiempo real
+    $('#id_nombre').on('input', function() {
+        const nombre = $(this).val() || 'Nuevo Tipo';
+        $('#preview-name').text(nombre);
+        $('#preview-type').text(nombre);
+    });
+
+    // Validación del formulario
+    $('#frmTipoModulo').on('submit', function(e) {
+        let isValid = true;
+
+        // Validar nombre requerido
+        const nombre = $('#id_nombre').val();
+        if (!nombre || !nombre.trim()) {
+            $('#id_nombre').addClass('is-invalid');
+            isValid = false;
+
+            // Mostrar mensaje de error
+            if (!$('#id_nombre').next('.invalid-feedback').length) {
+                $('#id_nombre').after('<div class="invalid-feedback">El nombre del tipo es requerido.</div>');
+            }
+        } else {
+            $('#id_nombre').removeClass('is-invalid');
+            $('#id_nombre').next('.invalid-feedback').remove();
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor completa todos los campos requeridos');
+        }
+    });
+
+    // Limpiar validación al escribir
+    $('#id_nombre').on('input', function() {
+        $(this).removeClass('is-invalid');
+        $(this).next('.invalid-feedback').remove();
+    });
+});
 </script>
 {% endblock %}

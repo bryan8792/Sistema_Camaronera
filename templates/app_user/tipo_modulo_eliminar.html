@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">
+                    <i class="fas fa-trash"></i> Eliminar Tipo de Módulo
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{% url 'inicio_dashboard' %}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'app_usuario:listar_tipo_modulo' %}">Tipos de Módulo</a></li>
+                    <li class="breadcrumb-item active">Eliminar</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Confirmar Eliminación
+                        </h3>
+                    </div>
+
+                    <div class="card-body text-center">
+                        <i class="fas fa-layer-group fa-4x text-danger mb-3"></i>
+                        <h4>¿Estás seguro?</h4>
+                        <p class="text-muted">
+                            Estás a punto de eliminar el tipo de módulo:
+                        </p>
+                        <h5 class="text-danger">{{ object.nombre }}</h5>
+                        <p class="text-warning">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+
+                    <div class="card-footer text-center">
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash mr-2"></i>
+                                Sí, Eliminar
+                            </button>
+                            <a href="{% url 'app_usuario:listar_tipo_modulo' %}" class="btn btn-secondary">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancelar
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
