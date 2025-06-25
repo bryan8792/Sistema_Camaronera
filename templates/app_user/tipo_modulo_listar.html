@@ -1,28 +1,24 @@
-v{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block head %}
-    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
-    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
-    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'lib/datatables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+<link rel="stylesheet" href="{% static 'lib/datatables-1.10.18/css/responsive.bootstrap4.min.css' %}">
 {% endblock %}
 
 {% block contenido %}
-
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
-            <div class="col-sm-12">
-                <ol class="breadcrumb float-sm-left">
-                    <li class="breadcrumb-item">
-                        <a href="#">{{ nombre }}&nbsp;<i class="far nav-icon fa fa-home"></i></a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        Listado de {{ nombre }}&nbsp;<i class="far nav-icon fa fa-list"></i>
-                    </li>
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">
+                    <i class="fas fa-layer-group"></i> Tipos de Módulo
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{% url 'inicio_dashboard' %}">Inicio</a></li>
+                    <li class="breadcrumb-item active">Tipos de Módulo</li>
                 </ol>
             </div>
         </div>
@@ -30,98 +26,78 @@ v{% extends 'base.html' %}
 </div>
 
 <section class="content">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header" style="background-color:#3498DB">
-                    <h3 class="card-title">Registros de: <strong>{{ nombre }}</strong></h3>
-                    <div class="card-tools">
-                        <ul class="pagination pagination-sm float-right">
-                            <li class="page-item">
-                                <a href="{% url 'app_usuario:crear_tipo_modulo' %}" class="btn btn-block btn-success btn-sm">
-                                    <strong><i class="fas fa-plus"></i> NUEVO REGISTRO</strong>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-list mr-2"></i>
+                    Lista de Tipos de Módulo
+                </h3>
+                <div class="card-tools">
+                    <a href="{% url 'app_usuario:crear_tipo_modulo' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus mr-1"></i>
+                        Nuevo Tipo de Módulo
+                    </a>
                 </div>
-                <div class="card-body">
-                    <table id="tb_tipo_modulo" class="table table-striped table-bordered dt-responsive nowrap" style="width:100%">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th>Módulos</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- AJAX llenará esta tabla -->
-                        </tbody>
-                    </table>
-                </div>
+            </div>
+            <div class="card-body">
+                <table id="tb_tipo_modulo" class="table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Fecha Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se cargan via AJAX -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'lib/datatables-1.10.18/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.18/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.18/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.18/js/responsive.bootstrap4.min.js' %}"></script>
 
 <script>
 $(document).ready(function() {
     $('#tb_tipo_modulo').DataTable({
-        responsive: true,
-        autoWidth: false,
-        destroy: true,
-        deferRender: true,
-        ajax: {
-            url: window.location.pathname,
-            type: 'POST',
-            data: {
-                'action': 'searchdata'
-            },
-            dataSrc: ""
+        "processing": true,
+        "serverSide": false,
+        "ajax": {
+            "url": "{% url 'app_usuario:listar_tipo_modulo_ajax' %}",
+            "type": "GET",
+            "headers": {
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
         },
-        columns: [
+        "columns": [
             {"data": "id"},
             {"data": "nombre"},
-            {
-                "data": "descripcion",
-                "render": function(data, type, row) {
-                    if (data && data.length > 50) {
-                        return data.substring(0, 50) + '...';
-                    }
-                    return data || 'Sin descripción';
-                }
-            },
-            {
-                "data": "id",
-                "render": function(data, type, row) {
-                    // Aquí podrías hacer una consulta AJAX para obtener el conteo de módulos
-                    return '<span class="badge badge-info">Ver módulos</span>';
-                }
-            },
-            {
-                "data": null,
-                "render": function(data, type, row) {
-                    return '<div class="btn-group">' +
-                           '<a href="/tipo-modulo/actualizar/' + row.id + '/" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>' +
-                           '<a href="/tipo-modulo/eliminar/' + row.id + '/" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>' +
-                           '</div>';
-                }
-            }
+            {"data": "descripcion"},
+            {"data": "fecha_creacion"},
+            {"data": "acciones", "orderable": false}
         ],
-        columnDefs: [
-            {
-                targets: [-1],
-                class: 'text-center',
-                orderable: false,
-            }
-        ],
-        initComplete: function(settings, json) {
-            // Código adicional si es necesario
-        }
+        "language": {
+            "url": "{% static 'lib/datatables-1.10.18/js/Spanish.json' %}"
+        },
+        "responsive": true,
+        "autoWidth": false
     });
 });
-</script>
 
+function eliminarTipoModulo(id) {
+    if (confirm('¿Estás seguro de que deseas eliminar este tipo de módulo?')) {
+        window.location.href = "{% url 'app_usuario:eliminar_tipo_modulo' 0 %}".replace('0', id);
+    }
+}
+</script>
 {% endblock %}
