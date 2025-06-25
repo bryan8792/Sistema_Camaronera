@@ -1,79 +1,42 @@
 $(function () {
     $('#tb_usuario').DataTable({
-        language: {
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "zeroRecords": "Ningun dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "infoEmpty": "Tabla vacia por favor inserte datos",
-            "lengthMenu": "Listando _MENU_ registros",
-            "sSearch": "Buscar:",
-            "infoFiltered": "(filtrado de _MAX_ registros totales)"
-        },
-        //responsive: true,
-        scrollX: true,
+        responsive: true,
         autoWidth: false,
         destroy: true,
         deferRender: true,
         ajax: {
             url: window.location.pathname,
             type: 'POST',
-            data: {
-                'action': 'searchdata'
+            headers: {
+                'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
             },
+            data: { action: 'searchdata' },
             dataSrc: ""
         },
         columns: [
-            {"data": "id"},
-            {"data": "first_name"},
-            {"data": "last_name"},
-            {"data": "email"},
-            {"data": "last_login"},
-            {"data": "id"},
-        ],
-        columnDefs: [
+            { data: 'id' },
+            { data: 'username' },
+            { data: 'full_name' },
+            { data: 'email' },
             {
-                targets: [0],
-                class: 'text-center',
-                orderable: false,
+                data: 'groups',
                 render: function (data, type, row) {
-                    return data;
+                    if (data.length === 0) return '<span class="text-muted">Sin grupo</span>';
+                    return data.map(g => `<span class="badge badge-info mr-1">${g.name}</span>`).join('');
                 }
             },
+            { data: 'last_login' },
             {
-                targets: [1],
-                class: 'text-left',
-                orderable: false,
+                data: null,
+                className: "text-center",
                 render: function (data, type, row) {
-                    return data;
+                    return `
+                        <a href="/usuario/usuario/detail/${row.id}/" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                        <a href="/usuario/usuario/actualizar/${row.id}/" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                        <a href="/usuario/usuario/eliminar/${row.id}/" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>
+                    `;
                 }
-            },
-            {
-                targets: [-4, -3, -2 ],
-                class: 'text-left',
-                orderable: false,
-                render: function (data, type, row) {
-                    return data;
-                }
-            },
-            {
-                targets: [-1],
-                class: 'text-center',
-                orderable: false,
-                render: function (data, type, row) {
-                    var buttons = '<a href="/usuario/usuario/actualizar/' + row.id + '/" class="btn btn-primary btn-xs"><i class="fas fa-edit"></i></a>';
-                    buttons += '&nbsp';
-                    buttons += '<a href="/usuario/usuario/eliminar/' + row.id + '/" class="btn btn-danger btn-xs"><i class="fas fa-trash-alt"></i></a>';
-                    return buttons;
-                }
-            },
-        ],
-        initComplete: function (settings, json) {
-
-        }
+            }
+        ]
     });
 });

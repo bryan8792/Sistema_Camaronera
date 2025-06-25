@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block contenido %}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <h3 class="text-dark">Detalle de Usuario: {{ usuario.username }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Nombre completo:</strong> {{ usuario.get_full_name }}</p>
+            <p><strong>Email:</strong> {{ usuario.email }}</p>
+            <p><strong>Último acceso:</strong> {{ usuario.last_login }}</p>
+            <p><strong>Grupos:</strong>
+                {% for group in usuario.groups.all %}
+                    <span class="badge badge-info">{{ group.name }}</span>
+                {% empty %}
+                    <span class="text-muted">Sin grupo</span>
+                {% endfor %}
+            </p>
+            <p><strong>Permisos:</strong></p>
+            <ul>
+                {% for perm in usuario.get_all_permissions %}
+                    <li>{{ perm }}</li>
+                {% empty %}
+                    <li class="text-muted">Sin permisos asignados</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'app_usuario:listar_usuario' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
