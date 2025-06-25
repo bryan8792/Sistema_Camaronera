@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">
+                    <i class="fas fa-puzzle-piece"></i> Crear Módulo del Sistema
+                </h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{% url 'inicio_dashboard' %}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'app_usuario:listar_modulo' %}">Módulos</a></li>
+                    <li class="breadcrumb-item active">Crear Módulo</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-puzzle-piece mr-2"></i>
+                            Configuración del Nuevo Módulo
+                        </h3>
+                    </div>
+
+                    <form method="post" id="frmModule">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Información Básica -->
+                                <div class="col-lg-6">
+                                    <div class="card card-outline card-info">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-info-circle mr-2"></i>
+                                                Información Básica
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label for="{{ form.nombre.id_for_label }}">
+                                                    <i class="fas fa-tag mr-1"></i>
+                                                    Nombre del Módulo *
+                                                </label>
+                                                {{ form.nombre }}
+                                                <small class="form-text text-muted">
+                                                    Ejemplo: Inventario, Usuarios, Reportes
+                                                </small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="{{ form.url.id_for_label }}">
+                                                    <i class="fas fa-link mr-1"></i>
+                                                    URL del Módulo *
+                                                </label>
+                                                {{ form.url }}
+                                                <small class="form-text text-muted">
+                                                    Ejemplo: /inventario/, /usuarios/, /reportes/
+                                                </small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="{{ form.orden.id_for_label }}">
+                                                    <i class="fas fa-sort-numeric-up mr-1"></i>
+                                                    Orden de Visualización
+                                                </label>
+                                                {{ form.orden }}
+                                                <small class="form-text text-muted">
+                                                    Número que determina el orden en el menú (menor número = mayor prioridad)
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Configuración Visual -->
+                                <div class="col-lg-6">
+                                    <div class="card card-outline card-success">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-palette mr-2"></i>
+                                                Configuración Visual
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label for="{{ form.tipo.id_for_label }}">
+                                                    <i class="fas fa-layer-group mr-1"></i>
+                                                    Tipo de Módulo *
+                                                </label>
+                                                {{ form.tipo }}
+                                                <small class="form-text text-muted">
+                                                    Categoría a la que pertenece este módulo
+                                                </small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="{{ form.icono.id_for_label }}">
+                                                    <i class="fas fa-icons mr-1"></i>
+                                                    Icono del Módulo
+                                                </label>
+                                                <div class="input-group">
+                                                    {{ form.icono }}
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text" id="iconPreview">
+                                                            <i class="fas fa-cog"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <small class="form-text text-muted">
+                                                    Usa clases de FontAwesome. Ejemplo: fas fa-users, fas fa-chart-bar
+                                                </small>
+
+                                                <!-- Iconos comunes -->
+                                                <div class="mt-2">
+                                                    <small class="text-muted">Iconos comunes:</small><br>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-btn" data-icon="fas fa-users">
+                                                        <i class="fas fa-users"></i> Usuarios
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-btn" data-icon="fas fa-chart-bar">
+                                                        <i class="fas fa-chart-bar"></i> Reportes
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-btn" data-icon="fas fa-boxes">
+                                                        <i class="fas fa-boxes"></i> Inventario
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-btn" data-icon="fas fa-cog">
+                                                        <i class="fas fa-cog"></i> Configuración
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary m-1 icon-btn" data-icon="fas fa-file-invoice">
+                                                        <i class="fas fa-file-invoice"></i> Facturas
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="custom-control custom-switch">
+                                                    {{ form.activo }}
+                                                    <label class="custom-control-label" for="{{ form.activo.id_for_label }}">
+                                                        <i class="fas fa-toggle-on mr-1"></i>
+                                                        Módulo Activo
+                                                    </label>
+                                                </div>
+                                                <small class="form-text text-muted">
+                                                    Determina si el módulo aparece en el menú del sistema
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card card-outline card-warning">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-file-alt mr-2"></i>
+                                                Descripción del Módulo
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label for="{{ form.descripcion.id_for_label }}">
+                                                    <i class="fas fa-align-left mr-1"></i>
+                                                    Descripción Detallada
+                                                </label>
+                                                {{ form.descripcion }}
+                                                <small class="form-text text-muted">
+                                                    Describe la funcionalidad y propósito de este módulo
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vista Previa -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card card-outline card-secondary">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-eye mr-2"></i>
+                                                Vista Previa del Módulo
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+                                                <h6><i class="fas fa-info-circle mr-2"></i>Así se verá en el menú:</h6>
+                                                <div class="nav-item has-treeview">
+                                                    <a href="#" class="nav-link">
+                                                        <i id="previewIcon" class="nav-icon fas fa-cog"></i>
+                                                        <p id="previewName">Nombre del Módulo</p>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-save mr-2"></i>
+                                        Crear Módulo
+                                    </button>
+                                </div>
+                                <div class="col-lg-6 text-right">
+                                    <a href="{% url 'app_usuario:listar_modulo' %}" class="btn btn-secondary btn-lg">
+                                        <i class="fas fa-times mr-2"></i>
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Actualizar vista previa del icono
+    function updateIconPreview() {
+        const iconClass = $('#id_icono').val() || 'fas fa-cog';
+        $('#iconPreview i').attr('class', iconClass);
+        $('#previewIcon').attr('class', 'nav-icon ' + iconClass);
+    }
+
+    // Actualizar vista previa del nombre
+    function updateNamePreview() {
+        const name = $('#id_nombre').val() || 'Nombre del Módulo';
+        $('#previewName').text(name);
+    }
+
+    // Eventos para actualizar vista previa
+    $('#id_icono').on('input', updateIconPreview);
+    $('#id_nombre').on('input', updateNamePreview);
+
+    // Botones de iconos comunes
+    $('.icon-btn').click(function() {
+        const iconClass = $(this).data('icon');
+        $('#id_icono').val(iconClass);
+        updateIconPreview();
+    });
+
+    // Inicializar vista previa
+    updateIconPreview();
+    updateNamePreview();
+
+    // Validación del formulario
+    $('#frmModule').on('submit', function(e) {
+        let isValid = true;
+
+        // Validar campos requeridos
+        const requiredFields = ['nombre', 'url', 'tipo'];
+
+        requiredFields.forEach(function(field) {
+            const input = $(`#id_${field}`);
+            if (!input.val().trim()) {
+                input.addClass('is-invalid');
+                isValid = false;
+            } else {
+                input.removeClass('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            toastr.error('Por favor completa todos los campos requeridos');
+        }
+    });
+
+    // Limpiar validación al escribir
+    $('input, select, textarea').on('input change', function() {
+        $(this).removeClass('is-invalid');
+    });
+});
+</script>
+{% endblock %}

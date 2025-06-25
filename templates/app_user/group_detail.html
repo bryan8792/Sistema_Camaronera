@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <h3 class="text-dark">Detalle de Grupo: {{ grupo.name }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info">
+                    <h3 class="card-title">Información del Grupo</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre:</strong> {{ grupo.name }}</p>
+                    <p><strong>Usuarios asignados:</strong> {{ grupo.user_set.count }}</p>
+                    <p><strong>Permisos asignados:</strong> {{ grupo.permissions.count }}</p>
+                    
+                    <h5 class="mt-3">Usuarios en este grupo:</h5>
+                    {% if grupo.user_set.all %}
+                        <ul class="list-group">
+                            {% for user in grupo.user_set.all %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ user.get_full_name|default:user.username }}
+                                    <span class="badge badge-primary badge-pill">{{ user.email }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No hay usuarios asignados a este grupo.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success">
+                    <h3 class="card-title">Módulos Asignados</h3>
+                </div>
+                <div class="card-body">
+                    {% if grupo.grupomodulo_set.all %}
+                        <div class="row">
+                            {% for gm in grupo.grupomodulo_set.all %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="card card-outline card-primary">
+                                        <div class="card-body p-2">
+                                            <div class="d-flex align-items-center">
+                                                <i class="{{ gm.modulo.icono }} fa-2x text-primary mr-3"></i>
+                                                <div>
+                                                    <h6 class="mb-0">{{ gm.modulo.nombre }}</h6>
+                                                    <small class="text-muted">{{ gm.modulo.tipo.nombre }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay módulos asignados a este grupo.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h3 class="card-title">Permisos del Sistema</h3>
+                </div>
+                <div class="card-body">
+                    {% if grupo.permissions.all %}
+                        <div class="row">
+                            {% for permission in grupo.permissions.all %}
+                                <div class="col-md-12 mb-1">
+                                    <span class="badge badge-secondary">{{ permission.name }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay permisos específicos asignados.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card-footer">
+                <a href="{% url 'app_usuario:listar_grupo' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+                <a href="{% url 'app_usuario:actualizar_grupo' grupo.pk %}" class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1651,36 +1651,114 @@ table.dataTable tbody td select,
                             </ul>
                         </li>
 
+                        <!-- ===== NUEVA SECCIÓN DE SEGURIDAD Y PERMISOS ===== -->
+                        <li class="nav-header">Seguridad y Permisos</li>
+
+                        <!-- Modulo Usuarios -->
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-users"></i>
-                                <p>Usuarios<i class="right fas fa-angle-left"></i></p>
+                                <p>Gestión de Usuarios<i class="right fas fa-angle-left"></i></p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:listar_usuario' %}" class="nav-link"><i
-                                            class="far fa-dot-circle nav-icon"></i>
-                                        <p>Crear Usuarios</p></a>
+                                    <a href="{% url 'app_usuario:listar_usuario' %}" class="nav-link">
+                                        <i class="far fa-user nav-icon"></i>
+                                        <p>Listar Usuarios</p>
+                                    </a>
                                 </li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-unlock-alt"></i>
-                                <p>Seguridad<i class="fas fa-angle-left right"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link" type="button" data-toggle="modal"
-                                       data-target="#modal-default"><i class="far fa-circle nav-icon"></i>
-                                        <p>Permisos</p>
+                                    <a href="{% url 'app_usuario:crear_usuario' %}" class="nav-link">
+                                        <i class="fas fa-user-plus nav-icon"></i>
+                                        <p>Crear Usuario</p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
 
-                    {% else %}
+                        <!-- Modulo Grupos -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-users-cog"></i>
+                                <p>Gestión de Grupos<i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{% url 'app_usuario:listar_grupo' %}" class="nav-link">
+                                        <i class="far fa-users nav-icon"></i>
+                                        <p>Listar Grupos</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'app_usuario:crear_grupo' %}" class="nav-link">
+                                        <i class="fas fa-plus-circle nav-icon"></i>
+                                        <p>Crear Grupo</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Modulo Módulos del Sistema -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-th"></i>
+                                <p>Módulos del Sistema<i class="right fas fa-angle-left"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{% url 'app_usuario:listar_modulo' %}" class="nav-link">
+                                        <i class="far fa-th-large nav-icon"></i>
+                                        <p>Listar Módulos</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'app_usuario:crear_modulo' %}" class="nav-link">
+                                        <i class="fas fa-plus-square nav-icon"></i>
+                                        <p>Crear Módulo</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'app_usuario:listar_tipo_modulo' %}" class="nav-link">
+                                        <i class="far fa-list nav-icon"></i>
+                                        <p>Tipos de Módulos</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{% url 'app_usuario:crear_tipo_modulo' %}" class="nav-link">
+                                        <i class="fas fa-plus nav-icon"></i>
+                                        <p>Crear Tipo de Módulo</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Modulo Accesos y Permisos -->
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-unlock-alt"></i>
+                                <p>Accesos y Permisos<i class="fas fa-angle-left right"></i></p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link" type="button" data-toggle="modal"
+                                       data-target="#modal-default"><i class="far fa-circle nav-icon"></i>
+                                        <p>Configurar Permisos</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">
+                                        <i class="fas fa-key nav-icon"></i>
+                                        <p>Cambiar Contraseña</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link">
+                                        <i class="fas fa-history nav-icon"></i>
+                                        <p>Historial de Accesos</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 
                     {% endif %}
 

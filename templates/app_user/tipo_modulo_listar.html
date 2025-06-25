@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+v{% extends 'base.html' %}
 {% load static %}
 
 {% block head %}
@@ -8,7 +8,6 @@
     <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
     <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
     <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
-    <script src="{% static 'acciones/app_user/list_user.js' %}"></script>
 {% endblock %}
 
 {% block contenido %}
@@ -22,7 +21,7 @@
                         <a href="#">{{ nombre }}&nbsp;<i class="far nav-icon fa fa-home"></i></a>
                     </li>
                     <li class="breadcrumb-item active">
-                        Listado de {{ nombre }}&nbsp;<i class="far nav-icon fa fa-clipboard-check"></i>
+                        Listado de {{ nombre }}&nbsp;<i class="far nav-icon fa fa-list"></i>
                     </li>
                 </ol>
             </div>
@@ -33,14 +32,13 @@
 <section class="content">
     <div class="row">
         <div class="col-12">
-
             <div class="card">
                 <div class="card-header" style="background-color:#3498DB">
                     <h3 class="card-title">Registros de: <strong>{{ nombre }}</strong></h3>
                     <div class="card-tools">
                         <ul class="pagination pagination-sm float-right">
                             <li class="page-item">
-                                <a href="{% url 'app_usuario:crear_usuario' %}" class="btn btn-block btn-success btn-sm">
+                                <a href="{% url 'app_usuario:crear_tipo_modulo' %}" class="btn btn-block btn-success btn-sm">
                                     <strong><i class="fas fa-plus"></i> NUEVO REGISTRO</strong>
                                 </a>
                             </li>
@@ -48,15 +46,13 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <table id="tb_usuario" class="table table-striped table-bordered dt-responsive nowrap" style="width:100%">
+                    <table id="tb_tipo_modulo" class="table table-striped table-bordered dt-responsive nowrap" style="width:100%">
                         <thead class="thead-light">
                             <tr>
                                 <th>#</th>
-                                <th>Usuario</th>
-                                <th>Nombre completo</th>
-                                <th>Email</th>
-                                <th>Grupos</th>
-                                <th>Último acceso</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Módulos</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
                         </thead>
@@ -66,9 +62,66 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 </section>
+
+<script>
+$(document).ready(function() {
+    $('#tb_tipo_modulo').DataTable({
+        responsive: true,
+        autoWidth: false,
+        destroy: true,
+        deferRender: true,
+        ajax: {
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'searchdata'
+            },
+            dataSrc: ""
+        },
+        columns: [
+            {"data": "id"},
+            {"data": "nombre"},
+            {
+                "data": "descripcion",
+                "render": function(data, type, row) {
+                    if (data && data.length > 50) {
+                        return data.substring(0, 50) + '...';
+                    }
+                    return data || 'Sin descripción';
+                }
+            },
+            {
+                "data": "id",
+                "render": function(data, type, row) {
+                    // Aquí podrías hacer una consulta AJAX para obtener el conteo de módulos
+                    return '<span class="badge badge-info">Ver módulos</span>';
+                }
+            },
+            {
+                "data": null,
+                "render": function(data, type, row) {
+                    return '<div class="btn-group">' +
+                           '<a href="/tipo-modulo/actualizar/' + row.id + '/" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>' +
+                           '<a href="/tipo-modulo/eliminar/' + row.id + '/" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>' +
+                           '</div>';
+                }
+            }
+        ],
+        columnDefs: [
+            {
+                targets: [-1],
+                class: 'text-center',
+                orderable: false,
+            }
+        ],
+        initComplete: function(settings, json) {
+            // Código adicional si es necesario
+        }
+    });
+});
+</script>
 
 {% endblock %}

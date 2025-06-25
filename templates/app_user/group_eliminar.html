@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">{{ nombre }}</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                    <li class="breadcrumb-item active">Eliminar {{ nombre }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" action=".">
+    <section class="content">
+        <div class="row">
+            <div class="col-1"></div>
+            <div class="col-10">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title">Eliminar: <strong>{{ nombre }}</strong></h3>
+                    </div>
+                    <div class="card-body">
+                        {% csrf_token %}
+                        <div class="alert alert-default-danger alert-dismissible" style="text-align: center">
+                            <h4><i class="icon fas fa-ban"> Notificación:</i></h4>
+                            <button class="alert alert-default-danger alert-dismissible btn btn-lg"
+                                    style="text-align: center;height: 180px;width: 145px">
+                                <i class="fas fa-trash-alt fa-6x"></i>
+                            </button>
+                            <br><br>
+                            <h4>
+                                ¿Está seguro de eliminar el registro?<br><br>
+                                Grupo: <strong>&nbsp;&nbsp;{{ object.name }}</strong><br>
+                                <small class="text-muted">
+                                    Este grupo tiene {{ object.user_set.count }} usuario(s) asignado(s)
+                                </small>
+                            </h4>
+
+                            {% if object.user_set.count > 0 %}
+                                <div class="alert alert-warning mt-3">
+                                    <strong>¡Atención!</strong> Al eliminar este grupo, los usuarios perderán los permisos asociados.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer navbar-white">
+                        <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
+                            <i class="fas fa-check-circle"></i> SÍ, ACEPTAR
+                        </button>
+                        <a href="{% url 'app_usuario:listar_grupo' %}" class="btn btn-danger btn-file">
+                            <i class="fas fa-times"></i> CANCELAR
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script type="application/javascript">
+    $(function () {
+        $('.btnTest').on('click', function () {
+            $.ajax({
+                url: '{% url 'app_usuario:listar_grupo' %}',
+                type: 'POST',
+                data: {id: 1},
+                dataType: 'json'
+            }).done(function (data) {
+                // Éxito
+            }).fail(function (data) {
+                toastr.error('Error verificar por favor')
+            }).always(function (data) {
+                toastr.info('Procesando datos')
+            })
+        })
+    })
+</script>
+{% endblock %}
