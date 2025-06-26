@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Group, Permission
+from app_user.models import User
 from django.forms import ModelForm
 from django.forms.widgets import (
     CheckboxInput, ClearableFileInput, Select, SelectMultiple,
