@@ -22,6 +22,7 @@
 </div>
 
 <section class="content">
+<form id="frmModulo" class="form" method="post" action="." enctype="multipart/form-data">
     <div class="container-fluid">
         <div class="row justify-content-center">
             <div class="col-md-8">
@@ -33,7 +34,6 @@
                         </h3>
                     </div>
 
-                    <form method="post" id="frmModulo">
                         {% csrf_token %}
                         <div class="card-body">
                             <div class="row">
@@ -76,6 +76,15 @@
                                         {{ form.icono }}
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="{{ form.orden.id_for_label }}">
+                                            <i class="fas fa-icons mr-1"></i>
+                                            Orden
+                                        </label>
+                                        {{ form.orden }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -89,10 +98,11 @@
                                 Cancelar
                             </a>
                         </div>
-                    </form>
+
                 </div>
             </div>
         </div>
     </div>
+</form>
 </section>
 {% endblock %}

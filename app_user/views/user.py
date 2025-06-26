@@ -1,63 +1,97 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
+from django.shortcuts import render, redirect
 from app_user.forms import GroupForm, CustomUserCreationForm
 from app_user.models import GrupoModulo
 from app_user.forms import UserForm
 from app_user.models import User
 from app_user.forms import ModuloForm, TipoModuloForm
 from app_user.models import Modulo, TipoModulo
+import json
 
 
-class crearUsuarioView(CreateView):
+class crearUsuarioView(LoginRequiredMixin, CreateView):
     model = User
     form_class = CustomUserCreationForm
     template_name = 'app_user/user_crear.html'
     success_url = reverse_lazy('app_usuario:listar_usuario')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self.object.groups.set(form.cleaned_data['groups'])
-        self.object.user_permissions.set(form.cleaned_data['user_permissions'])
-        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Ingresar Usuario'
         context['entity'] = 'Usuario'
         context['action'] = 'crear'
+        context['all_permissions'] = Permission.objects.all().select_related('content_type').order_by(
+            'content_type__app_label', 'codename')
         return context
 
+    def form_valid(self, form):
+        try:
+            response = super().form_valid(form)
 
-class actualizarUsuarioView(UpdateView):
+            # Asignar grupos y permisos
+            if form.cleaned_data.get('groups'):
+                self.object.groups.set(form.cleaned_data['groups'])
+            if form.cleaned_data.get('user_permissions'):
+                self.object.user_permissions.set(form.cleaned_data['user_permissions'])
+
+            messages.success(self.request, f'Usuario "{self.object.username}" creado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(self.request, f'Error al crear usuario: {str(e)}')
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        print("Errores del formulario:", form.errors)  # Para debug
+        return super().form_invalid(form)
+
+
+class actualizarUsuarioView(LoginRequiredMixin, UpdateView):
     model = User
     form_class = UserForm
     template_name = 'app_user/user_crear.html'
     success_url = reverse_lazy('app_usuario:listar_usuario')
-
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        self.object.groups.set(form.cleaned_data['groups'])
-        self.object.user_permissions.set(form.cleaned_data['user_permissions'])
-        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Actualizar Usuario'
         context['entity'] = 'Usuario'
         context['action'] = 'editar'
+        context['all_permissions'] = Permission.objects.all().select_related('content_type').order_by(
+            'content_type__app_label', 'codename')
         return context
 
+    def form_valid(self, form):
+        try:
+            response = super().form_valid(form)
 
-class eliminarUsuarioView(DeleteView):
+            if form.cleaned_data.get('groups'):
+                self.object.groups.set(form.cleaned_data['groups'])
+            if form.cleaned_data.get('user_permissions'):
+                self.object.user_permissions.set(form.cleaned_data['user_permissions'])
+
+            messages.success(self.request, f'Usuario "{self.object.username}" actualizado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(self.request, f'Error al actualizar usuario: {str(e)}')
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        print("Errores del formulario:", form.errors)  # Para debug
+        return super().form_invalid(form)
+
+
+class eliminarUsuarioView(LoginRequiredMixin, DeleteView):
     model = User
-    form_class = UserForm
     template_name = 'app_user/user_eliminar.html'
     success_url = reverse_lazy('app_usuario:listar_usuario')
 
@@ -65,14 +99,23 @@ class eliminarUsuarioView(DeleteView):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Eliminar Usuario'
         context['entity'] = 'Usuario'
-        context['action'] = 'crear'
+        context['action'] = 'eliminar'
         return context
 
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        nombre = self.object.username
+        try:
+            response = super().delete(request, *args, **kwargs)
+            messages.success(request, f'Usuario "{nombre}" eliminado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(request, f'Error al eliminar usuario: {str(e)}')
+            return redirect(self.success_url)
 
-# CREAREMOS LISTA BASADA EN CLASES
-class listarUsuarioView(ListView):
+
+class listarUsuarioView(LoginRequiredMixin, ListView):
     model = User
-    # defino la plantilla
     template_name = 'app_user/user_listar.html'
 
     def user_to_json(self, user):
@@ -111,10 +154,8 @@ class listarUsuarioView(ListView):
             data['error'] = str(e)
         return JsonResponse(data, safe=False)
 
-    # defino el dicionario para enviar variables a mi plantilla
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # pongo el titulo a mi tabla y demas que necesiten
         context['nombre'] = 'Usuario'
         return context
 
@@ -125,10 +166,42 @@ class detalleUsuarioView(LoginRequiredMixin, DetailView):
     context_object_name = 'usuario'
 
 
-class listarGrupoView(ListView):
+class listarGrupoView(LoginRequiredMixin, ListView):
     model = Group
     template_name = 'app_user/group_listar.html'
     context_object_name = 'grupos'
+
+    def group_to_json(self, group):
+        """Método para convertir grupo a JSON"""
+        modulos_grupo = GrupoModulo.objects.filter(grupo=group).select_related('modulo')
+        modulos = [gm.modulo.nombre for gm in modulos_grupo]
+
+        return {
+            'id': group.id,
+            'name': group.name,
+            'users_count': group.user_set.count(),
+            'permissions_count': group.permissions.count(),
+            'modulos': modulos,
+        }
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = []
+                for group in Group.objects.all():
+                    data.append(self.group_to_json(group))
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -136,7 +209,59 @@ class listarGrupoView(ListView):
         return context
 
 
-class crearGrupoView(CreateView):
+class listarGrupoAjaxView(LoginRequiredMixin, View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        return self.handle_request(request)
+
+    def post(self, request):
+        return self.handle_request(request)
+
+    def handle_request(self, request):
+        try:
+            grupos = Group.objects.all().order_by('name')
+
+            data = []
+            for grupo in grupos:
+                modulos_grupo = GrupoModulo.objects.filter(grupo=grupo).select_related('modulo')
+                modulos = [gm.modulo.nombre for gm in modulos_grupo]
+
+                data.append({
+                    'id': grupo.id,
+                    'name': grupo.name,
+                    'users_count': grupo.user_set.count(),
+                    'permissions_count': grupo.permissions.count(),
+                    'modulos': modulos,
+                    'acciones': f'''
+                        <div class="btn-group" role="group">
+                            <a href="{reverse_lazy('app_usuario:actualizar_grupo', kwargs={'pk': grupo.id})}" class="btn btn-sm btn-warning" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarGrupo({grupo.id})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    '''
+                })
+
+            return JsonResponse({
+                'data': data,
+                'recordsTotal': len(data),
+                'recordsFiltered': len(data)
+            })
+        except Exception as e:
+            return JsonResponse({
+                'error': str(e),
+                'data': [],
+                'recordsTotal': 0,
+                'recordsFiltered': 0
+            })
+
+
+class crearGrupoView(LoginRequiredMixin, CreateView):
     model = Group
     form_class = GroupForm
     template_name = 'app_user/group_crear.html'
@@ -145,16 +270,69 @@ class crearGrupoView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Crear Grupo'
-        context['modulos'] = Modulo.objects.all()  # Agregar módulos al contexto
+        context['modulos'] = Modulo.objects.select_related('tipo').all().order_by('tipo__nombre', 'nombre')
+        context['all_permissions'] = Permission.objects.all().select_related('content_type').order_by(
+            'content_type__app_label', 'codename')
         return context
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, 'Grupo creado exitosamente.')
-        return response
+        try:
+            # Primero guardamos el grupo
+            response = super().form_valid(form)
+
+            # Asignar permisos
+            if form.cleaned_data.get('permissions'):
+                self.object.permissions.set(form.cleaned_data['permissions'])
+
+            # Asignar módulos
+            selected_modules = self.request.POST.get('selected_modules', '[]')
+            print(f"Módulos seleccionados (raw): {selected_modules}")  # Debug
+
+            try:
+                if selected_modules and selected_modules != '[]':
+                    module_ids = json.loads(selected_modules)
+                    print(f"Módulos parseados: {module_ids}")  # Debug
+
+                    # Eliminar asignaciones anteriores
+                    GrupoModulo.objects.filter(grupo=self.object).delete()
+
+                    # Crear nuevas asignaciones
+                    created_count = 0
+                    for module_id in module_ids:
+                        try:
+                            modulo = Modulo.objects.get(id=module_id)
+                            GrupoModulo.objects.create(grupo=self.object, modulo=modulo)
+                            created_count += 1
+                            print(f"Módulo asignado: {modulo.nombre}")  # Debug
+                        except Modulo.DoesNotExist:
+                            print(f"Módulo con ID {module_id} no existe")  # Debug
+                            continue
+
+                    messages.success(self.request,
+                                     f'Grupo "{self.object.name}" creado exitosamente con {created_count} módulos asignados.')
+                else:
+                    messages.success(self.request,
+                                     f'Grupo "{self.object.name}" creado exitosamente sin módulos asignados.')
+
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"Error al procesar módulos: {str(e)}")  # Debug
+                messages.warning(self.request,
+                                 f'Grupo "{self.object.name}" creado, pero hubo un error al asignar módulos: {str(e)}')
+
+            return response
+
+        except Exception as e:
+            print(f"Error general en form_valid: {str(e)}")  # Debug
+            messages.error(self.request, f'Error al crear grupo: {str(e)}')
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        print(f"Errores del formulario: {form.errors}")  # Debug
+        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        return super().form_invalid(form)
 
 
-class actualizarGrupoView(UpdateView):
+class actualizarGrupoView(LoginRequiredMixin, UpdateView):
     model = Group
     form_class = GroupForm
     template_name = 'app_user/group_crear.html'
@@ -163,33 +341,99 @@ class actualizarGrupoView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Actualizar Grupo'
-        context['modulos'] = Modulo.objects.all()
+        context['modulos'] = Modulo.objects.select_related('tipo').all().order_by('tipo__nombre', 'nombre')
+        context['all_permissions'] = Permission.objects.all().select_related('content_type').order_by(
+            'content_type__app_label', 'codename')
+
+        # Obtener módulos ya asignados al grupo
+        modulos_asignados = GrupoModulo.objects.filter(grupo=self.object).values_list('modulo_id', flat=True)
+        context['modulos_asignados'] = list(modulos_asignados)
+
         return context
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, 'Grupo actualizado exitosamente.')
-        return response
+        try:
+            response = super().form_valid(form)
+
+            # Asignar permisos
+            if form.cleaned_data.get('permissions'):
+                self.object.permissions.set(form.cleaned_data['permissions'])
+
+            # Asignar módulos
+            selected_modules = self.request.POST.get('selected_modules', '[]')
+            print(f"Módulos seleccionados para actualizar: {selected_modules}")  # Debug
+
+            try:
+                if selected_modules and selected_modules != '[]':
+                    module_ids = json.loads(selected_modules)
+
+                    # Eliminar asignaciones anteriores
+                    GrupoModulo.objects.filter(grupo=self.object).delete()
+
+                    # Crear nuevas asignaciones
+                    created_count = 0
+                    for module_id in module_ids:
+                        try:
+                            modulo = Modulo.objects.get(id=module_id)
+                            GrupoModulo.objects.create(grupo=self.object, modulo=modulo)
+                            created_count += 1
+                        except Modulo.DoesNotExist:
+                            continue
+
+                    messages.success(self.request,
+                                     f'Grupo "{self.object.name}" actualizado exitosamente con {created_count} módulos asignados.')
+                else:
+                    # Si no hay módulos seleccionados, eliminar todas las asignaciones
+                    GrupoModulo.objects.filter(grupo=self.object).delete()
+                    messages.success(self.request,
+                                     f'Grupo "{self.object.name}" actualizado exitosamente sin módulos asignados.')
+
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"Error al procesar módulos: {str(e)}")  # Debug
+                messages.warning(self.request,
+                                 f'Grupo "{self.object.name}" actualizado, pero hubo un error al asignar módulos: {str(e)}')
+
+            return response
+
+        except Exception as e:
+            print(f"Error general en form_valid: {str(e)}")  # Debug
+            messages.error(self.request, f'Error al actualizar grupo: {str(e)}')
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        print(f"Errores del formulario: {form.errors}")  # Debug
+        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        return super().form_invalid(form)
 
 
-class eliminarGrupoView(DeleteView):
+class eliminarGrupoView(LoginRequiredMixin, DeleteView):
     model = Group
     template_name = 'app_user/group_eliminar.html'
     success_url = reverse_lazy('app_usuario:listar_grupo')
 
     def delete(self, request, *args, **kwargs):
-        response = super().delete(request, *args, **kwargs)
-        messages.success(request, 'Grupo eliminado exitosamente.')
-        return response
+        self.object = self.get_object()
+        nombre = self.object.name
+
+        try:
+            # Eliminar relaciones con módulos
+            GrupoModulo.objects.filter(grupo=self.object).delete()
+
+            response = super().delete(request, *args, **kwargs)
+            messages.success(request, f'Grupo "{nombre}" eliminado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(request, f'Error al eliminar grupo: {str(e)}')
+            return redirect(self.success_url)
 
 
-class detalleGrupoView(DetailView):
+class detalleGrupoView(LoginRequiredMixin, DetailView):
     model = Group
     template_name = 'app_user/group_detail.html'
     context_object_name = 'grupo'
 
 
-class detalleModuloView(DetailView):
+class detalleModuloView(LoginRequiredMixin, DetailView):
     model = Modulo
     template_name = 'app_user/modulo_detail.html'
     context_object_name = 'modulo'
@@ -202,10 +446,16 @@ class CrearTipoModuloView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('app_usuario:listar_tipo_modulo')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Tipo de módulo "{form.instance.nombre}" creado exitosamente.')
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, f'Tipo de módulo "{form.instance.nombre}" creado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(self.request, f'Error al crear tipo de módulo: {str(e)}')
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
+        print(f"Errores del formulario: {form.errors}")  # Debug
         messages.error(self.request, 'Por favor corrige los errores en el formulario.')
         return super().form_invalid(form)
 
@@ -272,10 +522,16 @@ class EditarTipoModuloView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('app_usuario:listar_tipo_modulo')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Tipo de módulo "{form.instance.nombre}" actualizado exitosamente.')
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, f'Tipo de módulo "{form.instance.nombre}" actualizado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(self.request, f'Error al actualizar tipo de módulo: {str(e)}')
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
+        print(f"Errores del formulario: {form.errors}")  # Debug
         messages.error(self.request, 'Por favor corrige los errores en el formulario.')
         return super().form_invalid(form)
 
@@ -288,22 +544,37 @@ class EliminarTipoModuloView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         nombre = self.object.nombre
-        messages.success(request, f'Tipo de módulo "{nombre}" eliminado exitosamente.')
-        return super().delete(request, *args, **kwargs)
+        try:
+            response = super().delete(request, *args, **kwargs)
+            messages.success(request, f'Tipo de módulo "{nombre}" eliminado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(request, f'Error al eliminar tipo de módulo: {str(e)}')
+            return redirect(self.success_url)
 
 
-# Vistas basadas en clases para Modulo
 class CrearModuloView(LoginRequiredMixin, CreateView):
     model = Modulo
     form_class = ModuloForm
     template_name = 'app_user/modulo_crear.html'
     success_url = reverse_lazy('app_usuario:listar_modulo')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tipos_modulo'] = TipoModulo.objects.all().order_by('nombre')
+        return context
+
     def form_valid(self, form):
-        messages.success(self.request, f'Módulo "{form.instance.nombre}" creado exitosamente.')
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, f'Módulo "{form.instance.nombre}" creado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(self.request, f'Error al crear módulo: {str(e)}')
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
+        print(f"Errores del formulario: {form.errors}")  # Debug
         messages.error(self.request, 'Por favor corrige los errores en el formulario.')
         return super().form_invalid(form)
 
@@ -312,6 +583,44 @@ class ListarModuloView(LoginRequiredMixin, ListView):
     model = Modulo
     template_name = 'app_user/modulo_listar.html'
     context_object_name = 'modulos'
+
+    def modulo_to_json(self, modulo):
+        """Método para convertir módulo a JSON"""
+        return {
+            'id': modulo.id,
+            'nombre': modulo.nombre,
+            'tipo': modulo.tipo.nombre if modulo.tipo else 'Sin tipo',
+            'url': modulo.url or '',
+            'icono': modulo.icono or 'fas fa-cube',
+            'orden': getattr(modulo, 'orden', 0),
+            'activo': getattr(modulo, 'activo', True),
+            'fecha_creacion': modulo.fecha_creacion.strftime('%d/%m/%Y %H:%M') if hasattr(modulo,
+                                                                                          'fecha_creacion') else '',
+        }
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'searchdata':
+                data = []
+                for modulo in Modulo.objects.select_related('tipo').all():
+                    data.append(self.modulo_to_json(modulo))
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Módulos'
+        return context
 
 
 class ListarModuloAjaxView(LoginRequiredMixin, View):
@@ -336,12 +645,14 @@ class ListarModuloAjaxView(LoginRequiredMixin, View):
                     'nombre': modulo.nombre,
                     'tipo': modulo.tipo.nombre if modulo.tipo else 'Sin tipo',
                     'url': modulo.url or '',
-                    'icono': modulo.icono or '',
+                    'icono': modulo.icono or 'fas fa-cube',
+                    'orden': getattr(modulo, 'orden', 0),
+                    'activo': getattr(modulo, 'activo', True),
                     'fecha_creacion': modulo.fecha_creacion.strftime('%d/%m/%Y %H:%M') if hasattr(modulo,
                                                                                                   'fecha_creacion') else '',
                     'acciones': f'''
                         <div class="btn-group" role="group">
-                            <a href="{reverse_lazy('app_usuario:editar_modulo', kwargs={'pk': modulo.id})}" class="btn btn-sm btn-warning" title="Editar">
+                            <a href="{reverse_lazy('app_usuario:actualizar_modulo', kwargs={'pk': modulo.id})}" class="btn btn-sm btn-warning" title="Editar">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <button class="btn btn-sm btn-danger" onclick="eliminarModulo({modulo.id})" title="Eliminar">
@@ -372,10 +683,15 @@ class EditarModuloView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('app_usuario:listar_modulo')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Módulo "{form.instance.nombre}" actualizado exitosamente.')
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+            print('llego a response')
+            return response
+        except Exception as e:
+            return self.form_invalid(form)
 
     def form_invalid(self, form):
+        print(f"Errores del formulario: {form.errors}")  # Debug
         messages.error(self.request, 'Por favor corrige los errores en el formulario.')
         return super().form_invalid(form)
 
@@ -388,5 +704,10 @@ class EliminarModuloView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
         nombre = self.object.nombre
-        messages.success(request, f'Módulo "{nombre}" eliminado exitosamente.')
-        return super().delete(request, *args, **kwargs)
+        try:
+            response = super().delete(request, *args, **kwargs)
+            messages.success(request, f'Módulo "{nombre}" eliminado exitosamente.')
+            return response
+        except Exception as e:
+            messages.error(request, f'Error al eliminar módulo: {str(e)}')
+            return redirect(self.success_url)
