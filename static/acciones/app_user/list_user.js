@@ -65,7 +65,7 @@ $(document).ready(function() {
                     buttons += '<a href="/usuario/usuario/actualizar/' + row.id + '/" class="btn btn-warning btn-sm" title="Editar">';
                     buttons += '<i class="fas fa-edit"></i>';
                     buttons += '</a>';
-                    buttons += '<a href="/usuario/usuario/detalle/' + row.id + '/" class="btn btn-info btn-sm" title="Ver">';
+                    buttons += '<a href="/usuario/usuario/detail/' + row.id + '/" class="btn btn-info btn-sm" title="Ver">';
                     buttons += '<i class="fas fa-eye"></i>';
                     buttons += '</a>';
                     buttons += '<a href="/usuario/usuario/eliminar/' + row.id + '/" class="btn btn-danger btn-sm" title="Eliminar">';
