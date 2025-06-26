@@ -16,17 +16,18 @@ urlpatterns = [
     path('grupo/actualizar/<int:pk>/', actualizarGrupoView.as_view(), name='actualizar_grupo'),
     path('grupo/eliminar/<int:pk>/', eliminarGrupoView.as_view(), name='eliminar_grupo'),
     path('grupo/listar/', listarGrupoView.as_view(), name='listar_grupo'),
+    path('grupo/listar_ajax/', listarGrupoAjaxView.as_view(), name='listar_grupo_ajax'),
     path('grupo/detail/<int:pk>/', detalleGrupoView.as_view(), name='detalle_grupo'),
 
-    # URLs de Módulo (usando los nombres correctos con mayúscula)
+    # URLs de Módulo (corregidas para coincidir con los templates)
     path('modulo/crear/', CrearModuloView.as_view(), name='crear_modulo'),
-    path('modulo/actualizar/<int:pk>/', EditarModuloView.as_view(), name='editar_modulo'),
+    path('modulo/actualizar/<int:pk>/', EditarModuloView.as_view(), name='actualizar_modulo'),
     path('modulo/eliminar/<int:pk>/', EliminarModuloView.as_view(), name='eliminar_modulo'),
     path('modulo/listar/', ListarModuloView.as_view(), name='listar_modulo'),
     path('modulo/listar_ajax/', ListarModuloAjaxView.as_view(), name='listar_modulo_ajax'),
     path('modulo/detail/<int:pk>/', detalleModuloView.as_view(), name='detalle_modulo'),
 
-    # URLs de Tipo de Módulo (usando los nombres correctos con mayúscula)
+    # URLs de Tipo de Módulo
     path('tipo-modulo/crear/', CrearTipoModuloView.as_view(), name='crear_tipo_modulo'),
     path('tipo-modulo/listar/', ListarTipoModuloView.as_view(), name='listar_tipo_modulo'),
     path('tipo-modulo/listar_ajax/', ListarTipoModuloAjaxView.as_view(), name='listar_tipo_modulo_ajax'),
