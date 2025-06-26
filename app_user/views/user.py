@@ -28,8 +28,7 @@ class crearUsuarioView(LoginRequiredMixin, CreateView):
         context['nombre'] = 'Ingresar Usuario'
         context['entity'] = 'Usuario'
         context['action'] = 'crear'
-        context['all_permissions'] = Permission.objects.all().select_related('content_type').order_by(
-            'content_type__app_label', 'codename')
+        context['all_permissions'] = Permission.objects.all().select_related('content_type').order_by('content_type__app_label', 'codename')
         return context
 
     def form_valid(self, form):
