@@ -59,7 +59,9 @@ LOCAL_APPS = [
     'app_stock.app_detalle_stock',
     'app_empresa.app_reg_empresa',
     'app_dieta.app_dieta_reg',
-    'cliente'
+    'app_cliente',
+    'app_venta',
+    'app_notaCredito'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -158,6 +160,11 @@ LOGIN_URL = '/login/'
 AUTH_USER_MODEL = 'app_user.User'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+GROUPS = {
+    'secretaria': 2,
+    'client': 3,
+}
 
 # Configurations
 # LOCALHOST = '127.0.0.1'

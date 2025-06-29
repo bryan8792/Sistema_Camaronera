@@ -38,7 +38,7 @@ urlpatterns = [
     path('kardex/', include('app_kardex.urls')),
     path('planCuentas/', include('app_contabilidad_planCuentas.urls', namespace='planCuentas')),
     path('usuario/', include('app_user.urls')),
-    path('cliente/', include('cliente.urls')),
+    path('cliente/', include('app_cliente.urls')),
 
 
 ]
