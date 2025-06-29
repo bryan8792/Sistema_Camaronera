@@ -725,3 +725,5 @@ class VoucherErrors(models.Model):
         db_table = 'tb_errores_comprobantes'
         verbose_name = 'Errores del Comprobante'
         verbose_name_plural = 'Errores de los Comprobantes'
+
+

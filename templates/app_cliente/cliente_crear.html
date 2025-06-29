@@ -2,6 +2,22 @@
 
 {% load static %}
 
+{% block head %}
+    <!--Formvalidation Libs-->
+    <link rel="stylesheet" href="{% static 'lib/formvalidation-1.9.0/css/formValidation.min.css' %}">
+    <script src="{% static 'lib/formvalidation-1.9.0/js/es6-shim.min.js' %}"></script>
+    <script src="{% static 'lib/formvalidation-1.9.0/js/FormValidation.min.js' %}"></script>
+    <script src="{% static 'lib/formvalidation-1.9.0/js/plugins/Bootstrap.min.js' %}"></script>
+    <script src="{% static 'lib/formvalidation-1.9.0/js/locales/es_ES.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}">
+    <script src="{% static 'lib/tempusdominus-bootstrap-4.5.37.0/js/tempusdominus-bootstrap.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/tempusdominus-bootstrap-4.5.37.0/css/tempusdominus-bootstrap.css' %}"/>
+    <script src="{% static 'acciones/app_cliente/js/form.js' %}"></script>
+{% endblock %}
+
 {% block contenido %}
 
     <div class="content-header">
@@ -26,35 +42,65 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <form method="post" action=".">
+                    <form method="post" action="." enctype="multipart/form-data" id="frmForm" data-url="{{ list_url }}" autocomplete="off">
                         <!-- /.card-header -->
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-plus"></i> Nuevo registro de un Cliente</h3>
                         </div>
                         <!-- /.card-body -->
                         <div class="card-body">
+                            <input type="hidden" name="action" id="action" value="{{ action }}">
 
-                            {% csrf_token %}
-                            <h4>Datos de Usuario</h4>
-                            {% for field in user_form %}
+
+                            {% for field in frmUser.visible_fields %}
                                 <div class="form-group">
-                                    <label>{{ field.label }}</label>
+                                    <label>{{ field.label }}:</label>
                                     {{ field }}
                                 </div>
                             {% endfor %}
-
-                            <h4>Datos del Cliente</h4>
-                            {% for field in form %}
-                                <div class="form-group">
-                                    <label>{{ field.label }}</label>
-                                    {{ field }}
-                                </div>
+                            {% for field in form.visible_fields %}
+                                {% if field.name == 'dni' %}
+                                    <div class="form-group">
+                                        <label>{{ field.label }}:</label>
+                                        <div class="input-group mb-3">
+                                            {{ field }}
+                                            <div class="input-group-append">
+                                                <button class="btn btn-secondary btnSearchRUCInSRI" disabled
+                                                        type="button"><i class="fas fa-search"></i> Buscar RUC con el
+                                                    SRI
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="form-group">
+                                        <label>{{ field.label }}:</label>
+                                        {{ field }}
+                                    </div>
+                                {% endif %}
                             {% endfor %}
+                            <div class="modal fade" id="myModalSRI" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title font-weight-bold">
+                                                <i class="fas fa-search"></i> Consulta de RUC en el SRI
+                                            </h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p id="details"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                         </div>
                         <!-- /.card-footer -->
                         <div class="card-footer navbar-white">
-                            <button type="submit" class="btn btn-primary btn-flat btnTest toastrDefaultSuccess">
+                            <button type="submit" class="btn btn-primary btn-flat">
                                 <i class="fas fa-save"></i> GUARDAR
                             </button>
                             <a href="{% url 'app_cliente:listar_cliente' %}" class="btn btn-danger btn-file">
@@ -94,46 +140,6 @@
             alert('x');
         });
 {% endcomment %}
-    </script>
-
-{% endblock %}
-
-
-{% block scripts %}
-
-    <script type="application/javascript">
-
-        $(function () {
-            $('.btnTest').on('click', function () {
-                $.ajax({
-                    url: '{% url 'app_cliente:listar_cliente' %}',
-                    type: 'POST',
-                    data: {id: 1},
-                    dataType: 'json'
-                }).done(function (data) {
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Información registrada correctamente',
-                        showConfirmButton: false,
-                        timer: 95000
-                    });
-                }).fail(function (data) {
-                    toastr.error('Error verificar por favor', data)
-                }).always(function (data) {
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Información registrada correctamente',
-                        showConfirmButton: false,
-                        timer: 95000
-                    });
-                })
-            })
-        })
-
-        //alert_jqueryconfirm();
-
     </script>
 
 {% endblock %}

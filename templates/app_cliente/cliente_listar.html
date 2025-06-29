@@ -1,6 +1,15 @@
 {% extends 'base.html' %}
-
 {% load static %}
+
+{% block head %}
+     <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'acciones/app_cliente/js/list.js' %}"></script>
+{% endblock %}
 
 {% block contenido %}
 
@@ -31,7 +40,7 @@
                             <ul class="pagination pagination-sm float-right">
                                 <li class="page-item">
                                     <a href="{% url 'app_cliente:crear_cliente' %}"
-                                       class="btn btn-block btn-default btn-sm">
+                                       class="btn btn-block btn-primary btn-sm">
                                         <strong><i class="fas fa-plus"></i> Nuevo Cliente</strong>
                                     </a>
                                 </li>
@@ -43,35 +52,16 @@
                         <table id="tb_cliente" class="table table-sm table-striped table-bordered">
                             <thead>
                             <tr>
-                                <th style="width: 5%;" class="text-center">Id</th>
-                                <th style="width: 35%;">Usuario</th>
-                                <th style="width: 5%;">Cedula</th>
-                                <th style="width: 50%;">Dirección</th>
-                                <th style="width: 5%;" class="text-center">Opciones</th>
+                                <th>Id</th>
+                                <th>Nombres</th>
+                                <th>Tipo de identificación</th>
+                                <th>Número de cedula</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th class="text-center">Opciones</th>
                             </tr>
                             </thead>
                             <tbody>
-
-                            <!-- PONEMOS EL OBJETO DE LA PLANTILLA-->
-                            {% for usuario in object_list %}
-                                <tr>
-                                    <td class="text-center">{{ usuario.id }} </td>
-                                    <td>{{ usuario.usuario }}</td>
-                                    <td>{{ usuario.cedula }}</td>
-                                    <td>{{ usuario.direccion }}</td>
-                                    <td class="text-center">
-                                        <div class="btn-group-sm">
-                                            <a href="{% url 'app_cliente:actualizar_cliente' usuario.id %}" class="btn-primary btn btn-xs">
-                                                <i class="fas fa-edit"> </i>
-                                            </a>
-                                            <a href="{% url 'app_cliente:eliminar_cliente' usuario.id %}" class="btn-danger btn btn-sm">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-
                             </tbody>
 
                         </table>
@@ -86,30 +76,4 @@
     </section>
     <!-- /.row -->
 
-{% endblock %}
-
-{% block scripts %}
-    <script>
-        $(function () {
-            $("#tb_cliente").DataTable({
-                responsive: true,
-                autoWidth: false,
-                destroy: true,
-                "language": {
-                    url: '{% static 'lib/datatables-1.10.20/spanish.txt' %}'
-                },
-                deferRender: true,
-                columnDefs: [{
-                    targets: [0, 1, 2, 3],
-                    class: 'text-center',
-                    orderable: false,
-                    render: function (data, type, row) {
-                        console.log('data')
-                        console.log(data)
-                        return data;
-                }
-                }]
-            });
-        });
-    </script>
 {% endblock %}
