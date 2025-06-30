@@ -50,6 +50,8 @@ class Producto(models.Model):
     estado = models.BooleanField(default=True, verbose_name='Estado ')
     aplic_directa = models.BooleanField(default=False, verbose_name='Aplicación Directa ')
     imagen = models.ImageField(upload_to='product/%Y/%m/%d', null=True, blank=True, verbose_name='Seleccionar Imagen ')
+    inventoried = models.BooleanField(default=True, verbose_name='¿Es inventariado?')
+    stock = models.IntegerField(default=0, verbose_name='Costo')
 
     def __str__(self):
         return self.nombre

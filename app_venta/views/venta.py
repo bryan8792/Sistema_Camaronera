@@ -1,6 +1,5 @@
 
 import json
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.db.models import Q
@@ -14,10 +13,10 @@ from app_contabilidad_planCuentas.forms import *
 from app_inventario.app_producto.forms import *
 from app_notaCredito.models import CreditNoteDetail, CreditNote
 from app_venta.forms import SaleForm
-from app_venta.models import Sale, SaleDetail
+from app_venta.models import Sale, SaleDetail, CtasCollect
 from utilities import printer
 from utilities.sri import SRI
-from core.reports.forms import ReportForm
+from app_reportes.forms import ReportForm
 
 class SaleListView(FormView):
     template_name = 'sale/admin/list.html'
@@ -99,10 +98,9 @@ class SaleListView(FormView):
 
 class SaleCreateView(CreateView):
     model = Sale
-    template_name = 'sale/admin/create.html'
+    template_name = 'app_venta/admin/create.html'
     form_class = SaleForm
-    success_url = reverse_lazy('sale_admin_list')
-    permission_required = 'add_sale'
+    success_url = reverse_lazy('app_venta:sale_admin_list')
 
     def get_first_final_consumer(self):
         client = Client.objects.filter(dni='9999999999999').first()
@@ -110,6 +108,8 @@ class SaleCreateView(CreateView):
 
     def post(self, request, *args, **kwargs):
         action = request.POST['action']
+        print('Opcion de Action')
+        print('action', action)
         data = {}
         try:
             if action == 'add':
@@ -180,9 +180,9 @@ class SaleCreateView(CreateView):
                 ids = json.loads(request.POST['ids'])
                 data = []
                 term = request.POST['term']
-                queryset = Producto.objects.filter(Q(stock__gt=0) | Q(inventoried=False)).exclude(id__in=ids).order_by('name')
+                queryset = Producto.objects.all().exclude(id__in=ids).order_by('nombre')
                 if len(term):
-                    queryset = queryset.filter(Q(name__icontains=term) | Q(code__icontains=term))
+                    queryset = queryset.filter(Q(nombre__icontains=term))
                     queryset = queryset[:10]
                 for i in queryset:
                     item = i.toJSON()
@@ -206,7 +206,7 @@ class SaleCreateView(CreateView):
                 for i in Client.objects.filter(Q(user__names__icontains=term) | Q(dni__icontains=term)).order_by('user__names')[0:10]:
                     data.append(i.toJSON())
             elif action == 'search_voucher_number':
-                company = Empresa.objects.first()
+                company = Empresa.objects.all()
                 data['voucher_number'] = ''
                 receipt = Recibo.objects.filter(voucher_type=request.POST['receipt'], establishment_code=company.establishment_code, issuing_point_code=company.issuing_point_code).first()
                 if receipt:
@@ -279,7 +279,7 @@ class SaleDeleteView(DeleteView):
         return context
 
 
-class SalePrintInvoiceView(LoginRequiredMixin, View):
+class SalePrintInvoiceView(View):
     success_url = reverse_lazy('sale_admin_list')
 
     def get_success_url(self):
