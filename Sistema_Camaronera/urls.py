@@ -39,6 +39,7 @@ urlpatterns = [
     path('planCuentas/', include('app_contabilidad_planCuentas.urls', namespace='planCuentas')),
     path('usuario/', include('app_user.urls')),
     path('cliente/', include('app_cliente.urls')),
+    path('venta/', include('app_venta.urls')),
 
 
 ]
