@@ -15,6 +15,7 @@ class SaleForm(forms.ModelForm):
             'receipt': forms.Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
             'voucher_number': forms.TextInput(attrs={'class': 'form-control', 'disabled': True}),
             'payment_type': forms.Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
+            'company': forms.Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
             'payment_method': forms.Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
             'date_joined': forms.DateInput(format='%Y-%m-%d', attrs={
                 'class': 'form-control datetimepicker-input',

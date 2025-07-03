@@ -71,7 +71,7 @@
                             <input type="hidden" name="action" id="action" value="{{ action }}">
 
                             <div class="row">
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="form-group">
                                         <label>{{ form.client.label }}:</label>
                                         <div class="input-group input-group-search">
@@ -93,12 +93,6 @@
                                 </div>
                                 <div class="col-lg-3">
                                     <div class="form-group">
-                                        <label>{{ form.date_joined.label }}:</label>
-                                        {{ form.date_joined }}
-                                    </div>
-                                </div>
-                                <div class="col-lg-2">
-                                    <div class="form-group">
                                         <label>{{ form.receipt.label }}:</label>
                                         {{ form.receipt }}
                                     </div>
@@ -109,21 +103,33 @@
                                         {{ form.voucher_number }}
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row content-electronic-billing">
-                                <div class="col-lg-2">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label>Escoger Empresa:</label>
+                                        {{ form.company }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                        <label>{{ form.date_joined.label }}:</label>
+                                        {{ form.date_joined }}
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
                                     <div class="form-group">
                                         <label>{{ form.create_electronic_invoice.label }}:</label><br>
                                         {{ form.create_electronic_invoice }}
                                     </div>
                                 </div>
-                                <div class="col-lg-7">
+                            </div>
+                            <div class="row content-electronic-billing">
+                                <div class="col-lg-8">
                                     <div class="form-group">
                                         <label>{{ form.payment_method.label }}:</label>
                                         {{ form.payment_method }}
                                     </div>
                                 </div>
-                                <div class="col-lg-3">
+                                <div class="col-lg-4">
                                     <div class="form-group">
                                         <label>{{ form.time_limit.label }}:</label>
                                         {{ form.time_limit }}

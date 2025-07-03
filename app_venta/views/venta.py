@@ -116,7 +116,8 @@ class SaleCreateView(CreateView):
                 with transaction.atomic():
                     sale = Sale()
                     sale.date_joined = request.POST['date_joined']
-                    sale.company = Empresa.objects.first()
+                    sale.company = Empresa.objects.get(
+                        siglas__exact=Empresa.objects.get(id=request.POST['company']).siglas)
                     sale.environment_type = sale.company.environment_type
                     sale.receipt = Recibo.objects.get(voucher_type=request.POST['receipt'], establishment_code=sale.company.establishment_code, issuing_point_code=sale.company.issuing_point_code)
                     sale.voucher_number = sale.generate_voucher_number()

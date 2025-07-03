@@ -1,5 +1,5 @@
 var fvSale, fvClient;
-var select_client, select_payment_type, select_receipt;
+var select_client, select_payment_type, select_receipt, select_company;
 var input_birthdate, input_cash, input_change, input_search_product, input_end_credit, input_sale, input_time_limit, input_date_joined;
 var tblSearchProducts, tblProducts;
 
@@ -188,6 +188,34 @@ var sale = {
         });
     },
     searchVoucherNumber: function () {
+        var company = select_company.val()
+        var receipt = select_receipt.val()
+
+        console.log('company')
+        console.log(company)
+        console.log('receipt')
+        console.log(receipt)
+
+        if (!company || company === "") {
+            Swal.fire({
+                title: 'Error',
+                text: 'Por favor, selecciona una empresa antes de continuar.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
+        if (!receipt || receipt === "") {
+            Swal.fire({
+                title: 'Error',
+                text: 'Por favor, selecciona un tipo de recibo antes de continuar.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido',
+            });
+            return;
+        }
+
         $.ajax({
             url: pathname,
             data: {
@@ -213,6 +241,63 @@ var sale = {
 
             }
         });
+    },
+    searchVoucherRecibo: function () {
+        var company = select_company.val();
+        var receipt = select_receipt.val();
+
+        if (!company || company === "") {
+            Swal.fire({
+                title: 'Error',
+                text: 'Por favor, selecciona una empresa antes de continuar.',
+                icon: 'warning',
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
+
+        $.ajax({
+            url: window.location.pathname, // Ruta actual de la vista
+            data: {
+                action: 'search_recibo',
+                company: company,
+            },
+            type: 'POST',
+            dataType: 'json',
+            headers: {
+                'X-CSRFToken': csrftoken,
+            },
+        })
+            .done(function (data) {
+                if (!data.hasOwnProperty('error')) {
+                    console.log(data['recibos'])
+                    const select = $('select[name="receipt"]');
+                    select.empty();
+                    select.append('<option value="" selected>Seleccione una opción</option>');
+
+                    data['recibos'].forEach(option => {
+                        select.append(`<option value="${option.codigo}">${option.text}</option>`);
+                    });
+                    //$('input[name="receipt"]').val(data.voucher_number);
+                } else {
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.error,
+                        icon: 'error',
+                        confirmButtonText: 'Entendido',
+                    });
+                }
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Ocurrió un error al buscar el número de comprobante: ' + textStatus,
+                    icon: 'error',
+                    confirmButtonText: 'Entendido',
+                });
+            });
+
     },
     setOptionsFields: function (inputs) {
         inputs.forEach(function (value, index, array) {
@@ -632,9 +717,12 @@ document.addEventListener('DOMContentLoaded', function (e) {
 });
 
 $(function () {
+    select_company = $('select[name="company"]');
+    select_receipt = $('select[name="receipt"]');
+    alert(select_company)
+    alert(select_receipt)
     input_search_product = $('input[name="search_product"]');
     select_client = $('select[name="client"]');
-    select_receipt = $('select[name="receipt"]');
     input_birthdate = $('input[name="birthdate"]');
     input_date_joined = $('input[name="date_joined"]');
     input_end_credit = $('input[name="end_credit"]');
@@ -644,13 +732,21 @@ $(function () {
     input_sale = $('.input_sale');
     input_time_limit = $('input[name="time_limit"]');
 
+    select_receipt.on('change', function () {
+        $('.content-electronic-billing').find('input,select').prop('disabled', $(this).val() !== '01');
+        sale.searchVoucherNumber();
+    });
+
+    select_company.on('change', function () {
+        sale.searchVoucherRecibo();
+    });
+
     $('.select2').select2({
         theme: 'bootstrap4',
         language: "es",
     });
 
     // Product
-
     input_search_product.autocomplete({
         source: function (request, response) {
             $.ajax({
@@ -803,7 +899,6 @@ $(function () {
     });
 
     // Client
-
     select_client.select2({
         theme: "bootstrap4",
         language: 'es',
@@ -866,7 +961,6 @@ $(function () {
     });
 
     // Sale
-
     select_receipt.on('change', function () {
         $('.content-electronic-billing').find('input,select').prop('disabled', $(this).val() !== '01');
         sale.searchVoucherNumber();
@@ -950,7 +1044,6 @@ $(function () {
         });
 
     // Barcode
-
     $(document).on('keypress', function (e) {
         if (e.which === 13) {
             e.preventDefault();
@@ -959,7 +1052,6 @@ $(function () {
     });
 
     // Additional Info
-
     $('.btnAdditionalInfo').on('click', function () {
         $('#myModalAdditionalInfo').modal('show');
     });

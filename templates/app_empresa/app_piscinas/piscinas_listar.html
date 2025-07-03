@@ -33,8 +33,8 @@
                         <div class="card-tools">
                             <ul class="pagination pagination-sm">
                                 <li class="page-item">
-                                    <a href="{% url 'app_empresa:crear_piscinas' %}" class="btn btn-block btn-default btn-sm">
-                                        <strong><i class="fas fa-plus"></i> NUEVO REGISTRO</strong>
+                                    <a href="{% url 'app_empresa:crear_piscinas' %}" class="btn btn-block btn-sm" style="background-color: #0d8ddb">
+                                        <strong><i class="fas fa-plus"></i>&nbsp; NUEVO REGISTRO</strong>
                                     </a>
                             </ul>
                         </div>
@@ -87,7 +87,7 @@
                                                 </td>
                                                 <td>
                                                     <a href="{% url 'app_empresa:actualizar_piscinas' pis.id %}"
-                                                       class="btn btn-primary btn-xs btn-flat">
+                                                       class="btn btn-info btn-xs btn-flat">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     <a href="{% url 'app_empresa:eliminar_piscinas' pis.id %}"
