@@ -256,6 +256,7 @@ class SRI:
     def search_ruc_in_sri(self, ruc):
         response = {'error': 'El número de ruc es inválido'}
         url = f'https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/estadoTributario/{ruc}'
+        # url = f'https://localhost:7175/WeatherForecast/RucSri?Ruc=0706396132001/{ruc}'
         r = requests.get(url)
         if r.status_code == requests.codes.ok:
             response = r.json()
