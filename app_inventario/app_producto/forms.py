@@ -116,6 +116,13 @@ class ProductoForm(ModelForm):
                     'placeholder': 'Ingrese su Costo en aplicacion',
                     'autocomplete': 'off'
                 }
-            )
+            ),
+            'stock': NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese su Stock',
+                    'autocomplete': 'off'
+                }
+            ),
 
             }

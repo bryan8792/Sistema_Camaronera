@@ -44,14 +44,14 @@ class Producto(models.Model):
     peso_presentacion = models.DecimalField(max_digits=19, decimal_places=0, verbose_name='Peso de la Presentacion ', null=True, blank=True)
     unid_medida = models.CharField(max_length=400, verbose_name='Unidad de Medida de la Presentación ', null=True, blank=True)
     unid_aplicacion = models.CharField(max_length=400, verbose_name='Aplicación en ', null=True, blank=True)
-    minimo_stock = models.DecimalField(max_digits=19, decimal_places=0, verbose_name='Stock Mínimo ', null=True, blank=True)
+    minimo_stock = models.DecimalField(max_digits=19, decimal_places=0, default=0, verbose_name='Ingrese el Stock Mínimo ', null=True, blank=True)
     costo = models.DecimalField(max_digits=19, decimal_places=10, default=0.0000, verbose_name='Valor de Producto ')
-    costo_aplicacion = models.DecimalField(max_digits=19, decimal_places=10, default=0.0000, verbose_name='Costo de Aplicacion del Producto ')
+    costo_aplicacion = models.DecimalField(max_digits=19, decimal_places=10, default=0.0000, verbose_name='Costo de Aplicacion del Producto')
     estado = models.BooleanField(default=True, verbose_name='Estado ')
     aplic_directa = models.BooleanField(default=False, verbose_name='Aplicación Directa ')
     imagen = models.ImageField(upload_to='product/%Y/%m/%d', null=True, blank=True, verbose_name='Seleccionar Imagen ')
     inventoried = models.BooleanField(default=True, verbose_name='¿Es inventariado?')
-    stock = models.IntegerField(default=0, verbose_name='Costo')
+    stock = models.IntegerField(default=0, verbose_name='Ingrese el Stock')
 
     def __str__(self):
         return self.nombre
@@ -78,6 +78,7 @@ class Producto(models.Model):
         item['categoria'] = self.categoria.toJSON()
         item['imagen'] = self.get_image()
         item['minimo_stock'] = '0.00' if self.minimo_stock is None else format(self.minimo_stock, '.2f')
+        item['stock'] = '0' if self.stock is None else self.stock
         item['peso_presentacion'] = '0.00' if self.peso_presentacion is None else format(self.peso_presentacion, '.2f')
         item['costo'] = format(self.costo, '.2f')
         item['costo_aplicacion'] = format(self.costo_aplicacion, '.10f')
