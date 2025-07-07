@@ -217,16 +217,18 @@ var sale = {
         }
 
         $.ajax({
-            url: pathname,
+            url: window.location.pathname,
             data: {
-                'action': 'search_voucher_number',
-                'receipt': select_receipt.val()
+                action: 'search_voucher_number',
+                receipt: receipt,
+                company: company,
+
             },
             type: 'POST',
+            dataType: 'json',
             headers: {
                 'X-CSRFToken': csrftoken
             },
-            dataType: 'json',
             success: function (request) {
                 if (!request.hasOwnProperty('error')) {
                     $('input[name="voucher_number"]').val(request.voucher_number);

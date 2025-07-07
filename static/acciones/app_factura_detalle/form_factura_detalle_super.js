@@ -1,4 +1,3 @@
-
 var tblProducts_sup;
 var tblSearchProducts;
 var vents_sup = {
@@ -32,17 +31,17 @@ var vents_sup = {
             console.log('dict')
             console.log(dict)
             dict.pos = pos;
-            if (dict.nombre_prod.unid_aplicacion === 'GR'){
+            if (dict.nombre_prod.unid_aplicacion === 'GR') {
                 dict.subtotal = dict.cantidad_ingreso * parseFloat(dict.nombre_prod.costo_aplicacion);
-            } else if (dict.nombre_prod.unid_aplicacion === 'LB'){
+            } else if (dict.nombre_prod.unid_aplicacion === 'LB') {
                 dict.subtotal = dict.cantidad_ingreso * parseFloat(dict.nombre_prod.costo_aplicacion);
-            }else{
+            } else {
                 dict.subtotal = dict.cantidad_usar * parseFloat(dict.nombre_prod.costo);
             }
             subtotal += dict.subtotal;
         });
         this.items.subtotal = subtotal;
-        this.items.iva = this.items.subtotal * (iva/100);
+        this.items.iva = this.items.subtotal * (iva / 100);
         this.items.total = this.items.subtotal + this.items.iva;
 
         $('input[name="subtotal"]').val(this.items.subtotal.toFixed(2));
@@ -139,7 +138,7 @@ var vents_sup = {
                         return '<b>' + parseFloat(row.cantidad_ingreso).toFixed(2) + '<b>';
                     }
                 },
-                 {
+                {
                     targets: [-2],
                     class: 'text-center',
                     orderable: false,
@@ -148,10 +147,10 @@ var vents_sup = {
                         console.log('row de costoooooo')
                         console.log(row.nombre_prod)
                         // return row.nombre_prod.costo;
-                        if(row.nombre_prod.unid_aplicacion === 'GR') {
+                        if (row.nombre_prod.unid_aplicacion === 'GR') {
                             return '<input type="text" name="costo" class="form-control text-center" autocomplete="off" value="' + parseFloat(row.costo_aplicacion > 0 ? row.costo_aplicacion : row.nombre_prod.costo_aplicacion).toFixed(9) + '">';
                             // return row.nombre_prod.costo_aplicacion;
-                        }else if(row.nombre_prod.unid_aplicacion === 'LB'){
+                        } else if (row.nombre_prod.unid_aplicacion === 'LB') {
                             return '<input type="text" name="costo" class="form-control text-center" autocomplete="off" value="' + parseFloat(row.costo_aplicacion > 0 ? row.costo_aplicacion : row.nombre_prod.costo_aplicacion).toFixed(9) + '">';
                         }
                         return '<input type="text" name="costo" class="form-control text-center" autocomplete="off" value="' + parseFloat(row.costo > 0 ? row.costo : row.nombre_prod.costo).toFixed(9) + '">';
@@ -169,16 +168,16 @@ var vents_sup = {
 
             rowCallback(row, data, displayNum, displayIndex, dataIndex) {
 
-                 /*$(row).find('input[name="cantidad_usar"]').TouchSpin({
-                    min: 0,
-                    max: 10000,
-                    step: 1,
-                    decimals: 2,
-                    boostat: 5,
-                    maxboostedstep: 10,
-                }).on('change', function () {
-                    vents_sup.calculate_invoice();
-                }).val(1);*/
+                /*$(row).find('input[name="cantidad_usar"]').TouchSpin({
+                   min: 0,
+                   max: 10000,
+                   step: 1,
+                   decimals: 2,
+                   boostat: 5,
+                   maxboostedstep: 10,
+               }).on('change', function () {
+                   vents_sup.calculate_invoice();
+               }).val(1);*/
 
                 /*$(row).find('input[name="costo"]').TouchSpin({
                     min: 0,
@@ -225,11 +224,11 @@ $(function () {
         maxboostedstep: 10,
         postfix: '%'
     }).on('change touchspin.on.min touchspin.on.max', function () {
-            var iva = $(this).val();
-            if (iva === '' || iva === 0.00) {
-                $(this).val('12');
-            }
-            vents_sup.calculate_invoice();
+        var iva = $(this).val();
+        if (iva === '' || iva === 0.00) {
+            $(this).val('12');
+        }
+        vents_sup.calculate_invoice();
     }).val(12);
 
     // const isEmpty = str => !str.trim().length;
@@ -404,12 +403,12 @@ $(function () {
             //alert(data.cantidad_usar)
             if (data.nombre_prod.presentacion === 'CANECA') {
                 data.cantidad_ingreso = data.cantidad_usar * data.nombre_prod.valor_aplicacion * 1;
-            } else if (data.nombre_prod.nombre === 'PRO W' ) {
+            } else if (data.nombre_prod.nombre === 'PRO W') {
                 data.cantidad_ingreso = data.cantidad_usar * data.nombre_prod.peso_presentacion;
             } else if (data.nombre_prod.nombre === 'CAL' || data.nombre_prod.nombre === 'CARBONATO' || data.nombre_prod.nombre === 'MELAZA' || data.nombre_prod.nombre === 'POWER CAMARON' || data.nombre_prod.nombre === 'SILICATO ACUICOLA') {
                 data.cantidad_ingreso = data.cantidad_usar;
-            /*} else if (data.nombre_prod.nombre === 'ECOBONAZA') {
-                data.cantidad_ingreso = data.cantidad_usar;*/
+                /*} else if (data.nombre_prod.nombre === 'ECOBONAZA') {
+                    data.cantidad_ingreso = data.cantidad_usar;*/
                 /*alert('data.nombre_prod.categoria')
                 alert(data.nombre_prod.categoria)
                 alert('data.nombre_prod.valor_aplicacion')

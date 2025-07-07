@@ -206,12 +206,46 @@ class SaleCreateView(CreateView):
                 term = request.POST['term']
                 for i in Client.objects.filter(Q(user__names__icontains=term) | Q(dni__icontains=term)).order_by('user__names')[0:10]:
                     data.append(i.toJSON())
+
+            elif action == 'search_recibo':
+                recibos = []
+                VOUCHER_TYPE = {
+                    '01': 'FACTURA',
+                    '04': 'NOTA DE CRÉDITO',
+                    '07': 'COMPROBANTE DE RETENCIÓN',
+                    '08': 'TICKET DE VENTA',
+                }
+                company = json.loads(request.POST['company'])
+                recibo = Recibo.objects.filter(empresa_id=company)
+                for i in recibo:
+                    item = {}
+                    item['codigo'] = i.pk
+                    item['text'] = VOUCHER_TYPE[i.voucher_type]
+                    recibos.append(item)
+                data['recibos'] = recibos
+
             elif action == 'search_voucher_number':
-                company = Empresa.objects.all()
-                data['voucher_number'] = ''
-                receipt = Recibo.objects.filter(voucher_type=request.POST['receipt'], establishment_code=company.establishment_code, issuing_point_code=company.issuing_point_code).first()
-                if receipt:
-                    data['voucher_number'] = f'{receipt.sequence + 1:09d}'
+                try:
+                    print('LLEGO A search_voucher_number')
+                    print(f"Tipo de recibo recibido: {request.POST.get('receipt', '')}")
+                    company_id = request.POST.get('company', None)
+                    receipt_type = request.POST.get('receipt', None)
+                    if not company_id:
+                        data['error'] = 'Debe seleccionar una empresa válida.'
+                    elif not receipt_type:
+                        data['error'] = 'Debe seleccionar un tipo de recibo válido.'
+                    else:
+                        try:
+                            company = Empresa.objects.get(id=company_id)
+                            receipt = Recibo.objects.filter(pk=receipt_type).order_by('-sequence').first()
+                            if receipt:
+                                data['voucher_number'] = f'{receipt.sequence + 1:09d}'
+                            else:
+                                data['voucher_number'] = f'{1:09d}'
+                        except Empresa.DoesNotExist:
+                            data['error'] = 'La empresa seleccionada no existe.'
+                except Exception as e:
+                    data['error'] = f'Ocurrió un error inesperado: {str(e)}'
             elif action == 'validate_client':
                 data = {'valid': True}
                 pattern = request.POST['pattern']
