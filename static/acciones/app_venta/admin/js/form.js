@@ -721,8 +721,6 @@ document.addEventListener('DOMContentLoaded', function (e) {
 $(function () {
     select_company = $('select[name="company"]');
     select_receipt = $('select[name="receipt"]');
-    alert(select_company)
-    alert(select_receipt)
     input_search_product = $('input[name="search_product"]');
     select_client = $('select[name="client"]');
     input_birthdate = $('input[name="birthdate"]');
@@ -831,11 +829,10 @@ $(function () {
                 dataSrc: ""
             },
             columns: [
-                {data: "code"},
-                {data: "short_name"},
-                {data: "pvp"},
-                {data: "price_promotion"},
-                {data: "stock"},
+                {data: "orden"},
+                {data: "numero"},
+                {data: "pis"},
+                {data: "empresa.siglas"},
                 {data: "id"},
             ],
             columnDefs: [
@@ -843,20 +840,14 @@ $(function () {
                     targets: [-3, -4],
                     class: 'text-center',
                     render: function (data, type, row) {
-                        return '$' + data.toFixed(2);
+                        return data;
                     }
                 },
                 {
                     targets: [-2],
                     class: 'text-center',
                     render: function (data, type, row) {
-                        if (row.inventoried) {
-                            if (row.stock > 0) {
-                                return '<span class="badge badge-success badge-pill">' + row.stock + '</span>';
-                            }
-                            return '<span class="badge badge-danger badge-pill">' + row.stock + '</span>';
-                        }
-                        return '<span class="badge badge-secondary badge-pill">Sin stock</span>';
+                        return data;
                     }
                 },
                 {

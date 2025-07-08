@@ -1,15 +1,20 @@
 
 import json
+
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, DeleteView, FormView
 from Sistema_Camaronera import settings
 from app_cliente.forms import Client, ClientUserForm, ClientForm
 from app_contabilidad_planCuentas.forms import *
+from app_empresa.app_reg_empresa.models import Piscinas
 from app_inventario.app_producto.forms import *
 from app_notaCredito.models import CreditNoteDetail, CreditNote
 from app_venta.forms import SaleForm
@@ -102,6 +107,11 @@ class SaleCreateView(CreateView):
     form_class = SaleForm
     success_url = reverse_lazy('app_venta:sale_admin_list')
 
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get_first_final_consumer(self):
         client = Client.objects.filter(dni='9999999999999').first()
         return client.toJSON() if client else dict()
@@ -177,30 +187,33 @@ class SaleCreateView(CreateView):
                             transaction.set_rollback(True)
                 if 'error' in data:
                     SRI().create_voucher_errors(sale, data)
+
             elif action == 'search_product':
                 ids = json.loads(request.POST['ids'])
                 data = []
                 term = request.POST['term']
-                queryset = Producto.objects.all().exclude(id__in=ids).order_by('nombre')
+                queryset = Piscinas.objects.all().exclude(id__in=ids).order_by('numero')
                 if len(term):
-                    queryset = queryset.filter(Q(nombre__icontains=term))
+                    queryset = queryset.filter(Q(numero__icontains=term))
                     queryset = queryset[:10]
                 for i in queryset:
                     item = i.toJSON()
-                    item['pvp'] = float(i.pvp)
-                    item['value'] = i.get_full_name()
-                    item['dscto'] = 0.00
-                    item['total_dscto'] = 0.00
+                    # item['pvp'] = float(i.pvp)
+                    # item['value'] = i.get_full_name()
+                    # item['dscto'] = 0.00
+                    # item['total_dscto'] = 0.00
                     data.append(item)
+
             elif action == 'search_product_code':
                 data = {}
                 code = request.POST['code']
                 if len(code):
-                    product = Producto.objects.filter(code=code).first()
+                    product = Piscinas.objects.filter(orden=code).first()
                     if product:
                         data = product.toJSON()
-                        data['dscto'] = 0.00
-                        data['total_dscto'] = 0.00
+                        # data['dscto'] = 0.00
+                        # data['total_dscto'] = 0.00
+
             elif action == 'search_client':
                 data = []
                 term = request.POST['term']

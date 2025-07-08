@@ -77,16 +77,10 @@
                                         <div class="input-group input-group-search">
                                             {{ form.client }}
                                             <div class="input-group-append">
-                                                <button class="btn btn-primary dropdown-toggle" type="button"
-                                                        data-toggle="dropdown" aria-haspopup="true"
-                                                        aria-expanded="false">
-                                                    <i class="fas fa-tasks"></i>
+                                                <button class="btn btn-primary btn-flat btnAddClient"
+                                                        id="regPlan" type="button">
+                                                    <i class="fas fa-list"></i>
                                                 </button>
-                                                <div class="dropdown-menu dropdown-menu-right" style="cursor: pointer;">
-                                                    <a class="dropdown-item btnAddClient">
-                                                        <i class="fas fa-plus"></i> Crear cliente
-                                                    </a>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -146,27 +140,10 @@
                                                        name="search_product" id="input_search_product"
                                                        placeholder="Ingrese el nombre de un producto">
                                                 <div class="input-group-append">
-                                                    <button class="btn btn-primary dropdown-toggle" type="button"
-                                                            data-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false">
-                                                        <i class="fas fa-tasks"></i>
+                                                    <button class="btn btn-primary btn-flat btnSearchProducts" type="button">
+                                                        <i class="fas fa-list"></i>
                                                     </button>
-                                                    <div class="dropdown-menu dropdown-menu-right"
-                                                         style="cursor: pointer;">
-                                                        <a class="dropdown-item btnSearchProducts">
-                                                            <i class="fas fa-search"></i> Buscar productos
-                                                        </a>
-                                                        <a class="dropdown-item btnClearProducts">
-                                                            <i class="fas fa-times"></i> Limpiar búsqueda
-                                                        </a>
-                                                        <a class="dropdown-item btnRemoveAllProducts">
-                                                            <i class="fas fa-trash-alt"></i> Borrar todo
-                                                        </a>
-                                                    </div>
                                                 </div>
-
-
-
                                             </div>
                                         </div>
                                     </div>
@@ -283,7 +260,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title font-weight-bold">
-                        <i class="fa fa-search"></i> Búsqueda de productos
+                        <i class="fa fa-search"></i> Búsqueda de Piscinas
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -295,10 +272,9 @@
                             <thead>
                             <tr>
                                 <th>Código</th>
-                                <th>Nombre</th>
-                                <th>P./Unitario</th>
-                                <th>P./Promoción</th>
-                                <th>Stock</th>
+                                <th>Numero</th>
+                                <th>Piscina</th>
+                                <th>Empresa</th>
                                 <th>Agregar</th>
                             </tr>
                             </thead>
@@ -397,21 +373,21 @@
 
 
     <script>
-    {% if form.errors %}
-        let errores = '';
-        {% for field in form %}
-            {% for error in field.errors %}
-                errores += "{{ error|escapejs }}\n";
+        {% if form.errors %}
+            let errores = '';
+            {% for field in form %}
+                {% for error in field.errors %}
+                    errores += "{{ error|escapejs }}\n";
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
-        Swal.fire({
-            title: 'Error',
-            text: errores,
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    {% endif %}
-</script>
+            Swal.fire({
+                title: 'Error',
+                text: errores,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        {% endif %}
+    </script>
 
 
 
