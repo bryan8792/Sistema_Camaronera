@@ -57,26 +57,34 @@ var sale = {
             paginate: false,
             columns: [
                 {data: "id"},
-                {data: "code"},
-                {data: "name"},
-                {data: "stock"},
-                {data: "cant"},
-                {data: "price_current"},
-                {data: "total_dscto"},
-                {data: "total"},
+                {data: "orden"},
+                {data: "numero"},
+                {data: "id"},
+                {data: "id"},
+                {data: "id"},
+                {data: "id"},
+                {data: "id"},
             ],
             columnDefs: [
+                {
+                    targets: [-7],
+                    class: 'text-center',
+                    render: function (data, type, row) {
+                        return 'L'+data;
+                    }
+                },
+                {
+                    targets: [-6],
+                    class: 'text-center',
+                    render: function (data, type, row) {
+                        return data;
+                    }
+                },
                 {
                     targets: [-5],
                     class: 'text-center',
                     render: function (data, type, row) {
-                        if (row.inventoried) {
-                            if (row.stock > 0) {
-                                return '<span class="badge badge-success badge-pill">' + row.stock + '</span>';
-                            }
-                            return '<span class="badge badge-danger badge-pill">' + row.stock + '</span>';
-                        }
-                        return '<span class="badge badge-secondary badge-pill">Sin stock</span>';
+                        return '<input type="text" class="form-control" autocomplete="off" name="descripcion" value="' + row.cant + '">';
                     }
                 },
                 {
@@ -97,7 +105,7 @@ var sale = {
                     targets: [-1, -3],
                     class: 'text-center',
                     render: function (data, type, row) {
-                        return '$' + data.toFixed(2);
+                        return data;
                     }
                 },
                 {
@@ -143,15 +151,7 @@ var sale = {
         return this.detail.products.map(value => value.id);
     },
     addProduct: function (item) {
-        var index = this.detail.products.findIndex(value => value.code === item.code);
-        if (index === -1) {
-            this.detail.products.push(item);
-        } else {
-            var product = this.detail.products[index];
-            if ((product.cant + 1 <= product.stock) || !product.inventoried) {
-                product.cant += 1;
-            }
-        }
+        this.detail.products.push(item);
         this.listProducts();
     },
     searchProductBarcode: function () {

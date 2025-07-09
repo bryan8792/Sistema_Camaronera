@@ -192,10 +192,10 @@ class SaleCreateView(CreateView):
                 ids = json.loads(request.POST['ids'])
                 data = []
                 term = request.POST['term']
-                queryset = Piscinas.objects.all().exclude(id__in=ids).order_by('numero')
+                queryset = Piscinas.objects.all().exclude(id__in=ids)
                 if len(term):
                     queryset = queryset.filter(Q(numero__icontains=term))
-                    queryset = queryset[:10]
+                    queryset = queryset
                 for i in queryset:
                     item = i.toJSON()
                     # item['pvp'] = float(i.pvp)

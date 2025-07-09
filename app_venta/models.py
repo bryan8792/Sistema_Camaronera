@@ -280,7 +280,7 @@ class Sale(models.Model):
 
 class SaleDetail(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
-    piscinas = models.ForeignKey(Piscinas, on_delete=models.CASCADE, verbose_name='Empresa', null=True, blank=True)
+    piscinas = models.ForeignKey(Piscinas, on_delete=models.CASCADE, verbose_name='Piscinas', null=True, blank=True)
     cant = models.IntegerField(default=0)
     price = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
     price_with_vat = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
@@ -299,7 +299,7 @@ class SaleDetail(models.Model):
 
     def toJSON(self, args=None):
         item = model_to_dict(self, exclude=['sale'])
-        item['product'] = self.piscinas.toJSON()
+        item['piscinas'] = self.piscinas.toJSON()
         item['price'] = float(self.price)
         item['price_with_vat'] = float(self.price_with_vat)
         item['subtotal'] = float(self.subtotal)
