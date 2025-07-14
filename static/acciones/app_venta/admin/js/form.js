@@ -9,7 +9,8 @@ var sale = {
         subtotal_12: 0.00,
         subtotal: 0.00,
         iva: 0.00,
-        total_iva: 0.00,
+        total_iva: 0.15,
+        descripcion: '',
         total_dscto: 0.00,
         total: 0.00,
         cash: 0.00,
@@ -21,6 +22,8 @@ var sale = {
         var tax = this.detail.iva / 100;
         this.detail.products.forEach(function (value, index, array) {
             value.iva = parseFloat(tax);
+            console.log('value')
+            console.log(value)
             value.price_with_vat = value.price_current + (value.price_current * value.iva);
             value.subtotal = value.price_current * value.cant;
             value.total_dscto = value.subtotal * parseFloat((value.dscto / 100));
@@ -56,35 +59,42 @@ var sale = {
             searching: false,
             paginate: false,
             columns: [
-                {data: "id"},
-                {data: "orden"},
-                {data: "numero"},
-                {data: "id"},
-                {data: "id"},
-                {data: "id"},
-                {data: "id"},
-                {data: "id"},
+                {data: "id", "width": "1%"},
+                {data: "orden", "width": "5%"},
+                {data: "numero", "width": "8%"},
+                {data: "id", "width": "26%"},
+                {data: "id", "width": "15%"},
+                {data: "id", "width": "15%"},
+                {data: "id", "width": "15%"},
+                {data: "id", "width": "15%"},
             ],
             columnDefs: [
                 {
-                    targets: [-7],
+                    targets: [0],
                     class: 'text-center',
                     render: function (data, type, row) {
-                        return 'L'+data;
+                        return '<a rel="remove" class="btn btn-danger btn-flat btn-xs"><i class="fas fa-times"></i></a>';
                     }
                 },
                 {
-                    targets: [-6],
+                    targets: [1],
+                    class: 'text-center',
+                    render: function (data, type, row) {
+                        return '<b> L'+data+ '</b>';
+                    }
+                },
+                {
+                    targets: [3],
+                    class: 'text-center',
+                    render: function (data, type, row) {
+                        return '<input type="text" class="form-control" autocomplete="off" name="descripcion" value="' + row.descripcion + '">';
+                    }
+                },
+                {
+                    targets: [-6, -3, -1],
                     class: 'text-center',
                     render: function (data, type, row) {
                         return data;
-                    }
-                },
-                {
-                    targets: [-5],
-                    class: 'text-center',
-                    render: function (data, type, row) {
-                        return '<input type="text" class="form-control" autocomplete="off" name="descripcion" value="' + row.cant + '">';
                     }
                 },
                 {
@@ -101,20 +111,7 @@ var sale = {
                         return '<input type="text" class="form-control" autocomplete="off" name="dscto_unitary" value="' + row.dscto + '">';
                     }
                 },
-                {
-                    targets: [-1, -3],
-                    class: 'text-center',
-                    render: function (data, type, row) {
-                        return data;
-                    }
-                },
-                {
-                    targets: [0],
-                    class: 'text-center',
-                    render: function (data, type, row) {
-                        return '<a rel="remove" class="btn btn-danger btn-flat btn-xs"><i class="fas fa-times"></i></a>';
-                    }
-                },
+
             ],
             rowCallback: function (row, data, index) {
                 var tr = $(row).closest('tr');
@@ -122,7 +119,7 @@ var sale = {
                 tr.find('input[name="cant"]')
                     .TouchSpin({
                         min: 1,
-                        max: stock
+                        max: 1000000
                     })
                     .on('keypress', function (e) {
                         return validate_text_box({'event': e, 'type': 'numbers'});

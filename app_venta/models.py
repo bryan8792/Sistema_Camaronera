@@ -282,6 +282,7 @@ class SaleDetail(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
     piscinas = models.ForeignKey(Piscinas, on_delete=models.CASCADE, verbose_name='Piscinas', null=True, blank=True)
     cant = models.IntegerField(default=0)
+    observacion = models.TextField(default="Sin Novedades", null=True, blank=True, verbose_name='Observación ')
     price = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
     price_with_vat = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
     subtotal = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)

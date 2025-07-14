@@ -152,10 +152,10 @@
                                                id="tblProducts">
                                             <thead>
                                             <tr>
-                                                <th style="width: 5%;">Eliminar</th>
+                                                <th style="width: 1%;">Del</th>
                                                 <th style="width: 5%;">Código</th>
-                                                <th style="width: 20%;">Producto</th>
-                                                <th style="width: 5%;">Stock</th>
+                                                <th style="width: 8%;">Piscina</th>
+                                                <th style="width: 26%;">Descripción</th>
                                                 <th style="width: 15%;">Cantidad</th>
                                                 <th style="width: 15%;">P./Unitario</th>
                                                 <th style="width: 15%;">Descuento</th>
@@ -369,6 +369,11 @@
                 select_client.select2('trigger', 'select', {data: {{ final_consumer|safe }}});
             {% endif %}
         });
+    </script>
+
+    <script>
+        sale.detail.products = {{ det|safe }};
+        vents_sup.items.products = {{ det|safe }};
     </script>
 
 
