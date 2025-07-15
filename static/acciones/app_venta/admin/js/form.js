@@ -91,7 +91,7 @@ var sale = {
                     }
                 },
                 {
-                    targets: [-6, -3, -1],
+                    targets: [-6, -1],
                     class: 'text-center',
                     render: function (data, type, row) {
                         return data;
@@ -102,6 +102,13 @@ var sale = {
                     class: 'text-center',
                     render: function (data, type, row) {
                         return '<input type="text" class="form-control" autocomplete="off" name="cant" value="' + row.cant + '">';
+                    }
+                },
+                {
+                    targets: [-3],
+                    class: 'text-center',
+                    render: function (data, type, row) {
+                        return '<input type="text" class="form-control" autocomplete="off" name="price" value="' + row.price + '">';
                     }
                 },
                 {
@@ -790,6 +797,9 @@ $(function () {
         .on('change', 'input[name="cant"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             sale.detail.products[tr.row].cant = parseInt($(this).val());
+            console.log('sale.detail.products[tr.row].cant')
+            console.log(sale.detail.products[tr.row].cant)
+
             sale.calculateInvoice();
             $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
         })
