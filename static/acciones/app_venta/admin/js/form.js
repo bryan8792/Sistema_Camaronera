@@ -132,6 +132,15 @@ var sale = {
                         return validate_text_box({'event': e, 'type': 'numbers'});
                     });
 
+                tr.find('input[name="price"]')
+                    .TouchSpin({
+                        min: 1,
+                        max: 1000000
+                    })
+                    .on('keypress', function (e) {
+                        return validate_text_box({'event': e, 'type': 'numbers'});
+                    });
+
                 tr.find('input[name="dscto_unitary"]')
                     .TouchSpin({
                         min: 0.00,
@@ -794,6 +803,15 @@ $(function () {
 
     $('#tblProducts tbody')
         .off()
+        .on('change', 'input[name="descripcion"]', function () {
+            var tr = tblProducts.cell($(this).closest('td, li')).index();
+            sale.detail.products[tr.row].descripcion = $(this).val();
+            console.log('sale.detail.products[tr.row].descripcion')
+            console.log(sale.detail.products[tr.row].descripcion)
+
+            // sale.calculateInvoice();
+            // $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
+        })
         .on('change', 'input[name="cant"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             sale.detail.products[tr.row].cant = parseInt($(this).val());
@@ -802,6 +820,15 @@ $(function () {
 
             sale.calculateInvoice();
             $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
+        })
+        .on('change', 'input[name="price"]', function () {
+            var tr = tblProducts.cell($(this).closest('td, li')).index();
+            sale.detail.products[tr.row].price = parseInt($(this).val());
+            console.log('sale.detail.products[tr.row].price')
+            console.log(sale.detail.products[tr.row].price)
+
+            // sale.calculateInvoice();
+            // $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
         })
         .on('change', 'input[name="dscto_unitary"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
