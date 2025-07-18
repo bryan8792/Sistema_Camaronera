@@ -19,13 +19,16 @@ var sale = {
         additional_info: [],
     },
     calculateInvoice: function () {
-        var tax = this.detail.iva / 100;
+        var tax = 0.00;
         this.detail.products.forEach(function (value, index, array) {
+            tax = value.empresa.iva / 100;
             value.iva = parseFloat(tax);
             console.log('value')
             console.log(value)
-            value.price_with_vat = value.price_current + (value.price_current * value.iva);
-            value.subtotal = value.price_current * value.cant;
+            console.log('value.iva')
+            console.log(value.iva)
+            value.price_with_vat = value.price + (value.price * value.iva);
+            value.subtotal = value.price * value.cant;
             value.total_dscto = value.subtotal * parseFloat((value.dscto / 100));
             value.total_iva = (value.subtotal - value.total_dscto) * value.iva;
             value.total = value.subtotal - value.total_dscto;
@@ -706,7 +709,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             }
             var list_url = $(fvSale.form).attr('data-url');
             var params = new FormData(fvSale.form);
-            ['input_search_product', 'cant', 'price_current', 'dscto_unitary'].forEach(function (value) {
+            ['input_search_product', 'cant', 'price', 'dscto_unitary'].forEach(function (value) {
                 params.delete(value);
             });
             params.append('products', JSON.stringify(sale.detail.products));
@@ -744,7 +747,6 @@ $(function () {
     input_change = $('input[name="change"]');
     input_sale = $('.input_sale');
     input_time_limit = $('input[name="time_limit"]');
-
     select_receipt.on('change', function () {
         $('.content-electronic-billing').find('input,select').prop('disabled', $(this).val() !== '01');
         sale.searchVoucherNumber();
@@ -815,20 +817,14 @@ $(function () {
         .on('change', 'input[name="cant"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             sale.detail.products[tr.row].cant = parseInt($(this).val());
-            console.log('sale.detail.products[tr.row].cant')
-            console.log(sale.detail.products[tr.row].cant)
-
             sale.calculateInvoice();
             $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
         })
         .on('change', 'input[name="price"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             sale.detail.products[tr.row].price = parseInt($(this).val());
-            console.log('sale.detail.products[tr.row].price')
-            console.log(sale.detail.products[tr.row].price)
-
-            // sale.calculateInvoice();
-            // $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
+            sale.calculateInvoice();
+            $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
         })
         .on('change', 'input[name="dscto_unitary"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();

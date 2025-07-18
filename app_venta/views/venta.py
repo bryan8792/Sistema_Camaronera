@@ -128,6 +128,8 @@ class SaleCreateView(CreateView):
                     sale.date_joined = request.POST['date_joined']
                     sale.company = Empresa.objects.get(
                         siglas__exact=Empresa.objects.get(id=request.POST['company']).siglas)
+                    print('sale.company')
+                    print(sale.company)
                     sale.environment_type = sale.company.environment_type
                     sale.receipt = Recibo.objects.get(voucher_type=request.POST['receipt'], establishment_code=sale.company.establishment_code, issuing_point_code=sale.company.issuing_point_code)
                     sale.voucher_number = sale.generate_voucher_number()
@@ -159,7 +161,7 @@ class SaleCreateView(CreateView):
                         sale.change = 0.00
                     sale.save()
                     for i in json.loads(request.POST['products']):
-                        product = Producto.objects.get(pk=i['id'])
+                        product = Piscinas.objects.get(pk=i['id'])
                         detail = SaleDetail()
                         detail.sale_id = sale.id
                         detail.product_id = product.id
@@ -167,9 +169,6 @@ class SaleCreateView(CreateView):
                         detail.price = float(i['price_current'])
                         detail.dscto = float(i['dscto']) / 100
                         detail.save()
-                        if detail.product.inventoried:
-                            detail.product.stock -= detail.cant
-                            detail.product.save()
                     sale.calculate_detail()
                     sale.calculate_invoice()
                     if sale.payment_type == PAYMENT_TYPE[1][0]:
