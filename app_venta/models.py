@@ -8,6 +8,7 @@ from app_cliente.models import *
 from app_contabilidad_planCuentas.models import *
 from app_inventario.app_categoria.models import Producto
 from app_user.models import *
+from django.utils import timezone
 
 
 # Create your models here.
@@ -21,7 +22,7 @@ class Sale(models.Model):
     payment_type = models.CharField(choices=PAYMENT_TYPE, max_length=50, default=PAYMENT_TYPE[0][0], verbose_name='Tipo de pago')
     payment_method = models.CharField(choices=PAYMENT_METHOD, max_length=50, default=PAYMENT_METHOD[5][0], verbose_name='Método de pago')
     time_limit = models.IntegerField(default=31, verbose_name='Plazo')
-    creation_date = models.DateTimeField(default=datetime.now, verbose_name='Fecha y hora de registro')
+    creation_date = models.DateTimeField(default=timezone.now, verbose_name='Fecha y hora de registro')
     date_joined = models.DateField(default=datetime.now, verbose_name='Fecha de registro')
     end_credit = models.DateField(default=datetime.now, verbose_name='Fecha limite de credito')
     additional_info = models.JSONField(default=dict, verbose_name='Información adicional')
@@ -158,8 +159,8 @@ class Sale(models.Model):
         xml_details = ElementTree.SubElement(root, 'detalles')
         for detail in self.saledetail_set.all():
             xml_detail = ElementTree.SubElement(xml_details, 'detalle')
-            ElementTree.SubElement(xml_detail, 'codigoPrincipal').text = detail.product.code
-            ElementTree.SubElement(xml_detail, 'descripcion').text = detail.product.name
+            ElementTree.SubElement(xml_detail, 'codigoPrincipal').text = detail.piscinas.orden
+            ElementTree.SubElement(xml_detail, 'descripcion').text = detail.piscinas.numero
             ElementTree.SubElement(xml_detail, 'cantidad').text = f'{detail.cant:.2f}'
             ElementTree.SubElement(xml_detail, 'precioUnitario').text = f'{detail.price:.2f}'
             ElementTree.SubElement(xml_detail, 'descuento').text = f'{detail.total_dscto:.2f}'
@@ -167,7 +168,7 @@ class Sale(models.Model):
             xml_taxes = ElementTree.SubElement(xml_detail, 'impuestos')
             xml_tax = ElementTree.SubElement(xml_taxes, 'impuesto')
             ElementTree.SubElement(xml_tax, 'codigo').text = str(TAX_CODES[0][0])
-            if detail.product.with_tax:
+            if detail.piscinas.with_tax:
                 ElementTree.SubElement(xml_tax, 'codigoPorcentaje').text = str(self.company.vat_percentage)
                 ElementTree.SubElement(xml_tax, 'tarifa').text = f'{detail.iva * 100:.2f}'
                 ElementTree.SubElement(xml_tax, 'baseImponible').text = f'{detail.total:.2f}'
@@ -226,9 +227,9 @@ class Sale(models.Model):
             detail.save()
 
     def calculate_invoice(self):
-        self.subtotal_0 = float(self.saledetail_set.filter(product__with_tax=False).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
-        self.subtotal_12 = float(self.saledetail_set.filter(product__with_tax=True).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
-        self.total_iva = float(self.saledetail_set.filter(product__with_tax=True).aggregate(result=Coalesce(Sum('total_iva'), 0.00, output_field=FloatField()))['result'])
+        self.subtotal_0 = float(self.saledetail_set.filter(piscinas__with_tax=False).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
+        self.subtotal_12 = float(self.saledetail_set.filter(piscinas__with_tax=True).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
+        self.total_iva = float(self.saledetail_set.filter(piscinas__with_tax=True).aggregate(result=Coalesce(Sum('total_iva'), 0.00, output_field=FloatField()))['result'])
         self.total_dscto = float(self.saledetail_set.filter().aggregate(result=Coalesce(Sum('total_dscto'), 0.00, output_field=FloatField()))['result'])
         self.total = float(self.get_full_subtotal()) + float(self.total_iva)
         self.save()
@@ -244,7 +245,7 @@ class Sale(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         try:
-            for i in self.saledetail_set.filter(product__inventoried=True):
+            for i in self.saledetail_set.filter(piscinas__inventoried=True):
                 i.product.stock += i.cant
                 i.product.save()
                 i.delete()

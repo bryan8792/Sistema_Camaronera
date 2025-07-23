@@ -102,6 +102,8 @@ class Piscinas(models.Model):
     pis = models.BooleanField(default=True, verbose_name="Piscina ")
     prec = models.BooleanField(default=False, verbose_name="Precria ")
     estado = models.BooleanField(default=True, verbose_name="Estado ")
+    inventoried = models.BooleanField(default=True, verbose_name='¿Es inventariado?')
+    with_tax = models.BooleanField(default=True, verbose_name='¿Se cobra impuesto?')
 
     def __str__(self):
         return self.numero

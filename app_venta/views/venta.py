@@ -1,6 +1,5 @@
 
 import json
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.db import transaction
@@ -22,9 +21,10 @@ from app_venta.models import Sale, SaleDetail, CtasCollect
 from utilities import printer
 from utilities.sri import SRI
 from app_reportes.forms import ReportForm
+from utilities.choices import VOUCHER_TYPE, INVOICE_STATUS
 
 class SaleListView(FormView):
-    template_name = 'sale/admin/list.html'
+    template_name = 'app_venta/admin/list.html'
     form_class = ReportForm
     permission_required = 'view_sale'
 
@@ -131,7 +131,7 @@ class SaleCreateView(CreateView):
                     print('sale.company')
                     print(sale.company)
                     sale.environment_type = sale.company.environment_type
-                    sale.receipt = Recibo.objects.get(voucher_type=request.POST['receipt'], establishment_code=sale.company.establishment_code, issuing_point_code=sale.company.issuing_point_code)
+                    sale.receipt = Recibo.objects.get(pk=request.POST['receipt'])
                     sale.voucher_number = sale.generate_voucher_number()
                     sale.voucher_number_full = sale.get_voucher_number_full()
                     sale.employee_id = request.user.id
@@ -149,8 +149,8 @@ class SaleCreateView(CreateView):
                     sale.iva = float(sale.company.iva) / 100
                     sale.create_electronic_invoice = False
                     if sale.receipt.voucher_type == VOUCHER_TYPE[0][0]:
-                        sale.time_limit = int(request.POST['time_limit'])
-                        sale.payment_method = request.POST['payment_method']
+                        sale.time_limit = int(request.POST.get('time_limit', 0))
+                        sale.payment_method = request.POST.get('payment_method', '')
                         sale.create_electronic_invoice = 'create_electronic_invoice' in request.POST
                     if sale.payment_type == PAYMENT_TYPE[0][0]:
                         sale.cash = float(request.POST['cash'])
@@ -164,9 +164,9 @@ class SaleCreateView(CreateView):
                         product = Piscinas.objects.get(pk=i['id'])
                         detail = SaleDetail()
                         detail.sale_id = sale.id
-                        detail.product_id = product.id
+                        detail.piscinas_id = product.id
                         detail.cant = int(i['cant'])
-                        detail.price = float(i['price_current'])
+                        detail.price = float(i['price'])
                         detail.dscto = float(i['dscto']) / 100
                         detail.save()
                     sale.calculate_detail()
@@ -179,7 +179,7 @@ class SaleCreateView(CreateView):
                         ctas_collect.debt = sale.total
                         ctas_collect.saldo = sale.total
                         ctas_collect.save()
-                    data = {'print_url': str(reverse_lazy('sale_admin_print_invoice', kwargs={'pk': sale.id}))}
+                    data = {'print_url': str(reverse_lazy('app_venta:sale_admin_print_invoice', kwargs={'pk': sale.id}))}
                     if sale.create_electronic_invoice:
                         data = sale.generate_electronic_invoice()
                         if not data['resp']:
@@ -221,18 +221,13 @@ class SaleCreateView(CreateView):
 
             elif action == 'search_recibo':
                 recibos = []
-                VOUCHER_TYPE = {
-                    '01': 'FACTURA',
-                    '04': 'NOTA DE CRÉDITO',
-                    '07': 'COMPROBANTE DE RETENCIÓN',
-                    '08': 'TICKET DE VENTA',
-                }
+                voucher_dict = dict(VOUCHER_TYPE)
                 company = json.loads(request.POST['company'])
                 recibo = Recibo.objects.filter(empresa_id=company)
                 for i in recibo:
                     item = {}
                     item['codigo'] = i.pk
-                    item['text'] = VOUCHER_TYPE[i.voucher_type]
+                    item['text'] = voucher_dict.get(i.voucher_type, 'Desconocido')
                     recibos.append(item)
                 data['recibos'] = recibos
 
