@@ -90,7 +90,8 @@ class SRI:
                 print('ooooooooooooooooo')
                 print(INVOICE_STATUS[4][0])
                 instance.status = INVOICE_STATUS[4][0]
-                instance.save()
+                instance.edit()
+                # instance.save()
 
     def create_xml(self, instance):
         response = {'resp': False, 'stage': VOUCHER_STAGE[1][0]}

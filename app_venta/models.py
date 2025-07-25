@@ -88,7 +88,9 @@ class Sale(models.Model):
     def generate_voucher_number_full(self):
         if self.receipt_id is None:
             self.company = Empresa.objects.first()
-            self.receipt = Recibo.objects.get(voucher_type=VOUCHER_TYPE[0][0], establishment_code=self.company.establishment_code, issuing_point_code=self.company.issuing_point_code)
+            self.receipt = Recibo.objects.get(voucher_type=VOUCHER_TYPE[0][0],
+                                              establishment_code=self.company.establishment_code,
+                                              issuing_point_code=self.company.issuing_point_code)
         self.voucher_number = self.generate_voucher_number()
         return self.get_voucher_number_full()
 
@@ -305,7 +307,7 @@ class SaleDetail(models.Model):
         item['price'] = float(self.price)
         item['price_with_vat'] = float(self.price_with_vat)
         item['subtotal'] = float(self.subtotal)
-        item['iva'] = float(self.subtotal)
+        item['iva'] = float(self.iva)
         item['total_iva'] = float(self.subtotal)
         item['dscto'] = float(self.dscto) * 100
         item['total_dscto'] = float(self.total_dscto)

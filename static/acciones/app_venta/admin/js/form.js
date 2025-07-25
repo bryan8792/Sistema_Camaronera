@@ -1,6 +1,7 @@
 var fvSale, fvClient;
 var select_client, select_payment_type, select_receipt, select_company;
-var input_birthdate, input_cash, input_change, input_search_product, input_end_credit, input_sale, input_time_limit, input_date_joined;
+var input_birthdate, input_cash, input_change, input_search_product, input_end_credit, input_sale, input_time_limit,
+    input_date_joined;
 var tblSearchProducts, tblProducts;
 
 var sale = {
@@ -83,7 +84,7 @@ var sale = {
                     targets: [1],
                     class: 'text-center',
                     render: function (data, type, row) {
-                        return '<b> L'+data+ '</b>';
+                        return '<b> L' + data + '</b>';
                     }
                 },
                 {
@@ -714,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             });
             params.append('products', JSON.stringify(sale.detail.products));
             params.append('additional_info', JSON.stringify(sale.detail.additional_info.filter(value => !$.isEmptyObject(value.name) && !$.isEmptyObject(value.value))));
-            var args = {
+            /*var args = {
                 'params': params,
                 'success': function (request) {
                     dialog_action({
@@ -728,6 +729,34 @@ document.addEventListener('DOMContentLoaded', function (e) {
                             location.href = list_url;
                         }
                     });
+                }
+            };*/
+            var args = {
+                'params': params,
+                'success': function (request) {
+                    if (!request.hasOwnProperty('resp') || request.resp === true) {
+                        dialog_action({
+                            'content': '¿Desea Imprimir el Comprobante?',
+                            'success': function () {
+                                window.open(request.print_url, '_blank');
+                                location.href = list_url;
+                            },
+                            'cancel': function () {
+                                location.href = list_url;
+                            }
+                        });
+                    } else {
+                        // Mostrar errores correctamente
+                        const errores = Array.isArray(request.errors)
+                            ? request.errors.map(e => `• ${e.mensaje}${e.informacionAdicional ? ': ' + e.informacionAdicional : ''}`).join('<br>')
+                            : (typeof request.errors === 'string' ? request.errors : JSON.stringify(request.errors, null, 2));
+
+                        Swal.fire({
+                            title: '❌ Factura Rechazada por el SRI',
+                            html: errores,
+                            icon: 'error'
+                        });
+                    }
                 }
             };
             submit_with_formdata(args);
@@ -994,7 +1023,10 @@ $(function () {
             var id = $(this).val();
             switch (id) {
                 case "efectivo":
-                    sale.setOptionsFields([{'index': 0, 'enable': true}, {'index': 1, 'enable': true}, {'index': 2, 'enable': false}]);
+                    sale.setOptionsFields([{'index': 0, 'enable': true}, {'index': 1, 'enable': true}, {
+                        'index': 2,
+                        'enable': false
+                    }]);
                     fvSale.enableValidator('cash');
                     fvSale.enableValidator('change');
                     fvSale.disableValidator('end_credit');
@@ -1003,7 +1035,10 @@ $(function () {
                     fvSale.disableValidator('cash');
                     fvSale.disableValidator('change');
                     fvSale.enableValidator('end_credit');
-                    sale.setOptionsFields([{'index': 0, 'enable': false}, {'index': 1, 'enable': false}, {'index': 2, 'enable': true}]);
+                    sale.setOptionsFields([{'index': 0, 'enable': false}, {'index': 1, 'enable': false}, {
+                        'index': 2,
+                        'enable': true
+                    }]);
                     break;
             }
         });

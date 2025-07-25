@@ -22,6 +22,7 @@ from utilities import printer
 from utilities.sri import SRI
 from app_reportes.forms import ReportForm
 from utilities.choices import VOUCHER_TYPE, INVOICE_STATUS
+from django.http import JsonResponse
 
 class SaleListView(FormView):
     template_name = 'app_venta/admin/list.html'
@@ -183,6 +184,10 @@ class SaleCreateView(CreateView):
                     if sale.create_electronic_invoice:
                         data = sale.generate_electronic_invoice()
                         if not data['resp']:
+                            print("\n❌ RECHAZO DE FACTURA ELECTRÓNICA ❌")
+                            print("Clave de acceso:", sale.access_code)
+                            print("Errores devueltos por el SRI:")
+                            print(json.dumps(data.get('errors', 'No hay errores'), indent=2, ensure_ascii=False))
                             transaction.set_rollback(True)
                 if 'error' in data:
                     SRI().create_voucher_errors(sale, data)
@@ -287,7 +292,8 @@ class SaleCreateView(CreateView):
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
             data['error'] = str(e)
-        return HttpResponse(json.dumps(data), content_type='application/json')
+        return JsonResponse(data, safe=False)
+        # return HttpResponse(json.dumps(data), content_type='application/json')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
