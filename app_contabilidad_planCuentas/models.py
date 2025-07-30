@@ -503,9 +503,10 @@ class AnexoTransaccional(models.Model):
         encabezado = sale.encabezadocuentaplan
         detalle = DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan_id=sale.encabezadocuentaplan_id)
         rv = BytesIO()
-        barcode.Code128(sale.access_code, writer=barcode.writer.ImageWriter()).write(rv,
-                                                                                     options={'text_distance': 3.0,
-                                                                                              'font_size': 6})
+        barcode.Code128(sale.access_code,
+                        writer=barcode.writer.ImageWriter()).write(rv,
+                                                                    options={'text_distance': 3.0,
+                                                                             'font_size': 6})
         file = base64.b64encode(rv.getvalue()).decode("ascii")
         context = {'sale': sale, 'encabezado': encabezado, 'height': 450, 'detalle': detalle,
                        'access_code_barcode': f"data:image/png;base64,{file}"}

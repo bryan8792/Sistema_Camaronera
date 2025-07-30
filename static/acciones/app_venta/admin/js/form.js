@@ -237,7 +237,7 @@ var sale = {
             url: window.location.pathname,
             data: {
                 action: 'search_voucher_number',
-                receipt: receipt,
+                receipt: select_receipt.val(),
                 company: company,
 
             },
@@ -267,7 +267,7 @@ var sale = {
 
         if (!company || company === "") {
             Swal.fire({
-                title: 'Error',
+                title: 'Advertencia',
                 text: 'Por favor, selecciona una empresa antes de continuar.',
                 icon: 'warning',
                 confirmButtonText: 'Entendido'
@@ -277,7 +277,7 @@ var sale = {
 
 
         $.ajax({
-            url: window.location.pathname, // Ruta actual de la vista
+            url: window.location.pathname,
             data: {
                 action: 'search_recibo',
                 company: company,
@@ -776,10 +776,10 @@ $(function () {
     input_change = $('input[name="change"]');
     input_sale = $('.input_sale');
     input_time_limit = $('input[name="time_limit"]');
-    select_receipt.on('change', function () {
-        $('.content-electronic-billing').find('input,select').prop('disabled', $(this).val() !== '01');
-        sale.searchVoucherNumber();
-    });
+    // select_receipt.on('change', function () {
+    //     $('.content-electronic-billing').find('input,select').prop('disabled', $(this).val() !== '01');
+    //     sale.searchVoucherNumber();
+    // });
 
     select_company.on('change', function () {
         sale.searchVoucherRecibo();

@@ -63,7 +63,7 @@
     <!-- Main content -->
 
     <section class="content">
-        <form method="post" action="." enctype="multipart/form-data" id="frmForm" autocomplete="off">
+        <form class="form" method="post" action="." enctype="multipart/form-data" id="frmForm" autocomplete="off">
             <div class="row">
                 <div class="col-12">
                     <div class="card">
@@ -74,7 +74,7 @@
                         <!-- /.card-body -->
                         <div class="card-body">
                             <input type="hidden" name="action" id="action" value="{{ action }}">
-
+                            {% csrf_token %}
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">

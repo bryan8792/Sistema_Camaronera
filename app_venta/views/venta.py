@@ -152,6 +152,8 @@ class SaleCreateView(CreateView):
                     if sale.receipt.voucher_type == VOUCHER_TYPE[0][0]:
                         sale.time_limit = int(request.POST.get('time_limit', 0))
                         sale.payment_method = request.POST.get('payment_method', '')
+                        print('sale.payment_method')
+                        print(sale.payment_method)
                         sale.create_electronic_invoice = 'create_electronic_invoice' in request.POST
                     if sale.payment_type == PAYMENT_TYPE[0][0]:
                         sale.cash = float(request.POST['cash'])

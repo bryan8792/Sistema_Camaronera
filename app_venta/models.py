@@ -3,6 +3,9 @@ from xml.etree import ElementTree
 from app_compra.models import Purchase
 from app_empresa.app_reg_empresa.models import *
 import barcode
+import logging
+import time
+from pprint import pprint
 from barcode import writer
 from app_cliente.models import *
 from app_contabilidad_planCuentas.models import *
@@ -99,7 +102,7 @@ class Sale(models.Model):
         barcode.Code128(self.access_code, writer=barcode.writer.ImageWriter()).write(rv, options={'text_distance': 3.0, 'font_size': 6})
         file = base64.b64encode(rv.getvalue()).decode("ascii")
         context = {'sale': self, 'access_code_barcode': f"data:image/png;base64,{file}"}
-        pdf_file = printer.create_pdf(context=context, template_name='sale/format/invoice.html')
+        pdf_file = printer.create_pdf(context=context, template_name='app_venta/format/invoice.html')
         with tempfile.NamedTemporaryFile(delete=True) as file_temp:
             file_temp.write(pdf_file)
             file_temp.flush()
@@ -255,23 +258,62 @@ class Sale(models.Model):
             pass
         super(Sale, self).delete()
 
+    # def generate_electronic_invoice(self):
+    #     sri = SRI()
+    #     result = sri.create_xml(self)
+    #     print('continua proceso SRI()')
+    #     if result['resp']:
+    #         result = sri.firm_xml(instance=self, xml=result['xml'])
+    #         if result['resp']:
+    #             result = sri.validate_xml(instance=self, xml=result['xml'])
+    #             if result['resp']:
+    #                 result = sri.authorize_xml(instance=self)
+    #                 index = 1
+    #                 while not result['resp'] and index < 3:
+    #                     time.sleep(1)
+    #                     result = sri.authorize_xml(instance=self)
+    #                     index += 1
+    #                 if result['resp']:
+    #                     result['print_url'] = self.get_pdf_authorized()
+    #                 return result
+    #     return result
+
     def generate_electronic_invoice(self):
         sri = SRI()
+
         result = sri.create_xml(self)
-        if result['resp']:
-            result = sri.firm_xml(instance=self, xml=result['xml'])
+        pprint(result)
+        if not result['resp']:
+            logging.error("❌ Error al crear XML: %s", result.get('error', 'Sin detalle'))
+            return result
+
+        result = sri.firm_xml(instance=self, xml=result['xml'])
+        pprint(result)
+        if not result['resp']:
+            logging.error("❌ Error al firmar XML: %s", result.get('error', 'Sin detalle'))
+            return result
+
+        result = sri.validate_xml(instance=self, xml=result['xml'])
+        pprint(result)
+        if not result['resp']:
+            logging.error("❌ Error al validar XML: %s", result.get('error', 'Sin detalle'))
+            return result
+
+        index = 0
+        while index < 3:
+            result = sri.authorize_xml(instance=self)
+            pprint(result)
             if result['resp']:
-                result = sri.validate_xml(instance=self, xml=result['xml'])
-                if result['resp']:
-                    result = sri.authorize_xml(instance=self)
-                    index = 1
-                    while not result['resp'] and index < 3:
-                        time.sleep(1)
-                        result = sri.authorize_xml(instance=self)
-                        index += 1
-                    if result['resp']:
-                        result['print_url'] = self.get_pdf_authorized()
-                    return result
+                result['print_url'] = self.get_pdf_authorized()
+                logging.info("✅ Factura autorizada con éxito.")
+                return result
+
+            logging.warning("⚠️ Intento %d de autorización fallido. Error: %s", index + 1,
+                            result.get('error', 'Sin detalle'))
+            time.sleep(1)
+            index += 1
+
+        logging.error("❌ Autorización fallida tras 3 intentos. Último error: %s", result.get('error', 'Sin detalle'))
         return result
 
     class Meta:
