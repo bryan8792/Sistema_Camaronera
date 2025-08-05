@@ -11,8 +11,8 @@ ENVIRONMENT_TYPE = (
 VOUCHER_TYPE = (
     ('01', 'FACTURA'),
     ('04', 'NOTA DE CRÉDITO'),
-    ('08', 'TICKET DE VENTA'),
     ('07', 'COMPROBANTE DE RETENCIÓN'),
+    ('08', 'TICKET DE VENTA'),
 )
 
 # VOUCHER_TYPE = (

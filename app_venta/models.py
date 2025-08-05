@@ -12,6 +12,7 @@ from app_contabilidad_planCuentas.models import *
 from app_inventario.app_categoria.models import Producto
 from app_user.models import *
 from django.utils import timezone
+from xml.sax.saxutils import escape
 
 
 # Create your models here.
@@ -108,9 +109,97 @@ class Sale(models.Model):
             file_temp.flush()
             self.pdf_authorized.save(name=f'{self.receipt.get_name_xml()}_{self.access_code}.pdf', content=File(file_temp))
 
+    # def generate_xml(self):
+    #     access_key = SRI().create_access_key(self)
+    #     root = ElementTree.Element('factura', id="comprobante", version="1.0.0")
+    #     # infoTributaria
+    #     xml_tax_info = ElementTree.SubElement(root, 'infoTributaria')
+    #     ElementTree.SubElement(xml_tax_info, 'ambiente').text = str(self.company.environment_type)
+    #     ElementTree.SubElement(xml_tax_info, 'tipoEmision').text = str(self.company.emission_type)
+    #     ElementTree.SubElement(xml_tax_info, 'razonSocial').text = self.company.business_name
+    #     ElementTree.SubElement(xml_tax_info, 'nombreComercial').text = self.company.tradename
+    #     ElementTree.SubElement(xml_tax_info, 'ruc').text = self.company.ruc
+    #     ElementTree.SubElement(xml_tax_info, 'claveAcceso').text = access_key
+    #     ElementTree.SubElement(xml_tax_info, 'codDoc').text = self.receipt.voucher_type
+    #     ElementTree.SubElement(xml_tax_info, 'estab').text = self.receipt.establishment_code
+    #     ElementTree.SubElement(xml_tax_info, 'ptoEmi').text = self.receipt.issuing_point_code
+    #     ElementTree.SubElement(xml_tax_info, 'secuencial').text = self.voucher_number
+    #     ElementTree.SubElement(xml_tax_info, 'dirMatriz').text = self.company.main_address
+    #     # infoFactura
+    #     xml_info_invoice = ElementTree.SubElement(root, 'infoFactura')
+    #     ElementTree.SubElement(xml_info_invoice, 'fechaEmision').text = datetime.now().strftime('%d/%m/%Y')
+    #     ElementTree.SubElement(xml_info_invoice, 'dirEstablecimiento').text = self.company.establishment_address
+    #     ElementTree.SubElement(xml_info_invoice, 'obligadoContabilidad').text = self.company.obligated_accounting
+    #     ElementTree.SubElement(xml_info_invoice, 'tipoIdentificacionComprador').text = self.client.identification_type
+    #     ElementTree.SubElement(xml_info_invoice, 'razonSocialComprador').text = self.client.user.names
+    #     ElementTree.SubElement(xml_info_invoice, 'identificacionComprador').text = self.client.dni
+    #     ElementTree.SubElement(xml_info_invoice, 'direccionComprador').text = self.client.address
+    #     ElementTree.SubElement(xml_info_invoice, 'totalSinImpuestos').text = f'{self.get_full_subtotal():.2f}'
+    #     ElementTree.SubElement(xml_info_invoice, 'totalDescuento').text = f'{self.total_dscto:.2f}'
+    #     # totalConImpuestos
+    #     xml_total_with_taxes = ElementTree.SubElement(xml_info_invoice, 'totalConImpuestos')
+    #     # totalImpuesto
+    #     if self.subtotal_0 != 0.0000:
+    #         xml_total_tax_0 = ElementTree.SubElement(xml_total_with_taxes, 'totalImpuesto')
+    #         ElementTree.SubElement(xml_total_tax_0, 'codigo').text = str(TAX_CODES[0][0])
+    #         ElementTree.SubElement(xml_total_tax_0, 'codigoPorcentaje').text = '0'
+    #         ElementTree.SubElement(xml_total_tax_0, 'baseImponible').text = f'{self.subtotal_0:.2f}'
+    #         ElementTree.SubElement(xml_total_tax_0, 'valor').text = '0.00'
+    #     if self.subtotal_12 != 0.0000:
+    #         xml_total_tax12 = ElementTree.SubElement(xml_total_with_taxes, 'totalImpuesto')
+    #         ElementTree.SubElement(xml_total_tax12, 'codigo').text = str(TAX_CODES[0][0])
+    #         ElementTree.SubElement(xml_total_tax12, 'codigoPorcentaje').text = str(self.company.vat_percentage)
+    #         ElementTree.SubElement(xml_total_tax12, 'baseImponible').text = f'{self.subtotal_12:.2f}'
+    #         ElementTree.SubElement(xml_total_tax12, 'valor').text = f'{self.total_iva:.2f}'
+    #     ElementTree.SubElement(xml_info_invoice, 'propina').text = '0.00'
+    #     ElementTree.SubElement(xml_info_invoice, 'importeTotal').text = f'{self.total:.2f}'
+    #     ElementTree.SubElement(xml_info_invoice, 'moneda').text = 'DOLAR'
+    #     # pagos
+    #     xml_payments = ElementTree.SubElement(xml_info_invoice, 'pagos')
+    #     xml_payment = ElementTree.SubElement(xml_payments, 'pago')
+    #     ElementTree.SubElement(xml_payment, 'formaPago').text = str(self.payment_method)
+    #     ElementTree.SubElement(xml_payment, 'total').text = f'{self.total:.2f}'
+    #     ElementTree.SubElement(xml_payment, 'plazo').text = str(self.time_limit)
+    #     ElementTree.SubElement(xml_payment, 'unidadTiempo').text = 'dias'
+    #     # detalles
+    #     xml_details = ElementTree.SubElement(root, 'detalles')
+    #     for detail in self.saledetail_set.all():
+    #         xml_detail = ElementTree.SubElement(xml_details, 'detalle')
+    #         ElementTree.SubElement(xml_detail, 'codigoPrincipal').text = str(detail.piscinas.orden)
+    #         ElementTree.SubElement(xml_detail, 'descripcion').text = str(detail.piscinas.numero)
+    #         ElementTree.SubElement(xml_detail, 'cantidad').text = f'{float(detail.cant):.6f}'.rstrip('0').rstrip(
+    #             '.') if '.' in f'{float(detail.cant):.6f}' else f'{float(detail.cant):.6f}'
+    #         ElementTree.SubElement(xml_detail, 'precioUnitario').text = f'{detail.price:.2f}'
+    #         ElementTree.SubElement(xml_detail, 'descuento').text = f'{detail.total_dscto:.2f}'
+    #         ElementTree.SubElement(xml_detail, 'precioTotalSinImpuesto').text = f'{detail.total:.2f}'
+    #
+    #         xml_taxes = ElementTree.SubElement(xml_detail, 'impuestos')
+    #         xml_tax = ElementTree.SubElement(xml_taxes, 'impuesto')
+    #         ElementTree.SubElement(xml_tax, 'codigo').text = str(TAX_CODES[0][0])
+    #         if detail.piscinas.with_tax:
+    #             ElementTree.SubElement(xml_tax, 'codigoPorcentaje').text = str(self.company.vat_percentage)
+    #             ElementTree.SubElement(xml_tax, 'tarifa').text = f'{detail.iva * 100:.2f}'
+    #             ElementTree.SubElement(xml_tax, 'baseImponible').text = f'{detail.total:.2f}'
+    #             ElementTree.SubElement(xml_tax, 'valor').text = f'{detail.total_iva:.2f}'
+    #         else:
+    #             ElementTree.SubElement(xml_tax, 'codigoPorcentaje').text = "0"
+    #             ElementTree.SubElement(xml_tax, 'tarifa').text = "0"
+    #             ElementTree.SubElement(xml_tax, 'baseImponible').text = f'{detail.total:.2f}'
+    #             ElementTree.SubElement(xml_tax, 'valor').text = "0"
+    #     # infoAdicional
+    #     if len(self.additional_info):
+    #         xml_additional_info = ElementTree.SubElement(root, 'infoAdicional')
+    #         for additional_info in self.additional_info:
+    #             ElementTree.SubElement(xml_additional_info, 'campoAdicional', nombre=additional_info['name']).text = additional_info['value']
+    #     return ElementTree.tostring(root, xml_declaration=True, encoding='utf-8').decode('utf-8').replace("'", '"'), access_key
+
     def generate_xml(self):
+        def format_decimal(value, dec=2):
+            return f'{value:.{dec}f}'
+
         access_key = SRI().create_access_key(self)
         root = ElementTree.Element('factura', id="comprobante", version="1.0.0")
+
         # infoTributaria
         xml_tax_info = ElementTree.SubElement(root, 'infoTributaria')
         ElementTree.SubElement(xml_tax_info, 'ambiente').text = str(self.company.environment_type)
@@ -124,71 +213,81 @@ class Sale(models.Model):
         ElementTree.SubElement(xml_tax_info, 'ptoEmi').text = self.receipt.issuing_point_code
         ElementTree.SubElement(xml_tax_info, 'secuencial').text = self.voucher_number
         ElementTree.SubElement(xml_tax_info, 'dirMatriz').text = self.company.main_address
+
         # infoFactura
         xml_info_invoice = ElementTree.SubElement(root, 'infoFactura')
         ElementTree.SubElement(xml_info_invoice, 'fechaEmision').text = datetime.now().strftime('%d/%m/%Y')
         ElementTree.SubElement(xml_info_invoice, 'dirEstablecimiento').text = self.company.establishment_address
         ElementTree.SubElement(xml_info_invoice, 'obligadoContabilidad').text = self.company.obligated_accounting
-        ElementTree.SubElement(xml_info_invoice, 'tipoIdentificacionComprador').text = self.client.identification_type
+        ElementTree.SubElement(xml_info_invoice, 'tipoIdentificacionComprador').text = str(
+            self.client.identification_type)
         ElementTree.SubElement(xml_info_invoice, 'razonSocialComprador').text = self.client.user.names
         ElementTree.SubElement(xml_info_invoice, 'identificacionComprador').text = self.client.dni
         ElementTree.SubElement(xml_info_invoice, 'direccionComprador').text = self.client.address
-        ElementTree.SubElement(xml_info_invoice, 'totalSinImpuestos').text = f'{self.get_full_subtotal():.2f}'
-        ElementTree.SubElement(xml_info_invoice, 'totalDescuento').text = f'{self.total_dscto:.2f}'
+        ElementTree.SubElement(xml_info_invoice, 'totalSinImpuestos').text = format_decimal(self.get_full_subtotal())
+        ElementTree.SubElement(xml_info_invoice, 'totalDescuento').text = format_decimal(self.total_dscto)
+
         # totalConImpuestos
         xml_total_with_taxes = ElementTree.SubElement(xml_info_invoice, 'totalConImpuestos')
-        # totalImpuesto
-        if self.subtotal_0 != 0.0000:
+        if self.subtotal_0:
             xml_total_tax_0 = ElementTree.SubElement(xml_total_with_taxes, 'totalImpuesto')
             ElementTree.SubElement(xml_total_tax_0, 'codigo').text = str(TAX_CODES[0][0])
             ElementTree.SubElement(xml_total_tax_0, 'codigoPorcentaje').text = '0'
-            ElementTree.SubElement(xml_total_tax_0, 'baseImponible').text = f'{self.subtotal_0:.2f}'
+            ElementTree.SubElement(xml_total_tax_0, 'baseImponible').text = format_decimal(self.subtotal_0)
             ElementTree.SubElement(xml_total_tax_0, 'valor').text = '0.00'
-        if self.subtotal_12 != 0.0000:
-            xml_total_tax12 = ElementTree.SubElement(xml_total_with_taxes, 'totalImpuesto')
-            ElementTree.SubElement(xml_total_tax12, 'codigo').text = str(TAX_CODES[0][0])
-            ElementTree.SubElement(xml_total_tax12, 'codigoPorcentaje').text = str(self.company.vat_percentage)
-            ElementTree.SubElement(xml_total_tax12, 'baseImponible').text = f'{self.subtotal_12:.2f}'
-            ElementTree.SubElement(xml_total_tax12, 'valor').text = f'{self.total_iva:.2f}'
+        if self.subtotal_12:
+            xml_total_tax_12 = ElementTree.SubElement(xml_total_with_taxes, 'totalImpuesto')
+            ElementTree.SubElement(xml_total_tax_12, 'codigo').text = str(TAX_CODES[0][0])
+            ElementTree.SubElement(xml_total_tax_12, 'codigoPorcentaje').text = str(self.company.vat_percentage)
+            ElementTree.SubElement(xml_total_tax_12, 'baseImponible').text = format_decimal(self.subtotal_12)
+            ElementTree.SubElement(xml_total_tax_12, 'valor').text = format_decimal(self.total_iva)
+
         ElementTree.SubElement(xml_info_invoice, 'propina').text = '0.00'
-        ElementTree.SubElement(xml_info_invoice, 'importeTotal').text = f'{self.total:.2f}'
+        ElementTree.SubElement(xml_info_invoice, 'importeTotal').text = format_decimal(self.total)
         ElementTree.SubElement(xml_info_invoice, 'moneda').text = 'DOLAR'
+
         # pagos
         xml_payments = ElementTree.SubElement(xml_info_invoice, 'pagos')
         xml_payment = ElementTree.SubElement(xml_payments, 'pago')
-        ElementTree.SubElement(xml_payment, 'formaPago').text = self.payment_method
-        ElementTree.SubElement(xml_payment, 'total').text = f'{self.total:.2f}'
+        ElementTree.SubElement(xml_payment, 'formaPago').text = str(self.payment_method)
+        ElementTree.SubElement(xml_payment, 'total').text = format_decimal(self.total)
         ElementTree.SubElement(xml_payment, 'plazo').text = str(self.time_limit)
         ElementTree.SubElement(xml_payment, 'unidadTiempo').text = 'dias'
+
         # detalles
         xml_details = ElementTree.SubElement(root, 'detalles')
         for detail in self.saledetail_set.all():
             xml_detail = ElementTree.SubElement(xml_details, 'detalle')
-            ElementTree.SubElement(xml_detail, 'codigoPrincipal').text = detail.piscinas.orden
-            ElementTree.SubElement(xml_detail, 'descripcion').text = detail.piscinas.numero
-            ElementTree.SubElement(xml_detail, 'cantidad').text = f'{detail.cant:.2f}'
-            ElementTree.SubElement(xml_detail, 'precioUnitario').text = f'{detail.price:.2f}'
-            ElementTree.SubElement(xml_detail, 'descuento').text = f'{detail.total_dscto:.2f}'
-            ElementTree.SubElement(xml_detail, 'precioTotalSinImpuesto').text = f'{detail.total:.2f}'
+            ElementTree.SubElement(xml_detail, 'codigoPrincipal').text = str(detail.piscinas.orden)
+            ElementTree.SubElement(xml_detail, 'descripcion').text = str(detail.piscinas.numero)
+            ElementTree.SubElement(xml_detail, 'cantidad').text = format_decimal(detail.cant, 6)
+            ElementTree.SubElement(xml_detail, 'precioUnitario').text = format_decimal(detail.price)
+            ElementTree.SubElement(xml_detail, 'descuento').text = format_decimal(detail.total_dscto)
+            ElementTree.SubElement(xml_detail, 'precioTotalSinImpuesto').text = format_decimal(detail.total)
+
             xml_taxes = ElementTree.SubElement(xml_detail, 'impuestos')
             xml_tax = ElementTree.SubElement(xml_taxes, 'impuesto')
             ElementTree.SubElement(xml_tax, 'codigo').text = str(TAX_CODES[0][0])
             if detail.piscinas.with_tax:
                 ElementTree.SubElement(xml_tax, 'codigoPorcentaje').text = str(self.company.vat_percentage)
-                ElementTree.SubElement(xml_tax, 'tarifa').text = f'{detail.iva * 100:.2f}'
-                ElementTree.SubElement(xml_tax, 'baseImponible').text = f'{detail.total:.2f}'
-                ElementTree.SubElement(xml_tax, 'valor').text = f'{detail.total_iva:.2f}'
+                ElementTree.SubElement(xml_tax, 'tarifa').text = format_decimal(detail.iva * 100)
+                ElementTree.SubElement(xml_tax, 'baseImponible').text = format_decimal(detail.total)
+                ElementTree.SubElement(xml_tax, 'valor').text = format_decimal(detail.total_iva)
             else:
-                ElementTree.SubElement(xml_tax, 'codigoPorcentaje').text = "0"
-                ElementTree.SubElement(xml_tax, 'tarifa').text = "0"
-                ElementTree.SubElement(xml_tax, 'baseImponible').text = f'{detail.total:.2f}'
-                ElementTree.SubElement(xml_tax, 'valor').text = "0"
+                ElementTree.SubElement(xml_tax, 'codigoPorcentaje').text = '0'
+                ElementTree.SubElement(xml_tax, 'tarifa').text = '0.00'
+                ElementTree.SubElement(xml_tax, 'baseImponible').text = format_decimal(detail.total)
+                ElementTree.SubElement(xml_tax, 'valor').text = '0.00'
+
         # infoAdicional
-        if len(self.additional_info):
+        if self.additional_info:
             xml_additional_info = ElementTree.SubElement(root, 'infoAdicional')
-            for additional_info in self.additional_info:
-                ElementTree.SubElement(xml_additional_info, 'campoAdicional', nombre=additional_info['name']).text = additional_info['value']
-        return ElementTree.tostring(root, xml_declaration=True, encoding='utf-8').decode('utf-8').replace("'", '"'), access_key
+            for item in self.additional_info:
+                ElementTree.SubElement(xml_additional_info, 'campoAdicional', nombre=item['name']).text = str(
+                    item['value'])
+
+        return ElementTree.tostring(root, encoding='utf-8', xml_declaration=True).decode('utf-8').replace("'",
+                                                                                                          '"'), access_key
 
     def is_invoice(self):
         return self.receipt.voucher_type == VOUCHER_TYPE[0][0]

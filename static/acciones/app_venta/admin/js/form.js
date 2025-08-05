@@ -715,7 +715,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             });
             params.append('products', JSON.stringify(sale.detail.products));
             params.append('additional_info', JSON.stringify(sale.detail.additional_info.filter(value => !$.isEmptyObject(value.name) && !$.isEmptyObject(value.value))));
-            /*var args = {
+            var args = {
                 'params': params,
                 'success': function (request) {
                     dialog_action({
@@ -730,8 +730,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
                         }
                     });
                 }
-            };*/
-            var args = {
+            };
+            /*var args = {
                 'params': params,
                 'success': function (request) {
                     if (!request.hasOwnProperty('resp') || request.resp === true) {
@@ -758,7 +758,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
                         });
                     }
                 }
-            };
+            };*/
             submit_with_formdata(args);
         });
 });
@@ -846,6 +846,8 @@ $(function () {
         .on('change', 'input[name="cant"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             sale.detail.products[tr.row].cant = parseInt($(this).val());
+            console.log('sale.detail.products[tr.row].cant')
+            console.log(sale.detail.products[tr.row].cant)
             sale.calculateInvoice();
             $('td:last', tblProducts.row(tr.row).node()).html('$' + sale.detail.products[tr.row].total.toFixed(2));
         })
@@ -1014,7 +1016,9 @@ $(function () {
 
     // Sale
     select_receipt.on('change', function () {
-        $('.content-electronic-billing').find('input,select').prop('disabled', $(this).val() !== '01');
+        // $('.content-electronic-billing').find('input,select').prop('disabled', $(this).val() !== '01');
+        const isType01 = $(this).val() === '01';
+        $('.content-electronic-billing').find('input, select').prop('disabled', isType01);
         sale.searchVoucherNumber();
     });
 
