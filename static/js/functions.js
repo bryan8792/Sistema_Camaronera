@@ -99,6 +99,10 @@ function submit_with_formdata(args) {
                 text: "Si",
                 btnClass: 'btn-primary',
                 action: function () {
+                    console.log('args.pathname')
+                    console.log(args.pathname)
+                    console.log('args.params')
+                    console.log(args.params)
                     $.ajax({
                         url: args.pathname,
                         data: args.params,
@@ -109,9 +113,9 @@ function submit_with_formdata(args) {
                         },
                         processData: false,
                         contentType: false,
-                        /*beforeSend: function () {
+                        beforeSend: function () {
                             loading({'text': '...'});
-                        },*/
+                        },
                         success: function (request) {
                             if (!request.hasOwnProperty('error')) {
                                 if (args.hasOwnProperty('success')) {

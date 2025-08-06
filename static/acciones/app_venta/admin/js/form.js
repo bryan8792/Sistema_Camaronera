@@ -721,44 +721,19 @@ document.addEventListener('DOMContentLoaded', function (e) {
                     dialog_action({
                         'content': '¿Desea Imprimir el Comprobante?',
                         'success': function () {
+                            console.log('request del guardar ventar');
                             console.log(request);
                             window.open(request.print_url, '_blank');
-                            location.href = list_url;
+                            location.href = '/venta/sale/admin/add/';
+                            // location.href = list_url;
                         },
                         'cancel': function () {
-                            location.href = list_url;
+                            location.href = '/venta/sale/admin/add/';
+                            // location.href = list_url;
                         }
                     });
                 }
             };
-            /*var args = {
-                'params': params,
-                'success': function (request) {
-                    if (!request.hasOwnProperty('resp') || request.resp === true) {
-                        dialog_action({
-                            'content': '¿Desea Imprimir el Comprobante?',
-                            'success': function () {
-                                window.open(request.print_url, '_blank');
-                                location.href = list_url;
-                            },
-                            'cancel': function () {
-                                location.href = list_url;
-                            }
-                        });
-                    } else {
-                        // Mostrar errores correctamente
-                        const errores = Array.isArray(request.errors)
-                            ? request.errors.map(e => `• ${e.mensaje}${e.informacionAdicional ? ': ' + e.informacionAdicional : ''}`).join('<br>')
-                            : (typeof request.errors === 'string' ? request.errors : JSON.stringify(request.errors, null, 2));
-
-                        Swal.fire({
-                            title: '❌ Factura Rechazada por el SRI',
-                            html: errores,
-                            icon: 'error'
-                        });
-                    }
-                }
-            };*/
             submit_with_formdata(args);
         });
 });

@@ -1,42 +1,67 @@
 {% extends 'base.html' %}
+
+{% load widget_tweaks %}
 {% load static %}
-{% block assets_list %}
+
+{% block head %}
+
     <script src="{% static 'lib/bootstrap-daterangepicker-3.1/js/spanish.js' %}"></script>
     <script src="{% static 'lib/bootstrap-daterangepicker-3.1/js/daterangepicker.js' %}"></script>
     <link rel="stylesheet" href="{% static 'lib/bootstrap-daterangepicker-3.1/css/daterangepicker.css' %}"/>
     <script src="{% static 'acciones/app_venta/admin/js/list.js' %}"></script>
+
 {% endblock %}
 
-{% block columns %}
-    <th>Id</th>
-    <th>Múmero</th>
-    <th>Fecha de registro</th>
-    <th>Cliente</th>
-    <th>Tipo de comprobante</th>
-    <th>Estado de comprobante</th>
-    <th>Subtotal</th>
-    <th>IVA</th>
-    <th>Dsto</th>
-    <th>Total</th>
-    <th class="text-center">Opciones</th>
-{% endblock %}
+{% block contenido %}
 
-{% block content_list_before %}
-    <div class="row">
-        <div class="col-lg-5 col-md-12">
-            <div class="form-group">
-                <label>{{ form.date_range.label }}:</label>
-                <div class="input-group mb-3">
-                    {{ form.date_range }}
-                    <div class="input-group-append">
-                        <button class="btn btn-primary btnSearchAll" type="button">
-                            <i class="fas fa-calendar-check"></i> Ver todas
-                        </button>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div><!-- /.col -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Registro {{ nombre }}</li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- Main content -->
+
+    <section class="content">
+        <div class="row">
+            <div class="col-lg-5 col-md-12">
+                <div class="form-group">
+                    <label>{{ form.date_range.label }}:</label>
+                    <div class="input-group mb-3">
+                        {{ form.date_range }}
+                        <div class="input-group-append">
+                            <button class="btn btn-primary btnSearchAll" type="button">
+                                <i class="fas fa-calendar-check"></i> Ver todas
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    <div class="row">
+        <div class="col-lg-8">
+            <a href="{% url 'app_venta:sale_admin_create' %}" class="btn btn-primary btn-flat">
+                <i class="fas fa-plus"></i> Nuevo Registro
+            </a>
+            <a href="#" class="btn btn-success btn-flat">
+                <i class="fas fa-sync-alt"></i> Actualizar
+            </a>
+        </div>
+        <div class="col-lg-4 text-right">
+            <h1 class="font-weight-bold total">$0.00</h1>
+        </div>
     </div>
+    </section>
     <hr>
     <div class="modal fade" id="myModalDetails" role="dialog">
         <div class="modal-dialog modal-xl">
@@ -68,24 +93,88 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
-{% block javascript_list %}
 
-{% endblock %}
-
-{% block box_footer_buttons %}
-    <div class="row">
-        <div class="col-lg-8">
-            <a href="{{ create_url }}" class="btn btn-primary btn-flat">
-                <i class="fas fa-plus"></i> Nuevo Registro
-            </a>
-            <a href="{{ list_url }}" class="btn btn-success btn-flat">
-                <i class="fas fa-sync-alt"></i> Actualizar
-            </a>
-        </div>
-        <div class="col-lg-4 text-right">
-            <h1 class="font-weight-bold total">$0.00</h1>
-        </div>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
     </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Registros de: <strong> {{ nombre }}</strong></h3>
+                        <div class="card-tools">
+                            <ul class="pagination pagination-sm float-right">
+                                <li class="page-item">
+                                    <a href="{% url 'app_empresa:crear_empresa' %}" class="btn btn-block btn-default btn-sm" style="background-color:#AEAEAE">
+                                        <strong><i class="fas fa-plus"></i> NUEVO REGISTRO</strong>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <table id="tb_categoria" class="table table-striped table-bordered">
+                            <thead>
+                            <tr role="row">
+                                <th>Siglas</th>
+                                <th>Nombre</th>
+                                <th>RUC</th>
+                                <th>Actividad</th>
+                                <th>Dirección</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            {% for emp in object_list %}
+                                <tr role="row" class="odd">
+                                    <td><strong>{{ emp.siglas }}</strong></td>
+                                    <td>{{ emp.nombre }}</td>
+                                    <td>{{ emp.ruc }}</td>
+                                    <td>{{ emp.actividad }}</td>
+                                    <td>{{ emp.direccion }}</td>
+                                    <td class="text-center">
+                                        <a href="{% url 'app_empresa:actualizar_empresa' emp.id %}"
+                                           class="btn btn-xs btn-flat" style="background-color:#AEAEAE">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'app_empresa:eliminar_empresa' emp.id %}"
+                                           class="btn btn-danger btn-xs btn-flat">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </section>
+    <!-- /.content -->
+
 {% endblock %}

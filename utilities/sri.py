@@ -175,40 +175,99 @@ class SRI:
                 self.create_voucher_errors(instance, response)
         return response
 
+    # def authorize_xml(self, instance):
+    #     response = {'resp': False, 'stage': VOUCHER_STAGE[3][0]}
+    #     try:
+    #         sri_client = Client(self.get_authorization_url(instance))
+    #         result = sri_client.service.autorizacionComprobante(instance.access_code)
+    #         if len(result):
+    #             receipt = result[2].autorizacion[0]
+    #             if receipt.estado == 'NO AUTORIZADO':
+    #                 response['error'] = {'access_code': instance.access_code, 'stage': receipt.estado, 'authorization_date': str(receipt.fechaAutorizacion), 'errors': []}
+    #                 for count, value in enumerate(receipt.mensajes):
+    #                     message = value[1][count]
+    #                     values = dict()
+    #                     for name in ['identificador', 'informacionAdicional', 'mensaje', 'tipo']:
+    #                         if name in message:
+    #                             values[name] = message[name]
+    #                     response['error']['errors'].append(values)
+    #             else:
+    #                 xml_authorization = etree.Element('autorizacion')
+    #                 etree.SubElement(xml_authorization, 'estado').text = receipt.estado
+    #                 etree.SubElement(xml_authorization, 'numeroAutorizacion').text = receipt.numeroAutorizacion
+    #                 etree.SubElement(xml_authorization, 'fechaAutorizacion', attrib={'class': "fechaAutorizacion"}).text = str(receipt.fechaAutorizacion.strftime("%d/%m/%Y %H:%M:%S"))
+    #                 voucher_sri = etree.SubElement(xml_authorization, 'comprobante')
+    #                 voucher_sri.text = etree.CDATA(receipt.comprobante)
+    #                 xml_text = etree.tostring(xml_authorization, encoding="utf8", xml_declaration=True).decode('utf8').replace("'", '"')
+    #                 with NamedTemporaryFile(delete=True) as file_temp:
+    #                     xml_path = f'xml/{instance.receipt.get_name_xml()}_{instance.access_code}.xml'
+    #                     file_temp.write(xml_text.encode())
+    #                     file_temp.flush()
+    #                     instance.xml_authorized.save(name=xml_path, content=File(file_temp))
+    #                     instance.authorization_date = receipt.fechaAutorizacion
+    #                     instance.generate_pdf_authorized()
+    #                     instance.status = INVOICE_STATUS[1][0]
+    #                     instance.save()
+    #                     response['resp'] = True
+    #     except Exception as e:
+    #         response['error'] = str(e)
+    #     finally:
+    #         if 'error' in response:
+    #             self.create_voucher_errors(instance, response)
+    #     return response
+
     def authorize_xml(self, instance):
         response = {'resp': False, 'stage': VOUCHER_STAGE[3][0]}
         try:
             sri_client = Client(self.get_authorization_url(instance))
             result = sri_client.service.autorizacionComprobante(instance.access_code)
-            if len(result):
-                receipt = result[2].autorizacion[0]
-                if receipt.estado == 'NO AUTORIZADO':
-                    response['error'] = {'access_code': instance.access_code, 'stage': receipt.estado, 'authorization_date': str(receipt.fechaAutorizacion), 'errors': []}
-                    for count, value in enumerate(receipt.mensajes):
-                        message = value[1][count]
-                        values = dict()
-                        for name in ['identificador', 'informacionAdicional', 'mensaje', 'tipo']:
-                            if name in message:
-                                values[name] = message[name]
-                        response['error']['errors'].append(values)
-                else:
-                    xml_authorization = etree.Element('autorizacion')
-                    etree.SubElement(xml_authorization, 'estado').text = receipt.estado
-                    etree.SubElement(xml_authorization, 'numeroAutorizacion').text = receipt.numeroAutorizacion
-                    etree.SubElement(xml_authorization, 'fechaAutorizacion', attrib={'class': "fechaAutorizacion"}).text = str(receipt.fechaAutorizacion.strftime("%d/%m/%Y %H:%M:%S"))
-                    voucher_sri = etree.SubElement(xml_authorization, 'comprobante')
-                    voucher_sri.text = etree.CDATA(receipt.comprobante)
-                    xml_text = etree.tostring(xml_authorization, encoding="utf8", xml_declaration=True).decode('utf8').replace("'", '"')
-                    with NamedTemporaryFile(delete=True) as file_temp:
-                        xml_path = f'xml/{instance.receipt.get_name_xml()}_{instance.access_code}.xml'
-                        file_temp.write(xml_text.encode())
-                        file_temp.flush()
-                        instance.xml_authorized.save(name=xml_path, content=File(file_temp))
-                        instance.authorization_date = receipt.fechaAutorizacion
-                        instance.generate_pdf_authorized()
-                        instance.status = INVOICE_STATUS[1][0]
-                        instance.save()
-                        response['resp'] = True
+
+            if hasattr(result, 'autorizaciones') and hasattr(result.autorizaciones, 'autorizacion'):
+                autorizaciones = result.autorizaciones.autorizacion
+
+                if autorizaciones:
+                    receipt = autorizaciones[0]
+
+                    if receipt.estado == 'NO AUTORIZADO':
+                        response['error'] = {
+                            'access_code': instance.access_code,
+                            'stage': receipt.estado,
+                            'authorization_date': str(receipt.fechaAutorizacion) if hasattr(receipt,
+                                                                                            'fechaAutorizacion') else None,
+                            'errors': []
+                        }
+                        if hasattr(receipt, 'mensajes') and hasattr(receipt.mensajes, 'mensaje'):
+                            for mensaje in receipt.mensajes.mensaje:
+                                values = {}
+                                for name in ['identificador', 'informacionAdicional', 'mensaje', 'tipo']:
+                                    if hasattr(mensaje, name):
+                                        values[name] = getattr(mensaje, name)
+                                response['error']['errors'].append(values)
+                    else:
+                        # AUTORIZADO
+                        xml_authorization = etree.Element('autorizacion')
+                        etree.SubElement(xml_authorization, 'estado').text = receipt.estado
+                        etree.SubElement(xml_authorization, 'numeroAutorizacion').text = receipt.numeroAutorizacion
+                        etree.SubElement(xml_authorization, 'fechaAutorizacion',
+                                         attrib={'class': "fechaAutorizacion"}).text = str(
+                            receipt.fechaAutorizacion.strftime("%d/%m/%Y %H:%M:%S"))
+                        voucher_sri = etree.SubElement(xml_authorization, 'comprobante')
+                        voucher_sri.text = etree.CDATA(receipt.comprobante)
+
+                        xml_text = etree.tostring(xml_authorization, encoding="utf8", xml_declaration=True).decode(
+                            'utf8').replace("'", '"')
+                        with NamedTemporaryFile(delete=True) as file_temp:
+                            xml_path = f'xml/{instance.receipt.get_name_xml()}_{instance.access_code}.xml'
+                            file_temp.write(xml_text.encode())
+                            file_temp.flush()
+                            instance.xml_authorized.save(name=xml_path, content=File(file_temp))
+                            instance.authorization_date = receipt.fechaAutorizacion
+                            instance.generate_pdf_authorized()
+                            instance.status = INVOICE_STATUS[1][0]
+                            instance.save()
+                            response['resp'] = True
+            else:
+                response['error'] = "No se recibió una respuesta válida del SRI"
         except Exception as e:
             response['error'] = str(e)
         finally:
