@@ -27,7 +27,6 @@ from django.http import JsonResponse
 class SaleListView(FormView):
     template_name = 'app_venta/admin/list.html'
     form_class = ReportForm
-    permission_required = 'view_sale'
 
     def post(self, request, *args, **kwargs):
         data = {}
@@ -43,6 +42,7 @@ class SaleListView(FormView):
                 for i in queryset:
                     data.append(i.toJSON())
             elif action == 'search_detail_products':
+                print('llego a search_detail_products')
                 data = []
                 for i in SaleDetail.objects.filter(sale_id=request.POST['id']):
                     data.append(i.toJSON())
@@ -98,6 +98,7 @@ class SaleListView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Ventas'
+        context['nombre'] = 'Facturas de Ventas'
         context['create_url'] = reverse_lazy('sale_admin_create')
         return context
 
@@ -304,6 +305,7 @@ class SaleCreateView(CreateView):
         context['list_url'] = self.success_url
         context['action'] = 'add'
         context['frmUser'] = ClientUserForm()
+        context['nombre'] = 'Registro de una Venta'
         context['final_consumer'] = json.dumps(self.get_first_final_consumer())
         return context
 

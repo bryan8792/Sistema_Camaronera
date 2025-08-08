@@ -11,7 +11,15 @@ var sale = {
             parameters['start_date'] = '';
             parameters['end_date'] = '';
         }
-        tblSale = $('#data').DataTable({
+
+        if (tblSale) {
+            // Si ya existe, solo actualiza los datos y recarga
+            tblSale.settings()[0].ajax.data = parameters;
+            tblSale.ajax.reload();
+            return;
+        }
+
+        tblSale = $('#tbSale').DataTable({
             autoWidth: false,
             destroy: true,
             deferRender: true,

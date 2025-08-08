@@ -724,12 +724,10 @@ document.addEventListener('DOMContentLoaded', function (e) {
                             console.log('request del guardar ventar');
                             console.log(request);
                             window.open(request.print_url, '_blank');
-                            location.href = '/venta/sale/admin/add/';
-                            // location.href = list_url;
+                            location.href = '/venta/sale/admin/';
                         },
                         'cancel': function () {
-                            location.href = '/venta/sale/admin/add/';
-                            // location.href = list_url;
+                            location.href = '/venta/sale/admin/';
                         }
                     });
                 }

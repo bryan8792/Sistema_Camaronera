@@ -1,63 +1,71 @@
 {% load static %}
-
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="description" content="">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <title>{{ nombre }}</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <meta content="ie=edge" http-equiv="x-ua-compatible"/>
+    <meta content="" name="description"/>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport"/>
+    <title>
+        {{ nombre }}
+    </title>
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="{% static 'lib/adminlte-3.0.4/plugins/font-awesome-5.11.1/css/all.min.css' %}">
+    <link href="{% static 'lib/adminlte-3.0.4/plugins/font-awesome-5.11.1/css/all.min.css' %}" rel="stylesheet"/>
     <!-- Theme style -->
-    <link rel="stylesheet" href="{% static 'lib/adminlte-3.0.4/css/adminlte.min.css' %}">
+    <link href="{% static 'lib/adminlte-3.0.4/css/adminlte.min.css' %}" rel="stylesheet"/>
     <!-- Favicons -->
-    <link href="{% static 'img/fabicon.png' %}" rel="icon">
-    <link href="{% static 'img/fabicon.png' %}" rel="apple-touch-icon">
+    <link href="{% static 'img/fabicon.png' %}" rel="icon"/>
+    <link href="{% static 'img/fabicon.png' %}" rel="apple-touch-icon"/>
     <!-- Google Font: Source Sans Pro -->
-    <link href="{% static 'css/otro/css.css' %}" rel="stylesheet">
+    <link href="{% static 'css/otro/css.css' %}" rel="stylesheet"/>
     <!-- Me sirve para la tabla -->
-    <link href="{% static 'css/toastr/toastr.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/toastr/toastr.min.css' %}" rel="stylesheet"/>
     <!-- Me sirve para la alerta de los registros -->
-    <script src="{% static 'lib/sweetalert2-9.10.0/sweetalert2.all.min.js' %}"></script>
-    <link href="{% static 'lib/bootstrap-4.4.1-dist/css/bootstrap.min.css' %}">
-    <link href="{% static 'lib/bootstrap-4.4.1-dist/css/bootstrap-datetimepicker.min.css' %}">
-    <script src="{% static 'lib/plugins/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'lib/sweetalert2-9.10.0/sweetalert2.all.min.js' %}">
+    </script>
+    <link href="{% static 'lib/bootstrap-4.4.1-dist/css/bootstrap.min.css' %}"/>
+    <link href="{% static 'lib/bootstrap-4.4.1-dist/css/bootstrap-datetimepicker.min.css' %}"/>
+    <script src="{% static 'lib/plugins/jquery/jquery.min.js' %}">
+    </script>
     <!-- Popper.js -->
-    <script src="{% static 'lib/popper-1.16.0/popper.min.js' %}"></script>
+    <script src="{% static 'lib/popper-1.16.0/popper.min.js' %}">
+    </script>
     <!-- Bootstrap JS -->
-    <script src="{% static 'lib/bootstrap-4.4.1-dist/js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'lib/bootstrap-4.4.1-dist/css/moment.min.js' %}"></script>
-    <script src="{% static 'lib/bootstrap-4.4.1-dist/css/bootstrap-datetimepicker.min.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
-    <link rel="stylesheet"
-          href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
-    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/bootstrap-4.4.1-dist/js/bootstrap.min.js' %}">
+    </script>
+    <script src="{% static 'lib/bootstrap-4.4.1-dist/css/moment.min.js' %}">
+    </script>
+    <script src="{% static 'lib/bootstrap-4.4.1-dist/css/bootstrap-datetimepicker.min.js' %}">
+    </script>
+    <link href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+    <link href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"
+          rel="stylesheet">
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}">
+    </script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}">
+    </script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}">
+    </script>
+    <script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}">
+    </script>
     <!-- Jquery Confirm -->
-    <link rel="stylesheet" href="{% static 'lib/jquery-confirm-v3.3.4/jquery-confirm.min.css' %}">
-    <script src="{% static 'lib/jquery-confirm-v3.3.4/jquery-confirm.min.js' %}"></script>
+    <link href="{% static 'lib/jquery-confirm-v3.3.4/jquery-confirm.min.css' %}" rel="stylesheet"/>
+    <script src="{% static 'lib/jquery-confirm-v3.3.4/jquery-confirm.min.js' %}">
+    </script>
     <!-- Functions -->
-    <script src="{% static 'acciones/app_factura_detalle/functions.js' %}"></script>
-    <script src="{% static 'js/functions.js' %}"></script>
+    <script src="{% static 'acciones/app_factura_detalle/functions.js' %}">
+    </script>
+    <script src="{% static 'js/functions.js' %}">
+    </script>
     <!-- My css -->
-    <link rel="stylesheet" href="{% static 'css/mystyle.css' %}">
+    <link href="{% static 'css/mystyle.css' %}" rel="stylesheet"/>
     <!-- Estilos Odoo para formularios -->
-    <link rel="stylesheet" href="{% static 'css/odoo_forms.css' %}">
-
+    <link href="{% static 'css/odoo_forms.css' %}" rel="stylesheet"/>
     <!-- ESTILOS ODOO PROFESIONALES - MANTIENE FUNCIONALIDAD ADMINLTE -->
     <style>
         /* Importar fuente moderna */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-        /* Variables de color profesionales */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'); /* Variables de color profesionales */
         :root {
             --odoo-primary: #3498DB;
             --odoo-primary-dark: #2980B9;
@@ -183,8 +191,7 @@
             color: var(--odoo-gray-500) !important;
         }
 
-        .nav-sidebar .nav-link:hover .nav-icon,
-        .nav-sidebar .nav-link.active .nav-icon {
+        .nav-sidebar .nav-link:hover .nav-icon, .nav-sidebar .nav-link.active .nav-icon {
             color: var(--odoo-primary) !important;
         }
 
@@ -412,443 +419,438 @@
             background: var(--odoo-gray-500);
         }
 
-        /* ===== ESTILOS DATATABLES MEJORADOS ===== */
-
-        /* Integración de estilos existentes con mejoras Odoo */
-        .table-bordered {
-            border: 1px solid var(--odoo-gray-200) !important;
-            border-radius: 8px !important;
-            overflow: hidden !important;
-        }
-
-        .table-bordered > thead > tr > th {
-            border: 0 !important;
-            border-bottom: 2px solid var(--odoo-gray-200) !important;
-            background: var(--odoo-gray-100) !important;
-            color: var(--odoo-gray-700) !important;
-            font-weight: 600 !important;
-            font-size: 12px !important;
-            padding: 8px 12px !important;
-        }
-
-        table.table-bordered.dataTable tbody td {
-            border-bottom: 1px solid var(--odoo-gray-200) !important;
-            border-right: 1px solid var(--odoo-gray-200) !important;
-            font-size: 13px !important;
-            padding: 8px 12px !important;
-            color: var(--odoo-gray-700) !important;
-        }
-
-        table.table-bordered.dataTable tbody td:last-child {
-            border-right: none !important;
-        }
-
-        .table-bordered > tbody > tr > td {
-            border: 0 !important;
-            border-bottom: 1px solid var(--odoo-gray-200) !important;
-            font-size: 13px !important;
-            padding: 8px 12px !important;
-        }
-
-        /* Tamaños de tabla responsivos */
-        .table-sm th, .table-sm td {
-            padding: 6px 10px !important;
-            font-size: 12px !important;
-        }
-
-        .table-md th, .table-md td {
-            padding: 8px 12px !important;
-            font-size: 13px !important;
-        }
-
-        .table-lg th, .table-lg td {
-            padding: 10px 14px !important;
-            font-size: 14px !important;
-        }
-
-        /* DataTables wrapper mejorado */
+        /* ===== ESTILO LIMPIO Y PROFESIONAL PARA DATATABLES (COMO LA IMAGEN) ===== */ /* REEMPLAZAR TODO EL CSS DE DATATABLES EN TU HTML CON ESTO: */ /* ===== WRAPPER PRINCIPAL ===== */
         .dataTables_wrapper {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
             font-size: 13px !important;
+            color: #333 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
-        .dataTables_wrapper .dataTables_length,
-        .dataTables_wrapper .dataTables_filter,
-        .dataTables_wrapper .dataTables_info,
+        /* ===== CONTROLES SUPERIORES ===== */
+        .dataTables_wrapper .dataTables_length {
+            float: left !important;
+            margin-bottom: 15px !important;
+            display: block !important;
+        }
+
+        .dataTables_wrapper .dataTables_length label {
+            font-size: 13px !important;
+            color: #333 !important;
+            font-weight: normal !important;
+            margin: 0 !important;
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+            display: inline-block !important;
+            width: auto !important;
+            padding: 4px 8px !important;
+            margin: 0 5px !important;
+            font-size: 13px !important;
+            border: 1px solid #ccc !important;
+            border-radius: 3px !important;
+            background: white !important;
+            color: #333 !important;
+        }
+
+        /* ===== BUSCADOR (COMO EN LA IMAGEN) ===== */
+        .dataTables_wrapper .dataTables_filter {
+            float: right !important;
+            text-align: right !important;
+            margin-bottom: 15px !important;
+            display: block !important;
+        }
+
+        .dataTables_wrapper .dataTables_filter label {
+            font-size: 13px !important;
+            color: #333 !important;
+            font-weight: normal !important;
+            margin: 0 !important;
+            white-space: nowrap !important;
+        }
+
+        .dataTables_wrapper .dataTables_filter input[type="search"] {
+            display: inline-block !important;
+            width: 200px !important;
+            padding: 6px 12px !important;
+            margin-left: 8px !important;
+            font-size: 13px !important;
+            border: 1px solid #ccc !important;
+            border-radius: 3px !important;
+            background: white !important;
+            color: #333 !important;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075) !important;
+        }
+
+        .dataTables_wrapper .dataTables_filter input[type="search"]:focus {
+            border-color: #66afe9 !important;
+            outline: 0 !important;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 8px rgba(102, 175, 233, .6) !important;
+        }
+
+        /* ===== CLEARFIX PARA CONTROLES SUPERIORES ===== */
+        .dataTables_wrapper .dataTables_length::after, .dataTables_wrapper .dataTables_filter::after {
+            content: "" !important;
+            display: table !important;
+            clear: both !important;
+        }
+
+        /* ===== TABLA PRINCIPAL ===== */
+        .table-bordered, table.table-bordered.dataTable {
+            border: 1px solid #ddd !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            width: 100% !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* ===== HEADERS COMO EN LA IMAGEN ===== */
+        table.dataTable thead, table.dataTable thead tr, .dataTables_wrapper table.dataTable thead, .dataTables_wrapper table.dataTable thead tr, .table-bordered > thead, table.table-bordered.dataTable thead, table.table-bordered.dataTable thead tr, .content-wrapper table thead, .content-wrapper table thead tr, .card-body table thead, .card-body table thead tr {
+            background: #f5f5f5 !important;
+            background-color: #f5f5f5 !important;
+        }
+
+        table.dataTable thead th, table.dataTable thead tr th, .dataTables_wrapper table.dataTable thead th, .dataTables_wrapper table.dataTable thead tr th, .table-bordered > thead > tr > th, table.table-bordered.dataTable thead th, table.table-bordered.dataTable thead tr th, .content-wrapper table thead th, .content-wrapper table thead tr th, .card-body table thead th, .card-body table thead tr th, .table thead th, .table thead tr th {
+            background: #f5f5f5 !important;
+            background-color: #f5f5f5 !important;
+            color: #333 !important;
+            font-weight: bold !important;
+            font-size: 13px !important;
+            padding: 8px !important;
+            border: 1px solid #ddd !important;
+            border-bottom: 1px solid #ddd !important;
+            text-align: left !important;
+            vertical-align: middle !important;
+        }
+
+        /* ===== SORTING HEADERS ===== */
+        table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, .dataTables_wrapper table.dataTable thead .sorting, .dataTables_wrapper table.dataTable thead .sorting_asc, .dataTables_wrapper table.dataTable thead .sorting_desc {
+            background: #f5f5f5 !important;
+            background-color: #f5f5f5 !important;
+            color: #333 !important;
+        }
+
+        table.dataTable thead .sorting:hover, table.dataTable thead .sorting_asc:hover, table.dataTable thead .sorting_desc:hover {
+            background: #e6e6e6 !important;
+            background-color: #e6e6e6 !important;
+        }
+
+        /* Iconos de sorting en gris */
+        table.dataTable thead .sorting:after, table.dataTable thead .sorting_asc:after, table.dataTable thead .sorting_desc:after, table.dataTable thead .sorting:before, table.dataTable thead .sorting_asc:before, table.dataTable thead .sorting_desc:before {
+            color: #6c757d !important;
+            opacity: 0.5 !important;
+        }
+
+        /* ===== CUERPO DE LA TABLA ===== */
+        table.dataTable tbody tr, .dataTables_wrapper table.dataTable tbody tr {
+            background: white !important;
+        }
+
+        table.dataTable tbody tr:nth-child(even), .dataTables_wrapper table.dataTable tbody tr:nth-child(even) {
+            background: #f9f9f9 !important;
+        }
+
+        table.dataTable tbody tr:hover, .dataTables_wrapper table.dataTable tbody tr:hover {
+            background: #f0f8ff !important;
+        }
+
+        table.dataTable tbody td, .dataTables_wrapper table.dataTable tbody td {
+            padding: 8px !important;
+            border: 1px solid #ddd !important;
+            font-size: 13px !important;
+            color: #333 !important;
+            vertical-align: middle !important;
+        }
+
+        /* ===== MENSAJE "SIN DATOS" ===== */
+        .dataTables_empty {
+            text-align: center !important;
+            font-style: italic !important;
+            color: #666 !important;
+            padding: 20px !important;
+        }
+
+        /* ===== CONTROLES INFERIORES ===== */
+        .dataTables_wrapper .dataTables_info {
+            float: left !important;
+            padding-top: 8px !important;
+            font-size: 13px !important;
+            color: #333 !important;
+            margin-top: 15px !important;
+        }
+
         .dataTables_wrapper .dataTables_paginate {
-            font-size: 12px !important;
-            color: var(--odoo-gray-600) !important;
+            float: right !important;
+            margin-top: 15px !important;
         }
 
-        .dataTables_wrapper .dataTables_length select,
-        .dataTables_wrapper .dataTables_filter input {
-            font-size: 12px !important;
-            padding: 4px 8px !important;
-            border: 1px solid var(--odoo-gray-300) !important;
-            border-radius: 4px !important;
-        }
-
-        /* Paginación DataTables estilo Odoo */
+        /* ===== PAGINACIÓN COMO EN LA IMAGEN ===== */
         .dataTables_wrapper .dataTables_paginate .paginate_button {
-            padding: 4px 8px !important;
-            margin: 0 2px !important;
-            border: 1px solid var(--odoo-gray-300) !important;
-            border-radius: 4px !important;
-            font-size: 12px !important;
-            color: var(--odoo-gray-700) !important;
+            display: inline-block !important;
+            padding: 6px 12px !important;
+            margin-left: 2px !important;
+            font-size: 13px !important;
+            color: #333 !important;
+            text-decoration: none !important;
+            border: 1px solid #ddd !important;
+            border-radius: 3px !important;
             background: white !important;
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-            background: var(--odoo-gray-100) !important;
-            border-color: var(--odoo-gray-400) !important;
+            background: #e6e6e6 !important;
+            border-color: #adadad !important;
+            color: #333 !important;
         }
 
         .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: var(--odoo-primary) !important;
-            border-color: var(--odoo-primary) !important;
+            background: #337ab7 !important;
+            border-color: #337ab7 !important;
             color: white !important;
         }
 
-        /* Scroll horizontal mejorado */
-        .dataTables_scroll {
-            overflow: auto !important;
-            border: 1px solid var(--odoo-gray-200) !important;
-            border-radius: 8px !important;
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+            color: #999 !important;
+            cursor: not-allowed !important;
+            background: white !important;
+            border-color: #ddd !important;
         }
 
-        /* Headers de tabla mejorados - AZUL AUTOMÁTICO PARA DATATABLES */
-        .table thead tr {
-            background: var(--odoo-gray-100) !important;
-            color: var(--odoo-gray-700) !important;
+        /* ===== CLEARFIX PARA CONTROLES INFERIORES ===== */
+        .dataTables_wrapper::after {
+            content: "" !important;
+            display: table !important;
+            clear: both !important;
         }
 
-        .table thead th {
-            border-top-width: 0 !important;
-            border-bottom: 2px solid var(--odoo-gray-200) !important;
-            font-weight: 600 !important;
-            font-size: 12px !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-        }
-
-        /* ===== DATATABLES - HEADERS AZULES AUTOMÁTICOS - FORZADO ===== */
-
-        /* Todos los headers de DataTables - Máxima especificidad */
-        table.dataTable thead,
-        table.dataTable thead tr,
-        .dataTables_wrapper table.dataTable thead,
-        .dataTables_wrapper table.dataTable thead tr,
-        .table-bordered > thead,
-        table.table-bordered.dataTable thead,
-        table.table-bordered.dataTable thead tr,
-        .content-wrapper table thead,
-        .content-wrapper table thead tr,
-        .card-body table thead,
-        .card-body table thead tr {
-            background: #3498DB !important;
-            background-color: #3498DB !important;
-            border-bottom: none !important;
-            border-top: none !important;
-        }
-
-        /* Todos los TH de headers de DataTables */
-        table.dataTable thead th,
-        table.dataTable thead tr th,
-        .dataTables_wrapper table.dataTable thead th,
-        .dataTables_wrapper table.dataTable thead tr th,
-        .table-bordered > thead > tr > th,
-        table.table-bordered.dataTable thead th,
-        table.table-bordered.dataTable thead tr th,
-        .content-wrapper table thead th,
-        .content-wrapper table thead tr th,
-        .card-body table thead th,
-        .card-body table thead tr th,
-        .table thead th,
-        .table thead tr th {
-            background: #3498DB !important;
-            background-color: #3498DB !important;
+        /* ===== BOTONES DEBAJO DE LA TABLA ===== */
+        .btn-primary {
+            background-color: #337ab7 !important;
+            border-color: #2e6da4 !important;
             color: white !important;
-            border-bottom: none !important;
-            border-top: none !important;
-            border-left: none !important;
-            border-right: none !important;
-            font-weight: 600 !important;
-            font-size: 12px !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-            padding: 12px 16px !important;
+            padding: 6px 12px !important;
+            font-size: 14px !important;
+            border-radius: 4px !important;
+            border: 1px solid transparent !important;
+            margin-right: 5px !important;
         }
 
-        /* Hover en headers de DataTables */
-        table.dataTable thead th:hover,
-        table.dataTable thead tr th:hover,
-        .dataTables_wrapper table.dataTable thead th:hover,
-        .dataTables_wrapper table.dataTable thead tr th:hover,
-        .table-bordered > thead > tr > th:hover,
-        table.table-bordered.dataTable thead th:hover,
-        .content-wrapper table thead th:hover,
-        .card-body table thead th:hover,
-        .table thead th:hover {
-            background: #2980B9 !important;
-            background-color: #2980B9 !important;
+        .btn-primary:hover {
+            background-color: #286090 !important;
+            border-color: #204d74 !important;
+        }
+
+        .btn-success {
+            background-color: #5cb85c !important;
+            border-color: #4cae4c !important;
             color: white !important;
-            border: none !important;
+            padding: 6px 12px !important;
+            font-size: 14px !important;
+            border-radius: 4px !important;
+            border: 1px solid transparent !important;
         }
 
-        /* Sorting en DataTables con fondo azul */
-        table.dataTable thead .sorting,
-        table.dataTable thead .sorting_asc,
-        table.dataTable thead .sorting_desc,
-        table.dataTable thead .sorting_asc_disabled,
-        table.dataTable thead .sorting_desc_disabled,
-        .dataTables_wrapper table.dataTable thead .sorting,
-        .dataTables_wrapper table.dataTable thead .sorting_asc,
-        .dataTables_wrapper table.dataTable thead .sorting_desc {
-            background: #3498DB !important;
-            background-color: #3498DB !important;
-            color: white !important;
-            border: none !important;
+        .btn-success:hover {
+            background-color: #449d44 !important;
+            border-color: #398439 !important;
         }
 
-        table.dataTable thead .sorting:hover,
-        table.dataTable thead .sorting_asc:hover,
-        table.dataTable thead .sorting_desc:hover,
-        .dataTables_wrapper table.dataTable thead .sorting:hover,
-        .dataTables_wrapper table.dataTable thead .sorting_asc:hover,
-        .dataTables_wrapper table.dataTable thead .sorting_desc:hover {
-            background: #2980B9 !important;
-            background-color: #2980B9 !important;
-            color: white !important;
-            border: none !important;
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+                float: none !important;
+                text-align: left !important;
+                margin-bottom: 10px !important;
+            }
+
+            .dataTables_wrapper .dataTables_filter {
+                text-align: right !important;
+            }
+
+            .dataTables_wrapper .dataTables_filter input[type="search"] {
+                width: 150px !important;
+            }
+
+            .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate {
+                float: none !important;
+                text-align: center !important;
+                margin-top: 10px !important;
+            }
         }
 
-        /* Iconos de sorting en blanco */
-        table.dataTable thead .sorting:after,
-        table.dataTable thead .sorting_asc:after,
-        table.dataTable thead .sorting_desc:after,
-        table.dataTable thead .sorting:before,
-        table.dataTable thead .sorting_asc:before,
-        table.dataTable thead .sorting_desc:before {
-            color: white !important;
-            opacity: 0.8 !important;
+        /* ===== FORZAR VISIBILIDAD DE TODOS LOS ELEMENTOS ===== */
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
-        /* Forzar estilos en cualquier tabla dentro del content-wrapper */
-        .content-wrapper .table thead,
-        .content-wrapper .table thead tr,
-        .content-wrapper .table thead th,
-        .content-wrapper table thead,
-        .content-wrapper table thead tr,
-        .content-wrapper table thead th {
-            background: #3498DB !important;
-            background-color: #3498DB !important;
-            color: white !important;
-            border: none !important;
+        /* ===== ELIMINAR ESTILOS CONFLICTIVOS ===== */
+        .dataTables_wrapper .dataTables_filter input {
+            background-image: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
         }
 
-        /* ELIMINAR COMPLETAMENTE CUALQUIER LÍNEA DEBAJO DE HEADERS */
-        table.dataTable,
-        .dataTables_wrapper table.dataTable,
-        .table-bordered,
-        table.table-bordered.dataTable {
-            border-collapse: separate !important;
-            border-spacing: 0 !important;
+        /* ===== ARREGLAR EL BUSCADOR DE DATATABLES ===== */ /* Asegurar que el wrapper de DataTables sea visible */
+        .dataTables_wrapper {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            clear: both !important;
         }
 
-        /* Eliminar bordes de la tabla completa */
-        table.dataTable thead tr:after,
-        table.dataTable thead:after,
-        .dataTables_wrapper table.dataTable thead tr:after,
-        .dataTables_wrapper table.dataTable thead:after {
-            display: none !important;
+        /* ===== CONTROLES SUPERIORES (SHOW ENTRIES Y SEARCH) ===== */
+        .dataTables_wrapper .dataTables_length {
+            float: left !important;
+            margin-bottom: 10px !important;
+            display: block !important;
+            visibility: visible !important;
         }
 
-        /* Eliminar cualquier pseudo-elemento que pueda crear líneas */
-        table.dataTable thead tr::after,
-        table.dataTable thead::after,
-        .dataTables_wrapper table.dataTable thead tr::after,
-        .dataTables_wrapper table.dataTable thead::after {
-            content: none !important;
-            display: none !important;
+        .dataTables_wrapper .dataTables_filter {
+            float: right !important;
+            text-align: right !important;
+            margin-bottom: 10px !important;
+            display: block !important;
+            visibility: visible !important;
         }
 
-        /* ===== BOTONES CORREGIDOS ===== */
-
-        /* Botones primarios */
-        .btn-primary,
-        .content-wrapper .btn-primary,
-        .card-body .btn-primary {
-            background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%) !important;
-            background-color: #3498DB !important;
-            border: none !important;
-            border-color: #3498DB !important;
-            color: white !important;
-            border-radius: 6px !important;
+        /* ===== LABEL Y INPUT DEL BUSCADOR ===== */
+        .dataTables_filter label {
             font-weight: 500 !important;
-            padding: 8px 20px !important;
-            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2) !important;
-            transition: all 0.2s ease !important;
+            color: #495057 !important;
+            font-size: 13px !important;
+            margin: 0 !important;
+            display: inline-block !important;
+            white-space: nowrap !important;
         }
 
-        .btn-primary:hover,
-        .content-wrapper .btn-primary:hover,
-        .card-body .btn-primary:hover {
-            background: linear-gradient(135deg, #2980B9 0%, #1f5f8b 100%) !important;
-            background-color: #2980B9 !important;
-            border-color: #2980B9 !important;
-            color: white !important;
-            transform: translateY(-1px) !important;
-            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3) !important;
+        .dataTables_filter input[type="search"] {
+            display: inline-block !important;
+            width: 200px !important;
+            padding: 6px 12px !important;
+            margin-left: 8px !important;
+            border: 1px solid #ced4da !important;
+            border-radius: 4px !important;
+            font-size: 13px !important;
+            color: #495057 !important;
+            background-color: #ffffff !important;
+            background-image: none !important;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075) !important;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out !important;
+            vertical-align: middle !important;
         }
 
-        .btn-primary:focus,
-        .btn-primary:active,
-        .content-wrapper .btn-primary:focus,
-        .content-wrapper .btn-primary:active {
-            background: #2980B9 !important;
-            background-color: #2980B9 !important;
-            border-color: #2980B9 !important;
-            color: white !important;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25) !important;
+        .dataTables_filter input[type="search"]:focus {
+            border-color: #80bdff !important;
+            outline: 0 !important;
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075), 0 0 0 0.2rem rgba(0, 123, 255, .25) !important;
         }
 
-        /* Botones secundarios */
-        .btn-secondary,
-        .content-wrapper .btn-secondary,
-        .card-body .btn-secondary {
-            background: #6c757d !important;
-            background-color: #6c757d !important;
-            border: 1px solid #6c757d !important;
-            border-color: #6c757d !important;
-            color: white !important;
-            border-radius: 6px !important;
-            font-weight: 500 !important;
+        /* ===== CLEARFIX PARA LOS CONTROLES SUPERIORES ===== */
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 15px !important;
         }
 
-        .btn-secondary:hover,
-        .content-wrapper .btn-secondary:hover,
-        .card-body .btn-secondary:hover {
-            background: #5a6268 !important;
-            background-color: #5a6268 !important;
-            border-color: #5a6268 !important;
-            color: white !important;
+        .dataTables_wrapper::after {
+            content: "" !important;
+            display: table !important;
+            clear: both !important;
         }
 
-        /* Botones de éxito */
-        .btn-success,
-        .content-wrapper .btn-success,
-        .card-body .btn-success {
-            background: #28a745 !important;
-            background-color: #28a745 !important;
-            border: 1px solid #28a745 !important;
-            border-color: #28a745 !important;
-            color: white !important;
-            border-radius: 6px !important;
-            font-weight: 500 !important;
+        /* ===== FORZAR VISIBILIDAD DE TODOS LOS ELEMENTOS ===== */
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
-        .btn-success:hover,
-        .content-wrapper .btn-success:hover,
-        .card-body .btn-success:hover {
-            background: #218838 !important;
-            background-color: #218838 !important;
-            border-color: #218838 !important;
-            color: white !important;
+        /* ===== ESPACIADO ENTRE CONTROLES Y TABLA ===== */
+        .dataTables_wrapper .dataTables_scroll {
+            clear: both !important;
+            margin-top: 10px !important;
         }
 
-        /* Botones de peligro */
-        .btn-danger,
-        .content-wrapper .btn-danger,
-        .card-body .btn-danger {
-            background: #dc3545 !important;
-            background-color: #dc3545 !important;
-            border: 1px solid #dc3545 !important;
-            border-color: #dc3545 !important;
-            color: white !important;
-            border-radius: 6px !important;
-            font-weight: 500 !important;
+        /* ===== CONTROLES INFERIORES ===== */
+        .dataTables_wrapper .dataTables_info {
+            float: left !important;
+            padding-top: 8px !important;
+            font-size: 13px !important;
+            color: #6c757d !important;
         }
 
-        .btn-danger:hover,
-        .content-wrapper .btn-danger:hover,
-        .card-body .btn-danger:hover {
-            background: #c82333 !important;
-            background-color: #c82333 !important;
-            border-color: #c82333 !important;
-            color: white !important;
+        .dataTables_wrapper .dataTables_paginate {
+            float: right !important;
+            margin: 0 !important;
         }
 
-        /* Botones de advertencia */
-        .btn-warning,
-        .content-wrapper .btn-warning,
-        .card-body .btn-warning {
-            background: #ffc107 !important;
-            background-color: #ffc107 !important;
-            border: 1px solid #ffc107 !important;
-            border-color: #ffc107 !important;
-            color: #212529 !important;
-            border-radius: 6px !important;
-            font-weight: 500 !important;
+        /* ===== RESPONSIVE PARA EL BUSCADOR ===== */
+        @media (max-width: 768px) {
+            .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter {
+                float: none !important;
+                text-align: center !important;
+                margin-bottom: 10px !important;
+            }
+
+            .dataTables_filter input[type="search"] {
+                width: 150px !important;
+            }
         }
 
-        .btn-warning:hover,
-        .content-wrapper .btn-warning:hover,
-        .card-body .btn-warning:hover {
-            background: #e0a800 !important;
-            background-color: #e0a800 !important;
-            border-color: #e0a800 !important;
-            color: #212529 !important;
+        /* ===== ELIMINAR CUALQUIER CSS QUE OCULTE EL BUSCADOR ===== */
+        .dataTables_filter input {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: static !important;
+            left: auto !important;
+            top: auto !important;
+            z-index: auto !important;
+            width: 200px !important;
+            height: auto !important;
+            margin: 0 0 0 8px !important;
+            padding: 6px 12px !important;
         }
 
-        /* Botones de información */
-        .btn-info,
-        .content-wrapper .btn-info,
-        .card-body .btn-info {
-            background: #17a2b8 !important;
-            background-color: #17a2b8 !important;
-            border: 1px solid #17a2b8 !important;
-            border-color: #17a2b8 !important;
-            color: white !important;
-            border-radius: 6px !important;
-            font-weight: 500 !important;
+        /* ===== ASEGURAR QUE NO HAY ESTILOS QUE INTERFIERAN ===== */
+        .dataTables_wrapper * {
+            box-sizing: border-box !important;
         }
 
-        .btn-info:hover,
-        .content-wrapper .btn-info:hover,
-        .card-body .btn-info:hover {
-            background: #138496 !important;
-            background-color: #138496 !important;
-            border-color: #138496 !important;
-            color: white !important;
+        /* ===== LAYOUT COMPLETO DE DATATABLES ===== */
+        .dataTables_wrapper .row {
+            margin: 0 !important;
         }
 
-        /* Botones outline */
-        .btn-outline-primary,
-        .content-wrapper .btn-outline-primary {
-            color: #3498DB !important;
-            border-color: #3498DB !important;
-            background: transparent !important;
+        .dataTables_wrapper .row:before, .dataTables_wrapper .row:after {
+            content: " " !important;
+            display: table !important;
         }
 
-        .btn-outline-primary:hover,
-        .content-wrapper .btn-outline-primary:hover {
-            background: #3498DB !important;
-            background-color: #3498DB !important;
-            border-color: #3498DB !important;
-            color: white !important;
+        .dataTables_wrapper .row:after {
+            clear: both !important;
         }
 
-        /* ===== OCULTAR MENSAJES DE DATATABLES VACÍAS ===== */
+        /* ===== ESPECÍFICO PARA TU LAYOUT ===== */
+        .content-wrapper .dataTables_wrapper .dataTables_filter, .card-body .dataTables_wrapper .dataTables_filter {
+            float: right !important;
+            text-align: right !important;
+            display: block !important;
+            visibility: visible !important;
+        }
 
-        /* ===== MOSTRAR MENSAJE "SIN RESULTADOS" CUANDO NO HAY DATOS ===== */
+        .content-wrapper .dataTables_wrapper .dataTables_filter input, .card-body .dataTables_wrapper .dataTables_filter input {
+            display: inline-block !important;
+            visibility: visible !important;
+            width: 200px !important;
+            margin-left: 8px !important;
+        }
 
-        /* ===== OCULTAR CUERPO DE TABLA CUANDO NO HAY DATOS ===== */
-
-        /* Ocultar mensaje "Sin resultados" */
-        .dataTables_empty,
-        table.dataTable tbody .dataTables_empty,
-        .dataTables_wrapper .dataTables_empty,
-        td.dataTables_empty {
+        /* ===== OCULTAR MENSAJES DE DATATABLES VACÍAS ===== */ /* ===== MOSTRAR MENSAJE "SIN RESULTADOS" CUANDO NO HAY DATOS ===== */ /* ===== OCULTAR CUERPO DE TABLA CUANDO NO HAY DATOS ===== */ /* Ocultar mensaje "Sin resultados" */
+        .dataTables_empty, table.dataTable tbody .dataTables_empty, .dataTables_wrapper .dataTables_empty, td.dataTables_empty {
             display: none !important;
         }
 
@@ -858,15 +860,12 @@
         }
 
         /* Ocultar toda la fila que contiene solo el mensaje de sin resultados */
-        table.dataTable tbody tr:has(td[colspan]):only-child,
-        table.dataTable tbody tr:has(td.dataTables_empty) {
+        table.dataTable tbody tr:has(td[colspan]):only-child, table.dataTable tbody tr:has(td.dataTables_empty) {
             display: none !important;
         }
 
         /* Ocultar celdas con texto "Sin resultados" */
-        table.dataTable tbody td:contains("Sin resultados"),
-        table.dataTable tbody td:contains("No data available"),
-        table.dataTable tbody td:contains("No hay datos disponibles") {
+        table.dataTable tbody td:contains("Sin resultados"), table.dataTable tbody td:contains("No data available"), table.dataTable tbody td:contains("No hay datos disponibles") {
             display: none !important;
         }
 
@@ -876,14 +875,12 @@
         }
 
         /* Ocultar el tbody completo cuando está vacío o solo tiene mensajes de "sin datos" */
-        table.dataTable tbody:empty,
-        .dataTables_wrapper table.dataTable tbody:empty {
+        table.dataTable tbody:empty, .dataTables_wrapper table.dataTable tbody:empty {
             display: none !important;
         }
 
         /* Ocultar tbody cuando solo contiene filas con mensajes de "sin datos" */
-        table.dataTable tbody:has(tr:only-child td[colspan]),
-        .dataTables_wrapper table.dataTable tbody:has(tr:only-child td[colspan]) {
+        table.dataTable tbody:has(tr:only-child td[colspan]), .dataTables_wrapper table.dataTable tbody:has(tr:only-child td[colspan]) {
             display: none !important;
         }
 
@@ -897,43 +894,12 @@
         }
 
         /* Ocultar información de DataTables cuando no hay datos */
-        .dataTables_wrapper .dataTables_info:contains("No data available"),
-        .dataTables_wrapper .dataTables_info:contains("Sin resultados"),
-        .dataTables_wrapper .dataTables_info:contains("No hay datos disponibles"),
-        .dataTables_wrapper .dataTables_info:contains("Mostrando 0 a 0 de 0 entradas") {
+        .dataTables_wrapper .dataTables_info:contains("No data available"), .dataTables_wrapper .dataTables_info:contains("Sin resultados"), .dataTables_wrapper .dataTables_info:contains("No hay datos disponibles"), .dataTables_wrapper .dataTables_info:contains("Mostrando 0 a 0 de 0 entradas") {
             display: none !important;
         }
 
-        /* ===== INPUTS INVISIBLES EN DATATABLES ===== */
-
-        /* Hacer inputs completamente invisibles dentro de las tablas */
-        table.dataTable tbody td input,
-        table.dataTable tbody td input[type="text"],
-        table.dataTable tbody td input[type="number"],
-        table.dataTable tbody td input[type="email"],
-        table.dataTable tbody td input[type="password"],
-        table.dataTable tbody td input[type="date"],
-        table.dataTable tbody td input[type="datetime-local"],
-        table.dataTable tbody td textarea,
-        table.dataTable tbody td select,
-        .dataTables_wrapper table tbody td input,
-        .dataTables_wrapper table tbody td input[type="text"],
-        .dataTables_wrapper table tbody td input[type="number"],
-        .dataTables_wrapper table tbody td input[type="email"],
-        .dataTables_wrapper table tbody td input[type="password"],
-        .dataTables_wrapper table tbody td input[type="date"],
-        .dataTables_wrapper table tbody td input[type="datetime-local"],
-        .dataTables_wrapper table tbody td textarea,
-        .dataTables_wrapper table tbody td select,
-        .content-wrapper table tbody td input,
-        .content-wrapper table tbody td input[type="text"],
-        .content-wrapper table tbody td input[type="number"],
-        .content-wrapper table tbody td input[type="email"],
-        .content-wrapper table tbody td input[type="password"],
-        .content-wrapper table tbody td input[type="date"],
-        .content-wrapper table tbody td input[type="datetime-local"],
-        .content-wrapper table tbody td textarea,
-        .content-wrapper table tbody td select {
+        /* ===== INPUTS INVISIBLES EN DATATABLES ===== */ /* Hacer inputs completamente invisibles dentro de las tablas */
+        table.dataTable tbody td input, table.dataTable tbody td input[type="text"], table.dataTable tbody td input[type="number"], table.dataTable tbody td input[type="email"], table.dataTable tbody td input[type="password"], table.dataTable tbody td input[type="date"], table.dataTable tbody td input[type="datetime-local"], table.dataTable tbody td textarea, table.dataTable tbody td select, .dataTables_wrapper table tbody td input, .dataTables_wrapper table tbody td input[type="text"], .dataTables_wrapper table tbody td input[type="number"], .dataTables_wrapper table tbody td input[type="email"], .dataTables_wrapper table tbody td input[type="password"], .dataTables_wrapper table tbody td input[type="date"], .dataTables_wrapper table tbody td input[type="datetime-local"], .dataTables_wrapper table tbody td textarea, .dataTables_wrapper table tbody td select, .content-wrapper table tbody td input, .content-wrapper table tbody td input[type="text"], .content-wrapper table tbody td input[type="number"], .content-wrapper table tbody td input[type="email"], .content-wrapper table tbody td input[type="password"], .content-wrapper table tbody td input[type="date"], .content-wrapper table tbody td input[type="datetime-local"], .content-wrapper table tbody td textarea, .content-wrapper table tbody td select {
             border: none !important;
             background: transparent !important;
             background-color: transparent !important;
@@ -954,15 +920,7 @@
         }
 
         /* Eliminar focus de inputs invisibles */
-        table.dataTable tbody td input:focus,
-        table.dataTable tbody td textarea:focus,
-        table.dataTable tbody td select:focus,
-        .dataTables_wrapper table tbody td input:focus,
-        .dataTables_wrapper table tbody td textarea:focus,
-        .dataTables_wrapper table tbody td select:focus,
-        .content-wrapper table tbody td input:focus,
-        .content-wrapper table tbody td textarea:focus,
-        .content-wrapper table tbody td select:focus {
+        table.dataTable tbody td input:focus, table.dataTable tbody td textarea:focus, table.dataTable tbody td select:focus, .dataTables_wrapper table tbody td input:focus, .dataTables_wrapper table tbody td textarea:focus, .dataTables_wrapper table tbody td select:focus, .content-wrapper table tbody td input:focus, .content-wrapper table tbody td textarea:focus, .content-wrapper table tbody td select:focus {
             border: none !important;
             background: transparent !important;
             background-color: transparent !important;
@@ -971,15 +929,7 @@
         }
 
         /* Eliminar hover de inputs invisibles */
-        table.dataTable tbody td input:hover,
-        table.dataTable tbody td textarea:hover,
-        table.dataTable tbody td select:hover,
-        .dataTables_wrapper table tbody td input:hover,
-        .dataTables_wrapper table tbody td textarea:hover,
-        .dataTables_wrapper table tbody td select:hover,
-        .content-wrapper table tbody td input:hover,
-        .content-wrapper table tbody td textarea:hover,
-        .content-wrapper table tbody td select:hover {
+        table.dataTable tbody td input:hover, table.dataTable tbody td textarea:hover, table.dataTable tbody td select:hover, .dataTables_wrapper table tbody td input:hover, .dataTables_wrapper table tbody td textarea:hover, .dataTables_wrapper table tbody td select:hover, .content-wrapper table tbody td input:hover, .content-wrapper table tbody td textarea:hover, .content-wrapper table tbody td select:hover {
             border: none !important;
             background: transparent !important;
             background-color: transparent !important;
@@ -987,46 +937,29 @@
         }
 
         /* Eliminar placeholder visible */
-        table.dataTable tbody td input::placeholder,
-        table.dataTable tbody td textarea::placeholder,
-        .dataTables_wrapper table tbody td input::placeholder,
-        .dataTables_wrapper table tbody td textarea::placeholder,
-        .content-wrapper table tbody td input::placeholder,
-        .content-wrapper table tbody td textarea::placeholder {
+        table.dataTable tbody td input::placeholder, table.dataTable tbody td textarea::placeholder, .dataTables_wrapper table tbody td input::placeholder, .dataTables_wrapper table tbody td textarea::placeholder, .content-wrapper table tbody td input::placeholder, .content-wrapper table tbody td textarea::placeholder {
             color: transparent !important;
             opacity: 0 !important;
         }
 
         /* Para selects, eliminar la flecha dropdown */
-        table.dataTable tbody td select,
-        .dataTables_wrapper table tbody td select,
-        .content-wrapper table tbody td select {
+        table.dataTable tbody td select, .dataTables_wrapper table tbody td select, .content-wrapper table tbody td select {
             background-image: none !important;
             cursor: text !important;
         }
 
         /* Hacer que los inputs se vean exactamente como texto normal */
-        table.dataTable tbody td input,
-        table.dataTable tbody td textarea,
-        table.dataTable tbody td select,
-        .dataTables_wrapper table tbody td input,
-        .dataTables_wrapper table tbody td textarea,
-        .dataTables_wrapper table tbody td select,
-        .content-wrapper table tbody td input,
-        .content-wrapper table tbody td textarea,
-        .content-wrapper table tbody td select {
+        table.dataTable tbody td input, table.dataTable tbody td textarea, table.dataTable tbody td select, .dataTables_wrapper table tbody td input, .dataTables_wrapper table tbody td textarea, .dataTables_wrapper table tbody td select, .content-wrapper table tbody td input, .content-wrapper table tbody td textarea, .content-wrapper table tbody td select {
             display: inline !important;
             vertical-align: baseline !important;
             min-height: auto !important;
             height: auto !important;
         }
     </style>
-
-    {% block head %}
-    {% endblock %}
-
+    {% block head %}    {% endblock %}
+    </link>
+    </link>
 </head>
-
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
     <!-- Navbar -->
@@ -1034,499 +967,823 @@
         <!-- Left navbar links -->
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link cursor-pointer collapsedMenu" id="collapsedMenu" data-widget="pushmenu"
-                   role="button"><i class="fas fa-bars"></i></a>
+                <a class="nav-link cursor-pointer collapsedMenu" data-widget="pushmenu" id="collapsedMenu"
+                   role="button">
+                    <i class="fas fa-bars">
+                    </i>
+                </a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="{% url 'inicio_dashboard' %}" class="nav-link"><strong>Inicio</strong></a>
+                <a class="nav-link" href="{% url 'inicio_dashboard' %}">
+                    <strong>
+                        Inicio
+                    </strong>
+                </a>
             </li>
         </ul>
-
         <!-- Right navbar links -->
         <ul class="navbar-nav ml-auto">
             <!-- Messages Dropdown Menu -->
             <li class="nav-item dropdown">
-
                 <!-- La IP direccion -->
             <li class="nav-item">
-                <a class="nav-link" data-toggle="tooltip" data-placement="bottom" data-html="true">
+                <a class="nav-link" data-html="true" data-placement="bottom" data-toggle="tooltip">
                 </a>
             </li>
-
             <a class="nav-link" data-toggle="dropdown" href="#">
-                <strong><i class="fas fa-users-cog"></i>&nbsp;&nbsp;{{ request.user.first_name }}
+                <strong>
+                    <i class="fas fa-users-cog">
+                    </i>
+                    {{ request.user.first_name }}
                 </strong>
             </a>
             <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                    <span class="dropdown-header">
-                        Último acceso:<br>
-                        {{ request.user.last_login }}
-                    </span>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-edit mr-2"></i> Editar perfil
+       <span class="dropdown-header">
+        Último acceso:
+        <br/>
+        {{ request.user.last_login }}
+       </span>
+                <div class="dropdown-divider">
+                </div>
+                <a class="dropdown-item" href="#">
+                    <i class="fas fa-edit mr-2">
+                    </i>
+                    Editar perfil
                 </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-lock mr-2"></i> Cambiar contraseña
+                <div class="dropdown-divider">
+                </div>
+                <a class="dropdown-item" href="#">
+                    <i class="fas fa-lock mr-2">
+                    </i>
+                    Cambiar contraseña
                 </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item dropdown-footer">
-                    <strong>PSM & BIO</strong> - Sistema de Producción
+                <div class="dropdown-divider">
+                </div>
+                <a class="dropdown-item dropdown-footer" href="#">
+                    <strong>
+                        PSM &amp; BIO
+                    </strong>
+                    - Sistema de Producción
                 </a>
             </div>
             </li>
-
             <li class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#">
-                    <strong><i class="nav-icon fas fa-power-off"></i></strong>
+                    <strong>
+                        <i class="nav-icon fas fa-power-off">
+                        </i>
+                    </strong>
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                    <a href="{% url 'logout' %}" class="dropdown-item dropdown-footer">
-                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    <a class="dropdown-item dropdown-footer" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt">
+                        </i>
+                        Cerrar Sesión
                     </a>
                 </div>
             </li>
         </ul>
     </nav>
-
     <aside class="main-sidebar sidebar-light-lightblue elevation-4">
         <!-- Brand Logo -->
-        {% comment %} <a href="#" class="brand-link">
-            <img src="{% static 'img/img_empresa/LOGO2.png' %}" class="brand-image img-circle elevation-3" style="opacity: .8; width: 50px; height: 45px;">
-            <span class="brand-text"><span id="empresa-sidebar-title">PSM & BIO</span></span>
-        </a>{% endcomment %}
-
-        <a href="{% url 'inicio_dashboard' %}"
-           class="brand-link d-flex align-items-center justify-content-center text-center">
-            <img src="{% static 'img/img_empresa/LOGO2.png' %}" alt="AdminLTE Logo"
-                 class="brand-image img-circle elevation-3 me-2" style="opacity: .8; width: 50px; height: 45px;">
-            <span class="brand-text font-weight-light" id="empresa-sidebar-title">PSM & BIO</span>
+        {% comment %}
+    <a class="brand-link" href="#">
+     <img class="brand-image img-circle elevation-3" src="{% static 'img/img_empresa/LOGO2.png' %}" style="opacity: .8; width: 50px; height: 45px;"/>
+     <span class="brand-text">
+      <span id="empresa-sidebar-title">
+       PSM &amp; BIO
+      </span>
+     </span>
+    </a>
+    {% endcomment %}
+        <a class="brand-link d-flex align-items-center justify-content-center text-center"
+           href="{% url 'inicio_dashboard' %}">
+            <img alt="AdminLTE Logo" class="brand-image img-circle elevation-3 me-2"
+                 src="{% static 'img/img_empresa/LOGO2.png' %}" style="opacity: .8; width: 50px; height: 45px;"/>
+            <span class="brand-text font-weight-light" id="empresa-sidebar-title">
+      PSM &amp; BIO
+     </span>
         </a>
-
         <div class="sidebar">
             <!-- Sidebar user panel (optional) -->
             <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                 <div class="image text-center">
-                    <img id="logo-empresa-sidebar" src="{% static 'img/img_empresa/logo_slider-png.png' %}"
-                         class="img-fluid img-responsive d-block mx-auto text-center"
-                         style="width: 180px; height: 110px; border-radius: 8px;" alt="User Image">
+                    <img alt="User Image" class="img-fluid img-responsive d-block mx-auto text-center"
+                         id="logo-empresa-sidebar" src="{% static 'img/img_empresa/logo_slider-png.png' %}"
+                         style="width: 180px; height: 110px; border-radius: 8px;"/>
                     <div class="brand-text font-weight-light" style="margin-top: 12px;">
-                        <h6><strong>USUARIO:</strong></h6>
-                        <h6><strong>{{ request.user.first_name }} {{ request.user.last_name }}</strong></h6>
+                        <h6>
+                            <strong>
+                                USUARIO:
+                            </strong>
+                        </h6>
+                        <h6>
+                            <strong>
+                                {{ request.user.first_name }} {{ request.user.last_name }}
+                            </strong>
+                        </h6>
                     </div>
                 </div>
             </div>
-
             <nav class="mt-2">
-
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                    data-accordion="false">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-accordion="false" data-widget="treeview"
+                    role="menu">
                     <!-- Add icons to the links using the .nav-icon class with font-awesome or any other icon font library -->
-                    <li class="nav-header"><span id="menu-title-sidebar">PSM & BIO</span> - Menú Principal</li>
+                    <li class="nav-header">
+        <span id="menu-title-sidebar">
+         PSM &amp; BIO
+        </span>
+                        - Menú Principal
+                    </li>
                     <!-- Modulo Dashboard -->
                     <li class="nav-item has-treeview">
-                        <a href="{% url 'inicio_dashboard' %}" class="nav-link active">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>Dashboard</p>
+                        <a class="nav-link active" href="{% url 'inicio_dashboard' %}">
+                            <i class="nav-icon fas fa-tachometer-alt">
+                            </i>
+                            <p>
+                                Dashboard
+                            </p>
                         </a>
                     </li>
                     <!-- Modulo Inventario -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fa fa-sitemap"></i>
-                            <p>Inventario<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fa fa-sitemap">
+                            </i>
+                            <p>
+                                Inventario
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_categoria:listar_categoria' %}" class="nav-link"><i
-                                        class="far nav-icon fa fa-archive"></i>
-                                    <p>Categorías</p></a>
+                                <a class="nav-link" href="{% url 'app_categoria:listar_categoria' %}">
+                                    <i class="far nav-icon fa fa-archive">
+                                    </i>
+                                    <p>
+                                        Categorías
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_categoria:listar_producto' %}" class="nav-link"><i
-                                        class="far nav-icon fa fa-cubes"></i>
-                                    <p>Productos</p></a>
+                                <a class="nav-link" href="{% url 'app_categoria:listar_producto' %}">
+                                    <i class="far nav-icon fa fa-cubes">
+                                    </i>
+                                    <p>
+                                        Productos
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Insumos Balanceados -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-boxes"></i>
-                            <p>Insumos Balanceado<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-boxes">
+                            </i>
+                            <p>
+                                Insumos Balanceado
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item psm-item">
-                                <a href="{% url 'app_stock:listar_stock_psm' %}" class="nav-link"><i
-                                        class="far nav-icon fa fa-cube"></i>
-                                    <p>Insumos PSM</p></a>
+                                <a class="nav-link" href="{% url 'app_stock:listar_stock_psm' %}">
+                                    <i class="far nav-icon fa fa-cube">
+                                    </i>
+                                    <p>
+                                        Insumos PSM
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item bio-item">
-                                <a href="{% url 'app_stock:listar_stock_bio' %}" class="nav-link"><i
-                                        class="far nav-icon fa fa-cube"></i>
-                                    <p>Insumos BIO</p></a>
+                                <a class="nav-link" href="{% url 'app_stock:listar_stock_bio' %}">
+                                    <i class="far nav-icon fa fa-cube">
+                                    </i>
+                                    <p>
+                                        Insumos BIO
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item both-item">
-                                <a href="{% url 'app_stock:listar_stock_psmybio' %}" class="nav-link"><i
-                                        class="far nav-icon fa fa-cube"></i>
-                                    <p>Insumos de Empresas</p></a>
+                                <a class="nav-link" href="{% url 'app_stock:listar_stock_psmybio' %}">
+                                    <i class="far nav-icon fa fa-cube">
+                                    </i>
+                                    <p>
+                                        Insumos de Empresas
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Insumos de Campo -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-boxes"></i>
-                            <p>Insumos Campo<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-boxes">
+                            </i>
+                            <p>
+                                Insumos Campo
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item psm-item">
-                                <a href="{% url 'app_stock_directo:listar_stock_directo_psm' %}" class="nav-link"><i
-                                        class="far nav-icon fa fa-cube"></i>
-                                    <p>Insumos PSM</p></a>
+                                <a class="nav-link" href="{% url 'app_stock_directo:listar_stock_directo_psm' %}">
+                                    <i class="far nav-icon fa fa-cube">
+                                    </i>
+                                    <p>
+                                        Insumos PSM
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item bio-item">
-                                <a href="{% url 'app_stock_directo:listar_stock_directo_bio' %}" class="nav-link"><i
-                                        class="far nav-icon fa fa-cube"></i>
-                                    <p>Insumos BIO</p></a>
+                                <a class="nav-link" href="{% url 'app_stock_directo:listar_stock_directo_bio' %}">
+                                    <i class="far nav-icon fa fa-cube">
+                                    </i>
+                                    <p>
+                                        Insumos BIO
+                                    </p>
+                                </a>
                             </li>
-
                         </ul>
                     </li>
                     <!-- Modulo Consumo por Piscinas -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>Consumo por Piscinas<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-chart-line">
+                            </i>
+                            <p>
+                                Consumo por Piscinas
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_consumo:listar_consumo' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Detalles de Consumo</p></a>
+                                <a class="nav-link" href="{% url 'app_consumo:listar_consumo' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Detalles de Consumo
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_consumo:listar_consumo_general' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Conglomerado Consumo</p></a>
+                                <a class="nav-link" href="{% url 'app_consumo:listar_consumo_general' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Conglomerado Consumo
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_consumo:listar_resumen_general' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Resumen General Consumo</p></a>
+                                <a class="nav-link" href="{% url 'app_consumo:listar_resumen_general' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Resumen General Consumo
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                         <ul class="nav nav-treeview">
                             <li class="nav-item psm-item">
-                                <a href="{% url 'app_consumo:listar_resumen_general_psm' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Resumen PSM Consumo</p></a>
+                                <a class="nav-link" href="{% url 'app_consumo:listar_resumen_general_psm' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Resumen PSM Consumo
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                         <ul class="nav nav-treeview">
                             <li class="nav-item bio-item">
-                                <a href="{% url 'app_consumo:listar_resumen_general_bio' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Resumen BIO Consumo</p></a>
+                                <a class="nav-link" href="{% url 'app_consumo:listar_resumen_general_bio' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Resumen BIO Consumo
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Consumo por Linea -->
                     <li class="nav-item has-treeview psm-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>Consumo por Línea<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-chart-line">
+                            </i>
+                            <p>
+                                Consumo por Línea
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_consumo:listar_resumen_general_psm_linea' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Consumo PSM </p></a>
+                                <a class="nav-link" href="{% url 'app_consumo:listar_resumen_general_psm_linea' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Consumo PSM
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Corrida -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-clipboard-check"></i>
-                            <p>Corridas<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-clipboard-check">
+                            </i>
+                            <p>
+                                Corridas
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_corrida:listar_siembra_cuant' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Siembras de Precrias</p></a>
+                                <a class="nav-link" href="{% url 'app_corrida:listar_siembra_cuant' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Siembras de Precrias
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_corrida:listar_transferencia' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Transferencia</p></a>
+                                <a class="nav-link" href="{% url 'app_corrida:listar_transferencia' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Transferencia
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Desarrollo</p></a>
+                                <a class="nav-link" href="#">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Desarrollo
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Empresa -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-building"></i>
-                            <p>Empresa<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-building">
+                            </i>
+                            <p>
+                                Empresa
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_empresa:listar_empresa' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Ver Detalles</p></a>
+                                <a class="nav-link" href="{% url 'app_empresa:listar_empresa' %}">
+                                    <i class="far fa-dot-circle nav-icon">
+                                    </i>
+                                    <p>
+                                        Ver Detalles
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_empresa:listar_piscinas' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Asignar Piscinas</p></a>
+                                <a class="nav-link" href="{% url 'app_empresa:listar_piscinas' %}">
+                                    <i class="far fa-dot-circle nav-icon">
+                                    </i>
+                                    <p>
+                                        Asignar Piscinas
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Proveedor -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-truck"></i>
-                            <p>Proveedor<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-truck">
+                            </i>
+                            <p>
+                                Proveedor
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_proveedor:listar_proveedor' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Ver Detalles</p></a>
+                                <a class="nav-link" href="{% url 'app_proveedor:listar_proveedor' %}">
+                                    <i class="far fa-dot-circle nav-icon">
+                                    </i>
+                                    <p>
+                                        Ver Detalles
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Dieta Piscina-->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-list-alt"></i>
-                            <p>Dieta Piscinas<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-list-alt">
+                            </i>
+                            <p>
+                                Dieta Piscinas
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_dieta:principal_anio' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Crear Dietas Piscinas</p></a>
+                                <a class="nav-link" href="{% url 'app_dieta:principal_anio' %}">
+                                    <i class="far fa-dot-circle nav-icon">
+                                    </i>
+                                    <p>
+                                        Crear Dietas Piscinas
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_dieta:listar_descripcion_dieta' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Escaneado - Dietas</p></a>
+                                <a class="nav-link" href="{% url 'app_dieta:listar_descripcion_dieta' %}">
+                                    <i class="far fa-dot-circle nav-icon">
+                                    </i>
+                                    <p>
+                                        Escaneado - Dietas
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Dieta Precria-->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-list-alt"></i>
-                            <p>Dieta Precrias<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fas fa-list-alt">
+                            </i>
+                            <p>
+                                Dieta Precrias
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_dieta:principal_anio_prec' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Crear Dietas Precrias</p></a>
+                                <a class="nav-link" href="{% url 'app_dieta:principal_anio_prec' %}">
+                                    <i class="far fa-dot-circle nav-icon">
+                                    </i>
+                                    <p>
+                                        Crear Dietas Precrias
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_dieta:listar_descripcion_dieta' %}" class="nav-link"><i
-                                        class="far fa-dot-circle nav-icon"></i>
-                                    <p>Escaneado - Dietas</p></a>
+                                <a class="nav-link" href="{% url 'app_dieta:listar_descripcion_dieta' %}">
+                                    <i class="far fa-dot-circle nav-icon">
+                                    </i>
+                                    <p>
+                                        Escaneado - Dietas
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Facturas Compra -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fa fa-clipboard-check"></i>
-                            <p>Compras<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fa fa-clipboard-check">
+                            </i>
+                            <p>
+                                Compras
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_factura:listar_factura' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Factura de Producto</p></a>
+                                <a class="nav-link" href="{% url 'app_factura:listar_factura' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Factura de Producto
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Factura de Gasto</p></a>
+                                <a class="nav-link" href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Factura de Gasto
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Kardex -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fa fa-book"></i>
-                            <p>Kardex<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fa fa-book">
+                            </i>
+                            <p>
+                                Kardex
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_general' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex General</p></a>
+                                <a class="nav-link" href="{% url 'app_kardex:listar_kardex_general' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Kardex General
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_detallado' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Detallado </p></a>
+                                <a class="nav-link" href="{% url 'app_kardex:listar_kardex_detallado' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Kardex Detallado
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item psm-item">
-                                <a href="{% url 'app_kardex:listar_kardex_movimientos_psm' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Movimientos PSM </p></a>
+                                <a class="nav-link" href="{% url 'app_kardex:listar_kardex_movimientos_psm' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Kardex Movimientos PSM
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item bio-item">
-                                <a href="{% url 'app_kardex:listar_kardex_movimientos_bio' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Movimientos BIO </p></a>
+                                <a class="nav-link" href="{% url 'app_kardex:listar_kardex_movimientos_bio' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Kardex Movimientos BIO
+                                    </p>
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{% url 'app_kardex:listar_kardex_productos' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Kardex Productos </p></a>
+                                <a class="nav-link" href="{% url 'app_kardex:listar_kardex_productos' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Kardex Productos
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
                     <!-- Modulo Clientes -->
                     <li class="nav-item has-treeview">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fa fa-clipboard-check"></i>
-                            <p>Clientes<i class="fas fa-angle-left right"></i></p>
+                        <a class="nav-link" href="#">
+                            <i class="nav-icon fa fa-clipboard-check">
+                            </i>
+                            <p>
+                                Clientes
+                                <i class="fas fa-angle-left right">
+                                </i>
+                            </p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{% url 'app_cliente:listar_cliente' %}" class="nav-link"><i
-                                        class="nav-icon fas fa-list-alt"></i>
-                                    <p>Ver Clientes</p></a>
+                                <a class="nav-link" href="{% url 'app_cliente:listar_cliente' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Ver Clientes
+                                    </p>
+                                </a>
                             </li>
                         </ul>
                     </li>
-
                     {% if request.user.is_superuser == True %}
-
                         <!-- Barra que divide campo Administracion-->
-                        <li class="nav-header">Administración</li>
+                        <li class="nav-header">
+                            Administración
+                        </li>
                         <!-- Modulo Contabilidad -->
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-calculator"></i>
-                                <p>Contabilidad<i class="fas fa-angle-left right"></i></p>
+                            <a class="nav-link" href="#">
+                                <i class="nav-icon fas fa-calculator">
+                                </i>
+                                <p>
+                                    Contabilidad
+                                    <i class="fas fa-angle-left right">
+                                    </i>
+                                </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-book-open nav-icon"></i>
-                                        <p>Planes de Cuentas<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-book-open nav-icon">
+                                        </i>
+                                        <p>
+                                            Planes de Cuentas
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item bio-item">
-                                            <a href="{% url 'app_planCuentas:listar_planCuenta_BIO' %}"
-                                               class="nav-link">
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Plan Cuentas BIO</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_planCuenta_BIO' %}">
+                                                <i class="far fa-dot-circle nav-icon">
+                                                </i>
+                                                <p>
+                                                    Plan Cuentas BIO
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item psm-item">
-                                            <a href="{% url 'app_planCuentas:listar_planCuenta_PSM' %}"
-                                               class="nav-link">
-                                                <i class="far fa-dot-circle nav-icon"></i>
-                                                <p>Plan Cuentas PSM</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_planCuenta_PSM' %}">
+                                                <i class="far fa-dot-circle nav-icon">
+                                                </i>
+                                                <p>
+                                                    Plan Cuentas PSM
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-list nav-icon"></i>
-                                        <p>Transacciones sin ATS<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-list nav-icon">
+                                        </i>
+                                        <p>
+                                            Transacciones sin ATS
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item bio-item">
-                                            <a href="{% url 'app_planCuentas:listar_transaccionPlan_bio' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-book nav-icon"></i>
-                                                <p>Transacción BIO</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_transaccionPlan_bio' %}">
+                                                <i class="fa fa-book nav-icon">
+                                                </i>
+                                                <p>
+                                                    Transacción BIO
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item psm-item">
-                                            <a href="{% url 'app_planCuentas:listar_transaccionPlan' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-book nav-icon"></i>
-                                                <p>Transacción PSM</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_transaccionPlan' %}">
+                                                <i class="fa fa-book nav-icon">
+                                                </i>
+                                                <p>
+                                                    Transacción PSM
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-list nav-icon"></i>
-                                        <p>Transacciones con ATS<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-list nav-icon">
+                                        </i>
+                                        <p>
+                                            Transacciones con ATS
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item bio-item">
-                                            <a href="{% url 'app_planCuentas:listar_fact_gasto_bio' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Transacción BIO</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_fact_gasto_bio' %}">
+                                                <i class="fa fa-book-reader nav-icon">
+                                                </i>
+                                                <p>
+                                                    Transacción BIO
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item psm-item">
-                                            <a href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Transacción PSM</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_fact_gasto_psm' %}">
+                                                <i class="fa fa-book-reader nav-icon">
+                                                </i>
+                                                <p>
+                                                    Transacción PSM
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-book nav-icon"></i>
-                                        <p>Mayores<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-book nav-icon">
+                                        </i>
+                                        <p>
+                                            Mayores
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item bio-item">
-                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_bio' %}" class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Mayores de BIO</p></a>
+                                            <a class="nav-link" href="{% url 'app_planCuentas:listar_mayorPlan_bio' %}">
+                                                <i class="fa fa-book-reader nav-icon">
+                                                </i>
+                                                <p>
+                                                    Mayores de BIO
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item psm-item">
-                                            <a href="{% url 'app_planCuentas:listar_mayorPlan_psm' %}" class="nav-link">
-                                                <i class="fa fa-book-reader nav-icon"></i>
-                                                <p>Mayores de PSM</p></a>
+                                            <a class="nav-link" href="{% url 'app_planCuentas:listar_mayorPlan_psm' %}">
+                                                <i class="fa fa-book-reader nav-icon">
+                                                </i>
+                                                <p>
+                                                    Mayores de PSM
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
-                                        <p>Diario General<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fas fa-balance-scale nav-icon">
+                                        </i>
+                                        <p>
+                                            Diario General
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item bio-item">
-                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_bio' %}"
-                                               class="nav-link">
-                                                <i class="fas fa-balance-scale-left nav-icon"></i>
-                                                <p>Diario de BIO</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:diario_general_acumulado_bio' %}">
+                                                <i class="fas fa-balance-scale-left nav-icon">
+                                                </i>
+                                                <p>
+                                                    Diario de BIO
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item psm-item">
-                                            <a href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}"
-                                               class="nav-link">
-                                                <i class="fas fa-balance-scale-right nav-icon"></i>
-                                                <p>Diario de PSM</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:diario_general_acumulado_psm' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Diario de PSM
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fas fa-balance-scale nav-icon"></i>
-                                        <p>Balances de Comprobación<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fas fa-balance-scale nav-icon">
+                                        </i>
+                                        <p>
+                                            Balances de Comprobación
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item bio-item">
-                                            <a href="{% url 'app_planCuentas:listar_balancePlan_bio' %}"
-                                               class="nav-link">
-                                                <i class="fas fa-balance-scale-left nav-icon"></i>
-                                                <p>Balance BIO</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_balancePlan_bio' %}">
+                                                <i class="fas fa-balance-scale-left nav-icon">
+                                                </i>
+                                                <p>
+                                                    Balance BIO
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item psm-item">
-                                            <a href="{% url 'app_planCuentas:listar_balancePlan_psm' %}"
-                                               class="nav-link">
-                                                <i class="fas fa-balance-scale-right nav-icon"></i>
-                                                <p>Balance PSM</p></a>
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:listar_balancePlan_psm' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Balance PSM
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
@@ -1534,413 +1791,476 @@
                         </li>
                         <!-- Modulo Facturas Compra -->
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fa fa-clipboard-check"></i>
-                                <p>Facturación<i class="fas fa-angle-left right"></i></p>
+                            <a class="nav-link" href="#">
+                                <i class="nav-icon fa fa-clipboard-check">
+                                </i>
+                                <p>
+                                    Facturación
+                                    <i class="fas fa-angle-left right">
+                                    </i>
+                                </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{% url 'app_planCuentas:recibo_listar' %}" class="nav-link">
-                                        <i class="nav-icon fas fa-file-export"></i>
-                                        <p>Comprobantes</p></a>
+                                    <a class="nav-link" href="{% url 'app_planCuentas:recibo_listar' %}">
+                                        <i class="nav-icon fas fa-file-export">
+                                        </i>
+                                        <p>
+                                            Comprobantes
+                                        </p>
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="nav-icon fas fa-file-archive"></i>
-                                        <p>Errores de Comprob.</p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="nav-icon fas fa-file-archive">
+                                        </i>
+                                        <p>
+                                            Errores de Comprob.
+                                        </p>
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="nav-icon fas fa-file-archive"></i>
-                                        <p>Notas de Credito</p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="nav-icon fas fa-file-archive">
+                                        </i>
+                                        <p>
+                                            Notas de Credito
+                                        </p>
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{% url 'app_venta:sale_admin_list' %}" class="nav-link">
-                                        <i class="nav-icon fas fa-file-archive"></i>
-                                        <p>Ventas</p></a>
+                                    <a class="nav-link" href="{% url 'app_venta:sale_admin_list' %}">
+                                        <i class="nav-icon fas fa-file-archive">
+                                        </i>
+                                        <p>
+                                            Ventas
+                                        </p>
+                                    </a>
                                 </li>
                             </ul>
                         </li>
-
                         <!-- Costos y Utilidades -->
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link"><i class="fa fa-chart-line nav-icon"></i>
-                                <p>Costos y Utilidades<i class="right fas fa-angle-left"></i></p></a>
+                            <a class="nav-link" href="#">
+                                <i class="fa fa-chart-line nav-icon">
+                                </i>
+                                <p>
+                                    Costos y Utilidades
+                                    <i class="right fas fa-angle-left">
+                                    </i>
+                                </p>
+                            </a>
                             <ul class="nav nav-treeview">
                                 <!-- Reporte de Costo-Utilidad -->
                                 <li class="nav-item">
-                                    <a href="{% url 'app_empresa:costo_utilidad_hectarea' %}"
-                                       class="nav-link">
-                                        <i class="fa fa-chart-bar nav-icon"></i>
-                                        <p>Reporte Costo-Utilidad</p></a>
+                                    <a class="nav-link" href="{% url 'app_empresa:costo_utilidad_hectarea' %}">
+                                        <i class="fa fa-chart-bar nav-icon">
+                                        </i>
+                                        <p>
+                                            Reporte Costo-Utilidad
+                                        </p>
+                                    </a>
                                 </li>
-
                                 <!-- Tipos de Costos -->
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-tags nav-icon"></i>
-                                        <p>Tipos de Costos<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-tags nav-icon">
+                                        </i>
+                                        <p>
+                                            Tipos de Costos
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:tipo_costo_list' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-list nav-icon"></i>
-                                                <p>Listar Tipos</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:tipo_costo_list' %}">
+                                                <i class="fa fa-list nav-icon">
+                                                </i>
+                                                <p>
+                                                    Listar Tipos
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:tipo_costo_create' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-plus nav-icon"></i>
-                                                <p>Crear Tipo</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:tipo_costo_create' %}">
+                                                <i class="fa fa-plus nav-icon">
+                                                </i>
+                                                <p>
+                                                    Crear Tipo
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
-
                                 <!-- Costos Operativos -->
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-money-bill nav-icon"></i>
-                                        <p>Costos Operativos<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-money-bill nav-icon">
+                                        </i>
+                                        <p>
+                                            Costos Operativos
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:costo_operativo_list' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-list nav-icon"></i>
-                                                <p>Listar Costos</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:costo_operativo_list' %}">
+                                                <i class="fa fa-list nav-icon">
+                                                </i>
+                                                <p>
+                                                    Listar Costos
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:costo_operativo_create' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-plus nav-icon"></i>
-                                                <p>Registrar Costo</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:costo_operativo_create' %}">
+                                                <i class="fa fa-plus nav-icon">
+                                                </i>
+                                                <p>
+                                                    Registrar Costo
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
-
                                 <!-- Ciclos -->
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-sync-alt nav-icon"></i>
-                                        <p>Ciclos<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-sync-alt nav-icon">
+                                        </i>
+                                        <p>
+                                            Ciclos
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:ciclo_list' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-list nav-icon"></i>
-                                                <p>Listar Ciclos</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:ciclo_list' %}">
+                                                <i class="fa fa-list nav-icon">
+                                                </i>
+                                                <p>
+                                                    Listar Ciclos
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:ciclo_create' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-plus nav-icon"></i>
-                                                <p>Registrar Ciclo</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:ciclo_create' %}">
+                                                <i class="fa fa-plus nav-icon">
+                                                </i>
+                                                <p>
+                                                    Registrar Ciclo
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
-
                                 <!-- Producciones -->
                                 <li class="nav-item has-treeview">
-                                    <a href="#" class="nav-link"><i class="fa fa-fish nav-icon"></i>
-                                        <p>Producciones<i class="right fas fa-angle-left"></i></p></a>
+                                    <a class="nav-link" href="#">
+                                        <i class="fa fa-fish nav-icon">
+                                        </i>
+                                        <p>
+                                            Producciones
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
                                     <ul class="nav nav-treeview">
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:produccion_list' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-list nav-icon"></i>
-                                                <p>Listar Producciones</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:produccion_list' %}">
+                                                <i class="fa fa-list nav-icon">
+                                                </i>
+                                                <p>
+                                                    Listar Producciones
+                                                </p>
+                                            </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a href="{% url 'app_empresa:produccion_create' %}"
-                                               class="nav-link">
-                                                <i class="fa fa-plus nav-icon"></i>
-                                                <p>Registrar Producción</p></a>
+                                            <a class="nav-link" href="{% url 'app_empresa:produccion_create' %}">
+                                                <i class="fa fa-plus nav-icon">
+                                                </i>
+                                                <p>
+                                                    Registrar Producción
+                                                </p>
+                                            </a>
                                         </li>
                                     </ul>
                                 </li>
-
                                 <!-- Cargar Datos Iniciales -->
                                 <li class="nav-item">
-                                    <a href="{% url 'app_empresa:cargar_datos_iniciales' %}"
-                                       class="nav-link">
-                                        <i class="fa fa-database nav-icon"></i>
-                                        <p>Cargar Datos Iniciales</p></a>
+                                    <a class="nav-link" href="{% url 'app_empresa:cargar_datos_iniciales' %}">
+                                        <i class="fa fa-database nav-icon">
+                                        </i>
+                                        <p>
+                                            Cargar Datos Iniciales
+                                        </p>
+                                    </a>
                                 </li>
                             </ul>
                         </li>
-
                         <!-- ===== NUEVA SECCIÓN DE SEGURIDAD Y PERMISOS ===== -->
-                        <li class="nav-header">Seguridad y Permisos</li>
-
+                        <li class="nav-header">
+                            Seguridad y Permisos
+                        </li>
                         <!-- Modulo Usuarios -->
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Gestión de Usuarios<i class="right fas fa-angle-left"></i></p>
+                            <a class="nav-link" href="#">
+                                <i class="nav-icon fas fa-users">
+                                </i>
+                                <p>
+                                    Gestión de Usuarios
+                                    <i class="fas fa-angle-left right">
+                                    </i>
+                                </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:listar_usuario' %}" class="nav-link">
-                                        <i class="far fa-user nav-icon"></i>
-                                        <p>Listar Usuarios</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:listar_usuario' %}">
+                                        <i class="far fa-user nav-icon">
+                                        </i>
+                                        <p>
+                                            Listar Usuarios
+                                        </p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:crear_usuario' %}" class="nav-link">
-                                        <i class="fas fa-user-plus nav-icon"></i>
-                                        <p>Crear Usuario</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:crear_usuario' %}">
+                                        <i class="fas fa-user-plus nav-icon">
+                                        </i>
+                                        <p>
+                                            Crear Usuario
+                                        </p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
-
                         <!-- Modulo Grupos -->
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-users-cog"></i>
-                                <p>Gestión de Grupos<i class="right fas fa-angle-left"></i></p>
+                            <a class="nav-link" href="#">
+                                <i class="nav-icon fas fa-users-cog">
+                                </i>
+                                <p>
+                                    Gestión de Grupos
+                                    <i class="fas fa-angle-left right">
+                                    </i>
+                                </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:listar_grupo' %}" class="nav-link">
-                                        <i class="far fa-users nav-icon"></i>
-                                        <p>Listar Grupos</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:listar_grupo' %}">
+                                        <i class="far fa-users nav-icon">
+                                        </i>
+                                        <p>
+                                            Listar Grupos
+                                        </p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:crear_grupo' %}" class="nav-link">
-                                        <i class="fas fa-plus-circle nav-icon"></i>
-                                        <p>Crear Grupo</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:crear_grupo' %}">
+                                        <i class="fas fa-plus-circle nav-icon">
+                                        </i>
+                                        <p>
+                                            Crear Grupo
+                                        </p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
-
                         <!-- Modulo Módulos del Sistema -->
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-th"></i>
-                                <p>Módulos del Sistema<i class="right fas fa-angle-left"></i></p>
+                            <a class="nav-link" href="#">
+                                <i class="nav-icon fas fa-th">
+                                </i>
+                                <p>
+                                    Módulos del Sistema
+                                    <i class="fas fa-angle-left right">
+                                    </i>
+                                </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:listar_modulo' %}" class="nav-link">
-                                        <i class="far fa-th-large nav-icon"></i>
-                                        <p>Listar Módulos</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:listar_modulo' %}">
+                                        <i class="far fa-th-large nav-icon">
+                                        </i>
+                                        <p>
+                                            Listar Módulos
+                                        </p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:crear_modulo' %}" class="nav-link">
-                                        <i class="fas fa-plus-square nav-icon"></i>
-                                        <p>Crear Módulo</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:crear_modulo' %}">
+                                        <i class="fas fa-plus-square nav-icon">
+                                        </i>
+                                        <p>
+                                            Crear Módulo
+                                        </p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:listar_tipo_modulo' %}" class="nav-link">
-                                        <i class="far fa-list nav-icon"></i>
-                                        <p>Tipos de Módulos</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:listar_tipo_modulo' %}">
+                                        <i class="far fa-list nav-icon">
+                                        </i>
+                                        <p>
+                                            Tipos de Módulos
+                                        </p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{% url 'app_usuario:crear_tipo_modulo' %}" class="nav-link">
-                                        <i class="fas fa-plus nav-icon"></i>
-                                        <p>Crear Tipo de Módulo</p>
+                                    <a class="nav-link" href="{% url 'app_usuario:crear_tipo_modulo' %}">
+                                        <i class="fas fa-plus nav-icon">
+                                        </i>
+                                        <p>
+                                            Crear Tipo de Módulo
+                                        </p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
-
                         <!-- Modulo Accesos y Permisos -->
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-unlock-alt"></i>
-                                <p>Accesos y Permisos<i class="fas fa-angle-left right"></i></p>
+                            <a class="nav-link" href="#">
+                                <i class="nav-icon fas fa-unlock-alt">
+                                </i>
+                                <p>
+                                    Accesos y Permisos
+                                    <i class="fas fa-angle-left right">
+                                    </i>
+                                </p>
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link" type="button" data-toggle="modal"
-                                       data-target="#modal-default"><i class="far fa-circle nav-icon"></i>
-                                        <p>Configurar Permisos</p>
+                                    <a class="nav-link" data-target="#modal-default" data-toggle="modal" href="#"
+                                       type="button">
+                                        <i class="far fa-circle nav-icon">
+                                        </i>
+                                        <p>
+                                            Configurar Permisos
+                                        </p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="fas fa-key nav-icon"></i>
-                                        <p>Cambiar Contraseña</p>
+                                    <a class="nav-link" href="#">
+                                        <i class="fas fa-key nav-icon">
+                                        </i>
+                                        <p>
+                                            Cambiar Contraseña
+                                        </p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="fas fa-history nav-icon"></i>
-                                        <p>Historial de Accesos</p>
+                                    <a class="nav-link" href="#">
+                                        <i class="fas fa-history nav-icon">
+                                        </i>
+                                        <p>
+                                            Historial de Accesos
+                                        </p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
-
                     {% endif %}
-
                 </ul>
-
             </nav>
-
-
         </div>
-
     </aside>
-
-    <script>
+    {% comment %}<script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Obtener todas las tarjetas de empresa
-            const empresaCards = document.querySelectorAll('.empresa-card');
-
-            // Función para actualizar el sidebar según la empresa seleccionada
-            function actualizarSidebar(empresa) {
-                // Elementos del sidebar a actualizar
-                const empresaSidebarTitle = document.getElementById('empresa-sidebar-title');
-                const logoEmpresaSidebar = document.getElementById('logo-empresa-sidebar');
-                const menuTitleSidebar = document.getElementById('menu-title-sidebar');
-
-                // Elementos específicos de cada empresa
-                const psmItems = document.querySelectorAll('.psm-item');
-                const bioItems = document.querySelectorAll('.bio-item');
-                const bothItems = document.querySelectorAll('.both-item');
-
-                // Actualizar según la empresa seleccionada
-                if (empresa === 'psm') {
-                    // Actualizar título y logo
-                    empresaSidebarTitle.textContent = 'PSM';
-                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/PSM.png' %}";
-                    menuTitleSidebar.textContent = 'PSM';
-
-                    // Mostrar elementos de PSM y ocultar elementos de BIO
-                    psmItems.forEach(item => item.style.display = 'block');
-                    bioItems.forEach(item => item.style.display = 'none');
-                    bothItems.forEach(item => item.style.display = 'block');
-                } else if (empresa === 'bio') {
-                    // Actualizar título y logo
-                    empresaSidebarTitle.textContent = 'BIO';
-                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/BIO.png' %}";
-                    menuTitleSidebar.textContent = 'BIO';
-
-                    // Mostrar elementos de BIO y ocultar elementos de PSM
-                    bioItems.forEach(item => item.style.display = 'block');
-                    psmItems.forEach(item => item.style.display = 'none');
-                    bothItems.forEach(item => item.style.display = 'block');
-                } else {
-                    // Mostrar ambos (estado predeterminado)
-                    empresaSidebarTitle.textContent = 'PSM & BIO';
-                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/logo_slider-png.png' %}";
-                    menuTitleSidebar.textContent = 'PSM & BIO';
-
-                    psmItems.forEach(item => item.style.display = 'block');
-                    bioItems.forEach(item => item.style.display = 'block');
-                    bothItems.forEach(item => item.style.display = 'block');
-                }
-
-                // Guardar la selección en localStorage para mantenerla entre páginas
-                localStorage.setItem('empresaSeleccionada', empresa);
-            }
-
-            // Añadir evento de clic a cada tarjeta
-            empresaCards.forEach(card => {
-                card.addEventListener('click', function () {
-                    // Obtener el tipo de empresa (psm o bio)
-                    const empresa = this.getAttribute('data-empresa');
-
-                    // Actualizar el sidebar
-                    actualizarSidebar(empresa);
-
-                    // Mostrar el slider correspondiente (código que ya teníamos)
-                    if (document.getElementById('empresa-slider')) {
-                        document.getElementById('empresa-slider').style.display = 'block';
-                        document.getElementById('slider-psm').style.display = 'none';
-                        document.getElementById('slider-bio').style.display = 'none';
-
-                        if (empresa === 'psm') {
-                            document.getElementById('slider-title').textContent = 'Slider de Empresa PSM';
-                            document.getElementById('slider-psm').style.display = 'block';
-                            $('#carouselPSM').carousel(0);
-                        } else if (empresa === 'bio') {
-                            document.getElementById('slider-title').textContent = 'Slider de Empresa BIO';
-                            document.getElementById('slider-bio').style.display = 'block';
-                            $('#carouselBIO').carousel(0);
-                        }
-
-                        document.getElementById('empresa-slider').scrollIntoView({behavior: 'smooth'});
-                    }
-                });
-            });
-
-            // Verificar si hay una empresa seleccionada previamente en localStorage
-            const empresaGuardada = localStorage.getItem('empresaSeleccionada');
-            if (empresaGuardada) {
-                actualizarSidebar(empresaGuardada);
-            }
-        });
-    </script>
-
-
+        // Obtener todas las tarjetas de empresa
+        // const empresaCards = document.querySelectorAll('.empresa-card');
+        // Función para actualizar el sidebar según la empresa seleccionada
+        // function actualizarSidebar(empresa) {
+        // Elementos del sidebar a actualizar                const empresaSidebarTitle = document.getElementById('empresa-sidebar-title');                const logoEmpresaSidebar = document.getElementById('logo-empresa-sidebar');                const menuTitleSidebar = document.getElementById('menu-title-sidebar');                // Elementos específicos de cada empresa                const psmItems = document.querySelectorAll('.psm-item');                const bioItems = document.querySelectorAll('.bio-item');                const bothItems = document.querySelectorAll('.both-item');                // Actualizar según la empresa seleccionada                if (empresa === 'psm') {                    // Actualizar título y logo                    empresaSidebarTitle.textContent = 'PSM';                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/PSM.png' %}";                    menuTitleSidebar.textContent = 'PSM';                    // Mostrar elementos de PSM y ocultar elementos de BIO                    psmItems.forEach(item => item.style.display = 'block');                    bioItems.forEach(item => item.style.display = 'none');                    bothItems.forEach(item => item.style.display = 'block');                } else if (empresa === 'bio') {                    // Actualizar título y logo                    empresaSidebarTitle.textContent = 'BIO';                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/BIO.png' %}";                    menuTitleSidebar.textContent = 'BIO';                    // Mostrar elementos de BIO y ocultar elementos de PSM                    bioItems.forEach(item => item.style.display = 'block');                    psmItems.forEach(item => item.style.display = 'none');                    bothItems.forEach(item => item.style.display = 'block');                } else {                    // Mostrar ambos (estado predeterminado)                    empresaSidebarTitle.textContent = 'PSM & BIO';                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/logo_slider-png.png' %}";                    menuTitleSidebar.textContent = 'PSM & BIO';                    psmItems.forEach(item => item.style.display = 'block');                    bioItems.forEach(item => item.style.display = 'block');                    bothItems.forEach(item => item.style.display = 'block');                }                // Guardar la selección en localStorage para mantenerla entre páginas                localStorage.setItem('empresaSeleccionada', empresa);            }            // Añadir evento de clic a cada tarjeta            empresaCards.forEach(card => {                card.addEventListener('click', function () {                    // Obtener el tipo de empresa (psm o bio)                    const empresa = this.getAttribute('data-empresa');                    // Actualizar el sidebar                    actualizarSidebar(empresa);                    // Mostrar el slider correspondiente (código que ya teníamos)                    if (document.getElementById('empresa-slider')) {                        document.getElementById('empresa-slider').style.display = 'block';                        document.getElementById('slider-psm').style.display = 'none';                        document.getElementById('slider-bio').style.display = 'none';                        if (empresa === 'psm') {                            document.getElementById('slider-title').textContent = 'Slider de Empresa PSM';                            document.getElementById('slider-psm').style.display = 'block';                            $('#carouselPSM').carousel(0);                        } else if (empresa === 'bio') {                            document.getElementById('slider-title').textContent = 'Slider de Empresa BIO';                            document.getElementById('slider-bio').style.display = 'block';                            $('#carouselBIO').carousel(0);                        }                        document.getElementById('empresa-slider').scrollIntoView({behavior: 'smooth'});                    }                });            });            // Verificar si hay una empresa seleccionada previamente en localStorage            const empresaGuardada = localStorage.getItem('empresaSeleccionada');            if (empresaGuardada) {                actualizarSidebar(empresaGuardada);            }        });    ç
+    </script>{% endcomment %}
     <div class="content-wrapper">
-
         {% block contenido %}
-
             <!-- AQUI VA TODO EL CONTENIDO DEL BLOQUE -->
-
         {% endblock %}
-
     </div>
-
     <aside class="control-sidebar control-sidebar-dark">
-
     </aside>
-
     <footer class="main-footer">
-        <strong>Copyright &copy; 2022 <a href="#">PSM & BIO</a>.</strong> Derechos reservados.
-        <div class="float-right d-none d-sm-inline-block"><b>Versión</b> 1.0</div>
+        <strong>
+            Copyright © 2022
+            <a href="#">
+                PSM &amp; BIO
+            </a>
+            .
+        </strong>
+        Derechos reservados.
+        <div class="float-right d-none d-sm-inline-block">
+            <b>
+                Versión
+            </b>
+            1.0
+        </div>
     </footer>
-
 </div>
-<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/main.js' %}">
+</script>
 <!-- Bootstrap -->
-<script src="{% static 'lib/adminlte-3.0.4/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'lib/adminlte-3.0.4/plugins/bootstrap/js/bootstrap.bundle.min.js' %}">
+</script>
 <!-- AdminLTE -->
-<script src="{% static 'lib/adminlte-3.0.4/js/adminlte.js' %}"></script>
+<script src="{% static 'lib/adminlte-3.0.4/js/adminlte.js' %}">
+</script>
 <!-- OPTIONAL SCRIPTS -->
-<script src="{% static 'lib/adminlte-3.0.4/plugins/chart.js/Chart.min.js' %}"></script>
-<script src="{% static 'lib/adminlte-3.0.4/js/demo.js' %}"></script>
-
-<script src="{% static 'lib/toastr/toastr.min.js' %}"></script>
-<script src="{% static 'acciones/alertas.js' %}"></script>
+<script src="{% static 'lib/adminlte-3.0.4/plugins/chart.js/Chart.min.js' %}">
+</script>
+<script src="{% static 'lib/adminlte-3.0.4/js/demo.js' %}">
+</script>
+<script src="{% static 'lib/toastr/toastr.min.js' %}">
+</script>
+<script src="{% static 'acciones/alertas.js' %}">
+</script>
 <!-- Bootstrap 4 -->
-<script src="{% static 'lib/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'lib/plugins/bootstrap/js/bootstrap.bundle.min.js' %}">
+</script>
 <!-- DataTables -->
-<script src="{% static 'lib/plugins/datatables/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'lib/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
-<script src="{% static 'lib/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
-<script src="{% static 'lib/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
-<script src="{% static 'lib/jquery-loading-overlay-2.1.7/js/loadingoverlay.min.js' %}"></script>
-
+<script src="{% static 'lib/plugins/datatables/jquery.dataTables.min.js' %}">
+</script>
+<script src="{% static 'lib/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}">
+</script>
+<script src="{% static 'lib/plugins/datatables-responsive/js/dataTables.responsive.min.js' %}">
+</script>
+<script src="{% static 'lib/plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}">
+</script>
+<script src="{% static 'lib/jquery-loading-overlay-2.1.7/js/loadingoverlay.min.js' %}">
+</script>
 {% block scripts %}
-
+    <script>
+        // JavaScript para forzar estilos después de que AdminLTE cargue    $(document).ready(function() {        // Esperar a que DataTables se inicialice completamente        setTimeout(function() {            forceDataTableStyles();            // Initialize DataTables with Spanish localization            $('.table').DataTable({                "language": {                    "sProcessing":     "Procesando...",                    "sLengthMenu":     "Mostrar _MENU_ registros",                    "sZeroRecords":    "No se encontraron resultados",                    "sEmptyTable":     "Ningún dato disponible en esta tabla",                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",                    "sInfoPostFix":    "",                    "sSearch":         "Buscar:",                    "sUrl":            "",                    "sInfoThousands":  ",",                    "sLoadingRecords": "Cargando...",                    "oPaginate": {                        "sFirst":    "Primero",                        "sLast":     "Último",                        "sNext":     "Siguiente",                        "sPrevious": "Anterior"                    },                    "oAria": {                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"                    }                },                "responsive": true,                "autoWidth": false,            });        }, 500);        // También aplicar cuando se redibuje la tabla        $('.table').on('draw.dt', function() {            setTimeout(function() {                forceDataTableStyles();            }, 100);        });    });    function forceDataTableStyles() {        // Forzar la visibilidad de los controles de DataTables        $('.dataTables_filter').show().css({            'display': 'block',            'visibility': 'visible',            'opacity': '1',            'float': 'right',            'text-align': 'right'        });        // Asegurar que el input sea visible        $('.dataTables_filter input').show().css({            'display': 'inline-block',            'visibility': 'visible',            'opacity': '1',            'width': '200px',            'margin-left': '8px'        });        // Asegurar que el show entries sea visible        $('.dataTables_length').show().css({            'display': 'block',            'visibility': 'visible',            'opacity': '1',            'float': 'left'        });        // Forzar estilos del header (from clean-professional-datatable.css)        $('.table thead th, .table thead td').each(function() {            $(this).css({                'background': '#f5f5f5',                'background-color': '#f5f5f5',                'color': '#333',                'font-weight': 'bold',                'font-size': '13px',                'padding': '8px',                'border': '1px solid #ddd',                'border-bottom': '1px solid #ddd',                'text-align': 'left',                'vertical-align': 'middle'            });        });        // Forzar botones (from clean-professional-datatable.css)        $('.btn-primary').css({            'background-color': '#337ab7',            'border-color': '#2e6da4',            'color': 'white',            'padding': '6px 12px',            'font-size': '14px',            'border-radius': '4px',            'border': '1px solid transparent',            'margin-right': '5px'        });        // Forzar paginación (from clean-professional-datatable.css)        $('.dataTables_paginate .paginate_button.current').css({            'background': '#337ab7',            'border-color': '#337ab7',            'color': 'white'        });        console.log('Estilos DataTable aplicados y forzados');    }    // Modificar tu inicialización de DataTables existente (if any, otherwise the above will handle it)    $(function () {        $('[data-toggle="tooltip"]').tooltip();        // Tu código existente de la tabla        $('.table')            .on('draw.dt', function () {                $('[data-toggle="tooltip"]').tooltip();                // AGREGAR ESTA LÍNEA para forzar estilos después del redibujado                setTimeout(forceDataTableStyles, 50);            });        // Resto de tu código AdminLTE existente...        var pathname = window.location.pathname;        var nav = $('body');        var page = {            // ... tu código existente        };        // Al final, después de page.initial(), agregar:        // page.initial(); // Uncomment if you have this function        // FORZAR ESTILOS AL CARGAR LA PÁGINA        setTimeout(function() {            forceDataTableStyles();        }, 1000);    });
+    </script>
 {% endblock %}
-
 <div class="modal fade" id="modal-default">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Permisos de Usuarios</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <h4 class="modal-title">
+                    Permisos de Usuarios
+                </h4>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+       <span aria-hidden="true">
+        ×
+       </span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Ud no cuenta con los Privilegios Suficientes para realizar esta acción <br> Muchas Gracias
-                    &hellip;</p>
+                <p>
+                    Ud no cuenta con los Privilegios Suficientes para realizar esta acción
+                    <br/>
+                    Muchas Gracias …
+                </p>
             </div>
             <div class="modal-footer justify-content-between">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+                <button class="btn btn-primary" data-dismiss="modal" type="button">
+                    Cerrar
+                </button>
             </div>
         </div>
     </div>
 </div>
-
 </body>
-
 </html>

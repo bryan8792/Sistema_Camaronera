@@ -56,10 +56,10 @@ $(function () {
         .on('draw.dt', function () {
             $('[data-toggle="tooltip"]').tooltip();
         })
-        .on('click', 'img', function () {
+        /*.on('click', 'img', function () {
             var src = $(this).attr('src');
             load_image(src);
-        });
+        });*/
 
     // Vertical
 

@@ -64,6 +64,28 @@ function load_image(src) {
     })
 }
 
+function loading(args) {
+    if (!args.hasOwnProperty('fontawesome')) {
+        args.fontawesome = 'fas fa-circle-notch fa-spin';
+    }
+    $.LoadingOverlay("show", {
+        image: "",
+        fontawesome: args.fontawesome,
+        custom: $("<div>", {
+            css: {
+                'font-family': "'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif'",
+                'font-size': '16px',
+                'font-weight': 'normal',
+                'text-align': 'center',
+                'position': 'absolute',
+                'top': '36%',
+                'width': '100%',
+            },
+            text: args.text
+        })
+    });
+}
+
 function submit_with_formdata(args) {
     if (!args.hasOwnProperty('type')) {
         args.type = 'type';
@@ -608,6 +630,53 @@ function validate_dni_ruc(dni) {
     return true;
 }
 
+function dialog_action(args) {
+    if (!args.hasOwnProperty('type')) {
+        args.type = 'type';
+    }
+    if (!args.hasOwnProperty('theme')) {
+        args.theme = 'material';
+    }
+    if (!args.hasOwnProperty('title')) {
+        args.title = 'Confirmación';
+    }
+    if (!args.hasOwnProperty('icon')) {
+        args.icon = 'fas fa-info-circle';
+    }
+    if (!args.hasOwnProperty('content')) {
+        args.content = '¿Esta seguro de realizar la siguiente acción?';
+    }
+    $.confirm({
+        type: args.type,
+        theme: args.theme,
+        title: args.title,
+        icon: args.icon,
+        content: args.content,
+        columnClass: 'small',
+        typeAnimated: true,
+        cancelButtonClass: "btn-primary",
+        draggable: true,
+        dragWindowBorder: false,
+        buttons: {
+            info: {
+                text: "Si",
+                btnClass: 'btn-primary',
+                action: function () {
+                    args.success();
+                }
+            },
+            danger: {
+                text: "No",
+                btnClass: 'btn-red',
+                action: function () {
+                    args.cancel();
+                }
+            },
+        }
+    });
+}
+
+/*
 function dialog_action(title, content, callback, cancel) {
     $.confirm({
         theme: 'material',
@@ -636,4 +705,4 @@ function dialog_action(title, content, callback, cancel) {
             },
         }
     });
-}
+}*/
