@@ -215,7 +215,7 @@ var sale = {
 
         if (!company || company === "") {
             Swal.fire({
-                title: 'Error',
+                title: 'Advertencia',
                 text: 'Por favor, selecciona una empresa antes de continuar.',
                 icon: 'warning',
                 confirmButtonText: 'Entendido'
