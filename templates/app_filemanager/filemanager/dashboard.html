@@ -1,0 +1,212 @@
+{% extends 'app_filemanager/filemanager/base.html' %}
+
+{% block title %}Dashboard - Gestor de Archivos{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-info">
+            <div class="inner">
+                <h3>{{ total_files }}</h3>
+                <p>Total de Archivos</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-file"></i>
+            </div>
+            <a href="{% url 'app_filemanager:file_list' %}" class="small-box-footer">
+                Más información <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-success">
+            <div class="inner">
+                <h3>{{ total_folders }}</h3>
+                <p>Total de Carpetas</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-folder"></i>
+            </div>
+            <a href="{% url 'app_filemanager:file_list' %}" class="small-box-footer">
+                Más información <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-warning">
+            <div class="inner">
+                <h3>{{ total_size }}</h3>
+                <p>Almacenamiento Usado</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-hdd"></i>
+            </div>
+            <a href="#" class="small-box-footer">
+                Más información <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+        <div class="small-box bg-danger">
+            <div class="inner">
+                <h3>{{ shared_with_me|length }}</h3>
+                <p>Items Compartidos</p>
+            </div>
+            <div class="icon">
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <a href="#" class="small-box-footer">
+                Más información <i class="fas fa-arrow-circle-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clock mr-2"></i>Archivos Recientes
+                </h3>
+                <div class="card-tools">
+                    <a href="{% url 'app_filemanager:file_list' %}" class="btn btn-tool">
+                        <i class="fas fa-eye"></i> Ver Todos
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_files %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Archivo</th>
+                                    <th>Tamaño</th>
+                                    <th>Tipo</th>
+                                    <th>Modificado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for file in recent_files %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="{{ file.get_file_icon }} mr-2"></i>
+                                            <span>{{ file.name|truncatechars:30 }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ file.get_file_size_display }}</td>
+                                    <td>
+                                        <span class="badge badge-secondary">{{ file.file_type|upper }}</span>
+                                    </td>
+                                    <td>{{ file.updated_at|timesince }} atrás</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'app_filemanager:file_download' file.pk %}" class="btn btn-primary btn-sm" title="Descargar">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-file fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay archivos subidos aún</p>
+                        <a href="{% url 'app_filemanager:file_upload' %}" class="btn btn-primary">
+                            <i class="fas fa-upload mr-2"></i>Subir tu Primer Archivo
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bolt mr-2"></i>Acciones Rápidas
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'app_filemanager:file_upload' %}" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-upload mr-2"></i>Subir Archivos
+                    </a>
+                    <a href="{% url 'app_filemanager:folder_create' %}" class="btn btn-success btn-block mb-2">
+                        <i class="fas fa-folder-plus mr-2"></i>Crear Carpeta
+                    </a>
+                    <a href="{% url 'app_filemanager:file_list' %}" class="btn btn-info btn-block">
+                        <i class="fas fa-search mr-2"></i>Explorar Archivos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-pie mr-2"></i>Tipos de Archivo
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if file_types %}
+                    {% for file_type in file_types %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge badge-primary">{{ file_type.file_type|upper|default:"Desconocido" }}</span>
+                        <span class="text-muted">{{ file_type.count }} archivo{{ file_type.count|pluralize }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No hay archivos para analizar</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if recent_folders %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-folder mr-2"></i>Carpetas Recientes
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for folder in recent_folders %}
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card folder-card">
+                            <div class="card-body text-center">
+                                <i class="fas fa-folder fa-3x mb-3"></i>
+                                <h6 class="card-title">{{ folder.name|truncatechars:20 }}</h6>
+                                <p class="card-text small">
+                                    {{ folder.get_file_count }} archivo{{ folder.get_file_count|pluralize }}
+                                </p>
+                                <a href="{% url 'app_filemanager:folder_detail' folder.pk %}" class="btn btn-light btn-sm">
+                                    <i class="fas fa-eye mr-1"></i>Abrir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

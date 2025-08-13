@@ -1,0 +1,412 @@
+{% extends 'app_filemanager/filemanager/base.html' %}
+{% load static %}
+
+{% block title %}Nueva Carpeta - Gestor de Archivos{% endblock %}
+
+{% block extra_css %}
+<style>
+.folder-templates {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.template-card {
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.template-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 123, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.template-card.selected {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.template-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.template-icon.documents { color: #dc3545; }
+.template-icon.images { color: #28a745; }
+.template-icon.projects { color: #ffc107; }
+.template-icon.shared { color: #17a2b8; }
+.template-icon.archive { color: #6c757d; }
+.template-icon.custom { color: #6f42c1; }
+
+.form-section {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.preview-section {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: white;
+}
+
+.folder-preview {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background: #f8f9fa;
+    margin-bottom: 0.5rem;
+}
+
+.folder-preview i {
+    color: #ffc107;
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+     Content Header 
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">
+                        <i class="fas fa-folder-plus text-success"></i>
+                        Nueva Carpeta
+                    </h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:file_list' %}">Archivos</a></li>
+                        <li class="breadcrumb-item active">Nueva Carpeta</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     Main content 
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-folder-plus"></i>
+                                Crear Nueva Carpeta
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                             Template Selection 
+                            <div class="form-section">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-templates"></i>
+                                    Selecciona una Plantilla
+                                </h5>
+                                <div class="folder-templates">
+                                    <div class="template-card" data-template="documents">
+                                        <i class="fas fa-file-alt template-icon documents"></i>
+                                        <h6>Documentos</h6>
+                                        <small class="text-muted">Para archivos de oficina</small>
+                                    </div>
+                                    <div class="template-card" data-template="images">
+                                        <i class="fas fa-images template-icon images"></i>
+                                        <h6>Imágenes</h6>
+                                        <small class="text-muted">Para fotos y gráficos</small>
+                                    </div>
+                                    <div class="template-card" data-template="projects">
+                                        <i class="fas fa-project-diagram template-icon projects"></i>
+                                        <h6>Proyectos</h6>
+                                        <small class="text-muted">Para organizar proyectos</small>
+                                    </div>
+                                    <div class="template-card" data-template="shared">
+                                        <i class="fas fa-share-alt template-icon shared"></i>
+                                        <h6>Compartida</h6>
+                                        <small class="text-muted">Para colaboración</small>
+                                    </div>
+                                    <div class="template-card" data-template="archive">
+                                        <i class="fas fa-archive template-icon archive"></i>
+                                        <h6>Archivo</h6>
+                                        <small class="text-muted">Para almacenamiento</small>
+                                    </div>
+                                    <div class="template-card selected" data-template="custom">
+                                        <i class="fas fa-folder template-icon custom"></i>
+                                        <h6>Personalizada</h6>
+                                        <small class="text-muted">Carpeta básica</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                             Form 
+                            <form method="post" id="folderForm">
+                                {% csrf_token %}
+                                <input type="hidden" name="template" id="selectedTemplate" value="custom">
+                                
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-cog"></i>
+                                        Configuración de la Carpeta
+                                    </h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="id_name">
+                                                    <i class="fas fa-tag"></i>
+                                                    Nombre de la Carpeta *
+                                                </label>
+                                                {{ form.name }}
+                                                {% if form.name.errors %}
+                                                    <div class="text-danger">
+                                                        {{ form.name.errors }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="id_parent">
+                                                    <i class="fas fa-folder-open"></i>
+                                                    Carpeta Padre
+                                                </label>
+                                                {{ form.parent }}
+                                                {% if form.parent.errors %}
+                                                    <div class="text-danger">
+                                                        {{ form.parent.errors }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="id_description">
+                                            <i class="fas fa-align-left"></i>
+                                            Descripción
+                                        </label>
+                                        {{ form.description }}
+                                        {% if form.description.errors %}
+                                            <div class="text-danger">
+                                                {{ form.description.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            {{ form.is_public }}
+                                            <label class="form-check-label" for="id_is_public">
+                                                <i class="fas fa-globe"></i>
+                                                Hacer carpeta pública
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Las carpetas públicas pueden ser vistas por todos los usuarios
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-folder-plus"></i>
+                                        Crear Carpeta
+                                    </button>
+                                    <a href="{% url 'app_filemanager:file_list' %}" class="btn btn-secondary btn-lg ml-2">
+                                        <i class="fas fa-times"></i>
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                     Preview 
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-eye"></i>
+                                Vista Previa
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="preview-section">
+                                <h6 class="mb-3">Estructura de la Carpeta:</h6>
+                                <div id="folderPreview">
+                                    <div class="folder-preview">
+                                        <i class="fas fa-folder"></i>
+                                        <span id="previewName">Nueva Carpeta</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                     Template Info 
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-info-circle"></i>
+                                Información de Plantilla
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="templateInfo">
+                                <div class="text-center">
+                                    <i class="fas fa-folder template-icon custom fa-3x mb-3"></i>
+                                    <h6>Carpeta Personalizada</h6>
+                                    <p class="text-muted">Una carpeta básica sin configuración especial.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                     Tips 
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-lightbulb"></i>
+                                Consejos
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success"></i>
+                                    Usa nombres descriptivos
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success"></i>
+                                    Organiza por categorías
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success"></i>
+                                    Evita caracteres especiales
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success"></i>
+                                    Considera la privacidad
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const templateCards = document.querySelectorAll('.template-card');
+    const selectedTemplateInput = document.getElementById('selectedTemplate');
+    const nameInput = document.getElementById('id_name');
+    const previewName = document.getElementById('previewName');
+    const templateInfo = document.getElementById('templateInfo');
+    
+    const templateData = {
+        documents: {
+            name: 'Documentos',
+            icon: 'fas fa-file-alt',
+            color: 'documents',
+            description: 'Perfecta para organizar documentos de oficina, PDFs, presentaciones y hojas de cálculo.',
+            suggestions: ['Contratos', 'Reportes', 'Manuales', 'Facturas']
+        },
+        images: {
+            name: 'Imágenes',
+            icon: 'fas fa-images',
+            color: 'images',
+            description: 'Ideal para almacenar fotos, gráficos, logos y cualquier contenido visual.',
+            suggestions: ['Fotos', 'Logos', 'Banners', 'Screenshots']
+        },
+        projects: {
+            name: 'Proyectos',
+            icon: 'fas fa-project-diagram',
+            color: 'projects',
+            description: 'Organiza archivos relacionados con proyectos específicos y colaboración en equipo.',
+            suggestions: ['Código', 'Diseños', 'Documentación', 'Recursos']
+        },
+        shared: {
+            name: 'Compartida',
+            icon: 'fas fa-share-alt',
+            color: 'shared',
+            description: 'Carpeta configurada para compartir fácilmente con otros usuarios.',
+            suggestions: ['Colaboración', 'Intercambio', 'Público', 'Equipo']
+        },
+        archive: {
+            name: 'Archivo',
+            icon: 'fas fa-archive',
+            color: 'archive',
+            description: 'Para almacenar archivos antiguos o de respaldo que no se usan frecuentemente.',
+            suggestions: ['Respaldos', 'Histórico', 'Obsoletos', 'Temporales']
+        },
+        custom: {
+            name: 'Personalizada',
+            icon: 'fas fa-folder',
+            color: 'custom',
+            description: 'Una carpeta básica sin configuración especial.',
+            suggestions: ['General', 'Varios', 'Misceláneos', 'Otros']
+        }
+    };
+    
+    // Template selection
+    templateCards.forEach(card => {
+        card.addEventListener('click', function() {
+            templateCards.forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            const template = this.dataset.template;
+            selectedTemplateInput.value = template;
+            
+            updateTemplateInfo(template);
+        });
+    });
+    
+    // Name input preview
+    nameInput.addEventListener('input', function() {
+        const name = this.value || 'Nueva Carpeta';
+        previewName.textContent = name;
+    });
+    
+    function updateTemplateInfo(template) {
+        const data = templateData[template];
+        templateInfo.innerHTML = `  {
+        const data = templateData[template];
+        templateInfo.innerHTML =
+            <div class="text-center">
+                <i class="${data.icon} template-icon ${data.color} fa-3x mb-3"></i>
+                <h6>${data.name}</h6>
+                <p class="text-muted">${data.description}</p>
+                <div class="mt-3">
+                    <h6>Sugerencias:</h6>
+                    <div class="d-flex flex-wrap justify-content-center">
+                        ${data.suggestions.map(suggestion => 
+                            `<span class="badge badge-light m-1">${suggestion}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Initialize with custom template
+    updateTemplateInfo('custom');
+});
+</script>
+{% endblock %}

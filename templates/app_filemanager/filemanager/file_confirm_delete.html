@@ -1,0 +1,273 @@
+{% extends 'app_filemanager/filemanager/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar Archivo - {{ file.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-warning {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .file-preview-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        text-align: center;
+    }
+    .file-icon-large {
+        font-size: 4rem;
+        margin-bottom: 15px;
+    }
+    .file-stats {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+    .danger-zone {
+        border: 2px dashed #dc3545;
+        border-radius: 8px;
+        padding: 20px;
+        background: #fff5f5;
+    }
+    .image-preview {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card-danger {
+        border-top: 3px solid #dc3545;
+    }
+    .info-box {
+        box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+        border-radius: .25rem;
+        background: #fff;
+        display: flex;
+        margin-bottom: 1rem;
+        min-height: 80px;
+        padding: .5rem;
+        position: relative;
+        width: 100%;
+    }
+    .info-box .info-box-icon {
+        border-radius: .25rem;
+        align-items: center;
+        display: flex;
+        font-size: 1.875rem;
+        justify-content: center;
+        text-align: center;
+        width: 70px;
+    }
+    .info-box .info-box-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.8;
+        margin-left: .5rem;
+        padding: 0 10px;
+    }
+    .bg-danger {
+        background-color: #dc3545!important;
+    }
+    .file-icon {
+        transition: all 0.3s ease;
+    }
+    .file-icon:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">
+                        <i class="fas fa-trash-alt text-danger"></i>
+                        Eliminar Archivo
+                    </h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:file_list' %}">Archivos</a></li>
+                        <li class="breadcrumb-item active">Eliminar Archivo</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card card-danger">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Confirmar Eliminación
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <h5><i class="icon fas fa-exclamation-triangle"></i> ¡Atención!</h5>
+                                Esta acción no se puede deshacer. El archivo será eliminado permanentemente.
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Vista Previa</h3>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            {% if file.file_type == 'image' %}
+                                                <img src="{{ file.file.url }}" alt="{{ file.name }}" 
+                                                     class="img-fluid" style="max-height: 200px;">
+                                            {% else %}
+                                                <div class="file-icon" style="font-size: 4rem; color: #6c757d;">
+                                                    {% if file.file_type == 'document' %}
+                                                        <i class="fas fa-file-alt"></i>
+                                                    {% elif file.file_type == 'video' %}
+                                                        <i class="fas fa-file-video"></i>
+                                                    {% elif file.file_type == 'audio' %}
+                                                        <i class="fas fa-file-audio"></i>
+                                                    {% elif file.file_type == 'archive' %}
+                                                        <i class="fas fa-file-archive"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-file"></i>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                            <p class="mt-2 text-muted">{{ file.name }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="info-box bg-light">
+                                        <span class="info-box-icon bg-danger">
+                                            <i class="fas fa-file"></i>
+                                        </span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">Archivo a Eliminar</span>
+                                            <span class="info-box-number">{{ file.name }}</span>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-danger" style="width: 100%"></div>
+                                            </div>
+                                            <span class="progress-description">
+                                                Tamaño: {{ file.get_file_size_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Detalles del Archivo</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <dl class="row">
+                                                <dt class="col-sm-4">Nombre:</dt>
+                                                <dd class="col-sm-8">{{ file.name }}</dd>
+                                                
+                                                <dt class="col-sm-4">Propietario:</dt>
+                                                <dd class="col-sm-8">
+                                                    <span class="badge badge-primary">
+                                                        <i class="fas fa-user"></i> {{ file.owner.username }}
+                                                    </span>
+                                                </dd>
+                                                
+                                                <dt class="col-sm-4">Carpeta:</dt>
+                                                <dd class="col-sm-8">
+                                                    {% if file.folder %}
+                                                        <i class="fas fa-folder"></i> {{ file.folder.name }}
+                                                    {% else %}
+                                                        <i class="fas fa-home"></i> Carpeta Raíz
+                                                    {% endif %}
+                                                </dd>
+                                                
+                                                <dt class="col-sm-4">Tipo:</dt>
+                                                <dd class="col-sm-8">
+                                                    <span class="badge badge-info">{{ file.file_type|title }}</span>
+                                                </dd>
+                                                
+                                                <dt class="col-sm-4">Tamaño:</dt>
+                                                <dd class="col-sm-8">{{ file.get_file_size_display }}</dd>
+                                                
+                                                <dt class="col-sm-4">Descargas:</dt>
+                                                <dd class="col-sm-8">
+                                                    <span class="badge badge-secondary">{{ file.download_count }}</span>
+                                                </dd>
+                                                
+                                                <dt class="col-sm-4">Visibilidad:</dt>
+                                                <dd class="col-sm-8">
+                                                    {% if file.is_public %}
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-globe"></i> Público
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">
+                                                            <i class="fas fa-lock"></i> Privado
+                                                        </span>
+                                                    {% endif %}
+                                                </dd>
+                                                
+                                                <dt class="col-sm-4">Subido:</dt>
+                                                <dd class="col-sm-8">{{ file.created_at|date:"d/m/Y H:i" }}</dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form method="post" class="mt-4">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <a href="{% if file.folder %}{% url 'app_filemanager:folder_detail' file.folder.pk %}{% else %}{% url 'app_filemanager:file_list' %}{% endif %}"
+                                           class="btn btn-secondary btn-block">
+                                            <i class="fas fa-times"></i> Cancelar
+                                        </a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-danger btn-block" 
+                                                onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo?')">
+                                            <i class="fas fa-trash-alt"></i> Eliminar Archivo
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animación de advertencia
+    $('.delete-warning').hide().fadeIn(1000);
+});
+</script>
+{% endblock %}
