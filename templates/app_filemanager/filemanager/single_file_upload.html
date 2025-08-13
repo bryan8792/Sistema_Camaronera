@@ -1,0 +1,543 @@
+{% extends 'app_filemanager/filemanager/base.html' %}
+{% load static %}
+
+{% block title %}Subir Archivo - Gestor de Archivos{% endblock %}
+
+{% block extra_css %}
+<style>
+.upload-area {
+    border: 3px dashed #dee2e6;
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    margin-bottom: 2rem;
+}
+
+.upload-area.dragover {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.05);
+    transform: scale(1.02);
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background-color: rgba(0, 123, 255, 0.02);
+}
+
+.upload-icon {
+    font-size: 4rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.upload-area.dragover .upload-icon {
+    color: #007bff;
+    transform: scale(1.1);
+}
+
+.file-preview {
+    display: none;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    background: white;
+}
+
+.file-preview.show {
+    display: block;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.file-info i {
+    font-size: 2rem;
+    margin-right: 1rem;
+    width: 40px;
+    text-align: center;
+}
+
+.file-info.image i { color: #28a745; }
+.file-info.document i { color: #dc3545; }
+.file-info.video i { color: #6f42c1; }
+.file-info.audio i { color: #fd7e14; }
+.file-info.archive i { color: #6c757d; }
+.file-info.other i { color: #17a2b8; }
+
+.progress-container {
+    display: none;
+    margin-top: 1rem;
+}
+
+.upload-tips {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.form-section {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-upload {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-upload:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 123, 255, 0.25);
+    color: white;
+}
+
+.btn-upload:disabled {
+    background: #6c757d;
+    transform: none;
+    box-shadow: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+     Content Header 
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">
+                        <i class="fas fa-cloud-upload-alt text-primary"></i>
+                        Subir Archivo
+                    </h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:file_list' %}">Archivos</a></li>
+                        <li class="breadcrumb-item active">Subir Archivo</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     Main content 
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-upload"></i>
+                                Subir Nuevo Archivo
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                             Upload Tips 
+                            <div class="upload-tips">
+                                <h6 class="mb-2">
+                                    <i class="fas fa-info-circle text-info"></i>
+                                    Consejos para subir archivos:
+                                </h6>
+                                <ul class="mb-0 small">
+                                    <li>Arrastra y suelta archivos en el área de subida</li>
+                                    <li>Tamaño máximo por archivo: 100MB</li>
+                                    <li>Formatos soportados: Todos los tipos de archivo</li>
+                                    <li>Los archivos se subirán a la carpeta seleccionada</li>
+                                </ul>
+                            </div>
+
+                             Upload Area 
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <h4>Arrastra tu archivo aquí</h4>
+                                <p class="text-muted mb-3">o haz clic para seleccionar un archivo</p>
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open"></i>
+                                    Seleccionar Archivo
+                                </button>
+                            </div>
+
+                             File Preview 
+                            <div class="file-preview" id="filePreview">
+                                <h6 class="mb-3">
+                                    <i class="fas fa-eye"></i>
+                                    Archivo Seleccionado:
+                                </h6>
+                                <div id="fileInfo" class="file-info">
+                                     File info will be populated by JavaScript 
+                                </div>
+                            </div>
+
+                             Upload Form 
+                            <form method="post" enctype="multipart/form-data" id="uploadForm">
+                                {% csrf_token %}
+                                
+                                 Hidden file input 
+                                <input type="file" id="fileInput" name="file" style="display: none;" accept="*/*">
+                                
+                                <div class="form-section">
+                                    <h5 class="mb-3">
+                                        <i class="fas fa-cog"></i>
+                                        Configuración del Archivo
+                                    </h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="id_name">
+                                                    <i class="fas fa-tag"></i>
+                                                    Nombre del Archivo
+                                                </label>
+                                                {{ form.name }}
+                                                <small class="form-text text-muted">
+                                                    Deja vacío para usar el nombre original
+                                                </small>
+                                                {% if form.name.errors %}
+                                                    <div class="text-danger">
+                                                        {{ form.name.errors }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>
+                                                    <i class="fas fa-folder"></i>
+                                                    Carpeta de Destino
+                                                </label>
+                                                <select name="folder_id" class="form-control">
+                                                    <option value="">Carpeta Raíz</option>
+                                                    {% for folder in user_folders %}
+                                                        <option value="{{ folder.pk }}">{{ folder.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="id_description">
+                                            <i class="fas fa-align-left"></i>
+                                            Descripción
+                                        </label>
+                                        {{ form.description }}
+                                        {% if form.description.errors %}
+                                            <div class="text-danger">
+                                                {{ form.description.errors }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <div class="form-check">
+                                            {{ form.is_public }}
+                                            <label class="form-check-label" for="id_is_public">
+                                                <i class="fas fa-globe"></i>
+                                                Hacer archivo público
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Los archivos públicos pueden ser descargados por cualquier usuario
+                                        </small>
+                                    </div>
+                                </div>
+
+                                 Progress Bar 
+                                <div class="progress-container">
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="upload-status"></div>
+                                </div>
+
+                                 Submit Buttons 
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-upload" id="submitBtn" disabled>
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        Subir Archivo
+                                    </button>
+                                    <a href="{% url 'app_filemanager:file_list' %}" class="btn btn-secondary ml-2">
+                                        <i class="fas fa-times"></i>
+                                        Cancelar
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                     Recent Files 
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-history"></i>
+                                Archivos Recientes
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {% if recent_files %}
+                                {% for file in recent_files %}
+                                    <div class="d-flex align-items-center mb-2 p-2 border-bottom">
+                                        <i class="fas {% if file.file_type == 'image' %}fa-image text-success{% elif file.file_type == 'document' %}fa-file-alt text-danger{% elif file.file_type == 'video' %}fa-file-video text-purple{% elif file.file_type == 'audio' %}fa-file-audio text-warning{% else %}fa-file text-info{% endif %} mr-2"></i>
+                                        <div class="flex-grow-1">
+                                            <div class="font-weight-bold">{{ file.name|truncatechars:25 }}</div>
+                                            <small class="text-muted">{{ file.created_at|timesince }} ago</small>
+                                        </div>
+                                        <a href="{% url 'app_filemanager:file_download' file.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-file fa-3x mb-3"></i>
+                                    <p>No hay archivos recientes</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                     Upload Statistics 
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-bar"></i>
+                                Estadísticas
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="border-right">
+                                        <h4 class="text-primary">{{ user.file_set.count }}</h4>
+                                        <small class="text-muted">Total Archivos</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="text-success">{{ user.folder_set.count }}</h4>
+                                    <small class="text-muted">Total Carpetas</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                     Help 
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-question-circle"></i>
+                                Ayuda
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <h6>Formatos Soportados:</h6>
+                            <div class="mb-3">
+                                <span class="badge badge-success mr-1">Imágenes</span>
+                                <span class="badge badge-danger mr-1">Documentos</span>
+                                <span class="badge badge-purple mr-1">Videos</span>
+                                <span class="badge badge-warning mr-1">Audio</span>
+                                <span class="badge badge-secondary mr-1">Archivos</span>
+                            </div>
+                            
+                            <h6>Límites:</h6>
+                            <ul class="small mb-0">
+                                <li>Tamaño máximo: 100MB</li>
+                                <li>Sin límite de archivos</li>
+                                <li>Todos los formatos permitidos</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileInfo = document.getElementById('fileInfo');
+    const submitBtn = document.getElementById('submitBtn');
+    const nameInput = document.getElementById('id_name');
+    const uploadForm = document.getElementById('uploadForm');
+    const progressContainer = document.querySelector('.progress-container');
+    const progressBar = document.querySelector('.progress-bar');
+    const uploadStatus = document.querySelector('.upload-status');
+
+    // Drag and drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelect(files[0]);
+        }
+    });
+
+    uploadArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        // Show file preview
+        filePreview.classList.add('show');
+        submitBtn.disabled = false;
+        
+        // Set default name if empty
+        if (!nameInput.value) {
+            nameInput.value = file.name;
+        }
+        
+        // Get file type and icon
+        const fileType = getFileType(file.name);
+        const fileIcon = getFileIcon(fileType);
+        
+        // Update file info
+        fileInfo.className = `file-info ${fileType}`;
+        fileInfo.innerHTML = `
+            <i class="${fileIcon}"></i>
+            <div class="flex-grow-1">
+                <div class="font-weight-bold">${file.name}</div>
+                <div class="text-muted">
+                    <small>
+                        Tamaño: ${formatFileSize(file.size)} | 
+                        Tipo: ${fileType.charAt(0).toUpperCase() + fileType.slice(1)} |
+                        Modificado: ${new Date(file.lastModified).toLocaleDateString()}
+                    </small>
+                </div>
+            </div>
+        `;
+    }
+
+    function getFileType(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(ext)) {
+            return 'image';
+        } else if (['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext)) {
+            return 'document';
+        } else if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'].includes(ext)) {
+            return 'video';
+        } else if (['mp3', 'wav', 'flac', 'aac', 'ogg'].includes(ext)) {
+            return 'audio';
+        } else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+            return 'archive';
+        } else {
+            return 'other';
+        }
+    }
+
+    function getFileIcon(fileType) {
+        const icons = {
+            image: 'fas fa-image',
+            document: 'fas fa-file-alt',
+            video: 'fas fa-file-video',
+            audio: 'fas fa-file-audio',
+            archive: 'fas fa-file-archive',
+            other: 'fas fa-file'
+        };
+        return icons[fileType] || icons.other;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Form submission with progress
+    uploadForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!fileInput.files.length) {
+            alert('Por favor selecciona un archivo');
+            return;
+        }
+        
+        const formData = new FormData(this);
+        progressContainer.style.display = 'block';
+        submitBtn.disabled = true;
+        
+        // Simulate upload progress
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressBar.style.width = progress + '%';
+        }, 200);
+        
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+            
+            if (response.ok) {
+                uploadStatus.innerHTML = '<div class="alert alert-success">¡Archivo subido exitosamente!</div>';
+                setTimeout(() => {
+                    window.location.href = '{% url "app_filemanager:file_list" %}';
+                }, 2000);
+            } else {
+                throw new Error('Error en la subida');
+            }
+        })
+        .catch(error => {
+            clearInterval(progressInterval);
+            uploadStatus.innerHTML = '<div class="alert alert-danger">Error al subir el archivo</div>';
+            submitBtn.disabled = false;
+        });
+    });
+});
+</script>
+{% endblock %}

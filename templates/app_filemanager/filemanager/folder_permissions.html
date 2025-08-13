@@ -1,0 +1,231 @@
+{% extends 'app_filemanager/filemanager/base.html' %}
+
+{% block title %}Permisos de Carpeta - {{ folder.name }} - Gestor de Archivos{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-share-alt text-primary"></i> Permisos de Carpeta
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'app_filemanager:dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'app_filemanager:file_list' %}">Mis Archivos</a></li>
+{% for breadcrumb in folder.get_breadcrumbs %}
+    {% if forloop.last %}
+        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:folder_detail' breadcrumb.pk %}">{{ breadcrumb.name }}</a></li>
+    {% else %}
+        <li class="breadcrumb-item"><a href="{% url 'app_filemanager:folder_detail' breadcrumb.pk %}">{{ breadcrumb.name }}</a></li>
+    {% endif %}
+{% endfor %}
+<li class="breadcrumb-item active">Permisos</li>
+{% endblock %}
+
+{% block content %}
+ Folder Info 
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-folder fa-3x text-primary mr-3"></i>
+                    <div>
+                        <h4 class="mb-1">{{ folder.name }}</h4>
+                        <p class="text-muted mb-0">
+                            {{ folder.description|default:"Sin descripción" }}<br>
+                            <small>Creado el {{ folder.created_at|date:"d M Y" }} por {{ folder.owner.username }}</small>
+                        </p>
+                    </div>
+                    <div class="ml-auto">
+                        <a href="{% url 'app_filemanager:folder_detail' folder.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left mr-2"></i>Volver a la Carpeta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ Grant New Permission 
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-user-plus mr-2"></i>Otorgar Permiso
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'app_filemanager:folder_permission_create' folder.pk %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="username">Nombre de Usuario</label>
+                        <input type="text" name="username" class="form-control user-search" 
+                               placeholder="Ingresa el nombre de usuario" required autocomplete="off">
+                        <small class="form-text text-muted">Comienza a escribir para buscar usuarios</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="permission_level">Nivel de Permiso</label>
+                        <select name="permission_level" class="form-control" required>
+                            <option value="read">Solo Lectura - Puede ver carpeta y archivos</option>
+                            <option value="write">Lectura y Escritura - Puede ver, subir y editar</option>
+                            <option value="admin">Acceso Total - Puede ver, editar, eliminar y compartir</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-share-alt mr-2"></i>Otorgar Permiso
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle mr-2"></i>Niveles de Permiso
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <span class="badge badge-success permission-level-read mr-2">Solo Lectura</span>
+                    <small>Puede ver el contenido de la carpeta y descargar archivos</small>
+                </div>
+                <div class="mb-3">
+                    <span class="badge badge-warning permission-level-write mr-2">Lectura y Escritura</span>
+                    <small>Puede ver, subir nuevos archivos y editar archivos existentes</small>
+                </div>
+                <div class="mb-3">
+                    <span class="badge badge-danger permission-level-admin mr-2">Acceso Total</span>
+                    <small>Puede ver, editar, eliminar y compartir la carpeta</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ Current Permissions 
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-users mr-2"></i>Permisos Actuales
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if permissions or guardian_permissions %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nivel de Permiso</th>
+                                    <th>Otorgado por</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                 Owner 
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-crown text-warning mr-2"></i>
+                                            <strong>{{ folder.owner.username }}</strong>
+                                            <span class="badge badge-primary ml-2">Propietario</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-danger permission-level-admin">Acceso Total</span>
+                                    </td>
+                                    <td>-</td>
+                                    <td>{{ folder.created_at|date:"d M Y" }}</td>
+                                    <td>-</td>
+                                </tr>
+                                
+                                 Custom Permissions 
+                                {% for permission in permissions %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-user mr-2"></i>
+                                        {{ permission.user.username }}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success permission-level-{{ permission.permission_level }}">
+                                            {{ permission.get_permission_level_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ permission.granted_by.username }}</td>
+                                    <td>{{ permission.created_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="revokePermission({{ permission.pk }}, '{{ permission.user.username }}')">
+                                            <i class="fas fa-times"></i> Revocar
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No hay permisos adicionales otorgados</h5>
+                        <p class="text-muted">Solo el propietario de la carpeta tiene acceso a esta carpeta.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function revokePermission(permissionId, username) {
+    if (confirm(`¿Estás seguro de que quieres revocar el permiso de ${username}?`)) {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/filemanager/folder/{{ folder.pk }}/permissions/revoke/${permissionId}/`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = '{{ csrf_token }}';
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+$(document).ready(function() {
+    // User search autocomplete
+    $('.user-search').on('input', function() {
+        const query = $(this).val();
+        const $input = $(this);
+        
+        if (query.length >= 2) {
+            $.get('{% url "app_filemanager:user_search" %}', {q: query}, function(data) {
+                // Simple autocomplete implementation
+                let suggestions = '';
+                data.results.forEach(function(user) {
+                    suggestions += `<option value="${user.username}">${user.username} ${user.full_name ? '(' + user.full_name + ')' : ''}</option>`;
+                });
+                
+                // Remove existing datalist
+                $('#userSuggestions').remove();
+                
+                // Add new datalist
+                if (suggestions) {
+                    $input.attr('list', 'userSuggestions');
+                    $('<datalist id="userSuggestions">' + suggestions + '</datalist>').insertAfter($input);
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends 'app_filemanager/filemanager/base.html' %}
+
+{% block title %}
+    {% if current_folder %}{{ current_folder.name }} - {% endif %}Mis Archivos - Gestor de Archivos
+{% endblock %}
+
+{% block page_title %}
+    {% if current_folder %}
+        <i class="fas fa-folder text-primary"></i> {{ current_folder.name }}
+    {% else %}
+        <i class="fas fa-home text-primary"></i> Mis Archivos
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+ Quick Upload Area 
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-upload mr-2"></i>Subida Rápida
+                </h3>
+                <div class="card-tools">
+                    <button class="btn btn-tool" type="button" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="upload-area-small" id="quickUploadArea">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-muted mr-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Arrastra archivos aquí o haz clic para seleccionar</h6>
+                                    <small class="text-muted">Se subirán a la carpeta actual</small>
+                                </div>
+                            </div>
+                            <input type="file" id="quickFileInput" multiple class="d-none">
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('quickFileInput').click()">
+                                <i class="fas fa-plus mr-2"></i>Seleccionar Archivos
+                            </button>
+                            <a href="{% url 'app_filemanager:file_upload' %}" class="btn btn-outline-primary ml-2">
+                                <i class="fas fa-cog mr-2"></i>Opciones Avanzadas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                 Quick Upload Progress 
+                <div id="quickUploadProgress" class="mt-3" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted">Subiendo archivos...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ Action Bar 
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="btn-group">
+            <a href="{% url 'app_filemanager:file_upload' %}" class="btn btn-primary">
+                <i class="fas fa-upload"></i> Subir Archivos
+            </a>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#folderModal">
+                <i class="fas fa-folder-plus"></i> Nueva Carpeta
+            </button>
+            {% if current_folder and can_share %}
+            <a href="{% url 'app_filemanager:folder_permissions' current_folder.pk %}" class="btn btn-info">
+                <i class="fas fa-share-alt"></i> Compartir Carpeta
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <form method="get" class="d-flex">
+            <input type="text" name="search" class="form-control" 
+                   placeholder="Buscar archivos y carpetas..." 
+                   value="{{ search_query|default:'' }}">
+            <button type="submit" class="btn btn-outline-primary ml-2">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+ Rest of your existing file list content 
+ ... (mantén todo el contenido existente de file_list.html) ... 
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Quick upload functionality
+    const quickUploadArea = document.getElementById('quickUploadArea');
+    const quickFileInput = document.getElementById('quickFileInput');
+    
+    // Drag and drop for quick upload
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        quickUploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        quickUploadArea.addEventListener(eventName, () => {
+            quickUploadArea.classList.add('dragover');
+        }, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        quickUploadArea.addEventListener(eventName, () => {
+            quickUploadArea.classList.remove('dragover');
+        }, false);
+    });
+    
+    quickUploadArea.addEventListener('drop', handleQuickDrop, false);
+    quickFileInput.addEventListener('change', function(e) {
+        handleQuickUpload(e.target.files);
+    });
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function handleQuickDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleQuickUpload(files);
+}
+
+function handleQuickUpload(files) {
+    if (files.length === 0) return;
+    
+    const formData = new FormData();
+    const progressDiv = document.getElementById('quickUploadProgress');
+    const progressBar = progressDiv.querySelector('.progress-bar');
+    
+    // Add CSRF token
+    formData.append('csrfmiddlewaretoken', $('[name=csrfmiddlewaretoken]').val());
+    
+    // Add current folder if exists
+    {% if current_folder %}
+    formData.append('folder_id', '{{ current_folder.pk }}');
+    {% endif %}
+    
+    // Add files
+    Array.from(files).forEach(file => {
+        formData.append('files', file);
+    });
+    
+    // Show progress
+    progressDiv.style.display = 'block';
+    
+    // Upload
+    $.ajax({
+        url: '{% url "app_filemanager:ajax_file_upload" %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        xhr: function() {
+            const xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener('progress', function(evt) {
+                if (evt.lengthComputable) {
+                    const percentComplete = (evt.loaded / evt.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                }
+            }, false);
+            return xhr;
+        },
+        success: function(response) {
+            if (response.success) {
+                // Show success message
+                showAlert('success', response.message);
+                // Reload page to show new files
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', response.error);
+            }
+        },
+        error: function(xhr, status, error) {
+            showAlert('danger', 'Error al subir archivos: ' + error);
+        },
+        complete: function() {
+            setTimeout(() => {
+                progressDiv.style.display = 'none';
+                progressBar.style.width = '0%';
+            }, 2000);
+        }
+    });
+}
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    `;
+    
+    // Insert at top of content
+    $('.content .container-fluid').prepend(alertHtml);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+
+<style>
+.upload-area-small {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.upload-area-small:hover,
+.upload-area-small.dragover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}

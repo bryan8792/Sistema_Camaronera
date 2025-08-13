@@ -1,0 +1,79 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% block head %}
+  {{ block.super }}
+  <style>
+    .file-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .file-card { transition: all 0.3s ease; cursor: pointer; border: 1px solid #dee2e6; height: 100%; }
+    .file-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); border-color: #007bff; }
+    .folder-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; }
+    .folder-card:hover { background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%); }
+    .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+    .upload-area { border: 3px dashed #dee2e6; border-radius: 10px; padding: 3rem; text-align: center; transition: all 0.3s ease; background: #f8f9fa; }
+    .upload-area:hover, .upload-area.dragover { border-color: #007bff; background: #e3f2fd; }
+    .permission-level-read { color: #28a745; }
+    .permission-level-write { color: #ffc107; }
+    .permission-level-admin { color: #dc3545; }
+    .breadcrumb-item a { text-decoration: none; color: #007bff; }
+    .breadcrumb-item a:hover { color: #0056b3; }
+    .file-thumbnail { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; }
+    .btn-file-action { padding: 0.25rem 0.5rem; font-size: 0.875rem; margin: 0.125rem; }
+  </style>
+  {% block extra_css %}{% endblock %}
+{% endblock %}
+
+{% block contenido %}
+  <section class="content pt-3">
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col-sm-6">
+          <h1 class="m-0">{% block page_title %}Dashboard{% endblock %}</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            {% block breadcrumb %}
+              <li class="breadcrumb-item"><a href="{% url 'app_filemanager:dashboard' %}">Inicio</a></li>
+              <li class="breadcrumb-item active">Dashboard</li>
+            {% endblock %}
+          </ol>
+        </div>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle mr-2"></i>
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">×</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script>
+    // Ocultar alertas tras 5s
+    setTimeout(function() { $('.alert').fadeOut('slow'); }, 5000);
+
+    // Confirmación estándar de borrado
+    function confirmDelete(itemType, itemName) {
+      return confirm('¿Estás seguro de que quieres eliminar este ' + itemType + ': "' + itemName + '"?\n\nEsta acción no se puede deshacer.');
+    }
+
+    // Drag & drop de subida
+    $(document).ready(function() {
+      $('.upload-area').on('dragover', function(e) { e.preventDefault(); $(this).addClass('dragover'); });
+      $('.upload-area').on('dragleave', function(e) { e.preventDefault(); $(this).removeClass('dragover'); });
+      $('.upload-area').on('drop', function(e) { e.preventDefault(); $(this).removeClass('dragover'); /* Manejar archivos soltados */ });
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+{% endblock %}

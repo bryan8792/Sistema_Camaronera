@@ -42,6 +42,10 @@ THIRD_PARTY_APPS = [
     'widget_tweaks',
     # 'django_user_agents',
     # 'django_cleanup.apps.CleanupConfig',
+    'guardian',
+    'crispy_forms',
+    'crispy_bootstrap5',
+
 ]
 
 LOCAL_APPS = [
@@ -62,7 +66,8 @@ LOCAL_APPS = [
     'app_cliente',
     'app_venta',
     'app_notaCredito',
-    'app_compra'
+    'app_compra',
+    'app_filemanager'
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -166,6 +171,20 @@ GROUPS = {
     'secretaria': 2,
     'client': 3,
 }
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024  # 50MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024   # 50MB
+
+# Guardian settings
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
+
+# Crispy forms settings
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Configurations
 # LOCALHOST = '127.0.0.1'
