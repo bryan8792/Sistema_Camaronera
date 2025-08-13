@@ -62,6 +62,20 @@ var sale = {
             lengthChange: false,
             searching: false,
             paginate: false,
+            language: {
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                },
+                "zeroRecords": "Ningun dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "infoEmpty": "Tabla vacia por favor inserte datos",
+                "lengthMenu": "Listando _MENU_ registros",
+                "sSearch": "Buscar:",
+                "infoFiltered": "(filtrado de _MAX_ registros totales)"
+            },
             columns: [
                 {data: "id", "width": "1%"},
                 {data: "orden", "width": "5%"},
@@ -337,6 +351,20 @@ var sale = {
             searching: false,
             paginate: false,
             info: false,
+            language: {
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                },
+                "zeroRecords": "Ningun dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "infoEmpty": "Tabla vacia por favor inserte datos",
+                "lengthMenu": "Listando _MENU_ registros",
+                "sSearch": "Buscar:",
+                "infoFiltered": "(filtrado de _MAX_ registros totales)"
+            },
             columns: [
                 {data: "name"},
                 {data: "name"},
@@ -849,6 +877,20 @@ $(function () {
         tblSearchProducts = $('#tblSearchProducts').DataTable({
             autoWidth: false,
             destroy: true,
+            language: {
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                },
+                "zeroRecords": "Ningun dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "infoEmpty": "Tabla vacia por favor inserte datos",
+                "lengthMenu": "Listando _MENU_ registros",
+                "sSearch": "Buscar:",
+                "infoFiltered": "(filtrado de _MAX_ registros totales)"
+            },
             ajax: {
                 url: pathname,
                 type: 'POST',

@@ -151,7 +151,7 @@ function handleQuickUpload(files) {
     
     // Add current folder if exists
     {% if current_folder %}
-    formData.append('folder_id', '{{ current_folder.pk }}');
+    formData.append('folder', '{{ current_folder.pk }}');
     {% endif %}
     
     // Add files

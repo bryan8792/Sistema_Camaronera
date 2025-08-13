@@ -5,6 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.http import Http404, JsonResponse, FileResponse, HttpResponseForbidden, HttpResponseNotAllowed, \
     HttpResponseBadRequest
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.urls import reverse_lazy, reverse
@@ -36,6 +38,7 @@ def _user_level_on_folder(user, folder):
 
 @require_POST
 @login_required
+@csrf_exempt
 def ajax_file_upload(request):
   uploaded_file = request.FILES.get('file')
   if not uploaded_file:
@@ -572,7 +575,7 @@ class FolderCreateView(LoginRequiredMixin, CreateView):
         return reverse('app_filemanager:file_list')
 
 
-class FolderDetailView(LoginRequiredMixin, DetailView):
+class FolderDetailView(DetailView):
     """Folder detail view with contents"""
     model = Folder
     template_name = 'app_filemanager/filemanager/folder_detail.html'
@@ -600,7 +603,7 @@ class FolderDetailView(LoginRequiredMixin, DetailView):
             crumbs = []
             cur = folder
             while cur and cur.parent:
-                crumbs.insert(0, {"id": cur.parent.id, "name": cur.parent.name})
+                crumbs.insert(0, {"pk": cur.parent.id, "name": cur.parent.name})
                 cur = cur.parent
             context["breadcrumbs"] = crumbs
         # Get subfolders
@@ -617,7 +620,6 @@ class FolderDetailView(LoginRequiredMixin, DetailView):
             klass=File
         ).filter(folder=folder)
 
-        # Pagination for files
         paginator = Paginator(files, 20)
         page_number = self.request.GET.get('page')
         files_page = paginator.get_page(page_number)
@@ -735,55 +737,49 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
         return reverse('app_filemanager:file_list')
 
 
-class AjaxFileUploadView(LoginRequiredMixin, View):
-    """AJAX file upload endpoint"""
 
-    def post(self, request):
-        try:
-            uploaded_files = request.FILES.getlist('files')
-            folder_id = request.POST.get('folder_id')
-            description = request.POST.get('description', '')
-            is_public = request.POST.get('is_public') == 'true'
+@method_decorator(csrf_exempt, name='dispatch')
+class AjaxFileUploadView(View):
+    def post(self, request, *args, **kwargs):
+        # Usamos el formulario pasando user como keyword argument
+        form = MultipleFileUploadForm(request.POST, request.FILES, user=request.user)
 
-            if not uploaded_files:
-                return JsonResponse({'success': False, 'error': 'No files selected'})
+        # Obtén los archivos enviados por JS
+        files = request.FILES.getlist('files')
 
-            # Get folder if specified
-            folder = None
-            if folder_id:
+        if form.is_valid():
+            folder = form.cleaned_data.get('folder', None)
+            description = form.cleaned_data.get('description', '')
+            is_public = form.cleaned_data.get('is_public', False)
+
+            # Validar permisos de escritura si es carpeta específica
+            if folder and _user_level_on_folder(request.user, folder) < LEVEL_NUM["write"]:
+                return JsonResponse({'success': False, 'message': 'No tienes permiso de escritura en esta carpeta.'}, status=403)
+
+            uploaded_files = []
+            for f in files:
                 try:
-                    folder = Folder.objects.get(id=folder_id, owner=request.user)
-                except Folder.DoesNotExist:
-                    return JsonResponse({'success': False, 'error': 'Folder not found'})
-
-            # Process files
-            uploaded_files_data = []
-            for uploaded_file in uploaded_files:
-                file_obj = File(
-                    name=uploaded_file.name,
-                    file=uploaded_file,
-                    folder=folder,
-                    owner=request.user,
-                    description=description,
-                    is_public=is_public
-                )
-                file_obj.save()
-
-                uploaded_files_data.append({
-                    'id': file_obj.pk,
-                    'name': file_obj.name,
-                    'size': file_obj.get_file_size_display(),
-                    'url': file_obj.file.url if file_obj.file else None
-                })
+                    file_instance = File(
+                        name=f.name,
+                        file=f,
+                        description=description,
+                        is_public=is_public,
+                        owner=request.user,
+                        folder=folder
+                    )
+                    file_instance.save()
+                    uploaded_files.append(file_instance.name)
+                except Exception as e:
+                    return JsonResponse({'success': False, 'message': f'Error al subir {f.name}: {str(e)}'}, status=500)
 
             return JsonResponse({
                 'success': True,
-                'files': uploaded_files_data,
-                'message': f'{len(uploaded_files_data)} archivo(s) subido(s) exitosamente!'
+                'message': f'Archivos subidos exitosamente: {", ".join(uploaded_files)}'
             })
 
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
+        else:
+            # Retorna errores de validación del formulario
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
 
 # Permission Views

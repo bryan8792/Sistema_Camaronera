@@ -42,7 +42,7 @@ urlpatterns = [
 
     path("move/", ajax_move, name="ajax_move"),
 
-    path("upload/ajax/", ajax_file_upload, name="ajax_file_upload"),
+    # path("upload/ajax/", ajax_file_upload, name="ajax_file_upload"),
 
 
 ]

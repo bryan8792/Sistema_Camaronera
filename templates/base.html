@@ -2001,44 +2001,28 @@
                                 </li>
                             </ul>
                         </li>
-                        <!-- Barra que divide campo Administracion-->
+                        <!-- Barra que divide campo Gestion de Archivos-->
                         <li class="nav-header">
-                            Administración
+                            Gestion Archivos
                         </li>
                         <!-- Modulo Gestor de Archivos -->
                         <li class="nav-item has-treeview">
                             <a class="nav-link" href="#">
-                                <i class="nav-icon fas fa-calculator">
+                                <i class="fa fa-box nav-icon">
                                 </i>
-                                <p>
-                                    Gestor de Archivos
-                                    <i class="fas fa-angle-left right">
-                                    </i>
+                                <p> Gestor de Archivos
+                                    <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
-                                <li class="nav-item has-treeview">
-                                    <a class="nav-link" href="#">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_filemanager:dashboard' %}">
                                         <i class="fa fa-book-open nav-icon">
                                         </i>
                                         <p>
                                             Ver archivos
-                                            <i class="right fas fa-angle-left">
-                                            </i>
                                         </p>
                                     </a>
-                                    <ul class="nav nav-treeview">
-                                        <li class="nav-item bio-item">
-                                            <a class="nav-link"
-                                               href="{% url 'app_filemanager:dashboard' %}">
-                                                <i class="far fa-dot-circle nav-icon">
-                                                </i>
-                                                <p>
-                                                    Dashboard archivos
-                                                </p>
-                                            </a>
-                                        </li>
-                                    </ul>
                                 </li>
                             </ul>
                         </li>

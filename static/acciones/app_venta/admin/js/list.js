@@ -23,6 +23,20 @@ var sale = {
             autoWidth: false,
             destroy: true,
             deferRender: true,
+            language: {
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                },
+                "zeroRecords": "Ningun dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "infoEmpty": "Tabla vacia por favor inserte datos",
+                "lengthMenu": "Listando _MENU_ registros",
+                "sSearch": "Buscar:",
+                "infoFiltered": "(filtrado de _MAX_ registros totales)"
+            },
             ajax: {
                 url: pathname,
                 type: 'POST',
