@@ -263,10 +263,10 @@
                                                     {{ subfolder.get_file_count }} archivos
                                                 </small>
                                                 <div class="file-actions">
-                                                    <a href="{% url 'app_filemanager:folder_detail' subfolder.pk %}"
-                                                       class="btn btn-sm btn-primary">
+                                                    <button class="btn btn-sm btn-info preview-btn"
+                                                            data-url="{{ file.file.url }}">
                                                         <i class="fas fa-eye"></i>
-                                                    </a>
+                                                    </button>
                                                     {% if subfolder.owner == request.user %}
                                                         <a href="{% url 'app_filemanager:folder_delete' subfolder.pk %}"
                                                            class="btn btn-sm btn-danger">
@@ -292,10 +292,19 @@
                                                     {{ file.get_file_size_display }}
                                                 </small>
                                                 <div class="file-actions">
+                                                    <!-- Descargar -->
                                                     <a href="{% url 'app_filemanager:file_download' file.pk %}"
                                                        class="btn btn-sm btn-success">
                                                         <i class="fas fa-download"></i>
                                                     </a>
+
+                                                    <!-- Previsualizar -->
+                                                    <button class="btn btn-sm btn-info preview-btn"
+                                                            data-url="{{ file.file.url }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+
+                                                    <!-- Eliminar -->
                                                     {% if file.owner == request.user %}
                                                         <a href="{% url 'app_filemanager:file_delete' file.pk %}"
                                                            class="btn btn-sm btn-danger">
@@ -306,6 +315,44 @@
                                             </div>
                                         {% endfor %}
                                     </div>
+
+                                    <!-- Modal para previsualizar -->
+                                    <div class="modal fade" id="previewModal" tabindex="-1" role="dialog"
+                                         aria-labelledby="previewModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-xl" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="previewModalLabel">Previsualización</h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Cerrar">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body p-0">
+                                                    <iframe id="previewFrame" src="" style="width:100%; height:80vh;"
+                                                            frameborder="0"></iframe>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- JS para previsualización -->
+                                    <script>
+                                        $(document).ready(function () {
+                                            $('.preview-btn').click(function (e) {
+                                                e.preventDefault();
+                                                const url = $(this).data('url');
+                                                $('#previewFrame').attr('src', url);
+                                                $('#previewModal').modal('show');
+                                            });
+
+                                            // Limpiar iframe al cerrar modal
+                                            $('#previewModal').on('hidden.bs.modal', function () {
+                                                $('#previewFrame').attr('src', '');
+                                            });
+                                        });
+                                    </script>
+
 
                                     {% if files.has_other_pages %}
                                         <div class="row mt-4">
@@ -474,17 +521,56 @@
 
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                {% comment %}fileInput.files = files;
-                $('#uploadModal').modal('show');{% endcomment %}
-
-                fileInput.files = files;
-
                 const form = document.getElementById('uploadForm');
                 const formData = new FormData(form);
+
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
+                }
+
                 formData.append('folder', '{{ folder.pk }}');
 
+                fetch('{% url "app_filemanager:ajax_file_upload" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Éxito!',
+                                text: data.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload(); // recarga la página después de mostrar el mensaje
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Error al subir archivos'
+                            });
+                        }
+
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error en la conexión'
+                        });
+                    });
+
+                $('#uploadModal').modal('show');
             }
         });
+
 
         function uploadFiles() {
             const form = document.getElementById('uploadForm');
