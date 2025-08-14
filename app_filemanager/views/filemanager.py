@@ -23,43 +23,74 @@ from app_user.forms import UserForm
 from django.db.models import Q
 from ..models import Folder, FolderPermission  # ajusta import a tu estructura
 
-
 LEVEL_NUM = {"read": 1, "write": 2, "admin": 3}
 
+
 def _user_level_on_folder(user, folder):
-  if not user.is_authenticated:
+    """Obtiene el nivel de permiso de un usuario en una carpeta, incluyendo herencia"""
+    if not user.is_authenticated:
+        return 0
+    if folder is None:
+        return 3  # opcional: trata raíz como libre si es dueño del file; ajusta a tu política
+    if folder.owner_id == user.id:
+        return 3
+
+    # Buscar permisos directos en la carpeta
+    perm = FolderPermission.objects.filter(folder=folder, user=user).values_list("permission_level", flat=True).first()
+    if perm:
+        return LEVEL_NUM.get(perm, 0)
+
+    # <CHANGE> Buscar permisos heredados de carpetas padre
+    current_folder = folder.parent
+    while current_folder:
+        parent_perm = FolderPermission.objects.filter(folder=current_folder, user=user).values_list("permission_level",
+                                                                                                    flat=True).first()
+        if parent_perm:
+            return LEVEL_NUM.get(parent_perm, 0)
+        current_folder = current_folder.parent
+
     return 0
-  if folder is None:
-    return 3  # opcional: trata raíz como libre si es dueño del file; ajusta a tu política
-  if folder.owner_id == user.id:
-    return 3
-  perm = FolderPermission.objects.filter(folder=folder, user=user).values_list("permission_level", flat=True).first()
-  return LEVEL_NUM.get(perm, 0) if perm else 0
+
+
+def _can_view_folder(user, folder):
+    """Verifica si un usuario puede ver una carpeta"""
+    if not user.is_authenticated:
+        return folder.is_public if folder else False
+    if folder is None:
+        return True
+    if folder.owner_id == user.id:
+        return True
+    if folder.is_public:
+        return True
+    return _user_level_on_folder(user, folder) >= LEVEL_NUM["read"]
+
 
 @require_POST
 @login_required
 @csrf_exempt
 def ajax_file_upload(request):
-  uploaded_file = request.FILES.get('file')
-  if not uploaded_file:
-    return HttpResponseBadRequest("Falta archivo")
-  folder_id = request.POST.get('folder')
-  dest = get_object_or_404(Folder, pk=folder_id) if folder_id else None
+    uploaded_file = request.FILES.get('file')
+    if not uploaded_file:
+        return HttpResponseBadRequest("Falta archivo")
+    folder_id = request.POST.get('folder')
+    dest = get_object_or_404(Folder, pk=folder_id) if folder_id else None
 
-  if dest and _user_level_on_folder(request.user, dest) < LEVEL_NUM["write"]:
-    return HttpResponseForbidden("Sin permiso de escritura")
+    if dest and _user_level_on_folder(request.user, dest) < LEVEL_NUM["write"]:
+        return HttpResponseForbidden("Sin permiso de escritura")
 
-  try:
-    File.objects.create(owner=request.user, name=uploaded_file.name, file=uploaded_file, folder=dest)
-    return JsonResponse({"ok": True})
-  except Exception as e:
-    return JsonResponse({"ok": False, "error": str(e)}, status=500)
+    try:
+        File.objects.create(owner=request.user, name=uploaded_file.name, file=uploaded_file, folder=dest)
+        return JsonResponse({"ok": True})
+    except Exception as e:
+        return JsonResponse({"ok": False, "error": str(e)}, status=500)
 
 
 def _can_manage_folder(user, folder: Folder) -> bool:
     if not user.is_authenticated:
         return False
-    return folder.owner_id == user.id or FolderPermission.objects.filter(folder=folder, user=user, permission_level="admin").exists()
+    return folder.owner_id == user.id or FolderPermission.objects.filter(folder=folder, user=user,
+                                                                         permission_level="admin").exists()
+
 
 @login_required
 def folder_permission_update(request, folder_id: int, perm_id: int):
@@ -82,6 +113,7 @@ def folder_permission_update(request, folder_id: int, perm_id: int):
     messages.success(request, f"Permiso actualizado a '{level}'.")
     return redirect("app_filemanager:folder_permissions", folder_id=folder.id)
 
+
 @login_required
 def folder_permission_delete(request, folder_id: int, perm_id: int):
     folder = get_object_or_404(Folder, pk=folder_id)
@@ -94,6 +126,26 @@ def folder_permission_delete(request, folder_id: int, perm_id: int):
     messages.success(request, "Permiso revocado.")
     return redirect("app_filemanager:folder_permissions", folder_id=folder.id)
 
+
+# <CHANGE> Agregar función para revocar permisos masivamente
+@login_required
+def bulk_revoke_permissions(request, folder_id):
+    """Revocar múltiples permisos a la vez"""
+    if request.method == 'POST':
+        folder = get_object_or_404(Folder, pk=folder_id)
+        if not _can_manage_folder(request.user, folder):
+            return HttpResponseForbidden("No autorizado")
+
+        permission_ids = request.POST.getlist('permission_ids')
+        FolderPermission.objects.filter(
+            id__in=permission_ids,
+            folder=folder
+        ).delete()
+
+        messages.success(request, f"Se revocaron {len(permission_ids)} permisos.")
+        return redirect("app_filemanager:folder_permissions", folder_id=folder.id)
+
+
 def _is_descendant(candidate: Folder | None, ancestor: Folder) -> bool:
     """
     True si 'candidate' está dentro del subárbol de 'ancestor'.
@@ -105,6 +157,7 @@ def _is_descendant(candidate: Folder | None, ancestor: Folder) -> bool:
             return True
         cur = cur.parent
     return False
+
 
 @require_POST
 @login_required
@@ -135,8 +188,10 @@ def ajax_move(request):
             source_folder = item.folder  # puede ser None (raíz)
 
             # Permisos: mover requiere admin en origen (o owner) y write/admin en destino (si hay destino)
-            src_level = _user_level_on_folder(request.user, source_folder) if source_folder else 3  # raíz: tratamos como dueño del propio file
-            dst_level = _user_level_on_folder(request.user, target_folder) if target_folder else 3  # mover a raíz: permitir al dueño/admin
+            src_level = _user_level_on_folder(request.user,
+                                              source_folder) if source_folder else 3  # raíz: tratamos como dueño del propio file
+            dst_level = _user_level_on_folder(request.user,
+                                              target_folder) if target_folder else 3  # mover a raíz: permitir al dueño/admin
 
             # Si no es owner del file, revisa nivel en origen
             is_owner = (item.owner_id == request.user.id)
@@ -154,7 +209,9 @@ def ajax_move(request):
             source_parent = folder.parent  # puede ser None
             # Evitar mover dentro de sí o un descendiente
             if target_folder and (target_folder.id == folder.id or _is_descendant(target_folder, folder)):
-                return JsonResponse({"ok": False, "error": "No puedes mover una carpeta dentro de sí misma o de un descendiente."}, status=400)
+                return JsonResponse(
+                    {"ok": False, "error": "No puedes mover una carpeta dentro de sí misma o de un descendiente."},
+                    status=400)
 
             src_level = _user_level_on_folder(request.user, source_parent) if source_parent else 3
             dst_level = _user_level_on_folder(request.user, target_folder) if target_folder else 3
@@ -172,7 +229,9 @@ def ajax_move(request):
     except Exception as e:
         return JsonResponse({"ok": False, "error": str(e)}, status=500)
 
+
 User = get_user_model()
+
 
 def user_search(request):
     """
@@ -232,7 +291,8 @@ def folder_permissions(request, folder_id: int):
     if not _can_manage_folder(request.user, folder):
         return HttpResponseForbidden("No autorizado")
 
-    permissions = FolderPermission.objects.filter(folder=folder).select_related("user", "granted_by").order_by("user__names", "user__username")
+    permissions = FolderPermission.objects.filter(folder=folder).select_related("user", "granted_by").order_by(
+        "user__names", "user__username")
 
     context = {
         "folder": folder,
@@ -278,22 +338,6 @@ def folder_permission_create(request, folder_id: int):
         perm.granted_by = request.user
         perm.save()
 
-    # Si usas django-guardian, aquí podrías sincronizar permisos de objeto:
-    # from guardian.shortcuts import assign_perm, remove_perm
-    # def sync_guardian(level: str):
-    #     # ejemplo de mapeo, ajusta a tus codenames reales
-    #     all_perms = ["view_folder", "change_folder", "delete_folder", "add_file", "change_file", "delete_file"]
-    #     for p in all_perms:
-    #         remove_perm(p, target_user, folder)
-    #     if level in {"read", "write", "admin"}:
-    #         assign_perm("view_folder", target_user, folder)
-    #     if level in {"write", "admin"}:
-    #         for p in ["change_folder", "add_file", "change_file", "delete_file"]:
-    #             assign_perm(p, target_user, folder)
-    #     if level == "admin":
-    #         assign_perm("delete_folder", target_user, folder)
-    # sync_guardian(level)
-
     messages.success(request, f"Permisos de {target_user.username} actualizados a '{level}'.")
     return redirect("app_filemanager:folder_permissions", folder_id=folder.id)
 
@@ -311,8 +355,8 @@ class DashboardView(LoginRequiredMixin, View):
         # Recent files
         recent_files = File.objects.filter(owner=request.user)[:10]
 
-        # Recent folders
-        recent_folders = Folder.objects.filter(owner=request.user)[:5]
+        # <CHANGE> Recent folders - solo carpetas raíz para evitar mostrar subcarpetas como independientes
+        recent_folders = Folder.objects.filter(owner=request.user, parent=None)[:5]
 
         # Shared items
         shared_with_me = SharedLink.objects.filter(shared_with=request.user)[:5]
@@ -320,6 +364,11 @@ class DashboardView(LoginRequiredMixin, View):
         # File type distribution
         file_types = File.objects.filter(owner=request.user).values('file_type').annotate(
             count=Count('id')).order_by('-count')[:10]
+
+        # <CHANGE> Agregar estadísticas de compartidos
+        shared_folders_count = FolderPermission.objects.filter(granted_by=request.user).values(
+            'folder').distinct().count()
+        folders_shared_with_me_count = FolderPermission.objects.filter(user=request.user).count()
 
         context = {
             'total_files': total_files,
@@ -329,6 +378,8 @@ class DashboardView(LoginRequiredMixin, View):
             'recent_folders': recent_folders,
             'shared_with_me': shared_with_me,
             'file_types': file_types,
+            'shared_folders_count': shared_folders_count,
+            'folders_shared_with_me_count': folders_shared_with_me_count,
         }
 
         return render(request, 'app_filemanager/filemanager/dashboard.html', context)
@@ -340,6 +391,58 @@ class DashboardView(LoginRequiredMixin, View):
                 return f"{size:.1f} {unit}"
             size /= 1024.0
         return f"{size:.1f} PB"
+
+
+# <CHANGE> Agregar vista para "Mis Compartidos"
+class MySharedFoldersView(LoginRequiredMixin, ListView):
+    """Vista para que el usuario vea todas las carpetas que ha compartido"""
+    template_name = 'app_filemanager/filemanager/my_shared_folders.html'
+    context_object_name = 'shared_folders'
+    paginate_by = 20
+
+    def get_queryset(self):
+        # Carpetas donde el usuario ha otorgado permisos a otros
+        return Folder.objects.filter(
+            custom_permissions__granted_by=self.request.user
+        ).distinct().select_related('owner').prefetch_related('custom_permissions__user')
+
+
+# <CHANGE> Agregar vista para "Compartido Conmigo"
+class SharedWithMeView(LoginRequiredMixin, ListView):
+    """Vista para que el usuario vea todas las carpetas compartidas con él"""
+    template_name = 'app_filemanager/filemanager/shared_with_me.html'
+    context_object_name = 'shared_folders'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Folder.objects.filter(
+            custom_permissions__user=self.request.user
+        ).select_related('owner').prefetch_related('custom_permissions')
+
+
+# <CHANGE> Agregar vista para editar carpetas
+class FolderEditView(LoginRequiredMixin, UpdateView):
+    """Editar nombres y propiedades de carpetas"""
+    model = Folder
+    form_class = FolderEditForm
+    template_name = 'app_filemanager/filemanager/folder_edit.html'
+
+    def get_object(self):
+        folder = super().get_object()
+        # Verificar permisos
+        if not (folder.owner == self.request.user or
+                _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["admin"]):
+            raise Http404("No tienes permiso para editar esta carpeta")
+        return folder
+
+    def form_valid(self, form):
+        messages.success(self.request, f'Carpeta "{self.object.name}" actualizada exitosamente!')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        if self.object.parent:
+            return reverse('app_filemanager:folder_detail', kwargs={'pk': self.object.parent.pk})
+        return reverse('app_filemanager:file_list')
 
 
 class FileListView(LoginRequiredMixin, ListView):
@@ -356,17 +459,17 @@ class FileListView(LoginRequiredMixin, ListView):
         if folder_id:
             current_folder = get_object_or_404(Folder, id=folder_id)
             # Check permissions
-            if not (current_folder.owner == self.request.user or
-                    current_folder.is_public or
-                    self.request.user.has_perm('app_filemanager.view_folder', current_folder)):
+            if not _can_view_folder(self.request.user, current_folder):
                 raise Http404("No tienes permiso para ver esta carpeta")
 
         # Get files in current directory
-        files = get_objects_for_user(
-            self.request.user,
-            'app_filemanager.view_file',
-            klass=File
-        ).filter(folder=current_folder)
+        files = File.objects.filter(folder=current_folder)
+
+        # Filtrar por permisos
+        if current_folder and current_folder.owner != self.request.user:
+            # Si no es el propietario, verificar permisos
+            if not _can_view_folder(self.request.user, current_folder):
+                files = files.none()
 
         # Search functionality
         search_query = self.request.GET.get('search')
@@ -397,17 +500,19 @@ class FileListView(LoginRequiredMixin, ListView):
         if folder_id:
             current_folder = get_object_or_404(Folder, id=folder_id)
 
-        # Get folders in current directory
-        folders = get_objects_for_user(
-            self.request.user,
-            'app_filemanager.view_folder',
-            klass=Folder
-        ).filter(parent=current_folder)
+        # <CHANGE> Get folders in current directory con permisos corregidos
+        folders = Folder.objects.filter(parent=current_folder)
+
+        # Filtrar carpetas por permisos
+        accessible_folders = []
+        for folder in folders:
+            if _can_view_folder(self.request.user, folder):
+                accessible_folders.append(folder)
 
         # Search in folders too
         search_query = self.request.GET.get('search')
         if search_query:
-            folders = folders.filter(name__icontains=search_query)
+            accessible_folders = [f for f in accessible_folders if search_query.lower() in f.name.lower()]
 
         # Breadcrumb navigation
         breadcrumbs = []
@@ -415,7 +520,7 @@ class FileListView(LoginRequiredMixin, ListView):
             breadcrumbs = current_folder.get_breadcrumbs()
 
         context.update({
-            'folders': folders,
+            'folders': accessible_folders,
             'current_folder': current_folder,
             'breadcrumbs': breadcrumbs,
             'search_query': search_query,
@@ -525,7 +630,7 @@ class SingleFileUploadView(LoginRequiredMixin, CreateView):
             folder = get_object_or_404(Folder, id=folder_id)
             # Check permissions
             if not (folder.owner == self.request.user or
-                    self.request.user.has_perm('app_filemanager.edit_folder', folder)):
+                    _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["write"]):
                 messages.error(self.request, "No tienes permiso para subir archivos a esta carpeta.")
                 return redirect('app_filemanager:file_list')
             form.instance.folder = folder
@@ -556,7 +661,7 @@ class FolderCreateView(LoginRequiredMixin, CreateView):
             parent_folder = get_object_or_404(Folder, id=parent_id)
             # Check permissions
             if not (parent_folder.owner == self.request.user or
-                    self.request.user.has_perm('app_filemanager.edit_folder', parent_folder)):
+                    _user_level_on_folder(self.request.user, parent_folder) >= LEVEL_NUM["write"]):
                 messages.error(self.request, "No tienes permiso para crear carpetas aquí.")
                 return redirect('app_filemanager:file_list')
             form.instance.parent = parent_folder
@@ -584,9 +689,7 @@ class FolderDetailView(DetailView):
     def get_object(self):
         folder = super().get_object()
         # Check permissions
-        if not (folder.owner == self.request.user or
-                folder.is_public or
-                self.request.user.has_perm('app_filemanager.view_folder', folder)):
+        if not _can_view_folder(self.request.user, folder):
             raise Http404("No tienes permiso para ver esta carpeta")
         return folder
 
@@ -594,11 +697,27 @@ class FolderDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         folder = self.object
         context["can_upload"] = _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["write"]
-        if "folders" not in context:
-            context["folders"] = Folder.objects.filter(parent=folder)
-        if "files" not in context:
-            context["files"] = folder.files.all()
-            # breadcrumbs si no lo tienes
+
+        # <CHANGE> Corregir obtención de subcarpetas con permisos heredados
+        all_subfolders = Folder.objects.filter(parent=folder)
+        accessible_subfolders = []
+        for subfolder in all_subfolders:
+            if _can_view_folder(self.request.user, subfolder):
+                accessible_subfolders.append(subfolder)
+
+        # <CHANGE> Corregir obtención de archivos con permisos
+        all_files = folder.files.all()
+        accessible_files = []
+        for file_obj in all_files:
+            # Los archivos heredan permisos de su carpeta padre
+            if _can_view_folder(self.request.user, folder):
+                accessible_files.append(file_obj)
+
+        paginator = Paginator(accessible_files, 20)
+        page_number = self.request.GET.get('page')
+        files_page = paginator.get_page(page_number)
+
+        # breadcrumbs si no lo tienes
         if "breadcrumbs" not in context:
             crumbs = []
             cur = folder
@@ -606,34 +725,17 @@ class FolderDetailView(DetailView):
                 crumbs.insert(0, {"pk": cur.parent.id, "name": cur.parent.name})
                 cur = cur.parent
             context["breadcrumbs"] = crumbs
-        # Get subfolders
-        subfolders = get_objects_for_user(
-            self.request.user,
-            'app_filemanager.view_folder',
-            klass=Folder
-        ).filter(parent=folder)
-
-        # Get files
-        files = get_objects_for_user(
-            self.request.user,
-            'app_filemanager.view_file',
-            klass=File
-        ).filter(folder=folder)
-
-        paginator = Paginator(files, 20)
-        page_number = self.request.GET.get('page')
-        files_page = paginator.get_page(page_number)
 
         context.update({
-            'subfolders': subfolders,
+            'subfolders': accessible_subfolders,
             'files': files_page,
             'breadcrumbs': folder.get_breadcrumbs(),
             'can_edit': (folder.owner == self.request.user or
-                         self.request.user.has_perm('app_filemanager.edit_folder', folder)),
+                         _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["admin"]),
             'can_delete': (folder.owner == self.request.user or
-                           self.request.user.has_perm('app_filemanager.delete_folder', folder)),
+                           _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["admin"]),
             'can_share': (folder.owner == self.request.user or
-                          self.request.user.has_perm('app_filemanager.share_folder', folder)),
+                          _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["admin"]),
         })
 
         return context
@@ -648,7 +750,7 @@ class FileDownloadView(LoginRequiredMixin, View):
         # Check permissions
         if not (file_obj.owner == request.user or
                 file_obj.is_public or
-                request.user.has_perm('app_filemanager.download_file', file_obj)):
+                _can_view_folder(request.user, file_obj.folder)):
             raise Http404("No tienes permiso para descargar este archivo")
 
         try:
@@ -676,7 +778,7 @@ class FileDeleteView(LoginRequiredMixin, DeleteView):
         file_obj = super().get_object()
         # Check permissions
         if not (file_obj.owner == self.request.user or
-                self.request.user.has_perm('app_filemanager.delete_file', file_obj)):
+                _user_level_on_folder(self.request.user, file_obj.folder) >= LEVEL_NUM["admin"]):
             raise Http404("No tienes permiso para eliminar este archivo")
         return file_obj
 
@@ -710,7 +812,7 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
         folder = super().get_object()
         # Check permissions
         if not (folder.owner == self.request.user or
-                self.request.user.has_perm('app_filemanager.delete_folder', folder)):
+                _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["admin"]):
             raise Http404("No tienes permiso para eliminar esta carpeta")
         return folder
 
@@ -737,7 +839,6 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
         return reverse('app_filemanager:file_list')
 
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class AjaxFileUploadView(View):
     def post(self, request, *args, **kwargs):
@@ -754,7 +855,8 @@ class AjaxFileUploadView(View):
 
             # Validar permisos de escritura si es carpeta específica
             if folder and _user_level_on_folder(request.user, folder) < LEVEL_NUM["write"]:
-                return JsonResponse({'success': False, 'message': 'No tienes permiso de escritura en esta carpeta.'}, status=403)
+                return JsonResponse({'success': False, 'message': 'No tienes permiso de escritura en esta carpeta.'},
+                                    status=403)
 
             uploaded_files = []
             for f in files:
@@ -794,8 +896,7 @@ class FolderPermissionListView(LoginRequiredMixin, ListView):
         self.folder = get_object_or_404(Folder, id=folder_id)
 
         # Check if user is owner or has admin permission
-        if not (self.folder.owner == self.request.user or
-                self.request.user.has_perm('app_filemanager.share_folder', self.folder)):
+        if not _can_manage_folder(self.request.user, self.folder):
             messages.error(self.request, "No tienes permiso para gestionar los permisos de esta carpeta.")
             return FolderPermission.objects.none()
 
@@ -820,8 +921,7 @@ class FolderPermissionCreateView(LoginRequiredMixin, View):
         folder = get_object_or_404(Folder, id=folder_id)
 
         # Check if user is owner or has admin permission
-        if not (folder.owner == request.user or
-                request.user.has_perm('app_filemanager.share_folder', folder)):
+        if not _can_manage_folder(request.user, folder):
             messages.error(request, "No tienes permiso para gestionar los permisos de esta carpeta.")
             return redirect('app_filemanager:folder_permissions', folder_id=folder_id)
 

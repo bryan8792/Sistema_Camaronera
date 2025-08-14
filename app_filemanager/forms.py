@@ -99,6 +99,7 @@ class FolderCreateForm(forms.ModelForm):
             self.fields['parent'].empty_label = "Carpeta raíz"
 
 
+# <CHANGE> Corregido para usar 'is_public' en lugar de 'visibility'
 class FolderEditForm(forms.ModelForm):
     class Meta:
         model = Folder
@@ -137,21 +138,19 @@ class FileEditForm(forms.ModelForm):
         }
 
 
-class FolderPermissionForm(forms.Form):
-    username = forms.CharField(
-        max_length=150,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Nombre de usuario',
-            'autocomplete': 'off'
-        }),
-        label='Usuario'
-    )
-    permission_level = forms.ChoiceField(
-        choices=FolderPermission.PERMISSION_CHOICES,
+class FolderPermissionForm(forms.ModelForm):
+    user = forms.ModelChoiceField(
+        queryset=User.objects.all(),
         widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Nivel de Permiso'
+        empty_label="Seleccionar usuario"
     )
+
+    class Meta:
+        model = FolderPermission
+        fields = ['user', 'permission_level']
+        widgets = {
+            'permission_level': forms.Select(attrs={'class': 'form-control'})
+        }
 
 
 class FilePermissionForm(forms.Form):
@@ -205,3 +204,37 @@ class SearchForm(forms.Form):
             'type': 'date'
         })
     )
+
+
+# <CHANGE> Corregido para usar 'is_public' en lugar de 'visibility'
+class FolderForm(forms.ModelForm):
+    class Meta:
+        model = Folder
+        fields = ['name', 'description', 'is_public', 'parent']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nombre de la carpeta'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Descripción opcional'
+            }),
+            'is_public': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+        if user:
+            # Only show folders that the user owns as potential parents
+            self.fields['parent'].queryset = Folder.objects.filter(owner=user)
+
+        # Make parent field optional
+        self.fields['parent'].required = False
+        self.fields['parent'].empty_label = "Sin carpeta padre (Raíz)"
+

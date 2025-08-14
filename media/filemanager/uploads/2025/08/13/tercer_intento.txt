@@ -1,0 +1,710 @@
+Opcion de Action
+action add
+sale.company
+BIOCASCAJAL
+sale.payment_method
+20
+*************************
+access_code
+0508202501079010180400110010020000000039540072711
+{'resp': True,
+ 'stage': 'xml_signature',
+ 'xml': '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<factura id="comprobante" '
+        'version="1.0.0"><infoTributaria><ambiente>1</ambiente><tipoEmision>1</tipoEmision><razonSocial>BIOCASCAJAL</razonSocial><nombreComercial>BIOCASCAJAL</nombreComercial><ruc>0790101804001</ruc><claveAcceso>0508202501079010180400110010020000000039540072711</claveAcceso><codDoc>01</codDoc><estab>001</estab><ptoEmi>002</ptoEmi><secuencial>000000003</secuencial><dirMatriz>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirMatriz></infoTributaria><infoFactura><fechaEmision>05/08/2025</fechaEmision><dirEstablecimiento>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirEstablecimiento><obligadoContabilidad>NO</obligadoContabilidad><tipoIdentificacionComprador>05</tipoIdentificacionComprador><razonSocialComprador>ROMAN '
+        'AGUILAR NATHALI '
+        'RAFAELA</razonSocialComprador><identificacionComprador>0703627182</identificacionComprador><direccionComprador>pasaje</direccionComprador><totalSinImpuestos>4.00</totalSinImpuestos><totalDescuento>0.00</totalDescuento><totalConImpuestos><totalImpuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><baseImponible>4.00</baseImponible><valor>0.60</valor></totalImpuesto></totalConImpuestos><propina>0.00</propina><importeTotal>4.60</importeTotal><moneda>DOLAR</moneda><pagos><pago><formaPago>20</formaPago><total>4.60</total><plazo>31</plazo><unidadTiempo>dias</unidadTiempo></pago></pagos></infoFactura><detalles><detalle><codigoPrincipal>21</codigoPrincipal><descripcion>PISCINA '
+        '21</descripcion><cantidad>2.000000</cantidad><precioUnitario>2.00</precioUnitario><descuento>0.00</descuento><precioTotalSinImpuesto>4.00</precioTotalSinImpuesto><impuestos><impuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><tarifa>15.00</tarifa><baseImponible>4.00</baseImponible><valor>0.60</valor></impuesto></impuestos></detalle></detalles><infoAdicional><campoAdicional '
+        'nombre="Dirección">pasaje</campoAdicional><campoAdicional '
+        'nombre="Teléfono">0997458533</campoAdicional><campoAdicional '
+        'nombre="Email">nathy1589@hotmail.com</campoAdicional></infoAdicional></factura>'}
+{'resp': True,
+ 'stage': 'xml_signature',
+ 'xml': '<?xml version="1.0" encoding="utf-8" standalone="no"?><factura '
+        'id="comprobante" '
+        'version="1.0.0"><infoTributaria><ambiente>1</ambiente><tipoEmision>1</tipoEmision><razonSocial>BIOCASCAJAL</razonSocial><nombreComercial>BIOCASCAJAL</nombreComercial><ruc>0790101804001</ruc><claveAcceso>0508202501079010180400110010020000000039540072711</claveAcceso><codDoc>01</codDoc><estab>001</estab><ptoEmi>002</ptoEmi><secuencial>000000003</secuencial><dirMatriz>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirMatriz></infoTributaria><infoFactura><fechaEmision>05/08/2025</fechaEmision><dirEstablecimiento>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirEstablecimiento><obligadoContabilidad>NO</obligadoContabilidad><tipoIdentificacionComprador>05</tipoIdentificacionComprador><razonSocialComprador>ROMAN '
+        'AGUILAR NATHALI '
+        'RAFAELA</razonSocialComprador><identificacionComprador>0703627182</identificacionComprador><direccionComprador>pasaje</direccionComprador><totalSinImpuestos>4.00</totalSinImpuestos><totalDescuento>0.00</totalDescuento><totalConImpuestos><totalImpuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><baseImponible>4.00</baseImponible><valor>0.60</valor></totalImpuesto></totalConImpuestos><propina>0.00</propina><importeTotal>4.60</importeTotal><moneda>DOLAR</moneda><pagos><pago><formaPago>20</formaPago><total>4.60</total><plazo>31</plazo><unidadTiempo>dias</unidadTiempo></pago></pagos></infoFactura><detalles><detalle><codigoPrincipal>21</codigoPrincipal><descripcion>PISCINA '
+        '21</descripcion><cantidad>2.000000</cantidad><precioUnitario>2.00</precioUnitario><descuento>0.00</descuento><precioTotalSinImpuesto>4.00</precioTotalSinImpuesto><impuestos><impuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><tarifa>15.00</tarifa><baseImponible>4.00</baseImponible><valor>0.60</valor></impuesto></impuestos></detalle></detalles><infoAdicional><campoAdicional '
+        'nombre="Dirección">pasaje</campoAdicional><campoAdicional '
+        'nombre="Teléfono">0997458533</campoAdicional><campoAdicional '
+        'nombre="Email">nathy1589@hotmail.com</campoAdicional></infoAdicional><ds:Signature '
+        'xmlns:ds="http://www.w3.org/2000/09/xmldsig#" '
+        'xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" '
+        'Id="Signature906230">\r\n'
+        '<ds:SignedInfo Id="Signature-SignedInfo569399">\r\n'
+        '<ds:CanonicalizationMethod '
+        'Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>\r\n'
+        '<ds:SignatureMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>\r\n'
+        '<ds:Reference Id="SignedPropertiesID1037640" '
+        'Type="http://uri.etsi.org/01903#SignedProperties" '
+        'URI="#Signature906230-SignedProperties830932">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>1jinmJHlzMHxQsi06INYPU4kfs4=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference URI="#Certificate1329413">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>nVS3OZDkjJGfebx6Z782ZlwhE7o=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference Id="Reference-ID-169009" URI="#comprobante">\r\n'
+        '<ds:Transforms>\r\n'
+        '<ds:Transform '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>\r\n'
+        '</ds:Transforms>\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>54q3lxyT1fkr63Ok0JUQXseK1X8=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '</ds:SignedInfo>\r\n'
+        '<ds:SignatureValue Id="SignatureValue574590">\r\n'
+        'HVuKHfrXS8zKh1neaYezSKupe0DOKoQNrpqwo7uIZ/iuCYE6mPzlV0x61Ag81TXTTVa5I1baj8FM\r\n'
+        'LNi0bXuDTc3wDazE2FYByeJeWDIq94dln53upKPBitATFPmDZspn0CCyhLxX6z8J6NXbGycE9bpI\r\n'
+        '+TMJ4RL+U6/Vk85aawE+pWQgrhepCnO7HisT7lvtaY+vWcMgeoViaKuVh+toaaWrzN+WK2hJfBSb\r\n'
+        'TZFi5RGd+9up5GtZt1njUjC6qPfF/THFqQlawS4v5qd8zSMSNwvhNBITWEpsYzerhsrHKU2wSicQ\r\n'
+        'mWh65VHG6MyPB6MPSYGgYOQk5bL6SkDl0odTTg==\r\n'
+        '</ds:SignatureValue>\r\n'
+        '<ds:KeyInfo Id="Certificate1329413">\r\n'
+        '<ds:X509Data>\r\n'
+        '<ds:X509Certificate>\r\n'
+        'MIIKIDCCCAigAwIBAgIEZeQyHzANBgkqhkiG9w0BAQsFADCBoTELMAkGA1UEBhMCRUMxIjAgBgNV\r\n'
+        'BAoTGUJBTkNPIENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElG\r\n'
+        'SUNBQ0lPTiBERSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxB\r\n'
+        'QyBCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMB4XDTI0MDczMDE1MTcxNVoXDTI2MDczMDE1NDc0\r\n'
+        'M1owgbcxCzAJBgNVBAYTAkVDMSIwIAYDVQQKExlCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMTcw\r\n'
+        'NQYDVQQLEy5FTlRJREFEIERFIENFUlRJRklDQUNJT04gREUgSU5GT1JNQUNJT04tRUNJQkNFMQ4w\r\n'
+        'DAYDVQQHEwVRVUlUTzE7MBEGA1UEBRMKMDIwMDAzNDQ0MDAmBgNVBAMTH1JPU0EgRU1QRVJBVFJJ\r\n'
+        'WiBDQVJQSU8gTU9TUVVFUkEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9/WZdr1Bj\r\n'
+        'GVl2RTQAFJocpEmiTiLeEe8JHodvpdOkPNOuhNuQK7Bye4xw0Kstm06JriDvUwtQNJbsl712f0+6\r\n'
+        'LQrocWoZUrKlQDCyaZernNHAgi+Tv/+xk+h44ePAaXhdxNS+3zLsbCo2lfkJWWeS6bHELJoU0Kxl\r\n'
+        '9G5CdMpNx43Dd0mFfB++oRLrYqD/4fxNwiTtHFuufifhRs8QYSWuw5weGAzK3OI5nMK5S8vuwjkc\r\n'
+        'xEHDQmswU5YEWgfj2UZ4WsG0sUtRSWknote3Ug0EXiofDN6BZMnZGSovUbVbUvPr/wWl4poZMAUw\r\n'
+        'Y9TeKgGYzCVa3ZnZKkvxZM0sisZRAgMBAAGjggVGMIIFQjALBgNVHQ8EBAMCB4AwZwYDVR0gBGAw\r\n'
+        'XjBcBgsrBgEEAYKoOwICATBNMEsGCCsGAQUFBwIBFj9odHRwOi8vd3d3LmVjaS5iY2UuZWMvcG9s\r\n'
+        'aXRpY2EtY2VydGlmaWNhZG8vcGVyc29uYS1qdXJpZGljYS5wZGYwgZEGCCsGAQUFBwEBBIGEMIGB\r\n'
+        'MD4GCCsGAQUFBzABhjJodHRwOi8vb2NzcC5lY2kuYmNlLmVjL2VqYmNhL3B1YmxpY3dlYi9zdGF0\r\n'
+        'dXMvb2NzcDA/BggrBgEFBQcwAYYzaHR0cDovL29jc3AxLmVjaS5iY2UuZWMvZWpiY2EvcHVibGlj\r\n'
+        'd2ViL3N0YXR1cy9vY3NwMEcGCisGAQQBgqg7AwoEORM3Q09NUEFOSUEgREUgUFJPRFVDQ0lPTiBC\r\n'
+        'SU9BQ1VBVElDQSBCSU9DQVNDQUpBTCBDSUEgTFREQTAdBgorBgEEAYKoOwMLBA8TDTA3OTAxMDE4\r\n'
+        'MDQwMDEwGgYKKwYBBAGCqDsDAQQMEwowOTA5MTc5ODg5MB8GCisGAQQBgqg7AwIEERMPUk9TQSBF\r\n'
+        'TVBFUkFUUklaMBYGCisGAQQBgqg7AwMECBMGQ0FSUElPMBgGCisGAQQBgqg7AwQEChMITU9TUVVF\r\n'
+        'UkEwFwYKKwYBBAGCqDsDBQQJEwdHRVJFTlRFMDUGCisGAQQBgqg7AwcEJxMlR1VBWUFTIDE4MTEg\r\n'
+        'RU5UUkUgU1VDUkUgWSAyNSBERSBKVU5JTzAZBgorBgEEAYKoOwMIBAsTCTA3MjkyMDM3MTAXBgor\r\n'
+        'BgEEAYKoOwMJBAkTB01BQ0hBTEEwFwYKKwYBBAGCqDsDDAQJEwdFQ1VBRE9SMCAGCisGAQQBgqg7\r\n'
+        'AzMEEhMQU09GVFdBUkUtQVJDSElWTzAoBgNVHREEITAfgR1mYWN0dXJhc2Jpb2Nhc2NhamFsQGdt\r\n'
+        'YWlsLmNvbTCCAeEGA1UdHwSCAdgwggHUMIIB0KCCAcygggHIhoHWbGRhcDovL2JjZXFsZGFwc3Vi\r\n'
+        'cDEuYmNlLmVjL2NuPUNSTDIwNTEsY249QUMlMjBCQU5DTyUyMENFTlRSQUwlMjBERUwlMjBFQ1VB\r\n'
+        'RE9SLGw9UVVJVE8sb3U9RU5USURBRCUyMERFJTIwQ0VSVElGSUNBQ0lPTiUyMERFJTIwSU5GT1JN\r\n'
+        'QUNJT04tRUNJQkNFLG89QkFOQ08lMjBDRU5UUkFMJTIwREVMJTIwRUNVQURPUixjPUVDP2NlcnRp\r\n'
+        'ZmljYXRlUmV2b2NhdGlvbkxpc3Q/YmFzZYY0aHR0cDovL3d3dy5lY2kuYmNlLmVjL0NSTC9lY2lf\r\n'
+        'YmNlX2VjX2NybGZpbGVjb21iLmNybKSBtjCBszELMAkGA1UEBhMCRUMxIjAgBgNVBAoTGUJBTkNP\r\n'
+        'IENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBE\r\n'
+        'RSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxBQyBCQU5DTyBD\r\n'
+        'RU5UUkFMIERFTCBFQ1VBRE9SMRAwDgYDVQQDEwdDUkwyMDUxMCsGA1UdEAQkMCKADzIwMjQwNzMw\r\n'
+        'MTUxNzE1WoEPMjAyNjA3MzAxNTQ3NDNaMB8GA1UdIwQYMBaAFEii3yMfHfgsUXqMA81JMqUJwZSr\r\n'
+        'MB0GA1UdDgQWBBRpvaBbsGYEoae6HuytX3fVidA+ijAJBgNVHRMEAjAAMBkGCSqGSIb2fQdBAAQM\r\n'
+        'MAobBFY4LjMDAgQwMA0GCSqGSIb3DQEBCwUAA4ICAQCaGS2UCo/NmKVIrBeTNn+o3muyI+qSwgVW\r\n'
+        '6CxFIvA+3qlniVh2+jWESg/3tKUsu4/aHQmQ5oMXznRZX321ymbIhUi1ioVsWj/LLuZC8XLf5GoQ\r\n'
+        'LvP0rMGvS/O1tr8kC8YKlOfAPdNpdJiRgriwEqp3b9sS6kpaVfqEV7pQ32QkGRxasRz7A2KD+5EI\r\n'
+        'ZS52ZMKalQAOg4GlHsjrsjYVwi+eWccX7ZufoeJTwMA6AFO+TkpO/xMNKT+oDxOXuufKSgO0kVAu\r\n'
+        'nqLCUuH0RsMppvUD0il/na8CEhP7sgywuKyrJkGwoOxiKOSU4HNoCnD8lJuRqSLee0HqgFLslpL3\r\n'
+        'kQv4EKahXq4JrecEtKQ3cSpQgvfLRP+kwsACUdaQ1NBaSEBVLp7oCmHkorkbS0z1pgwBkFIZ6+2W\r\n'
+        'O8j+md31l0PnMQ43+2kDNP2X0yN0WcOwQujgKmgKZgtR3JcReV7tMSjwooEtgwzXn5/LaP5B7a7W\r\n'
+        'VILyZIwFyJMGcRrdH8hwvd4jtFnSnvsGu0bPDcUZj5HVSPYs6880qL42Va/VVQYjzu0We/t5GO6v\r\n'
+        'bZhqu0PI8lgf2SU6E3fSRWmyejFA2s4olfuF/e5igipBuj7JNIerqrANi3JW98i98NVse7Pb9OVR\r\n'
+        'g8Pr5m+rOSwTWrVsiAI3zg8dts6HBGkETBte0CgSFA==\r\n'
+        '</ds:X509Certificate>\r\n'
+        '</ds:X509Data>\r\n'
+        '<ds:KeyValue>\r\n'
+        '<ds:RSAKeyValue>\r\n'
+        '<ds:Modulus>\r\n'
+        'vf1mXa9QYxlZdkU0ABSaHKRJok4i3hHvCR6Hb6XTpDzTroTbkCuwcnuMcNCrLZtOia4g71MLUDSW\r\n'
+        '7Je9dn9Pui0K6HFqGVKypUAwsmmXq5zRwIIvk7//sZPoeOHjwGl4XcTUvt8y7GwqNpX5CVlnkumx\r\n'
+        'xCyaFNCsZfRuQnTKTceNw3dJhXwfvqES62Kg/+H8TcIk7Rxbrn4n4UbPEGElrsOcHhgMytziOZzC\r\n'
+        'uUvL7sI5HMRBw0JrMFOWBFoH49lGeFrBtLFLUUlpJ6LXt1INBF4qHwzegWTJ2RkqL1G1W1Lz6/8F\r\n'
+        'peKaGTAFMGPU3ioBmMwlWt2Z2SpL8WTNLIrGUQ==\r\n'
+        '</ds:Modulus>\r\n'
+        '<ds:Exponent>AQAB</ds:Exponent>\r\n'
+        '</ds:RSAKeyValue>\r\n'
+        '</ds:KeyValue>\r\n'
+        '</ds:KeyInfo>\r\n'
+        '<ds:Object '
+        'Id="Signature906230-Object14409"><etsi:QualifyingProperties '
+        'Target="#Signature906230"><etsi:SignedProperties '
+        'Id="Signature906230-SignedProperties830932"><etsi:SignedSignatureProperties><etsi:SigningTime>2025-08-05T10:06:58-05:00</etsi:SigningTime><etsi:SigningCertificate><etsi:Cert><etsi:CertDigest><ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>Fbt/0dijghsubc0+jgT6a5NNNmI=</ds:DigestValue></etsi:CertDigest><etsi:IssuerSerial><ds:X509IssuerName>CN=AC '
+        'BANCO CENTRAL DEL ECUADOR,L=QUITO,OU=ENTIDAD DE CERTIFICACION DE '
+        'INFORMACION-ECIBCE,O=BANCO CENTRAL DEL '
+        'ECUADOR,C=EC</ds:X509IssuerName><ds:X509SerialNumber>1709453855</ds:X509SerialNumber></etsi:IssuerSerial></etsi:Cert></etsi:SigningCertificate></etsi:SignedSignatureProperties><etsi:SignedDataObjectProperties><etsi:DataObjectFormat '
+        'ObjectReference="#Reference-ID-169009"><etsi:Description>contenido '
+        'comprobante</etsi:Description><etsi:MimeType>text/xml</etsi:MimeType></etsi:DataObjectFormat></etsi:SignedDataObjectProperties></etsi:SignedProperties></etsi:QualifyingProperties></ds:Object></ds:Signature></factura>'}
+{'resp': True,
+ 'stage': 'xml_validation',
+ 'xml': '<?xml version="1.0" encoding="utf-8" standalone="no"?><factura '
+        'id="comprobante" '
+        'version="1.0.0"><infoTributaria><ambiente>1</ambiente><tipoEmision>1</tipoEmision><razonSocial>BIOCASCAJAL</razonSocial><nombreComercial>BIOCASCAJAL</nombreComercial><ruc>0790101804001</ruc><claveAcceso>0508202501079010180400110010020000000039540072711</claveAcceso><codDoc>01</codDoc><estab>001</estab><ptoEmi>002</ptoEmi><secuencial>000000003</secuencial><dirMatriz>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirMatriz></infoTributaria><infoFactura><fechaEmision>05/08/2025</fechaEmision><dirEstablecimiento>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirEstablecimiento><obligadoContabilidad>NO</obligadoContabilidad><tipoIdentificacionComprador>05</tipoIdentificacionComprador><razonSocialComprador>ROMAN '
+        'AGUILAR NATHALI '
+        'RAFAELA</razonSocialComprador><identificacionComprador>0703627182</identificacionComprador><direccionComprador>pasaje</direccionComprador><totalSinImpuestos>4.00</totalSinImpuestos><totalDescuento>0.00</totalDescuento><totalConImpuestos><totalImpuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><baseImponible>4.00</baseImponible><valor>0.60</valor></totalImpuesto></totalConImpuestos><propina>0.00</propina><importeTotal>4.60</importeTotal><moneda>DOLAR</moneda><pagos><pago><formaPago>20</formaPago><total>4.60</total><plazo>31</plazo><unidadTiempo>dias</unidadTiempo></pago></pagos></infoFactura><detalles><detalle><codigoPrincipal>21</codigoPrincipal><descripcion>PISCINA '
+        '21</descripcion><cantidad>2.000000</cantidad><precioUnitario>2.00</precioUnitario><descuento>0.00</descuento><precioTotalSinImpuesto>4.00</precioTotalSinImpuesto><impuestos><impuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><tarifa>15.00</tarifa><baseImponible>4.00</baseImponible><valor>0.60</valor></impuesto></impuestos></detalle></detalles><infoAdicional><campoAdicional '
+        'nombre="Dirección">pasaje</campoAdicional><campoAdicional '
+        'nombre="Teléfono">0997458533</campoAdicional><campoAdicional '
+        'nombre="Email">nathy1589@hotmail.com</campoAdicional></infoAdicional><ds:Signature '
+        'xmlns:ds="http://www.w3.org/2000/09/xmldsig#" '
+        'xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" '
+        'Id="Signature906230">\r\n'
+        '<ds:SignedInfo Id="Signature-SignedInfo569399">\r\n'
+        '<ds:CanonicalizationMethod '
+        'Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>\r\n'
+        '<ds:SignatureMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>\r\n'
+        '<ds:Reference Id="SignedPropertiesID1037640" '
+        'Type="http://uri.etsi.org/01903#SignedProperties" '
+        'URI="#Signature906230-SignedProperties830932">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>1jinmJHlzMHxQsi06INYPU4kfs4=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference URI="#Certificate1329413">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>nVS3OZDkjJGfebx6Z782ZlwhE7o=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference Id="Reference-ID-169009" URI="#comprobante">\r\n'
+        '<ds:Transforms>\r\n'
+        '<ds:Transform '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>\r\n'
+        '</ds:Transforms>\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>54q3lxyT1fkr63Ok0JUQXseK1X8=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '</ds:SignedInfo>\r\n'
+        '<ds:SignatureValue Id="SignatureValue574590">\r\n'
+        'HVuKHfrXS8zKh1neaYezSKupe0DOKoQNrpqwo7uIZ/iuCYE6mPzlV0x61Ag81TXTTVa5I1baj8FM\r\n'
+        'LNi0bXuDTc3wDazE2FYByeJeWDIq94dln53upKPBitATFPmDZspn0CCyhLxX6z8J6NXbGycE9bpI\r\n'
+        '+TMJ4RL+U6/Vk85aawE+pWQgrhepCnO7HisT7lvtaY+vWcMgeoViaKuVh+toaaWrzN+WK2hJfBSb\r\n'
+        'TZFi5RGd+9up5GtZt1njUjC6qPfF/THFqQlawS4v5qd8zSMSNwvhNBITWEpsYzerhsrHKU2wSicQ\r\n'
+        'mWh65VHG6MyPB6MPSYGgYOQk5bL6SkDl0odTTg==\r\n'
+        '</ds:SignatureValue>\r\n'
+        '<ds:KeyInfo Id="Certificate1329413">\r\n'
+        '<ds:X509Data>\r\n'
+        '<ds:X509Certificate>\r\n'
+        'MIIKIDCCCAigAwIBAgIEZeQyHzANBgkqhkiG9w0BAQsFADCBoTELMAkGA1UEBhMCRUMxIjAgBgNV\r\n'
+        'BAoTGUJBTkNPIENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElG\r\n'
+        'SUNBQ0lPTiBERSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxB\r\n'
+        'QyBCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMB4XDTI0MDczMDE1MTcxNVoXDTI2MDczMDE1NDc0\r\n'
+        'M1owgbcxCzAJBgNVBAYTAkVDMSIwIAYDVQQKExlCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMTcw\r\n'
+        'NQYDVQQLEy5FTlRJREFEIERFIENFUlRJRklDQUNJT04gREUgSU5GT1JNQUNJT04tRUNJQkNFMQ4w\r\n'
+        'DAYDVQQHEwVRVUlUTzE7MBEGA1UEBRMKMDIwMDAzNDQ0MDAmBgNVBAMTH1JPU0EgRU1QRVJBVFJJ\r\n'
+        'WiBDQVJQSU8gTU9TUVVFUkEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9/WZdr1Bj\r\n'
+        'GVl2RTQAFJocpEmiTiLeEe8JHodvpdOkPNOuhNuQK7Bye4xw0Kstm06JriDvUwtQNJbsl712f0+6\r\n'
+        'LQrocWoZUrKlQDCyaZernNHAgi+Tv/+xk+h44ePAaXhdxNS+3zLsbCo2lfkJWWeS6bHELJoU0Kxl\r\n'
+        '9G5CdMpNx43Dd0mFfB++oRLrYqD/4fxNwiTtHFuufifhRs8QYSWuw5weGAzK3OI5nMK5S8vuwjkc\r\n'
+        'xEHDQmswU5YEWgfj2UZ4WsG0sUtRSWknote3Ug0EXiofDN6BZMnZGSovUbVbUvPr/wWl4poZMAUw\r\n'
+        'Y9TeKgGYzCVa3ZnZKkvxZM0sisZRAgMBAAGjggVGMIIFQjALBgNVHQ8EBAMCB4AwZwYDVR0gBGAw\r\n'
+        'XjBcBgsrBgEEAYKoOwICATBNMEsGCCsGAQUFBwIBFj9odHRwOi8vd3d3LmVjaS5iY2UuZWMvcG9s\r\n'
+        'aXRpY2EtY2VydGlmaWNhZG8vcGVyc29uYS1qdXJpZGljYS5wZGYwgZEGCCsGAQUFBwEBBIGEMIGB\r\n'
+        'MD4GCCsGAQUFBzABhjJodHRwOi8vb2NzcC5lY2kuYmNlLmVjL2VqYmNhL3B1YmxpY3dlYi9zdGF0\r\n'
+        'dXMvb2NzcDA/BggrBgEFBQcwAYYzaHR0cDovL29jc3AxLmVjaS5iY2UuZWMvZWpiY2EvcHVibGlj\r\n'
+        'd2ViL3N0YXR1cy9vY3NwMEcGCisGAQQBgqg7AwoEORM3Q09NUEFOSUEgREUgUFJPRFVDQ0lPTiBC\r\n'
+        'SU9BQ1VBVElDQSBCSU9DQVNDQUpBTCBDSUEgTFREQTAdBgorBgEEAYKoOwMLBA8TDTA3OTAxMDE4\r\n'
+        'MDQwMDEwGgYKKwYBBAGCqDsDAQQMEwowOTA5MTc5ODg5MB8GCisGAQQBgqg7AwIEERMPUk9TQSBF\r\n'
+        'TVBFUkFUUklaMBYGCisGAQQBgqg7AwMECBMGQ0FSUElPMBgGCisGAQQBgqg7AwQEChMITU9TUVVF\r\n'
+        'UkEwFwYKKwYBBAGCqDsDBQQJEwdHRVJFTlRFMDUGCisGAQQBgqg7AwcEJxMlR1VBWUFTIDE4MTEg\r\n'
+        'RU5UUkUgU1VDUkUgWSAyNSBERSBKVU5JTzAZBgorBgEEAYKoOwMIBAsTCTA3MjkyMDM3MTAXBgor\r\n'
+        'BgEEAYKoOwMJBAkTB01BQ0hBTEEwFwYKKwYBBAGCqDsDDAQJEwdFQ1VBRE9SMCAGCisGAQQBgqg7\r\n'
+        'AzMEEhMQU09GVFdBUkUtQVJDSElWTzAoBgNVHREEITAfgR1mYWN0dXJhc2Jpb2Nhc2NhamFsQGdt\r\n'
+        'YWlsLmNvbTCCAeEGA1UdHwSCAdgwggHUMIIB0KCCAcygggHIhoHWbGRhcDovL2JjZXFsZGFwc3Vi\r\n'
+        'cDEuYmNlLmVjL2NuPUNSTDIwNTEsY249QUMlMjBCQU5DTyUyMENFTlRSQUwlMjBERUwlMjBFQ1VB\r\n'
+        'RE9SLGw9UVVJVE8sb3U9RU5USURBRCUyMERFJTIwQ0VSVElGSUNBQ0lPTiUyMERFJTIwSU5GT1JN\r\n'
+        'QUNJT04tRUNJQkNFLG89QkFOQ08lMjBDRU5UUkFMJTIwREVMJTIwRUNVQURPUixjPUVDP2NlcnRp\r\n'
+        'ZmljYXRlUmV2b2NhdGlvbkxpc3Q/YmFzZYY0aHR0cDovL3d3dy5lY2kuYmNlLmVjL0NSTC9lY2lf\r\n'
+        'YmNlX2VjX2NybGZpbGVjb21iLmNybKSBtjCBszELMAkGA1UEBhMCRUMxIjAgBgNVBAoTGUJBTkNP\r\n'
+        'IENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBE\r\n'
+        'RSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxBQyBCQU5DTyBD\r\n'
+        'RU5UUkFMIERFTCBFQ1VBRE9SMRAwDgYDVQQDEwdDUkwyMDUxMCsGA1UdEAQkMCKADzIwMjQwNzMw\r\n'
+        'MTUxNzE1WoEPMjAyNjA3MzAxNTQ3NDNaMB8GA1UdIwQYMBaAFEii3yMfHfgsUXqMA81JMqUJwZSr\r\n'
+        'MB0GA1UdDgQWBBRpvaBbsGYEoae6HuytX3fVidA+ijAJBgNVHRMEAjAAMBkGCSqGSIb2fQdBAAQM\r\n'
+        'MAobBFY4LjMDAgQwMA0GCSqGSIb3DQEBCwUAA4ICAQCaGS2UCo/NmKVIrBeTNn+o3muyI+qSwgVW\r\n'
+        '6CxFIvA+3qlniVh2+jWESg/3tKUsu4/aHQmQ5oMXznRZX321ymbIhUi1ioVsWj/LLuZC8XLf5GoQ\r\n'
+        'LvP0rMGvS/O1tr8kC8YKlOfAPdNpdJiRgriwEqp3b9sS6kpaVfqEV7pQ32QkGRxasRz7A2KD+5EI\r\n'
+        'ZS52ZMKalQAOg4GlHsjrsjYVwi+eWccX7ZufoeJTwMA6AFO+TkpO/xMNKT+oDxOXuufKSgO0kVAu\r\n'
+        'nqLCUuH0RsMppvUD0il/na8CEhP7sgywuKyrJkGwoOxiKOSU4HNoCnD8lJuRqSLee0HqgFLslpL3\r\n'
+        'kQv4EKahXq4JrecEtKQ3cSpQgvfLRP+kwsACUdaQ1NBaSEBVLp7oCmHkorkbS0z1pgwBkFIZ6+2W\r\n'
+        'O8j+md31l0PnMQ43+2kDNP2X0yN0WcOwQujgKmgKZgtR3JcReV7tMSjwooEtgwzXn5/LaP5B7a7W\r\n'
+        'VILyZIwFyJMGcRrdH8hwvd4jtFnSnvsGu0bPDcUZj5HVSPYs6880qL42Va/VVQYjzu0We/t5GO6v\r\n'
+        'bZhqu0PI8lgf2SU6E3fSRWmyejFA2s4olfuF/e5igipBuj7JNIerqrANi3JW98i98NVse7Pb9OVR\r\n'
+        'g8Pr5m+rOSwTWrVsiAI3zg8dts6HBGkETBte0CgSFA==\r\n'
+        '</ds:X509Certificate>\r\n'
+        '</ds:X509Data>\r\n'
+        '<ds:KeyValue>\r\n'
+        '<ds:RSAKeyValue>\r\n'
+        '<ds:Modulus>\r\n'
+        'vf1mXa9QYxlZdkU0ABSaHKRJok4i3hHvCR6Hb6XTpDzTroTbkCuwcnuMcNCrLZtOia4g71MLUDSW\r\n'
+        '7Je9dn9Pui0K6HFqGVKypUAwsmmXq5zRwIIvk7//sZPoeOHjwGl4XcTUvt8y7GwqNpX5CVlnkumx\r\n'
+        'xCyaFNCsZfRuQnTKTceNw3dJhXwfvqES62Kg/+H8TcIk7Rxbrn4n4UbPEGElrsOcHhgMytziOZzC\r\n'
+        'uUvL7sI5HMRBw0JrMFOWBFoH49lGeFrBtLFLUUlpJ6LXt1INBF4qHwzegWTJ2RkqL1G1W1Lz6/8F\r\n'
+        'peKaGTAFMGPU3ioBmMwlWt2Z2SpL8WTNLIrGUQ==\r\n'
+        '</ds:Modulus>\r\n'
+        '<ds:Exponent>AQAB</ds:Exponent>\r\n'
+        '</ds:RSAKeyValue>\r\n'
+        '</ds:KeyValue>\r\n'
+        '</ds:KeyInfo>\r\n'
+        '<ds:Object '
+        'Id="Signature906230-Object14409"><etsi:QualifyingProperties '
+        'Target="#Signature906230"><etsi:SignedProperties '
+        'Id="Signature906230-SignedProperties830932"><etsi:SignedSignatureProperties><etsi:SigningTime>2025-08-05T10:06:58-05:00</etsi:SigningTime><etsi:SigningCertificate><etsi:Cert><etsi:CertDigest><ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>Fbt/0dijghsubc0+jgT6a5NNNmI=</ds:DigestValue></etsi:CertDigest><etsi:IssuerSerial><ds:X509IssuerName>CN=AC '
+        'BANCO CENTRAL DEL ECUADOR,L=QUITO,OU=ENTIDAD DE CERTIFICACION DE '
+        'INFORMACION-ECIBCE,O=BANCO CENTRAL DEL '
+        'ECUADOR,C=EC</ds:X509IssuerName><ds:X509SerialNumber>1709453855</ds:X509SerialNumber></etsi:IssuerSerial></etsi:Cert></etsi:SigningCertificate></etsi:SignedSignatureProperties><etsi:SignedDataObjectProperties><etsi:DataObjectFormat '
+        'ObjectReference="#Reference-ID-169009"><etsi:Description>contenido '
+        'comprobante</etsi:Description><etsi:MimeType>text/xml</etsi:MimeType></etsi:DataObjectFormat></etsi:SignedDataObjectProperties></etsi:SignedProperties></etsi:QualifyingProperties></ds:Object></ds:Signature></factura>'}
+{'error': "'Text' object has no attribute 'autorizacion'",
+ 'resp': False,
+ 'stage': 'xml_authorized'}
+WARNING:root:⚠️ Intento 1 de autorización fallido. Error: 'Text' object has no attribute 'autorizacion'
+[05/Aug/2025 10:07:01] "GET /static/lib/bootstrap-4.6.0/css/bootstrap.min.css HTTP/1.1" 200 161415
+WARNING:weasyprint:Ignored `text-decoration-skip-ink:none` at 6:1734, unknown property.
+WARNING:weasyprint:Ignored `text-align:-webkit-match-parent` at 6:2858, invalid value.
+WARNING:weasyprint:Invalid or unsupported selector '[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner', (<IdentToken -moz-focus-inner>, 'Expected a supported pseudo-element, got -moz-focus-inner')
+WARNING:weasyprint:Ignored `resize:vertical` at 6:3664, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button', (<IdentToken -webkit-inner-spin-button>, 'Expected a supported pseudo-element, got -webkit-inner-spin-button')
+WARNING:weasyprint:Ignored `outline-offset:-2px` at 6:4017, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '::-webkit-file-upload-button', (<IdentToken -webkit-file-upload-button>, 'Expected a supported pseudo-element, got -webkit-file-upload-button')
+WARNING:weasyprint:Ignored `overflow-y:scroll` at 6:6042, unknown property.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:6227.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:6294.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:6375.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:6470.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:6586, invalid value.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:9757.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:12156.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:14555.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:16954.
+WARNING:weasyprint:Expected a media type, got '(max-width:575.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:575.98px)' the whole @media rule was ignored at 6:23502.
+WARNING:weasyprint:Expected a media type, got '(max-width:767.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:767.98px)' the whole @media rule was ignored at 6:23672.
+WARNING:weasyprint:Expected a media type, got '(max-width:991.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:991.98px)' the whole @media rule was ignored at 6:23842.
+WARNING:weasyprint:Expected a media type, got '(max-width:1199.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:1199.98px)' the whole @media rule was ignored at 6:24012.
+WARNING:weasyprint:Ignored `overflow-x:auto` at 6:24226, unknown property.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .75rem + 2px)` at 6:24357, invalid value.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:24640.
+WARNING:weasyprint:Invalid or unsupported selector '.form-control::-ms-expand', (<IdentToken -ms-expand>, 'Expected a supported pseudo-element, got -ms-expand')
+WARNING:weasyprint:Ignored `text-shadow:0 0 0 #495057` at 6:24821, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.form-control:-moz-focusring', ('Unknown pseudo-class', '-moz-focusring')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.25)` at 6:24934, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.form-control::-webkit-input-placeholder', (<IdentToken -webkit-input-placeholder>, 'Expected a supported pseudo-element, got -webkit-input-placeholder')
+WARNING:weasyprint:Invalid or unsupported selector '.form-control::-moz-placeholder', (<IdentToken -moz-placeholder>, 'Expected a supported pseudo-element, got -moz-placeholder')
+WARNING:weasyprint:Invalid or unsupported selector '.form-control:-ms-input-placeholder', ('Unknown pseudo-class', '-ms-input-placeholder')
+WARNING:weasyprint:Invalid or unsupported selector '.form-control::-ms-input-placeholder', (<IdentToken -ms-input-placeholder>, 'Expected a supported pseudo-element, got -ms-input-placeholder')
+WARNING:weasyprint:Invalid or unsupported selector '.form-control::placeholder', unknown pseudo-element: placeholder
+WARNING:weasyprint:Ignored `appearance:none` at 6:25528, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector 'select.form-control:focus::-ms-value', (<IdentToken -ms-value>, 'Expected a supported pseudo-element, got -ms-value')
+WARNING:weasyprint:Ignored `padding-top:calc(.375rem + 1px)` at 6:25697, invalid value.
+WARNING:weasyprint:Ignored `padding-bottom:calc(.375rem + 1px)` at 6:25729, invalid value.
+WARNING:weasyprint:Ignored `padding-top:calc(.5rem + 1px)` at 6:25833, invalid value.
+WARNING:weasyprint:Ignored `padding-bottom:calc(.5rem + 1px)` at 6:25863, invalid value.
+WARNING:weasyprint:Ignored `padding-top:calc(.25rem + 1px)` at 6:25949, invalid value.
+WARNING:weasyprint:Ignored `padding-bottom:calc(.25rem + 1px)` at 6:25980, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .5rem + 2px)` at 6:26377, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + 1rem + 2px)` at 6:26502, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:26793, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-inline-flexbox` at 6:27266, invalid value.
+WARNING:weasyprint:Invalid or unsupported selector '.is-valid~.valid-feedback,.is-valid~.valid-tooltip,.was-validated :valid~.valid-feedback,.was-validated :valid~.valid-tooltip', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Ignored `padding-right:calc(1.5em + .75rem)` at 6:28101, invalid value.
+WARNING:weasyprint:Ignored `background-position:right calc(.375em + .1875rem) center` at 6:28437, invalid value.
+WARNING:weasyprint:Ignored `background-size:calc(.75em + .375rem) calc(.75em + .375rem)` at 6:28494, invalid value.
+WARNING:weasyprint:Invalid or unsupported selector '.form-control.is-valid,.was-validated .form-control:valid', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(40,167,69,.25)` at 6:28645, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.form-control.is-valid:focus,.was-validated .form-control:valid:focus', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Ignored `padding-right:calc(1.5em + .75rem)` at 6:28762, invalid value.
+WARNING:weasyprint:Ignored `background-position:top calc(.375em + .1875rem) right calc(.375em + .1875rem)` at 6:28797, invalid value.
+WARNING:weasyprint:Ignored `padding-right:calc(.75em + 2.3125rem)` at 6:28956, invalid value.
+WARNING:weasyprint:Ignored `background:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") right .75rem center/8px 10px no-repeat,#fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e") center right 1.75rem/calc(.75em + .375rem) calc(.75em + .375rem) no-repeat` at 6:28994, invalid value.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-select.is-valid,.was-validated .custom-select:valid', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(40,167,69,.25)` at 6:29648, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-select.is-valid:focus,.was-validated .custom-select:valid:focus', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Invalid or unsupported selector '.form-check-input.is-valid~.form-check-label,.was-validated .form-check-input:valid~.form-check-label', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Invalid or unsupported selector '.form-check-input.is-valid~.valid-feedback,.form-check-input.is-valid~.valid-tooltip,.was-validated .form-check-input:valid~.valid-feedback,.was-validated .form-check-input:valid~.valid-tooltip', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-valid~.custom-control-label,.was-validated .custom-control-input:valid~.custom-control-label', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-valid~.custom-control-label::before,.was-validated .custom-control-input:valid~.custom-control-label::before', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-valid:checked~.custom-control-label::before,.was-validated .custom-control-input:valid:checked~.custom-control-label::before', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(40,167,69,.25)` at 6:30644, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-valid:focus:not(:checked)~.custom-control-label::before,.was-validated .custom-control-input:valid:focus:not(:checked)~.custom-control-label::before', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-file-input.is-valid~.custom-file-label,.was-validated .custom-file-input:valid~.custom-file-label', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(40,167,69,.25)` at 6:31148, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-file-input.is-valid:focus~.custom-file-label,.was-validated .custom-file-input:valid:focus~.custom-file-label', ('Unknown pseudo-class', 'valid')
+WARNING:weasyprint:Invalid or unsupported selector '.is-invalid~.invalid-feedback,.is-invalid~.invalid-tooltip,.was-validated :invalid~.invalid-feedback,.was-validated :invalid~.invalid-tooltip', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Ignored `padding-right:calc(1.5em + .75rem)` at 6:31829, invalid value.
+WARNING:weasyprint:Ignored `background-position:right calc(.375em + .1875rem) center` at 6:32224, invalid value.
+WARNING:weasyprint:Ignored `background-size:calc(.75em + .375rem) calc(.75em + .375rem)` at 6:32281, invalid value.
+WARNING:weasyprint:Invalid or unsupported selector '.form-control.is-invalid,.was-validated .form-control:invalid', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(220,53,69,.25)` at 6:32436, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.form-control.is-invalid:focus,.was-validated .form-control:invalid:focus', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Ignored `padding-right:calc(1.5em + .75rem)` at 6:32557, invalid value.
+WARNING:weasyprint:Ignored `background-position:top calc(.375em + .1875rem) right calc(.375em + .1875rem)` at 6:32592, invalid value.
+WARNING:weasyprint:Ignored `padding-right:calc(.75em + 2.3125rem)` at 6:32755, invalid value.
+WARNING:weasyprint:Ignored `background:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='4' height='5' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") right .75rem center/8px 10px no-repeat,#fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e") center right 1.75rem/calc(.75em + .375rem) calc(.75em + .375rem) no-repeat` at 6:32793, invalid value.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-select.is-invalid,.was-validated .custom-select:invalid', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(220,53,69,.25)` at 6:33510, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-select.is-invalid:focus,.was-validated .custom-select:invalid:focus', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Invalid or unsupported selector '.form-check-input.is-invalid~.form-check-label,.was-validated .form-check-input:invalid~.form-check-label', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Invalid or unsupported selector '.form-check-input.is-invalid~.invalid-feedback,.form-check-input.is-invalid~.invalid-tooltip,.was-validated .form-check-input:invalid~.invalid-feedback,.was-validated .form-check-input:invalid~.invalid-tooltip', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-invalid~.custom-control-label,.was-validated .custom-control-input:invalid~.custom-control-label', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-invalid~.custom-control-label::before,.was-validated .custom-control-input:invalid~.custom-control-label::before', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-invalid:checked~.custom-control-label::before,.was-validated .custom-control-input:invalid:checked~.custom-control-label::before', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(220,53,69,.25)` at 6:34542, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-control-input.is-invalid:focus:not(:checked)~.custom-control-label::before,.was-validated .custom-control-input:invalid:focus:not(:checked)~.custom-control-label::before', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-file-input.is-invalid~.custom-file-label,.was-validated .custom-file-input:invalid~.custom-file-label', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(220,53,69,.25)` at 6:35058, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-file-input.is-invalid:focus~.custom-file-label,.was-validated .custom-file-input:invalid:focus~.custom-file-label', ('Unknown pseudo-class', 'invalid')
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:35114, invalid value.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:35266.
+WARNING:weasyprint:Ignored `user-select:none` at 6:36466, unknown property.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:36742.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.25)` at 6:36881, unknown property.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:37053, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(38,143,255,.5)` at 6:37314, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(38,143,255,.5)` at 6:37803, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(130,138,145,.5)` at 6:38095, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(130,138,145,.5)` at 6:38601, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(72,180,97,.5)` at 6:38886, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(72,180,97,.5)` at 6:39374, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(58,176,195,.5)` at 6:39645, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(58,176,195,.5)` at 6:40110, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(222,170,12,.5)` at 6:40403, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(222,170,12,.5)` at 6:40898, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(225,83,97,.5)` at 6:41178, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(225,83,97,.5)` at 6:41658, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(216,217,219,.5)` at 6:41942, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(216,217,219,.5)` at 6:42422, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(82,88,93,.5)` at 6:42695, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(82,88,93,.5)` at 6:43158, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.5)` at 6:43393, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.5)` at 6:43931, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(108,117,125,.5)` at 6:44175, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(108,117,125,.5)` at 6:44731, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(40,167,69,.5)` at 6:44969, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(40,167,69,.5)` at 6:45507, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(23,162,184,.5)` at 6:45731, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(23,162,184,.5)` at 6:46246, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(255,193,7,.5)` at 6:46486, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(255,193,7,.5)` at 6:47027, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(220,53,69,.5)` at 6:47259, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(220,53,69,.5)` at 6:47789, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(248,249,250,.5)` at 6:48020, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(248,249,250,.5)` at 6:48547, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(52,58,64,.5)` at 6:48773, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(52,58,64,.5)` at 6:49286, unknown property.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:49554, unknown property.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:49985.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:50191.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:50981.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:51090.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:51199.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:51308.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:53415, unknown property.
+WARNING:weasyprint:Ignored `display:-ms-inline-flexbox` at 6:53736, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:54145, invalid value.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:56105, unknown property.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:56156, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:57399, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:58235, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:58879, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + 1rem + 2px)` at 6:59324, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .5rem + 2px)` at 6:59757, invalid value.
+WARNING:weasyprint:Ignored `color-adjust:exact` at 6:61388, unknown property.
+WARNING:weasyprint:Ignored `display:-ms-inline-flexbox` at 6:61430, invalid value.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.25)` at 6:61764, unknown property.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:62484, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-checkbox .custom-control-input:indeterminate~.custom-control-label::before', ('Unknown pseudo-class', 'indeterminate')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-checkbox .custom-control-input:indeterminate~.custom-control-label::after', ('Unknown pseudo-class', 'indeterminate')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-checkbox .custom-control-input:disabled:indeterminate~.custom-control-label::before', ('Unknown pseudo-class', 'indeterminate')
+WARNING:weasyprint:Ignored `pointer-events:all` at 6:64257, unknown property.
+WARNING:weasyprint:Ignored `top:calc(.25rem + 2px)` at 6:64340, invalid value.
+WARNING:weasyprint:Ignored `left:calc(-2.25rem + 2px)` at 6:64363, invalid value.
+WARNING:weasyprint:Ignored `width:calc(1rem - 4px)` at 6:64389, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1rem - 4px)` at 6:64412, invalid value.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:64914.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .75rem + 2px)` at 6:65343, invalid value.
+WARNING:weasyprint:Ignored `appearance:none` at 6:65820, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.25)` at 6:65888, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-select:focus::-ms-value', (<IdentToken -ms-value>, 'Expected a supported pseudo-element, got -ms-value')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-select::-ms-expand', (<IdentToken -ms-expand>, 'Expected a supported pseudo-element, got -ms-expand')
+WARNING:weasyprint:Ignored `text-shadow:0 0 0 #495057` at 6:66267, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-select:-moz-focusring', ('Unknown pseudo-class', '-moz-focusring')
+WARNING:weasyprint:Ignored `height:calc(1.5em + .5rem + 2px)` at 6:66311, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + 1rem + 2px)` at 6:66440, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .75rem + 2px)` at 6:66610, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .75rem + 2px)` at 6:66718, invalid value.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.25)` at 6:66852, unknown property.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .75rem + 2px)` at 6:67238, invalid value.
+WARNING:weasyprint:Ignored `height:calc(1.5em + .75rem)` at 6:67516, invalid value.
+WARNING:weasyprint:Ignored `appearance:none` at 6:67814, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 1px #fff,0 0 0 .2rem rgba(0,123,255,.25)` at 6:67902, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 1px #fff,0 0 0 .2rem rgba(0,123,255,.25)` at 6:67998, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 1px #fff,0 0 0 .2rem rgba(0,123,255,.25)` at 6:68087, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-moz-focus-outer', (<IdentToken -moz-focus-outer>, 'Expected a supported pseudo-element, got -moz-focus-outer')
+WARNING:weasyprint:Ignored `appearance:none` at 6:68555, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-webkit-slider-thumb', (<IdentToken -webkit-slider-thumb>, 'Expected a supported pseudo-element, got -webkit-slider-thumb')
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:68571.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-webkit-slider-thumb:active', (<IdentToken -webkit-slider-thumb>, 'Expected a supported pseudo-element, got -webkit-slider-thumb')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-webkit-slider-runnable-track', (<IdentToken -webkit-slider-runnable-track>, 'Expected a supported pseudo-element, got -webkit-slider-runnable-track')
+WARNING:weasyprint:Ignored `appearance:none` at 6:69266, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-moz-range-thumb', (<IdentToken -moz-range-thumb>, 'Expected a supported pseudo-element, got -moz-range-thumb')
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:69282.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-moz-range-thumb:active', (<IdentToken -moz-range-thumb>, 'Expected a supported pseudo-element, got -moz-range-thumb')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-moz-range-track', (<IdentToken -moz-range-track>, 'Expected a supported pseudo-element, got -moz-range-track')
+WARNING:weasyprint:Ignored `appearance:none` at 6:69974, unknown property.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-ms-thumb', (<IdentToken -ms-thumb>, 'Expected a supported pseudo-element, got -ms-thumb')
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:69990.
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-ms-thumb:active', (<IdentToken -ms-thumb>, 'Expected a supported pseudo-element, got -ms-thumb')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-ms-track', (<IdentToken -ms-track>, 'Expected a supported pseudo-element, got -ms-track')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-ms-fill-lower', (<IdentToken -ms-fill-lower>, 'Expected a supported pseudo-element, got -ms-fill-lower')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range::-ms-fill-upper', (<IdentToken -ms-fill-upper>, 'Expected a supported pseudo-element, got -ms-fill-upper')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range:disabled::-webkit-slider-thumb', (<IdentToken -webkit-slider-thumb>, 'Expected a supported pseudo-element, got -webkit-slider-thumb')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range:disabled::-moz-range-thumb', (<IdentToken -moz-range-thumb>, 'Expected a supported pseudo-element, got -moz-range-thumb')
+WARNING:weasyprint:Invalid or unsupported selector '.custom-range:disabled::-ms-thumb', (<IdentToken -ms-thumb>, 'Expected a supported pseudo-element, got -ms-thumb')
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:70956.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:71081, invalid value.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:71324, unknown property.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:72399, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:72710, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:73098, invalid value.
+WARNING:weasyprint:Ignored `max-height:75vh` at 6:73909, invalid value.
+WARNING:weasyprint:Ignored `overflow-y:auto` at 6:73925, unknown property.
+WARNING:weasyprint:Expected a media type, got '(max-width:575.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:575.98px)' the whole @media rule was ignored at 6:73941.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:74193.
+WARNING:weasyprint:Expected a media type, got '(max-width:767.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:767.98px)' the whole @media rule was ignored at 6:75008.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:75260.
+WARNING:weasyprint:Expected a media type, got '(max-width:991.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:991.98px)' the whole @media rule was ignored at 6:76075.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:76327.
+WARNING:weasyprint:Expected a media type, got '(max-width:1199.98px)'
+WARNING:weasyprint:Invalid media type ' (max-width:1199.98px)' the whole @media rule was ignored at 6:77142.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:77395.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:79024, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:81437, invalid value.
+WARNING:weasyprint:Ignored `border-top-left-radius:calc(.25rem - 1px)` at 6:81801, invalid value.
+WARNING:weasyprint:Ignored `border-top-right-radius:calc(.25rem - 1px)` at 6:81843, invalid value.
+WARNING:weasyprint:Ignored `border-bottom-right-radius:calc(.25rem - 1px)` at 6:81937, invalid value.
+WARNING:weasyprint:Ignored `border-bottom-left-radius:calc(.25rem - 1px)` at 6:81983, invalid value.
+WARNING:weasyprint:Ignored `border-radius:calc(.25rem - 1px) calc(.25rem - 1px) 0 0` at 6:82530, invalid value.
+WARNING:weasyprint:Ignored `border-radius:0 0 calc(.25rem - 1px) calc(.25rem - 1px)` at 6:82717, invalid value.
+WARNING:weasyprint:Ignored `border-radius:calc(.25rem - 1px)` at 6:83016, invalid value.
+WARNING:weasyprint:Ignored `border-top-left-radius:calc(.25rem - 1px)` at 6:83159, invalid value.
+WARNING:weasyprint:Ignored `border-top-right-radius:calc(.25rem - 1px)` at 6:83201, invalid value.
+WARNING:weasyprint:Ignored `border-bottom-right-radius:calc(.25rem - 1px)` at 6:83271, invalid value.
+WARNING:weasyprint:Ignored `border-bottom-left-radius:calc(.25rem - 1px)` at 6:83317, invalid value.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:83398.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:83680.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:84633.
+WARNING:weasyprint:Ignored `overflow-anchor:none` at 6:84883, unknown property.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:85211, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:85724, invalid value.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.25)` at 6:86113, unknown property.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:86506, unknown property.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:87485.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(0,123,255,.5)` at 6:87916, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(108,117,125,.5)` at 6:88153, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(40,167,69,.5)` at 6:88382, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(23,162,184,.5)` at 6:88594, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(255,193,7,.5)` at 6:88828, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(220,53,69,.5)` at 6:89050, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(248,249,250,.5)` at 6:89273, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 0 0 .2rem rgba(52,58,64,.5)` at 6:89487, unknown property.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:89621.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:91510, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:91662, invalid value.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:91902.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:92329.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:92437, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:92556, invalid value.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:93340, unknown property.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:94151.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:94742.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:95333.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:95924.
+WARNING:weasyprint:Ignored `text-shadow:0 1px 0 #fff` at 6:99307, unknown property.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:99564, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 .25rem .75rem rgba(0,0,0,.1)` at 6:99771, unknown property.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:99989, invalid value.
+WARNING:weasyprint:Ignored `border-top-left-radius:calc(.25rem - 1px)` at 6:100206, invalid value.
+WARNING:weasyprint:Ignored `border-top-right-radius:calc(.25rem - 1px)` at 6:100248, invalid value.
+WARNING:weasyprint:Ignored `overflow-x:hidden` at 6:100365, unknown property.
+WARNING:weasyprint:Ignored `overflow-y:auto` at 6:100383, unknown property.
+WARNING:weasyprint:Ignored `pointer-events:none` at 6:100565, unknown property.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:100818.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:101075, invalid value.
+WARNING:weasyprint:Ignored `max-height:calc(100% - 1rem)` at 6:101108, invalid value.
+WARNING:weasyprint:Ignored `max-height:calc(100vh - 1rem)` at 6:101177, invalid value.
+WARNING:weasyprint:Ignored `overflow-y:auto` at 6:101372, unknown property.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:101411, invalid value.
+WARNING:weasyprint:Ignored `min-height:calc(100% - 1rem)` at 6:101485, invalid value.
+WARNING:weasyprint:Ignored `height:calc(100vh - 1rem)` at 6:101559, invalid value.
+WARNING:weasyprint:Ignored `height:-webkit-min-content` at 6:101585, invalid value.
+WARNING:weasyprint:Ignored `height:-moz-min-content` at 6:101612, invalid value.
+WARNING:weasyprint:Ignored `height:min-content` at 6:101636, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:101996, invalid value.
+WARNING:weasyprint:Ignored `pointer-events:auto` at 6:102088, unknown property.
+WARNING:weasyprint:Ignored `width:100vw` at 6:102277, invalid value.
+WARNING:weasyprint:Ignored `height:100vh` at 6:102289, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:102401, invalid value.
+WARNING:weasyprint:Ignored `border-top-left-radius:calc(.3rem - 1px)` at 6:102580, invalid value.
+WARNING:weasyprint:Ignored `border-top-right-radius:calc(.3rem - 1px)` at 6:102621, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:102866, invalid value.
+WARNING:weasyprint:Ignored `border-bottom-right-radius:calc(.3rem - 1px)` at 6:103061, invalid value.
+WARNING:weasyprint:Ignored `border-bottom-left-radius:calc(.3rem - 1px)` at 6:103106, invalid value.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:103274.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:103687.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:103749.
+WARNING:weasyprint:Ignored `text-shadow:none` at 6:104171, unknown property.
+WARNING:weasyprint:Ignored `line-break:auto` at 6:104287, unknown property.
+WARNING:weasyprint:Ignored `text-shadow:none` at 6:106271, unknown property.
+WARNING:weasyprint:Ignored `line-break:auto` at 6:106387, unknown property.
+WARNING:weasyprint:Ignored `bottom:calc(-.5rem - 1px)` at 6:106901, invalid value.
+WARNING:weasyprint:Ignored `left:calc(-.5rem - 1px)` at 6:107358, invalid value.
+WARNING:weasyprint:Ignored `top:calc(-.5rem - 1px)` at 6:107875, invalid value.
+WARNING:weasyprint:Ignored `right:calc(-.5rem - 1px)` at 6:108575, invalid value.
+WARNING:weasyprint:Ignored `border-top-left-radius:calc(.3rem - 1px)` at 6:109069, invalid value.
+WARNING:weasyprint:Ignored `border-top-right-radius:calc(.3rem - 1px)` at 6:109110, invalid value.
+WARNING:weasyprint:Ignored `touch-action:pan-y` at 6:109311, unknown property.
+WARNING:weasyprint:Ignored `backface-visibility:hidden` at 6:109572, unknown property.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:109752.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:110574.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:110804, invalid value.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:111001.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:112027, invalid value.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:112496.
+WARNING:weasyprint:Expected a media type, got '(prefers-reduced-motion:reduce)'
+WARNING:weasyprint:Invalid media type ' (prefers-reduced-motion:reduce)' the whole @media rule was ignored at 6:113810.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:117456, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-inline-flexbox` at 6:117524, invalid value.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:117591.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:118050.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:118509.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:118968.
+WARNING:weasyprint:Ignored `display:-ms-flexbox` at 6:119760, invalid value.
+WARNING:weasyprint:Ignored `display:-ms-inline-flexbox` at 6:119834, invalid value.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:123290.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:126256.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:129222.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:132188.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:135256.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:135392.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:135528.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:135664.
+WARNING:weasyprint:Ignored `user-select:all` at 6:135883, unknown property.
+WARNING:weasyprint:Ignored `user-select:auto` at 6:136025, unknown property.
+WARNING:weasyprint:Ignored `user-select:none` at 6:136168, unknown property.
+WARNING:weasyprint:Ignored `position:-webkit-sticky` at 6:136472, invalid value.
+WARNING:weasyprint:Ignored `position:sticky` at 6:136506, invalid value.
+WARNING:weasyprint:Ignored `box-shadow:0 .125rem .25rem rgba(0,0,0,.075)` at 6:137069, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 .5rem 1rem rgba(0,0,0,.15)` at 6:137132, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:0 1rem 3rem rgba(0,0,0,.175)` at 6:137193, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:none` at 6:137256, unknown property.
+WARNING:weasyprint:Ignored `min-width:100vw` at 6:137636, invalid value.
+WARNING:weasyprint:Ignored `min-height:100vh` at 6:137674, invalid value.
+WARNING:weasyprint:Ignored `width:100vw` at 6:137709, invalid value.
+WARNING:weasyprint:Ignored `height:100vh` at 6:137739, invalid value.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:141264.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:145278.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:149292.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:153306.
+WARNING:weasyprint:Ignored `pointer-events:auto` at 6:157402, unknown property.
+WARNING:weasyprint:Expected a media type, got '(min-width:576px)'
+WARNING:weasyprint:Invalid media type ' (min-width:576px)' the whole @media rule was ignored at 6:157896.
+WARNING:weasyprint:Expected a media type, got '(min-width:768px)'
+WARNING:weasyprint:Invalid media type ' (min-width:768px)' the whole @media rule was ignored at 6:158048.
+WARNING:weasyprint:Expected a media type, got '(min-width:992px)'
+WARNING:weasyprint:Invalid media type ' (min-width:992px)' the whole @media rule was ignored at 6:158200.
+WARNING:weasyprint:Expected a media type, got '(min-width:1200px)'
+WARNING:weasyprint:Invalid media type ' (min-width:1200px)' the whole @media rule was ignored at 6:158352.
+WARNING:weasyprint:Ignored `text-shadow:none` at 6:159989, unknown property.
+WARNING:weasyprint:Ignored `word-break:break-word` at 6:160109, invalid value.
+WARNING:weasyprint:Ignored `text-shadow:none` at 6:160317, unknown property.
+WARNING:weasyprint:Ignored `box-shadow:none` at 6:160344, unknown property.
+[05/Aug/2025 10:07:02] "GET /media/logo_comp/2024/12/09/logo_bio1.jpg HTTP/1.1" 200 131664
+{'resp': True, 'stage': 'xml_authorized'}
+[05/Aug/2025 10:07:02] "POST /venta/sale/admin/add/ HTTP/1.1" 200 152

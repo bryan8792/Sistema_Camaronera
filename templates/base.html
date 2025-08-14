@@ -1574,6 +1574,31 @@
                             </li>
                         </ul>
                     </li>
+                    <!-- Barra que divide campo Gestion de Archivos-->
+                    <li class="nav-header">
+                        Gestion Archivos
+                    </li>
+                    <!-- Modulo Gestor de Archivos -->
+                    <li class="nav-item has-treeview">
+                            <a class="nav-link" href="#">
+                                <i class="fa fa-box nav-icon">
+                                </i>
+                                <p> Gestor de Archivos
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_filemanager:dashboard' %}">
+                                        <i class="fa fa-book-open nav-icon">
+                                        </i>
+                                        <p>
+                                            Ver archivos
+                                        </p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     {% if request.user.is_superuser == True %}
                         <!-- Barra que divide campo Administracion-->
                         <li class="nav-header">
@@ -1996,31 +2021,6 @@
                                         </i>
                                         <p>
                                             Cargar Datos Iniciales
-                                        </p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <!-- Barra que divide campo Gestion de Archivos-->
-                        <li class="nav-header">
-                            Gestion Archivos
-                        </li>
-                        <!-- Modulo Gestor de Archivos -->
-                        <li class="nav-item has-treeview">
-                            <a class="nav-link" href="#">
-                                <i class="fa fa-box nav-icon">
-                                </i>
-                                <p> Gestor de Archivos
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'app_filemanager:dashboard' %}">
-                                        <i class="fa fa-book-open nav-icon">
-                                        </i>
-                                        <p>
-                                            Ver archivos
                                         </p>
                                     </a>
                                 </li>

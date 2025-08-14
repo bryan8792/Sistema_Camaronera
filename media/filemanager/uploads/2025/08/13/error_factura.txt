@@ -1,0 +1,325 @@
+[04/Aug/2025 12:22:10] "POST /venta/sale/admin/add/ HTTP/1.1" 200 100
+{'error': 'Remote end closed connection without response',
+ 'resp': False,
+ 'stage': 'xml_validation'}
+
+❌ RECHAZO DE FACTURA ELECTRÓNICA ❌
+Clave de acceso: 0408202501079010180400110010020000000010705506611
+Errores devueltos por el SRI:
+"No hay errores"
+Opcion de Action
+action add
+sale.company
+BIOCASCAJAL
+sale.payment_method
+20
+*************************
+access_code
+0408202501079010180400110010020000000015929469217
+{'resp': True,
+ 'stage': 'xml_signature',
+ 'xml': '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<factura id="comprobante" '
+        'version="1.0.0"><infoTributaria><ambiente>1</ambiente><tipoEmision>1</tipoEmision><razonSocial>BIOCASCAJAL</razonSocial><nombreComercial>BIOCASCAJAL</nombreComercial><ruc>0790101804001</ruc><claveAcceso>0408202501079010180400110010020000000015929469217</claveAcceso><codDoc>01</codDoc><estab>001</estab><ptoEmi>002</ptoEmi><secuencial>000000001</secuencial><dirMatriz>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirMatriz></infoTributaria><infoFactura><fechaEmision>04/08/2025</fechaEmision><dirEstablecimiento>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirEstablecimiento><obligadoContabilidad>NO</obligadoContabilidad><tipoIdentificacionComprador>05</tipoIdentificacionComprador><razonSocialComprador>ROMAN '
+        'AGUILAR NATHALI '
+        'RAFAELA</razonSocialComprador><identificacionComprador>0703627182001</identificacionComprador><direccionComprador>pasaje</direccionComprador><totalSinImpuestos>4.00</totalSinImpuestos><totalDescuento>0.00</totalDescuento><totalConImpuestos><totalImpuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><baseImponible>4.00</baseImponible><valor>0.60</valor></totalImpuesto></totalConImpuestos><propina>0.00</propina><importeTotal>4.60</importeTotal><moneda>DOLAR</moneda><pagos><pago><formaPago>20</formaPago><total>4.60</total><plazo>31</plazo><unidadTiempo>dias</unidadTiempo></pago></pagos></infoFactura><detalles><detalle><codigoPrincipal>21</codigoPrincipal><descripcion>PISCINA '
+        '21</descripcion><cantidad>2.000000</cantidad><precioUnitario>2.00</precioUnitario><descuento>0.00</descuento><precioTotalSinImpuesto>4.00</precioTotalSinImpuesto><impuestos><impuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><tarifa>15.00</tarifa><baseImponible>4.00</baseImponible><valor>0.60</valor></impuesto></impuestos></detalle></detalles><infoAdicional><campoAdicional '
+        'nombre="Dirección">pasaje</campoAdicional><campoAdicional '
+        'nombre="Teléfono">0997458533</campoAdicional><campoAdicional '
+        'nombre="Email">nathy1589@hotmail.com</campoAdicional><campoAdicional '
+        'nombre="aa">aaa</campoAdicional></infoAdicional></factura>'}
+{'resp': True,
+ 'stage': 'xml_signature',
+ 'xml': '<?xml version="1.0" encoding="utf-8" standalone="no"?><factura '
+        'id="comprobante" '
+        'version="1.0.0"><infoTributaria><ambiente>1</ambiente><tipoEmision>1</tipoEmision><razonSocial>BIOCASCAJAL</razonSocial><nombreComercial>BIOCASCAJAL</nombreComercial><ruc>0790101804001</ruc><claveAcceso>0408202501079010180400110010020000000015929469217</claveAcceso><codDoc>01</codDoc><estab>001</estab><ptoEmi>002</ptoEmi><secuencial>000000001</secuencial><dirMatriz>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirMatriz></infoTributaria><infoFactura><fechaEmision>04/08/2025</fechaEmision><dirEstablecimiento>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirEstablecimiento><obligadoContabilidad>NO</obligadoContabilidad><tipoIdentificacionComprador>05</tipoIdentificacionComprador><razonSocialComprador>ROMAN '
+        'AGUILAR NATHALI '
+        'RAFAELA</razonSocialComprador><identificacionComprador>0703627182001</identificacionComprador><direccionComprador>pasaje</direccionComprador><totalSinImpuestos>4.00</totalSinImpuestos><totalDescuento>0.00</totalDescuento><totalConImpuestos><totalImpuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><baseImponible>4.00</baseImponible><valor>0.60</valor></totalImpuesto></totalConImpuestos><propina>0.00</propina><importeTotal>4.60</importeTotal><moneda>DOLAR</moneda><pagos><pago><formaPago>20</formaPago><total>4.60</total><plazo>31</plazo><unidadTiempo>dias</unidadTiempo></pago></pagos></infoFactura><detalles><detalle><codigoPrincipal>21</codigoPrincipal><descripcion>PISCINA '
+        '21</descripcion><cantidad>2.000000</cantidad><precioUnitario>2.00</precioUnitario><descuento>0.00</descuento><precioTotalSinImpuesto>4.00</precioTotalSinImpuesto><impuestos><impuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><tarifa>15.00</tarifa><baseImponible>4.00</baseImponible><valor>0.60</valor></impuesto></impuestos></detalle></detalles><infoAdicional><campoAdicional '
+        'nombre="Dirección">pasaje</campoAdicional><campoAdicional '
+        'nombre="Teléfono">0997458533</campoAdicional><campoAdicional '
+        'nombre="Email">nathy1589@hotmail.com</campoAdicional><campoAdicional '
+        'nombre="aa">aaa</campoAdicional></infoAdicional><ds:Signature '
+        'xmlns:ds="http://www.w3.org/2000/09/xmldsig#" '
+        'xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" '
+        'Id="Signature896867">\r\n'
+        '<ds:SignedInfo Id="Signature-SignedInfo389486">\r\n'
+        '<ds:CanonicalizationMethod '
+        'Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>\r\n'
+        '<ds:SignatureMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>\r\n'
+        '<ds:Reference Id="SignedPropertiesID747262" '
+        'Type="http://uri.etsi.org/01903#SignedProperties" '
+        'URI="#Signature896867-SignedProperties78904">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>Qi6rmO/xxCUf3EDsKUQRmv7xBa8=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference URI="#Certificate11017661">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>cmkj4IQ51Z4HXPmstTaTtwDOsfQ=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference Id="Reference-ID-35423" URI="#comprobante">\r\n'
+        '<ds:Transforms>\r\n'
+        '<ds:Transform '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>\r\n'
+        '</ds:Transforms>\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>oV8CWDXJKhzvhTWm7JtIvwcivE4=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '</ds:SignedInfo>\r\n'
+        '<ds:SignatureValue Id="SignatureValue910100">\r\n'
+        'NEi4FrkA7ArrtxZXedRdZO7CtDNgYjnY3PaUGvwbKOXy9K8p1xk2tAfqkD/w6GEwkPE53dM8RWPj\r\n'
+        'SIMM/RoEBB/JjtB0hz7aan4gkl/pcsNpyB7HReUtmsuxcQQYjnpeYBLP91mS0LmY+ndCnOf174+a\r\n'
+        'CWZnyHOhafo2IvEVm2juorPbqb725/h0hFJ0UkMd20YueEZ9ETKv3zWwqYjJEOyuFjMKn4Mf62f6\r\n'
+        'RgWgzvRKJ1qlzgb6h9Q0InMNwWB+yRXthF5p7Pi8gwWCAfT4TXvBvS9RRmnupBXlSAxxEDTkXHcX\r\n'
+        'ZJw7ObZeovLtsjxeY2fFOBlPXqY7xjioV7mopw==\r\n'
+        '</ds:SignatureValue>\r\n'
+        '<ds:KeyInfo Id="Certificate11017661">\r\n'
+        '<ds:X509Data>\r\n'
+        '<ds:X509Certificate>\r\n'
+        'MIIKIDCCCAigAwIBAgIEZeQyHzANBgkqhkiG9w0BAQsFADCBoTELMAkGA1UEBhMCRUMxIjAgBgNV\r\n'
+        'BAoTGUJBTkNPIENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElG\r\n'
+        'SUNBQ0lPTiBERSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxB\r\n'
+        'QyBCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMB4XDTI0MDczMDE1MTcxNVoXDTI2MDczMDE1NDc0\r\n'
+        'M1owgbcxCzAJBgNVBAYTAkVDMSIwIAYDVQQKExlCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMTcw\r\n'
+        'NQYDVQQLEy5FTlRJREFEIERFIENFUlRJRklDQUNJT04gREUgSU5GT1JNQUNJT04tRUNJQkNFMQ4w\r\n'
+        'DAYDVQQHEwVRVUlUTzE7MBEGA1UEBRMKMDIwMDAzNDQ0MDAmBgNVBAMTH1JPU0EgRU1QRVJBVFJJ\r\n'
+        'WiBDQVJQSU8gTU9TUVVFUkEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9/WZdr1Bj\r\n'
+        'GVl2RTQAFJocpEmiTiLeEe8JHodvpdOkPNOuhNuQK7Bye4xw0Kstm06JriDvUwtQNJbsl712f0+6\r\n'
+        'LQrocWoZUrKlQDCyaZernNHAgi+Tv/+xk+h44ePAaXhdxNS+3zLsbCo2lfkJWWeS6bHELJoU0Kxl\r\n'
+        '9G5CdMpNx43Dd0mFfB++oRLrYqD/4fxNwiTtHFuufifhRs8QYSWuw5weGAzK3OI5nMK5S8vuwjkc\r\n'
+        'xEHDQmswU5YEWgfj2UZ4WsG0sUtRSWknote3Ug0EXiofDN6BZMnZGSovUbVbUvPr/wWl4poZMAUw\r\n'
+        'Y9TeKgGYzCVa3ZnZKkvxZM0sisZRAgMBAAGjggVGMIIFQjALBgNVHQ8EBAMCB4AwZwYDVR0gBGAw\r\n'
+        'XjBcBgsrBgEEAYKoOwICATBNMEsGCCsGAQUFBwIBFj9odHRwOi8vd3d3LmVjaS5iY2UuZWMvcG9s\r\n'
+        'aXRpY2EtY2VydGlmaWNhZG8vcGVyc29uYS1qdXJpZGljYS5wZGYwgZEGCCsGAQUFBwEBBIGEMIGB\r\n'
+        'MD4GCCsGAQUFBzABhjJodHRwOi8vb2NzcC5lY2kuYmNlLmVjL2VqYmNhL3B1YmxpY3dlYi9zdGF0\r\n'
+        'dXMvb2NzcDA/BggrBgEFBQcwAYYzaHR0cDovL29jc3AxLmVjaS5iY2UuZWMvZWpiY2EvcHVibGlj\r\n'
+        'd2ViL3N0YXR1cy9vY3NwMEcGCisGAQQBgqg7AwoEORM3Q09NUEFOSUEgREUgUFJPRFVDQ0lPTiBC\r\n'
+        'SU9BQ1VBVElDQSBCSU9DQVNDQUpBTCBDSUEgTFREQTAdBgorBgEEAYKoOwMLBA8TDTA3OTAxMDE4\r\n'
+        'MDQwMDEwGgYKKwYBBAGCqDsDAQQMEwowOTA5MTc5ODg5MB8GCisGAQQBgqg7AwIEERMPUk9TQSBF\r\n'
+        'TVBFUkFUUklaMBYGCisGAQQBgqg7AwMECBMGQ0FSUElPMBgGCisGAQQBgqg7AwQEChMITU9TUVVF\r\n'
+        'UkEwFwYKKwYBBAGCqDsDBQQJEwdHRVJFTlRFMDUGCisGAQQBgqg7AwcEJxMlR1VBWUFTIDE4MTEg\r\n'
+        'RU5UUkUgU1VDUkUgWSAyNSBERSBKVU5JTzAZBgorBgEEAYKoOwMIBAsTCTA3MjkyMDM3MTAXBgor\r\n'
+        'BgEEAYKoOwMJBAkTB01BQ0hBTEEwFwYKKwYBBAGCqDsDDAQJEwdFQ1VBRE9SMCAGCisGAQQBgqg7\r\n'
+        'AzMEEhMQU09GVFdBUkUtQVJDSElWTzAoBgNVHREEITAfgR1mYWN0dXJhc2Jpb2Nhc2NhamFsQGdt\r\n'
+        'YWlsLmNvbTCCAeEGA1UdHwSCAdgwggHUMIIB0KCCAcygggHIhoHWbGRhcDovL2JjZXFsZGFwc3Vi\r\n'
+        'cDEuYmNlLmVjL2NuPUNSTDIwNTEsY249QUMlMjBCQU5DTyUyMENFTlRSQUwlMjBERUwlMjBFQ1VB\r\n'
+        'RE9SLGw9UVVJVE8sb3U9RU5USURBRCUyMERFJTIwQ0VSVElGSUNBQ0lPTiUyMERFJTIwSU5GT1JN\r\n'
+        'QUNJT04tRUNJQkNFLG89QkFOQ08lMjBDRU5UUkFMJTIwREVMJTIwRUNVQURPUixjPUVDP2NlcnRp\r\n'
+        'ZmljYXRlUmV2b2NhdGlvbkxpc3Q/YmFzZYY0aHR0cDovL3d3dy5lY2kuYmNlLmVjL0NSTC9lY2lf\r\n'
+        'YmNlX2VjX2NybGZpbGVjb21iLmNybKSBtjCBszELMAkGA1UEBhMCRUMxIjAgBgNVBAoTGUJBTkNP\r\n'
+        'IENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBE\r\n'
+        'RSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxBQyBCQU5DTyBD\r\n'
+        'RU5UUkFMIERFTCBFQ1VBRE9SMRAwDgYDVQQDEwdDUkwyMDUxMCsGA1UdEAQkMCKADzIwMjQwNzMw\r\n'
+        'MTUxNzE1WoEPMjAyNjA3MzAxNTQ3NDNaMB8GA1UdIwQYMBaAFEii3yMfHfgsUXqMA81JMqUJwZSr\r\n'
+        'MB0GA1UdDgQWBBRpvaBbsGYEoae6HuytX3fVidA+ijAJBgNVHRMEAjAAMBkGCSqGSIb2fQdBAAQM\r\n'
+        'MAobBFY4LjMDAgQwMA0GCSqGSIb3DQEBCwUAA4ICAQCaGS2UCo/NmKVIrBeTNn+o3muyI+qSwgVW\r\n'
+        '6CxFIvA+3qlniVh2+jWESg/3tKUsu4/aHQmQ5oMXznRZX321ymbIhUi1ioVsWj/LLuZC8XLf5GoQ\r\n'
+        'LvP0rMGvS/O1tr8kC8YKlOfAPdNpdJiRgriwEqp3b9sS6kpaVfqEV7pQ32QkGRxasRz7A2KD+5EI\r\n'
+        'ZS52ZMKalQAOg4GlHsjrsjYVwi+eWccX7ZufoeJTwMA6AFO+TkpO/xMNKT+oDxOXuufKSgO0kVAu\r\n'
+        'nqLCUuH0RsMppvUD0il/na8CEhP7sgywuKyrJkGwoOxiKOSU4HNoCnD8lJuRqSLee0HqgFLslpL3\r\n'
+        'kQv4EKahXq4JrecEtKQ3cSpQgvfLRP+kwsACUdaQ1NBaSEBVLp7oCmHkorkbS0z1pgwBkFIZ6+2W\r\n'
+        'O8j+md31l0PnMQ43+2kDNP2X0yN0WcOwQujgKmgKZgtR3JcReV7tMSjwooEtgwzXn5/LaP5B7a7W\r\n'
+        'VILyZIwFyJMGcRrdH8hwvd4jtFnSnvsGu0bPDcUZj5HVSPYs6880qL42Va/VVQYjzu0We/t5GO6v\r\n'
+        'bZhqu0PI8lgf2SU6E3fSRWmyejFA2s4olfuF/e5igipBuj7JNIerqrANi3JW98i98NVse7Pb9OVR\r\n'
+        'g8Pr5m+rOSwTWrVsiAI3zg8dts6HBGkETBte0CgSFA==\r\n'
+        '</ds:X509Certificate>\r\n'
+        '</ds:X509Data>\r\n'
+        '<ds:KeyValue>\r\n'
+        '<ds:RSAKeyValue>\r\n'
+        '<ds:Modulus>\r\n'
+        'vf1mXa9QYxlZdkU0ABSaHKRJok4i3hHvCR6Hb6XTpDzTroTbkCuwcnuMcNCrLZtOia4g71MLUDSW\r\n'
+        '7Je9dn9Pui0K6HFqGVKypUAwsmmXq5zRwIIvk7//sZPoeOHjwGl4XcTUvt8y7GwqNpX5CVlnkumx\r\n'
+        'xCyaFNCsZfRuQnTKTceNw3dJhXwfvqES62Kg/+H8TcIk7Rxbrn4n4UbPEGElrsOcHhgMytziOZzC\r\n'
+        'uUvL7sI5HMRBw0JrMFOWBFoH49lGeFrBtLFLUUlpJ6LXt1INBF4qHwzegWTJ2RkqL1G1W1Lz6/8F\r\n'
+        'peKaGTAFMGPU3ioBmMwlWt2Z2SpL8WTNLIrGUQ==\r\n'
+        '</ds:Modulus>\r\n'
+        '<ds:Exponent>AQAB</ds:Exponent>\r\n'
+        '</ds:RSAKeyValue>\r\n'
+        '</ds:KeyValue>\r\n'
+        '</ds:KeyInfo>\r\n'
+        '<ds:Object '
+        'Id="Signature896867-Object443820"><etsi:QualifyingProperties '
+        'Target="#Signature896867"><etsi:SignedProperties '
+        'Id="Signature896867-SignedProperties78904"><etsi:SignedSignatureProperties><etsi:SigningTime>2025-08-04T12:22:22-05:00</etsi:SigningTime><etsi:SigningCertificate><etsi:Cert><etsi:CertDigest><ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>Fbt/0dijghsubc0+jgT6a5NNNmI=</ds:DigestValue></etsi:CertDigest><etsi:IssuerSerial><ds:X509IssuerName>CN=AC '
+        'BANCO CENTRAL DEL ECUADOR,L=QUITO,OU=ENTIDAD DE CERTIFICACION DE '
+        'INFORMACION-ECIBCE,O=BANCO CENTRAL DEL '
+        'ECUADOR,C=EC</ds:X509IssuerName><ds:X509SerialNumber>1709453855</ds:X509SerialNumber></etsi:IssuerSerial></etsi:Cert></etsi:SigningCertificate></etsi:SignedSignatureProperties><etsi:SignedDataObjectProperties><etsi:DataObjectFormat '
+        'ObjectReference="#Reference-ID-35423"><etsi:Description>contenido '
+        'comprobante</etsi:Description><etsi:MimeType>text/xml</etsi:MimeType></etsi:DataObjectFormat></etsi:SignedDataObjectProperties></etsi:SignedProperties></etsi:QualifyingProperties></ds:Object></ds:Signature></factura>'}
+{'resp': True,
+ 'stage': 'xml_validation',
+ 'xml': '<?xml version="1.0" encoding="utf-8" standalone="no"?><factura '
+        'id="comprobante" '
+        'version="1.0.0"><infoTributaria><ambiente>1</ambiente><tipoEmision>1</tipoEmision><razonSocial>BIOCASCAJAL</razonSocial><nombreComercial>BIOCASCAJAL</nombreComercial><ruc>0790101804001</ruc><claveAcceso>0408202501079010180400110010020000000015929469217</claveAcceso><codDoc>01</codDoc><estab>001</estab><ptoEmi>002</ptoEmi><secuencial>000000001</secuencial><dirMatriz>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirMatriz></infoTributaria><infoFactura><fechaEmision>04/08/2025</fechaEmision><dirEstablecimiento>GUAYAS '
+        '/ SUCRE Y 25 DE '
+        'JUNIO</dirEstablecimiento><obligadoContabilidad>NO</obligadoContabilidad><tipoIdentificacionComprador>05</tipoIdentificacionComprador><razonSocialComprador>ROMAN '
+        'AGUILAR NATHALI '
+        'RAFAELA</razonSocialComprador><identificacionComprador>0703627182001</identificacionComprador><direccionComprador>pasaje</direccionComprador><totalSinImpuestos>4.00</totalSinImpuestos><totalDescuento>0.00</totalDescuento><totalConImpuestos><totalImpuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><baseImponible>4.00</baseImponible><valor>0.60</valor></totalImpuesto></totalConImpuestos><propina>0.00</propina><importeTotal>4.60</importeTotal><moneda>DOLAR</moneda><pagos><pago><formaPago>20</formaPago><total>4.60</total><plazo>31</plazo><unidadTiempo>dias</unidadTiempo></pago></pagos></infoFactura><detalles><detalle><codigoPrincipal>21</codigoPrincipal><descripcion>PISCINA '
+        '21</descripcion><cantidad>2.000000</cantidad><precioUnitario>2.00</precioUnitario><descuento>0.00</descuento><precioTotalSinImpuesto>4.00</precioTotalSinImpuesto><impuestos><impuesto><codigo>2</codigo><codigoPorcentaje>4</codigoPorcentaje><tarifa>15.00</tarifa><baseImponible>4.00</baseImponible><valor>0.60</valor></impuesto></impuestos></detalle></detalles><infoAdicional><campoAdicional '
+        'nombre="Dirección">pasaje</campoAdicional><campoAdicional '
+        'nombre="Teléfono">0997458533</campoAdicional><campoAdicional '
+        'nombre="Email">nathy1589@hotmail.com</campoAdicional><campoAdicional '
+        'nombre="aa">aaa</campoAdicional></infoAdicional><ds:Signature '
+        'xmlns:ds="http://www.w3.org/2000/09/xmldsig#" '
+        'xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" '
+        'Id="Signature896867">\r\n'
+        '<ds:SignedInfo Id="Signature-SignedInfo389486">\r\n'
+        '<ds:CanonicalizationMethod '
+        'Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>\r\n'
+        '<ds:SignatureMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>\r\n'
+        '<ds:Reference Id="SignedPropertiesID747262" '
+        'Type="http://uri.etsi.org/01903#SignedProperties" '
+        'URI="#Signature896867-SignedProperties78904">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>Qi6rmO/xxCUf3EDsKUQRmv7xBa8=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference URI="#Certificate11017661">\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>cmkj4IQ51Z4HXPmstTaTtwDOsfQ=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '<ds:Reference Id="Reference-ID-35423" URI="#comprobante">\r\n'
+        '<ds:Transforms>\r\n'
+        '<ds:Transform '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>\r\n'
+        '</ds:Transforms>\r\n'
+        '<ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>\r\n'
+        '<ds:DigestValue>oV8CWDXJKhzvhTWm7JtIvwcivE4=</ds:DigestValue>\r\n'
+        '</ds:Reference>\r\n'
+        '</ds:SignedInfo>\r\n'
+        '<ds:SignatureValue Id="SignatureValue910100">\r\n'
+        'NEi4FrkA7ArrtxZXedRdZO7CtDNgYjnY3PaUGvwbKOXy9K8p1xk2tAfqkD/w6GEwkPE53dM8RWPj\r\n'
+        'SIMM/RoEBB/JjtB0hz7aan4gkl/pcsNpyB7HReUtmsuxcQQYjnpeYBLP91mS0LmY+ndCnOf174+a\r\n'
+        'CWZnyHOhafo2IvEVm2juorPbqb725/h0hFJ0UkMd20YueEZ9ETKv3zWwqYjJEOyuFjMKn4Mf62f6\r\n'
+        'RgWgzvRKJ1qlzgb6h9Q0InMNwWB+yRXthF5p7Pi8gwWCAfT4TXvBvS9RRmnupBXlSAxxEDTkXHcX\r\n'
+        'ZJw7ObZeovLtsjxeY2fFOBlPXqY7xjioV7mopw==\r\n'
+        '</ds:SignatureValue>\r\n'
+        '<ds:KeyInfo Id="Certificate11017661">\r\n'
+        '<ds:X509Data>\r\n'
+        '<ds:X509Certificate>\r\n'
+        'MIIKIDCCCAigAwIBAgIEZeQyHzANBgkqhkiG9w0BAQsFADCBoTELMAkGA1UEBhMCRUMxIjAgBgNV\r\n'
+        'BAoTGUJBTkNPIENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElG\r\n'
+        'SUNBQ0lPTiBERSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxB\r\n'
+        'QyBCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMB4XDTI0MDczMDE1MTcxNVoXDTI2MDczMDE1NDc0\r\n'
+        'M1owgbcxCzAJBgNVBAYTAkVDMSIwIAYDVQQKExlCQU5DTyBDRU5UUkFMIERFTCBFQ1VBRE9SMTcw\r\n'
+        'NQYDVQQLEy5FTlRJREFEIERFIENFUlRJRklDQUNJT04gREUgSU5GT1JNQUNJT04tRUNJQkNFMQ4w\r\n'
+        'DAYDVQQHEwVRVUlUTzE7MBEGA1UEBRMKMDIwMDAzNDQ0MDAmBgNVBAMTH1JPU0EgRU1QRVJBVFJJ\r\n'
+        'WiBDQVJQSU8gTU9TUVVFUkEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC9/WZdr1Bj\r\n'
+        'GVl2RTQAFJocpEmiTiLeEe8JHodvpdOkPNOuhNuQK7Bye4xw0Kstm06JriDvUwtQNJbsl712f0+6\r\n'
+        'LQrocWoZUrKlQDCyaZernNHAgi+Tv/+xk+h44ePAaXhdxNS+3zLsbCo2lfkJWWeS6bHELJoU0Kxl\r\n'
+        '9G5CdMpNx43Dd0mFfB++oRLrYqD/4fxNwiTtHFuufifhRs8QYSWuw5weGAzK3OI5nMK5S8vuwjkc\r\n'
+        'xEHDQmswU5YEWgfj2UZ4WsG0sUtRSWknote3Ug0EXiofDN6BZMnZGSovUbVbUvPr/wWl4poZMAUw\r\n'
+        'Y9TeKgGYzCVa3ZnZKkvxZM0sisZRAgMBAAGjggVGMIIFQjALBgNVHQ8EBAMCB4AwZwYDVR0gBGAw\r\n'
+        'XjBcBgsrBgEEAYKoOwICATBNMEsGCCsGAQUFBwIBFj9odHRwOi8vd3d3LmVjaS5iY2UuZWMvcG9s\r\n'
+        'aXRpY2EtY2VydGlmaWNhZG8vcGVyc29uYS1qdXJpZGljYS5wZGYwgZEGCCsGAQUFBwEBBIGEMIGB\r\n'
+        'MD4GCCsGAQUFBzABhjJodHRwOi8vb2NzcC5lY2kuYmNlLmVjL2VqYmNhL3B1YmxpY3dlYi9zdGF0\r\n'
+        'dXMvb2NzcDA/BggrBgEFBQcwAYYzaHR0cDovL29jc3AxLmVjaS5iY2UuZWMvZWpiY2EvcHVibGlj\r\n'
+        'd2ViL3N0YXR1cy9vY3NwMEcGCisGAQQBgqg7AwoEORM3Q09NUEFOSUEgREUgUFJPRFVDQ0lPTiBC\r\n'
+        'SU9BQ1VBVElDQSBCSU9DQVNDQUpBTCBDSUEgTFREQTAdBgorBgEEAYKoOwMLBA8TDTA3OTAxMDE4\r\n'
+        'MDQwMDEwGgYKKwYBBAGCqDsDAQQMEwowOTA5MTc5ODg5MB8GCisGAQQBgqg7AwIEERMPUk9TQSBF\r\n'
+        'TVBFUkFUUklaMBYGCisGAQQBgqg7AwMECBMGQ0FSUElPMBgGCisGAQQBgqg7AwQEChMITU9TUVVF\r\n'
+        'UkEwFwYKKwYBBAGCqDsDBQQJEwdHRVJFTlRFMDUGCisGAQQBgqg7AwcEJxMlR1VBWUFTIDE4MTEg\r\n'
+        'RU5UUkUgU1VDUkUgWSAyNSBERSBKVU5JTzAZBgorBgEEAYKoOwMIBAsTCTA3MjkyMDM3MTAXBgor\r\n'
+        'BgEEAYKoOwMJBAkTB01BQ0hBTEEwFwYKKwYBBAGCqDsDDAQJEwdFQ1VBRE9SMCAGCisGAQQBgqg7\r\n'
+        'AzMEEhMQU09GVFdBUkUtQVJDSElWTzAoBgNVHREEITAfgR1mYWN0dXJhc2Jpb2Nhc2NhamFsQGdt\r\n'
+        'YWlsLmNvbTCCAeEGA1UdHwSCAdgwggHUMIIB0KCCAcygggHIhoHWbGRhcDovL2JjZXFsZGFwc3Vi\r\n'
+        'cDEuYmNlLmVjL2NuPUNSTDIwNTEsY249QUMlMjBCQU5DTyUyMENFTlRSQUwlMjBERUwlMjBFQ1VB\r\n'
+        'RE9SLGw9UVVJVE8sb3U9RU5USURBRCUyMERFJTIwQ0VSVElGSUNBQ0lPTiUyMERFJTIwSU5GT1JN\r\n'
+        'QUNJT04tRUNJQkNFLG89QkFOQ08lMjBDRU5UUkFMJTIwREVMJTIwRUNVQURPUixjPUVDP2NlcnRp\r\n'
+        'ZmljYXRlUmV2b2NhdGlvbkxpc3Q/YmFzZYY0aHR0cDovL3d3dy5lY2kuYmNlLmVjL0NSTC9lY2lf\r\n'
+        'YmNlX2VjX2NybGZpbGVjb21iLmNybKSBtjCBszELMAkGA1UEBhMCRUMxIjAgBgNVBAoTGUJBTkNP\r\n'
+        'IENFTlRSQUwgREVMIEVDVUFET1IxNzA1BgNVBAsTLkVOVElEQUQgREUgQ0VSVElGSUNBQ0lPTiBE\r\n'
+        'RSBJTkZPUk1BQ0lPTi1FQ0lCQ0UxDjAMBgNVBAcTBVFVSVRPMSUwIwYDVQQDExxBQyBCQU5DTyBD\r\n'
+        'RU5UUkFMIERFTCBFQ1VBRE9SMRAwDgYDVQQDEwdDUkwyMDUxMCsGA1UdEAQkMCKADzIwMjQwNzMw\r\n'
+        'MTUxNzE1WoEPMjAyNjA3MzAxNTQ3NDNaMB8GA1UdIwQYMBaAFEii3yMfHfgsUXqMA81JMqUJwZSr\r\n'
+        'MB0GA1UdDgQWBBRpvaBbsGYEoae6HuytX3fVidA+ijAJBgNVHRMEAjAAMBkGCSqGSIb2fQdBAAQM\r\n'
+        'MAobBFY4LjMDAgQwMA0GCSqGSIb3DQEBCwUAA4ICAQCaGS2UCo/NmKVIrBeTNn+o3muyI+qSwgVW\r\n'
+        '6CxFIvA+3qlniVh2+jWESg/3tKUsu4/aHQmQ5oMXznRZX321ymbIhUi1ioVsWj/LLuZC8XLf5GoQ\r\n'
+        'LvP0rMGvS/O1tr8kC8YKlOfAPdNpdJiRgriwEqp3b9sS6kpaVfqEV7pQ32QkGRxasRz7A2KD+5EI\r\n'
+        'ZS52ZMKalQAOg4GlHsjrsjYVwi+eWccX7ZufoeJTwMA6AFO+TkpO/xMNKT+oDxOXuufKSgO0kVAu\r\n'
+        'nqLCUuH0RsMppvUD0il/na8CEhP7sgywuKyrJkGwoOxiKOSU4HNoCnD8lJuRqSLee0HqgFLslpL3\r\n'
+        'kQv4EKahXq4JrecEtKQ3cSpQgvfLRP+kwsACUdaQ1NBaSEBVLp7oCmHkorkbS0z1pgwBkFIZ6+2W\r\n'
+        'O8j+md31l0PnMQ43+2kDNP2X0yN0WcOwQujgKmgKZgtR3JcReV7tMSjwooEtgwzXn5/LaP5B7a7W\r\n'
+        'VILyZIwFyJMGcRrdH8hwvd4jtFnSnvsGu0bPDcUZj5HVSPYs6880qL42Va/VVQYjzu0We/t5GO6v\r\n'
+        'bZhqu0PI8lgf2SU6E3fSRWmyejFA2s4olfuF/e5igipBuj7JNIerqrANi3JW98i98NVse7Pb9OVR\r\n'
+        'g8Pr5m+rOSwTWrVsiAI3zg8dts6HBGkETBte0CgSFA==\r\n'
+        '</ds:X509Certificate>\r\n'
+        '</ds:X509Data>\r\n'
+        '<ds:KeyValue>\r\n'
+        '<ds:RSAKeyValue>\r\n'
+        '<ds:Modulus>\r\n'
+        'vf1mXa9QYxlZdkU0ABSaHKRJok4i3hHvCR6Hb6XTpDzTroTbkCuwcnuMcNCrLZtOia4g71MLUDSW\r\n'
+        '7Je9dn9Pui0K6HFqGVKypUAwsmmXq5zRwIIvk7//sZPoeOHjwGl4XcTUvt8y7GwqNpX5CVlnkumx\r\n'
+        'xCyaFNCsZfRuQnTKTceNw3dJhXwfvqES62Kg/+H8TcIk7Rxbrn4n4UbPEGElrsOcHhgMytziOZzC\r\n'
+        'uUvL7sI5HMRBw0JrMFOWBFoH49lGeFrBtLFLUUlpJ6LXt1INBF4qHwzegWTJ2RkqL1G1W1Lz6/8F\r\n'
+        'peKaGTAFMGPU3ioBmMwlWt2Z2SpL8WTNLIrGUQ==\r\n'
+        '</ds:Modulus>\r\n'
+        '<ds:Exponent>AQAB</ds:Exponent>\r\n'
+        '</ds:RSAKeyValue>\r\n'
+        '</ds:KeyValue>\r\n'
+        '</ds:KeyInfo>\r\n'
+        '<ds:Object '
+        'Id="Signature896867-Object443820"><etsi:QualifyingProperties '
+        'Target="#Signature896867"><etsi:SignedProperties '
+        'Id="Signature896867-SignedProperties78904"><etsi:SignedSignatureProperties><etsi:SigningTime>2025-08-04T12:22:22-05:00</etsi:SigningTime><etsi:SigningCertificate><etsi:Cert><etsi:CertDigest><ds:DigestMethod '
+        'Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/><ds:DigestValue>Fbt/0dijghsubc0+jgT6a5NNNmI=</ds:DigestValue></etsi:CertDigest><etsi:IssuerSerial><ds:X509IssuerName>CN=AC '
+        'BANCO CENTRAL DEL ECUADOR,L=QUITO,OU=ENTIDAD DE CERTIFICACION DE '
+        'INFORMACION-ECIBCE,O=BANCO CENTRAL DEL '
+        'ECUADOR,C=EC</ds:X509IssuerName><ds:X509SerialNumber>1709453855</ds:X509SerialNumber></etsi:IssuerSerial></etsi:Cert></etsi:SigningCertificate></etsi:SignedSignatureProperties><etsi:SignedDataObjectProperties><etsi:DataObjectFormat '
+        'ObjectReference="#Reference-ID-35423"><etsi:Description>contenido '
+        'comprobante</etsi:Description><etsi:MimeType>text/xml</etsi:MimeType></etsi:DataObjectFormat></etsi:SignedDataObjectProperties></etsi:SignedProperties></etsi:QualifyingProperties></ds:Object></ds:Signature></factura>'}
+WARNING:root:⚠️ Intento 1 de autorización fallido. Error: {'access_code': '0408202501079010180400110010020000000015929469217', 'stage': NO AUTORIZADO, 'authorization_date': '2025-08-04 12:22:23-05:00', 'errors': [{'identificador': 69, 'informacionAdicional': La longitud del número de cédula debe  ser 10, 'mensaje': ERROR EN LA IDENTIFICACION DEL RECEPTOR, 'tipo': ERROR}]}
+{'error': {'access_code': '0408202501079010180400110010020000000015929469217',
+           'authorization_date': '2025-08-04 12:22:23-05:00',
+           'errors': [{'identificador': 69,
+                       'informacionAdicional': La longitud del número de cédula debe  ser 10,
+                       'mensaje': ERROR EN LA IDENTIFICACION DEL RECEPTOR,
+                       'tipo': ERROR}],
+           'stage': NO AUTORIZADO},
+ 'resp': False,
+ 'stage': 'xml_authorized'}
+WARNING:root:⚠️ Intento 2 de autorización fallido. Error: {'access_code': '0408202501079010180400110010020000000015929469217', 'stage': NO AUTORIZADO, 'authorization_date': '2025-08-04 12:22:23-05:00', 'errors': [{'identificador': 69, 'informacionAdicional': La longitud del número de cédula debe  ser 10, 'mensaje': ERROR EN LA IDENTIFICACION DEL RECEPTOR, 'tipo': ERROR}]}
+{'error': {'access_code': '0408202501079010180400110010020000000015929469217',
+           'authorization_date': '2025-08-04 12:22:23-05:00',
+           'errors': [{'identificador': 69,
+                       'informacionAdicional': La longitud del número de cédula debe  ser 10,
+                       'mensaje': ERROR EN LA IDENTIFICACION DEL RECEPTOR,
+                       'tipo': ERROR}],
+           'stage': NO AUTORIZADO},
+ 'resp': False,
+ 'stage': 'xml_authorized'}
+WARNING:root:⚠️ Intento 3 de autorización fallido. Error: {'access_code': '0408202501079010180400110010020000000015929469217', 'stage': NO AUTORIZADO, 'authorization_date': '2025-08-04 12:22:23-05:00', 'errors': [{'identificador': 69, 'informacionAdicional': La longitud del número de cédula debe  ser 10, 'mensaje': ERROR EN LA IDENTIFICACION DEL RECEPTOR, 'tipo': ERROR}]}
+{'error': {'access_code': '0408202501079010180400110010020000000015929469217',
+           'authorization_date': '2025-08-04 12:22:23-05:00',
+           'errors': [{'identificador': 69,
+                       'informacionAdicional': La longitud del número de cédula debe  ser 10,
+                       'mensaje': ERROR EN LA IDENTIFICACION DEL RECEPTOR,
+                       'tipo': ERROR}],
+           'stage': NO AUTORIZADO},
+ 'resp': False,
+ 'stage': 'xml_authorized'}
+ERROR:root:❌ Autorización fallida tras 3 intentos. Último error: {'access_code': '0408202501079010180400110010020000000015929469217', 'stage': NO AUTORIZADO, 'authorization_date': '2025-08-04 12:22:23-05:00', 'errors': [{'identificador': 69, 'informacionAdicional': La longitud del número de cédula debe  ser 10, 'mensaje': ERROR EN LA IDENTIFICACION DEL RECEPTOR, 'tipo': ERROR}]}
+[04/Aug/2025 12:22:27] "POST /venta/sale/admin/add/ HTTP/1.1" 200 389
+
+❌ RECHAZO DE FACTURA ELECTRÓNICA ❌
+Clave de acceso: 0408202501079010180400110010020000000015929469217
+Errores devueltos por el SRI:
+"No hay errores"
