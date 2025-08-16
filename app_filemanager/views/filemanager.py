@@ -7,7 +7,7 @@ from django.http import Http404, JsonResponse, FileResponse, HttpResponseForbidd
     HttpResponseBadRequest
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q, Sum, Count
@@ -40,7 +40,7 @@ def _user_level_on_folder(user, folder):
     if perm:
         return LEVEL_NUM.get(perm, 0)
 
-    # <CHANGE> Buscar permisos heredados de carpetas padre
+    # Buscar permisos heredados de carpetas padre
     current_folder = folder.parent
     while current_folder:
         parent_perm = FolderPermission.objects.filter(folder=current_folder, user=user).values_list("permission_level",
@@ -65,24 +65,72 @@ def _can_view_folder(user, folder):
     return _user_level_on_folder(user, folder) >= LEVEL_NUM["read"]
 
 
-@require_POST
 @login_required
-@csrf_exempt
+@require_http_methods(["POST"])
 def ajax_file_upload(request):
-    uploaded_file = request.FILES.get('file')
-    if not uploaded_file:
-        return HttpResponseBadRequest("Falta archivo")
-    folder_id = request.POST.get('folder')
-    dest = get_object_or_404(Folder, pk=folder_id) if folder_id else None
-
-    if dest and _user_level_on_folder(request.user, dest) < LEVEL_NUM["write"]:
-        return HttpResponseForbidden("Sin permiso de escritura")
-
     try:
-        File.objects.create(owner=request.user, name=uploaded_file.name, file=uploaded_file, folder=dest)
-        return JsonResponse({"ok": True})
+        # Obtener datos del formulario
+        folder_id = request.POST.get('folder')
+        description = request.POST.get('description', '')
+        is_public = request.POST.get('is_public') == 'true'
+
+        # Obtener archivos
+        files = request.FILES.getlist('files')
+
+        if not files:
+            return JsonResponse({
+                'success': False,
+                'message': 'No se seleccionaron archivos'
+            })
+
+        # Obtener carpeta si se especifica
+        folder = None
+        if folder_id:
+            try:
+                folder = Folder.objects.get(id=folder_id)
+                # Verificar permisos
+                if not (folder.owner == request.user or
+                        _user_level_on_folder(request.user, folder) >= LEVEL_NUM["write"]):
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'No tienes permisos para subir archivos a esta carpeta'
+                    })
+            except Folder.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Carpeta no encontrada'
+                })
+
+        uploaded_files = []
+        for file in files:
+            try:
+                # Crear instancia del archivo
+                file_instance = File.objects.create(
+                    name=file.name,
+                    file=file,
+                    folder=folder,
+                    owner=request.user,
+                    description=description,
+                    is_public=is_public
+                )
+                uploaded_files.append(file_instance.name)
+            except Exception as e:
+                return JsonResponse({
+                    'success': False,
+                    'message': f'Error al subir {file.name}: {str(e)}'
+                })
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Se subieron {len(uploaded_files)} archivo(s) correctamente',
+            'files': uploaded_files
+        })
+
     except Exception as e:
-        return JsonResponse({"ok": False, "error": str(e)}, status=500)
+        return JsonResponse({
+            'success': False,
+            'message': f'Error del servidor: {str(e)}'
+        })
 
 
 def _can_manage_folder(user, folder: Folder) -> bool:
@@ -127,7 +175,7 @@ def folder_permission_delete(request, folder_id: int, perm_id: int):
     return redirect("app_filemanager:folder_permissions", folder_id=folder.id)
 
 
-# <CHANGE> Agregar función para revocar permisos masivamente
+# Agregar función para revocar permisos masivamente
 @login_required
 def bulk_revoke_permissions(request, folder_id):
     """Revocar múltiples permisos a la vez"""
@@ -355,7 +403,7 @@ class DashboardView(LoginRequiredMixin, View):
         # Recent files
         recent_files = File.objects.filter(owner=request.user)[:10]
 
-        # <CHANGE> Recent folders - solo carpetas raíz para evitar mostrar subcarpetas como independientes
+        # Recent folders - solo carpetas raíz para evitar mostrar subcarpetas como independientes
         recent_folders = Folder.objects.filter(owner=request.user, parent=None)[:5]
 
         # Shared items
@@ -365,7 +413,7 @@ class DashboardView(LoginRequiredMixin, View):
         file_types = File.objects.filter(owner=request.user).values('file_type').annotate(
             count=Count('id')).order_by('-count')[:10]
 
-        # <CHANGE> Agregar estadísticas de compartidos
+        # Agregar estadísticas de compartidos
         shared_folders_count = FolderPermission.objects.filter(granted_by=request.user).values(
             'folder').distinct().count()
         folders_shared_with_me_count = FolderPermission.objects.filter(user=request.user).count()
@@ -393,7 +441,7 @@ class DashboardView(LoginRequiredMixin, View):
         return f"{size:.1f} PB"
 
 
-# <CHANGE> Agregar vista para "Mis Compartidos"
+# Agregar vista para "Mis Compartidos"
 class MySharedFoldersView(LoginRequiredMixin, ListView):
     """Vista para que el usuario vea todas las carpetas que ha compartido"""
     template_name = 'app_filemanager/filemanager/my_shared_folders.html'
@@ -407,7 +455,7 @@ class MySharedFoldersView(LoginRequiredMixin, ListView):
         ).distinct().select_related('owner').prefetch_related('custom_permissions__user')
 
 
-# <CHANGE> Agregar vista para "Compartido Conmigo"
+# Agregar vista para "Compartido Conmigo"
 class SharedWithMeView(LoginRequiredMixin, ListView):
     """Vista para que el usuario vea todas las carpetas compartidas con él"""
     template_name = 'app_filemanager/filemanager/shared_with_me.html'
@@ -420,7 +468,7 @@ class SharedWithMeView(LoginRequiredMixin, ListView):
         ).select_related('owner').prefetch_related('custom_permissions')
 
 
-# <CHANGE> Agregar vista para editar carpetas
+# Agregar vista para editar carpetas
 class FolderEditView(LoginRequiredMixin, UpdateView):
     """Editar nombres y propiedades de carpetas"""
     model = Folder
@@ -500,7 +548,7 @@ class FileListView(LoginRequiredMixin, ListView):
         if folder_id:
             current_folder = get_object_or_404(Folder, id=folder_id)
 
-        # <CHANGE> Get folders in current directory con permisos corregidos
+        # Get folders in current directory con permisos corregidos
         folders = Folder.objects.filter(parent=current_folder)
 
         # Filtrar carpetas por permisos
@@ -698,14 +746,14 @@ class FolderDetailView(DetailView):
         folder = self.object
         context["can_upload"] = _user_level_on_folder(self.request.user, folder) >= LEVEL_NUM["write"]
 
-        # <CHANGE> Corregir obtención de subcarpetas con permisos heredados
+        # Corregir obtención de subcarpetas con permisos heredados
         all_subfolders = Folder.objects.filter(parent=folder)
         accessible_subfolders = []
         for subfolder in all_subfolders:
             if _can_view_folder(self.request.user, subfolder):
                 accessible_subfolders.append(subfolder)
 
-        # <CHANGE> Corregir obtención de archivos con permisos
+        # Corregir obtención de archivos con permisos
         all_files = folder.files.all()
         accessible_files = []
         for file_obj in all_files:
@@ -841,47 +889,16 @@ class FolderDeleteView(LoginRequiredMixin, DeleteView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AjaxFileUploadView(View):
+    """Vista AJAX para subida de archivos múltiples"""
+
     def post(self, request, *args, **kwargs):
-        # Usamos el formulario pasando user como keyword argument
-        form = MultipleFileUploadForm(request.POST, request.FILES, user=request.user)
-
-        # Obtén los archivos enviados por JS
-        files = request.FILES.getlist('files')
-
-        if form.is_valid():
-            folder = form.cleaned_data.get('folder', None)
-            description = form.cleaned_data.get('description', '')
-            is_public = form.cleaned_data.get('is_public', False)
-
-            # Validar permisos de escritura si es carpeta específica
-            if folder and _user_level_on_folder(request.user, folder) < LEVEL_NUM["write"]:
-                return JsonResponse({'success': False, 'message': 'No tienes permiso de escritura en esta carpeta.'},
-                                    status=403)
-
-            uploaded_files = []
-            for f in files:
-                try:
-                    file_instance = File(
-                        name=f.name,
-                        file=f,
-                        description=description,
-                        is_public=is_public,
-                        owner=request.user,
-                        folder=folder
-                    )
-                    file_instance.save()
-                    uploaded_files.append(file_instance.name)
-                except Exception as e:
-                    return JsonResponse({'success': False, 'message': f'Error al subir {f.name}: {str(e)}'}, status=500)
-
+        if not request.user.is_authenticated:
             return JsonResponse({
-                'success': True,
-                'message': f'Archivos subidos exitosamente: {", ".join(uploaded_files)}'
-            })
+                'success': False,
+                'message': 'Usuario no autenticado'
+            }, status=401)
 
-        else:
-            # Retorna errores de validación del formulario
-            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+        return ajax_file_upload(request)
 
 
 # Permission Views
@@ -978,22 +995,3 @@ class FolderPermissionCreateView(LoginRequiredMixin, View):
         if permission_level == 'admin':
             assign_perm('app_filemanager.delete_folder', user, folder)
             assign_perm('app_filemanager.share_folder', user, folder)
-
-
-class UserSearchView(LoginRequiredMixin, View):
-    """AJAX endpoint for user search"""
-
-    def get(self, request):
-        query = request.GET.get('q', '')
-        if len(query) >= 2:
-            users = User.objects.filter(
-                username__icontains=query
-            ).exclude(
-                id=request.user.id
-            )[:10]
-
-            results = [{'username': user.username, 'full_name': user.get_full_name()}
-                       for user in users]
-            return JsonResponse({'results': results})
-
-        return JsonResponse({'results': []})

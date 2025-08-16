@@ -32,31 +32,39 @@ class FileUploadForm(forms.ModelForm):
         }
 
 
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True  # habilita multiples archivos
+
+
 class MultipleFileUploadForm(forms.Form):
-    """Formulario para subida múltiple - manejado por JavaScript"""
     folder = forms.ModelChoiceField(
-        queryset=Folder.objects.none(),
-        required=False,
-        empty_label="Carpeta Raíz",
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Carpeta de Destino'
+        queryset=Folder.objects.all(),
+        widget=forms.HiddenInput(),
+        required=False  # Hacer el campo folder opcional
+    )
+    files = forms.FileField(
+        widget=MultipleFileInput(attrs={
+            'multiple': True,
+            'class': 'form-control'
+        }),
+        required=True
     )
     description = forms.CharField(
+        max_length=500,
         required=False,
         widget=forms.Textarea(attrs={
-            'class': 'form-control',
             'rows': 3,
-            'placeholder': 'Descripción opcional para los archivos...'
-        }),
-        label='Descripción'
+            'class': 'form-control',
+            'placeholder': 'Descripción opcional...'
+        })
     )
     is_public = forms.BooleanField(
         required=False,
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        label='Hacer archivos públicos'
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
 
-    def __init__(self, *args, user=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if user:
             self.fields['folder'].queryset = Folder.objects.filter(owner=user)
@@ -99,7 +107,6 @@ class FolderCreateForm(forms.ModelForm):
             self.fields['parent'].empty_label = "Carpeta raíz"
 
 
-# <CHANGE> Corregido para usar 'is_public' en lugar de 'visibility'
 class FolderEditForm(forms.ModelForm):
     class Meta:
         model = Folder
@@ -206,7 +213,6 @@ class SearchForm(forms.Form):
     )
 
 
-# <CHANGE> Corregido para usar 'is_public' en lugar de 'visibility'
 class FolderForm(forms.ModelForm):
     class Meta:
         model = Folder
@@ -237,4 +243,3 @@ class FolderForm(forms.ModelForm):
         # Make parent field optional
         self.fields['parent'].required = False
         self.fields['parent'].empty_label = "Sin carpeta padre (Raíz)"
-

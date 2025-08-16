@@ -34,7 +34,7 @@ class Folder(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('filemanager:folder_detail', kwargs={'pk': self.pk})
+        return reverse('app_filemanager:folder_detail', kwargs={'pk': self.pk})
 
     def get_path(self):
         """Get the full path of the folder"""
@@ -84,7 +84,7 @@ class Folder(models.Model):
 
 class File(models.Model):
     name = models.CharField(max_length=255, verbose_name="Nombre")
-    file = models.FileField(upload_to='filemanager/uploads/%Y/%m/%d/', verbose_name="Archivo")
+    file = models.FileField(upload_to='filemanager/uploads/%Y/%m/%d/', verbose_name="Archivo", max_length=900)
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, null=True, blank=True,
                                related_name='files', verbose_name="Carpeta")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_files',

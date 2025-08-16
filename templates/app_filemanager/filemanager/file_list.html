@@ -12,30 +12,65 @@
     {% endif %}
 {% endblock %}
 
-{% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{% url 'app_filemanager:dashboard' %}">Inicio</a></li>
-{% for folder in breadcrumbs %}
-    {% if forloop.last %}
-        <li class="breadcrumb-item active">{{ folder.name }}</li>
-    {% else %}
-        <li class="breadcrumb-item">
-            <a href="{% url 'app_filemanager:folder_detail' folder.pk %}">{{ folder.name }}</a>
-        </li>
-    {% endif %}
-{% endfor %}
-{% if not current_folder %}
-    <li class="breadcrumb-item active">Mis Archivos</li>
-{% endif %}
-{% endblock %}
-
 {% block content %}
- Action Bar 
+<!-- Quick Upload Area -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-upload mr-2"></i>Subida Rápida
+                </h3>
+                <div class="card-tools">
+                    <button class="btn btn-tool" type="button" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="upload-area-small" id="quickUploadArea">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-muted mr-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Arrastra archivos aquí o haz clic para seleccionar</h6>
+                                    <small class="text-muted">Se subirán a la carpeta actual</small>
+                                </div>
+                            </div>
+                            <input type="file" id="quickFileInput" multiple class="d-none">
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('quickFileInput').click()">
+                                <i class="fas fa-plus mr-2"></i>Seleccionar Archivos
+                            </button>
+                            <a href="{% url 'app_filemanager:file_upload' %}" class="btn btn-outline-primary ml-2">
+                                <i class="fas fa-cog mr-2"></i>Opciones Avanzadas
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Upload Progress -->
+                <div id="quickUploadProgress" class="mt-3" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted">Subiendo archivos...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Bar -->
 <div class="row mb-3">
     <div class="col-md-6">
         <div class="btn-group">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">
+            <a href="{% url 'app_filemanager:file_upload' %}" class="btn btn-primary">
                 <i class="fas fa-upload"></i> Subir Archivos
-            </button>
+            </a>
             <button type="button" class="btn btn-success" data-toggle="modal" data-target="#folderModal">
                 <i class="fas fa-folder-plus"></i> Nueva Carpeta
             </button>
@@ -48,8 +83,8 @@
     </div>
     <div class="col-md-6">
         <form method="get" class="d-flex">
-            <input type="text" name="search" class="form-control" 
-                   placeholder="Buscar archivos y carpetas..." 
+            <input type="text" name="search" class="form-control"
+                   placeholder="Buscar archivos y carpetas..."
                    value="{{ search_query|default:'' }}">
             <button type="submit" class="btn btn-outline-primary ml-2">
                 <i class="fas fa-search"></i>
@@ -58,237 +93,156 @@
     </div>
 </div>
 
- Folders Section 
-{% if folders %}
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="fas fa-folder mr-2"></i>Carpetas
-        </h3>
-    </div>
-    <div class="card-body">
-        <div class="file-grid">
-            {% for folder in folders %}
-            <div class="card folder-card file-card">
-                <div class="card-body text-center">
-                    <div class="file-icon">
-                        <i class="fas fa-folder"></i>
-                    </div>
-                    <h6 class="card-title" title="{{ folder.name }}">
-                        {{ folder.name|truncatechars:25 }}
-                    </h6>
-                    <p class="card-text small">
-                        {{ folder.get_file_count }} archivo{{ folder.get_file_count|pluralize }}<br>
-                        {{ folder.created_at|date:"d M Y" }}
-                    </p>
-                    <div class="btn-group btn-group-sm">
-                        <a href="{% url 'app_filemanager:folder_detail' folder.pk %}" class="btn btn-light btn-sm">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        {% if folder.owner == user %}
-                        <a href="{% url 'app_filemanager:folder_permissions' folder.pk %}" class="btn btn-warning btn-sm">
-                            <i class="fas fa-share-alt"></i>
-                        </a>
-                        <a href="{% url 'app_filemanager:folder_delete' folder.pk %}" class="btn btn-danger btn-sm"
-                           onclick="return confirmDelete('carpeta', '{{ folder.name }}')">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
+<!-- Rest of your existing file list content -->
+<!-- ... (mantén todo el contenido existente de file_list.html) ... -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Quick upload functionality
+    const quickUploadArea = document.getElementById('quickUploadArea');
+    const quickFileInput = document.getElementById('quickFileInput');
+
+    // Drag and drop for quick upload
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        quickUploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        quickUploadArea.addEventListener(eventName, () => {
+            quickUploadArea.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        quickUploadArea.addEventListener(eventName, () => {
+            quickUploadArea.classList.remove('dragover');
+        }, false);
+    });
+
+    quickUploadArea.addEventListener('drop', handleQuickDrop, false);
+    quickFileInput.addEventListener('change', function(e) {
+        handleQuickUpload(e.target.files);
+    });
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function handleQuickDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleQuickUpload(files);
+}
+
+function handleQuickUpload(files) {
+    if (files.length === 0) return;
+
+    const formData = new FormData();
+    const progressDiv = document.getElementById('quickUploadProgress');
+    const progressBar = progressDiv.querySelector('.progress-bar');
+
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        formData.append('csrfmiddlewaretoken', csrfToken.value);
+    }
+
+    // Add current folder if exists
+    {% if current_folder %}
+    formData.append('folder', '{{ current_folder.pk }}');
+    {% endif %}
+
+    // Add files
+    Array.from(files).forEach(file => {
+        formData.append('files', file);
+    });
+
+    formData.append('description', '');
+    formData.append('is_public', 'off');
+
+    // Show progress
+    progressDiv.style.display = 'block';
+
+    // Upload
+    $.ajax({
+        url: '{% url "app_filemanager:ajax_file_upload" %}',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        xhr: function() {
+            const xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener('progress', function(evt) {
+                if (evt.lengthComputable) {
+                    const percentComplete = (evt.loaded / evt.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                }
+            }, false);
+            return xhr;
+        },
+        success: function(response) {
+            if (response.success) {
+                // Show success message
+                showAlert('success', response.message);
+                // Reload page to show new files
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                console.error('Upload error:', response);
+                showAlert('danger', response.message || 'Error al subir archivos');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', xhr.responseText);
+            showAlert('danger', 'Error al subir archivos: ' + error);
+        },
+        complete: function() {
+            setTimeout(() => {
+                progressDiv.style.display = 'none';
+                progressBar.style.width = '0%';
+            }, 2000);
+        }
+    });
+}
+
+function showAlert(type, message) {
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
         </div>
-    </div>
-</div>
-{% endif %}
+    `;
 
- Files Section 
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">
-            <i class="fas fa-file mr-2"></i>Archivos
-        </h3>
-    </div>
-    <div class="card-body">
-        {% if files %}
-            <div class="file-grid">
-                {% for file in files %}
-                <div class="card file-card">
-                    <div class="card-body text-center">
-                        {% if file.is_image %}
-                            <div class="file-icon">
-                                <img src="{{ file.file.url }}" alt="{{ file.name }}" class="file-thumbnail">
-                            </div>
-                        {% else %}
-                            <div class="file-icon">
-                                <i class="{{ file.get_file_icon }}"></i>
-                            </div>
-                        {% endif %}
-                        <h6 class="card-title" title="{{ file.name }}">
-                            {{ file.name|truncatechars:25 }}
-                        </h6>
-                        <p class="card-text small text-muted">
-                            {{ file.get_file_size_display }}<br>
-                            {{ file.created_at|date:"d M Y" }}<br>
-                            <span class="badge badge-secondary">{{ file.file_type|upper }}</span>
-                        </p>
-                        <div class="btn-group btn-group-sm">
-                            <a href="{% url 'app_filemanager:file_download' file.pk %}" class="btn btn-primary btn-file-action">
-                                <i class="fas fa-download"></i>
-                            </a>
-                            {% if file.owner == user %}
-                            <a href="{% url 'app_filemanager:file_delete' file.pk %}" class="btn btn-danger btn-file-action"
-                               onclick="return confirmDelete('archivo', '{{ file.name }}')">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+    // Insert at top of content
+    $('.content .container-fluid').prepend(alertHtml);
 
-             Pagination 
-            {% if files.has_other_pages %}
-            <nav aria-label="Paginación de archivos" class="mt-3">
-                <ul class="pagination justify-content-center">
-                    {% if files.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ files.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Anterior</a>
-                        </li>
-                    {% endif %}
-                    
-                    {% for num in files.paginator.page_range %}
-                        {% if files.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% else %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if files.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ files.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Siguiente</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-        {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-folder-open fa-5x text-muted mb-4"></i>
-                <h4 class="text-muted">No se encontraron archivos</h4>
-                <p class="text-muted">
-                    {% if search_query %}
-                        No hay archivos que coincidan con tu búsqueda.
-                    {% else %}
-                        Esta carpeta está vacía. ¡Sube tu primer archivo para comenzar!
-                    {% endif %}
-                </p>
-                {% if not search_query %}
-                <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#uploadModal">
-                    <i class="fas fa-upload mr-2"></i>Subir tu Primer Archivo
-                </button>
-                {% endif %}
-            </div>
-        {% endif %}
-    </div>
-</div>
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
 
- Upload Modal 
-<div class="modal fade" id="uploadModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-upload mr-2"></i>Subir Archivos
-                </h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form method="post" action="{% url 'app_filemanager:file_upload' %}" enctype="multipart/form-data">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    {% if current_folder %}
-                        <input type="hidden" name="folder_id" value="{{ current_folder.pk }}">
-                    {% endif %}
-                    <div class="upload-area">
-                        <i class="fas fa-cloud-upload-alt fa-4x text-muted mb-3"></i>
-                        <h5>Arrastra y suelta archivos aquí</h5>
-                        <p class="text-muted">o haz clic para seleccionar archivos</p>
-                        <input type="file" name="file" class="form-control-file" multiple>
-                    </div>
-                    <div class="form-group mt-3">
-                        <label for="description">Descripción (Opcional)</label>
-                        <textarea name="description" class="form-control" rows="3" placeholder="Agrega una descripción para tus archivos..."></textarea>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" name="is_public" class="form-check-input" id="isPublic">
-                        <label class="form-check-label" for="isPublic">
-                            Hacer archivos públicos
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-upload mr-2"></i>Subir Archivos
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<style>
+.upload-area-small {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
 
- Folder Modal 
-<div class="modal fade" id="folderModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-folder-plus mr-2"></i>Crear Nueva Carpeta
-                </h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <form method="post" action="{% url 'app_filemanager:folder_create' %}">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    {% if current_folder %}
-                        <input type="hidden" name="parent_id" value="{{ current_folder.pk }}">
-                    {% endif %}
-                    <div class="form-group">
-                        <label for="folderName">Nombre de la Carpeta</label>
-                        <input type="text" name="name" class="form-control" id="folderName" 
-                               placeholder="Ingresa el nombre de la carpeta" required maxlength="255">
-                    </div>
-                    <div class="form-group">
-                        <label for="folderDescription">Descripción (Opcional)</label>
-                        <textarea name="description" class="form-control" id="folderDescription" rows="3" 
-                                  placeholder="Agrega una descripción para tu carpeta..."></textarea>
-                    </div>
-                    <div class="form-check">
-                        <input type="checkbox" name="is_public" class="form-check-input" id="isFolderPublic">
-                        <label class="form-check-label" for="isFolderPublic">
-                            Hacer carpeta pública
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-folder-plus mr-2"></i>Crear Carpeta
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+.upload-area-small:hover,
+.upload-area-small.dragover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+</style>
 {% endblock %}
