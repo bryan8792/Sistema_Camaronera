@@ -10,9 +10,8 @@ from app_venta.models import CtasCollect, PaymentsCtaCollect
 
 
 class CtasCollectListView(FormView):
-    template_name = 'ctas_collect/list.html'
+    template_name = 'app_cuentasCobrar/list.html'
     form_class = ReportForm
-    permission_required = 'view_ctas_collect'
 
     def post(self, request, *args, **kwargs):
         data = {}
@@ -54,7 +53,7 @@ class CtasCollectListView(FormView):
 
 class CtasCollectCreateView(CreateView):
     model = CtasCollect
-    template_name = 'ctas_collect/create.html'
+    template_name = 'app_cuentasCobrar/create.html'
     form_class = PaymentsCtaCollectForm
     success_url = reverse_lazy('ctas_collect_list')
     permission_required = 'add_ctas_collect'
@@ -95,7 +94,7 @@ class CtasCollectCreateView(CreateView):
 
 class CtasCollectDeleteView(DeleteView):
     model = CtasCollect
-    template_name = 'delete.html'
+    template_name = 'app_cuentasCobrar/delete.html'
     success_url = reverse_lazy('ctas_collect_list')
     permission_required = 'delete_ctas_collect'
 

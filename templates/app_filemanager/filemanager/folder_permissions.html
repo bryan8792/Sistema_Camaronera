@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block content %}
- Folder Info 
+
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
@@ -45,7 +45,6 @@
     </div>
 </div>
 
- Grant New Permission 
 <div class="row mb-4">
     <div class="col-md-6">
         <div class="card">
@@ -104,7 +103,6 @@
     </div>
 </div>
 
- Current Permissions 
 <div class="row">
     <div class="col-12">
         <div class="card">
@@ -127,7 +125,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                 Owner 
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -143,8 +140,7 @@
                                     <td>{{ folder.created_at|date:"d M Y" }}</td>
                                     <td>-</td>
                                 </tr>
-                                
-                                 Custom Permissions 
+
                                 {% for permission in permissions %}
                                 <tr>
                                     <td>
