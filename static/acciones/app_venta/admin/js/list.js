@@ -134,7 +134,7 @@ $(function () {
 
     input_date_range = $('input[name="date_range"]');
 
-    $('#data tbody')
+    $('#tbSale tbody')
         .off()
         .on('click', 'a[rel="detail"]', function () {
             $('.tooltip').remove();
@@ -229,6 +229,7 @@ $(function () {
             submit_with_formdata(args);
         })
         .on('click', 'a[rel="create_credit_note"]', function () {
+            console.log('SE DIO CLICK EN CREAR NOTA DE CREDITO');
             $('.tooltip').remove();
             var tr = tblSale.cell($(this).closest('td, li')).index();
             var row = tblSale.row(tr.row).data();

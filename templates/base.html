@@ -1604,6 +1604,29 @@
                         <li class="nav-header">
                             Administración
                         </li>
+                        <!-- Modulo Administrativo -->
+                        <li class="nav-item has-treeview">
+                            <a class="nav-link" href="#">
+                                <i class="nav-icon fas fa-hand-holding-usd">
+                                </i>
+                                <p>
+                                    Administrativo
+                                    <i class="fas fa-angle-left right">
+                                    </i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_cuentasCobrar:ctas_collect_list' %}">
+                                        <i class="fas fa-funnel-dollar nav-icon">
+                                        </i>
+                                        <p>
+                                            Cuentas por Cobrar
+                                        </p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <!-- Modulo Contabilidad -->
                         <li class="nav-item has-treeview">
                             <a class="nav-link" href="#">

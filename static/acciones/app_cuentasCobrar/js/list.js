@@ -12,7 +12,7 @@ var ctas_collect = {
             parameters['start_date'] = '';
             parameters['end_date'] = '';
         }
-        tblCtasCollect = $('#data').DataTable({
+        tblCtasCollect = $('#tblCtasCollect').DataTable({
             autoWidth: false,
             destroy: true,
             ajax: {
@@ -118,7 +118,7 @@ $(function () {
         ctas_collect.list(true);
     });
 
-    $('#data tbody')
+    $('#tblCtasCollect tbody')
         .off()
         .on('click', 'a[rel="payments"]', function () {
             $('.tooltip').remove();
