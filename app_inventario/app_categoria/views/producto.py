@@ -9,13 +9,13 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from app_inventario.app_categoria.models import Categoria,Producto
 from app_inventario.app_producto.forms import ProductoForm
 
-def listarProducto(request):
-    data = {
-        'nombre': 'Producto',
-        'categorias': Categoria.objects.all(),
-        'productos': Producto.objects.all()
-    }
-    return render(request, 'app_inventario/app_producto/producto_listar.html', data)
+# def listarProducto(request):
+#     data = {
+#         'nombre': 'Producto',
+#         'categorias': Categoria.objects.all(),
+#         'productos': Producto.objects.all()
+#     }
+#     return render(request, 'app_inventario/app_producto/producto_listar.html', data)
 
 
 # VISTA PARA CREAR EL PRODUCTO

@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block head %}
+    <style>
+        .ats-toolbar {
+            background-color: #4a4a4a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .ats-button {
+            background-color: #6c757d;
+            border: 1px solid #5a6268;
+            color: white;
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            text-align: center;
+            min-width: 80px;
+        }
+        .ats-button:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        .ats-button.active {
+            background-color: #007bff;
+            border-color: #0056b3;
+        }
+        .ats-icon {
+            font-size: 24px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .toolbar-section {
+            display: inline-block;
+            margin-right: 15px;
+            text-align: center;
+        }
+        .toolbar-label {
+            color: white;
+            font-size: 11px;
+            display: block;
+            text-align: center;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .modal-ats {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 1050;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header-ats {
+            background: linear-gradient(to bottom, #90EE90, #7FDD7F);
+            color: black;
+            padding: 8px 15px;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .modal-body-ats {
+            padding: 15px;
+        }
+        .xml-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        .xml-table th,
+        .xml-table td {
+            border: 1px solid #ddd;
+            padding: 4px;
+            text-align: center;
+        }
+        .xml-table th {
+            background-color: #4a90e2;
+            color: white;
+            font-weight: bold;
+        }
+        .contadores-section {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .contador-item {
+            display: inline-block;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <!-- Toolbar ATS -->
+                <div class="ats-toolbar">
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:revision_datos' %}" class="ats-button">
+                            <!-- Using Font Awesome icons -->
+                            <i class="fas fa-search ats-icon" style="color: #ff6b6b;"></i>
+                        </a>
+                        <span class="toolbar-label">Revisión Datos</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <span class="toolbar-label" style="color: white; font-size: 11px;">Generación</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:generar_xml' %}" class="ats-button">
+                            <i class="fas fa-file-code ats-icon" style="color: #feca57;"></i>
+                        </a>
+                        <span class="toolbar-label">Generar XML</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:carpeta_xml' %}" class="ats-button active">
+                            <i class="fas fa-folder ats-icon" style="color: #48dbfb;"></i>
+                        </a>
+                        <span class="toolbar-label">Carpetas XML Facturas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_compras' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon" style="color: #1dd1a1;"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Compras</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_ventas' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon" style="color: #1dd1a1;"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Ventas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_xml' %}" class="ats-button">
+                            <i class="fas fa-file-import ats-icon" style="color: #5f27cd;"></i>
+                        </a>
+                        <span class="toolbar-label">XML ATS<br>Importar</span>
+                    </div>
+                </div>
+
+                <!-- Botón para abrir modal -->
+                <div class="text-center">
+                    <button type="button" class="btn btn-warning btn-lg" id="btnCarpetaXML">
+                        <i class="fas fa-folder"></i> Cargar desde Carpeta XML
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Carpeta XML -->
+    <div id="modalCarpetaXML" style="display: none;">
+        <div class="overlay" id="overlay"></div>
+        <div class="modal-ats">
+            <div class="modal-header-ats">
+                <div>
+                    <!-- Using Font Awesome icon -->
+                    <i class="fas fa-folder" style="margin-right: 8px;"></i>
+                    <strong>{{ nombre }}</strong>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm" id="btnMinimize">-</button>
+                    <button type="button" class="btn btn-sm" id="btnMaximize">□</button>
+                    <button type="button" class="btn btn-sm" id="btnClose">×</button>
+                </div>
+            </div>
+            <div class="modal-body-ats">
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <h6><strong>Parámetros:</strong></h6>
+                        <form id="formCarpetaXML" class="row">
+                            {% csrf_token %}
+                            <div class="col-md-8">
+                                <label>Ubicación Origen de archivos XML:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control form-control-sm" name="ubicacion_origen" placeholder="Ruta de la carpeta con archivos XML" id="ubicacionOrigen">
+                                    <div class="input-group-append">
+                                        <!-- Added functional directory selection -->
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="btnUbicarCarpeta">Ubicar carpeta con XML</button>
+                                        <input type="file" id="fileCarpetaXML" style="display: none;" webkitdirectory>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <button type="button" class="btn btn-primary btn-sm btn-block" id="btnLeerXML">
+                                    <!-- Using Font Awesome icon -->
+                                    <i class="fas fa-search" style="margin-right: 5px;"></i>
+                                    Leer XML
+                                </button>
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <button type="button" class="btn btn-secondary btn-sm btn-block" id="btnCancelar">
+                                    <i class="fas fa-times" style="margin-right: 5px;"></i>
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+                <!-- Información de archivos -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label><strong>Total de archivos XML: <span id="totalArchivos">0</span></strong></label>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check-inline">
+                            <span style="background-color: #FFB6C1; padding: 2px 5px; border-radius: 3px;">
+                                <!-- Using Font Awesome icon -->
+                                <i class="fas fa-building" style="margin-right: 3px;"></i>
+                                Cía. Fantasma
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contadores -->
+                <div class="contadores-section">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label><strong>Contador de registros por Tipo:</strong></label>
+                            <div>
+                                <span class="contador-item">FA_0: <span id="contadorFA">0</span>;</span>
+                                <span class="contador-item">MC_0: <span id="contadorMC">0</span>;</span>
+                                <span class="contador-item">ND_0: <span id="contadorND">0</span>;</span>
+                                <span class="contador-item">RT_0: <span id="contadorRT">0</span>;</span>
+                                <span class="contador-item">LL_0: <span id="contadorLL">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de archivos XML -->
+                <div class="table-responsive">
+                    <table class="xml-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 3%;"></th>
+                                <th style="width: 8%;">Ex Tp.Doc</th>
+                                <th style="width: 8%;">F.Emisión</th>
+                                <th style="width: 10%;"># Documento</th>
+                                <th style="width: 10%;">ID. Emisor</th>
+                                <th style="width: 20%;">Razón Social Emisor</th>
+                                <th style="width: 10%;">ID. Receptor</th>
+                                <th style="width: 20%;">Razón Social Receptor</th>
+                                <th style="width: 11%;">Clave Acceso</th>
+                            </tr>
+                        </thead>
+                        <tbody id="xmlTableBody">
+                            <!-- Table will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Botones finales -->
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-success" id="btnSalir">
+                        <!-- Using Font Awesome icon -->
+                        <i class="fas fa-check" style="margin-right: 5px;"></i>
+                        Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Mostrar modal
+    $('#btnCarpetaXML').click(function() {
+        $('#modalCarpetaXML').show();
+    });
+
+    // Cerrar modal
+    $('#btnClose, #btnCancelar, #btnSalir, #overlay').click(function() {
+        $('#modalCarpetaXML').hide();
+    });
+
+    $('#btnUbicarCarpeta').click(function() {
+        $('#fileCarpetaXML').click();
+    });
+
+    $('#fileCarpetaXML').change(function() {
+        if (this.files.length > 0) {
+            var path = this.files[0].webkitRelativePath;
+            var folderPath = path.substring(0, path.lastIndexOf('/'));
+            $('#ubicacionOrigen').val(folderPath);
+        }
+    });
+
+    $('#btnLeerXML').click(function() {
+        var formData = $('#formCarpetaXML').serialize();
+        var $btn = $(this);
+        var originalText = $btn.html();
+
+        // Show loading state
+        $btn.html('<i class="fas fa-spinner fa-spin"></i> Leyendo...');
+        $btn.prop('disabled', true);
+
+        // Simulate processing with sample data
+        setTimeout(function() {
+            var sampleData = [
+                {tipo: 'FA', fecha: '15/08/2025', documento: '001-001-000123456', id_emisor: '1792146739001', emisor: 'PROVEEDOR EJEMPLO S.A.', id_receptor: '0602495327001', receptor: 'LEMA TENE FRANCISCO', clave: '1508202501179214673900110010010001234567890123456'},
+                {tipo: 'MC', fecha: '16/08/2025', documento: '001-001-000123457', id_emisor: '0992345678001', emisor: 'SERVICIOS GENERALES CIA. LTDA.', id_receptor: '0602495327001', receptor: 'LEMA TENE FRANCISCO', clave: '1608202501099234567800110010010001234567890123457'},
+                {tipo: 'ND', fecha: '17/08/2025', documento: '001-001-000123458', id_emisor: '1791234567001', emisor: 'MATERIALES DEL ECUADOR S.A.', id_receptor: '0602495327001', receptor: 'LEMA TENE FRANCISCO', clave: '1708202501179123456700110010010001234567890123458'},
+                {tipo: 'RT', fecha: '18/08/2025', documento: '001-001-000123459', id_emisor: '0990123456001', emisor: 'TRANSPORTES RÁPIDOS S.A.', id_receptor: '0602495327001', receptor: 'LEMA TENE FRANCISCO', clave: '1808202501099012345600110010010001234567890123459'},
+                {tipo: 'FA', fecha: '19/08/2025', documento: '001-001-000123460', id_emisor: '1790987654001', emisor: 'COMERCIAL DEL PACIFICO CIA. LTDA.', id_receptor: '0602495327001', receptor: 'LEMA TENE FRANCISCO', clave: '1908202501179098765400110010010001234567890123460'}
+            ];
+
+            var tbody = $('#xmlTableBody');
+            tbody.empty();
+
+            var contadores = {FA: 0, MC: 0, ND: 0, RT: 0, LL: 0};
+
+            sampleData.forEach(function(item) {
+                var row = '<tr>' +
+                    '<td><input type="checkbox" checked></td>' +
+                    '<td>' + item.tipo + '</td>' +
+                    '<td>' + item.fecha + '</td>' +
+                    '<td>' + item.documento + '</td>' +
+                    '<td>' + item.id_emisor + '</td>' +
+                    '<td>' + item.emisor + '</td>' +
+                    '<td>' + item.id_receptor + '</td>' +
+                    '<td>' + item.receptor + '</td>' +
+                    '<td>' + item.clave + '</td>' +
+                    '</tr>';
+                tbody.append(row);
+
+                contadores[item.tipo]++;
+            });
+
+            // Update counters
+            $('#totalArchivos').text(sampleData.length);
+            $('#contadorFA').text(contadores.FA);
+            $('#contadorMC').text(contadores.MC);
+            $('#contadorND').text(contadores.ND);
+            $('#contadorRT').text(contadores.RT);
+            $('#contadorLL').text(contadores.LL);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Archivos XML procesados correctamente. Se encontraron ' + sampleData.length + ' archivos.',
+                confirmButtonText: 'OK'
+            });
+
+            // Restore button state
+            $btn.html(originalText);
+            $btn.prop('disabled', false);
+        }, 2000);
+    });
+});
+</script>
+{% endblock %}

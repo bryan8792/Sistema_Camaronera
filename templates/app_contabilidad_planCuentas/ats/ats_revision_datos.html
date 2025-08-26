@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block head %}
+    <style>
+        .ats-toolbar {
+            background-color: #4a4a4a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .ats-button {
+            background-color: #6c757d;
+            border: 1px solid #5a6268;
+            color: white;
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            text-align: center;
+            min-width: 80px;
+        }
+        .ats-button:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        .ats-button.active {
+            background-color: #007bff;
+            border-color: #0056b3;
+        }
+        .ats-icon {
+            font-size: 24px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .toolbar-section {
+            display: inline-block;
+            margin-right: 15px;
+            text-align: center;
+        }
+        .toolbar-label {
+            color: white;
+            font-size: 11px;
+            display: block;
+            text-align: center;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .modal-ats {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 1050;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header-ats {
+            background: linear-gradient(to bottom, #90EE90, #7FDD7F);
+            color: black;
+            padding: 8px 15px;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .modal-body-ats {
+            padding: 15px;
+        }
+        /* Added styles for data table */
+        .revision-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+        .revision-table th,
+        .revision-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .revision-table th {
+            background-color: #4a90e2;
+            color: white;
+            font-weight: bold;
+        }
+        .revision-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <!-- Toolbar ATS -->
+                <div class="ats-toolbar">
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:revision_datos' %}" class="ats-button active">
+                            <!-- Using Font Awesome icons -->
+                            <i class="fas fa-search ats-icon" style="color: #ff6b6b;"></i>
+                        </a>
+                        <span class="toolbar-label">Revisión Datos</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <span class="toolbar-label" style="color: white; font-size: 11px;">Generación</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:generar_xml' %}" class="ats-button">
+                            <i class="fas fa-file-code ats-icon" style="color: #feca57;"></i>
+                        </a>
+                        <span class="toolbar-label">Generar XML</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:carpeta_xml' %}" class="ats-button">
+                            <i class="fas fa-folder ats-icon" style="color: #48dbfb;"></i>
+                        </a>
+                        <span class="toolbar-label">Carpetas XML Facturas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_compras' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon" style="color: #1dd1a1;"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Compras</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_ventas' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon" style="color: #1dd1a1;"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Ventas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_xml' %}" class="ats-button">
+                            <i class="fas fa-file-import ats-icon" style="color: #5f27cd;"></i>
+                        </a>
+                        <span class="toolbar-label">XML ATS<br>Importar</span>
+                    </div>
+                </div>
+
+                <!-- Botón para abrir modal -->
+                <div class="text-center">
+                    <button type="button" class="btn btn-success btn-lg" id="btnRevisionDatos">
+                        <i class="fas fa-search"></i> Revisión Datos ATS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Revisión Datos -->
+    <div id="modalRevisionDatos" style="display: none;">
+        <div class="overlay" id="overlay"></div>
+        <div class="modal-ats">
+            <div class="modal-header-ats">
+                <div>
+                    <i class="fas fa-search" style="margin-right: 8px;"></i>
+                    <strong>{{ nombre }}</strong>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm" id="btnMinimize">-</button>
+                    <button type="button" class="btn btn-sm" id="btnMaximize">□</button>
+                    <button type="button" class="btn btn-sm" id="btnClose">×</button>
+                </div>
+            </div>
+            <div class="modal-body-ats">
+                <p><strong>{{ descripcion }}</strong></p>
+
+                <form id="formRevisionDatos" method="post">
+                    {% csrf_token %}
+                    <h6><strong>Parámetros:</strong></h6>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>ID Receptor:</label>
+                                <select class="form-control" name="id_receptor" required>
+                                    <option value="0602495327001">0602495327001</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Periodicidad:</label>
+                                <div>
+                                    <input type="radio" name="periodicidad" value="mensual" id="mensual_revision" checked>
+                                    <label for="mensual_revision">Mensual</label>
+                                    <input type="radio" name="periodicidad" value="semestral" id="semestral_revision" style="margin-left: 20px;">
+                                    <label for="semestral_revision">Semestral</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Período:</label>
+                                <select class="form-control" name="periodo">
+                                    <option value="Agosto" selected>Agosto</option>
+                                    <option value="Enero">Enero</option>
+                                    <option value="Febrero">Febrero</option>
+                                    <option value="Marzo">Marzo</option>
+                                    <option value="Abril">Abril</option>
+                                    <option value="Mayo">Mayo</option>
+                                    <option value="Junio">Junio</option>
+                                    <option value="Julio">Julio</option>
+                                    <option value="Septiembre">Septiembre</option>
+                                    <option value="Octubre">Octubre</option>
+                                    <option value="Noviembre">Noviembre</option>
+                                    <option value="Diciembre">Diciembre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Año:</label>
+                                <input type="number" class="form-control" name="anio" value="2025" min="2000" max="2050">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de transacción:</label>
+                        <div>
+                            <input type="radio" name="tipo_transaccion" value="compras" id="compras_revision" checked>
+                            <label for="compras_revision">Compras</label>
+                            <input type="radio" name="tipo_transaccion" value="ventas" id="ventas_revision" style="margin-left: 20px;">
+                            <label for="ventas_revision">Ventas</label>
+                            <input type="radio" name="tipo_transaccion" value="anulados" id="anulados_revision" style="margin-left: 20px;">
+                            <label for="anulados_revision">Anulados</label>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button" class="btn btn-primary" id="btnProcesarInformacion">
+                            <i class="fas fa-cog"></i> Procesar Información
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="btnSalir">
+                            <i class="fas fa-times"></i> Salir
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Added data table that will populate with results -->
+                <div id="resultadosSection" style="display: none;">
+                    <h6><strong>Resultados de la Revisión:</strong></h6>
+                    <div class="table-responsive">
+                        <table class="revision-table" id="tablaResultados">
+                            <thead>
+                                <tr>
+                                    <th>Tipo Doc.</th>
+                                    <th>Número</th>
+                                    <th>Fecha</th>
+                                    <th>Proveedor/Cliente</th>
+                                    <th>Base Imponible</th>
+                                    <th>IVA</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaResultadosBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Total Registros: <span id="totalRegistros">0</span></strong>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Base Imponible: <span id="totalBase">$0.00</span></strong>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Total IVA: <span id="totalIva">$0.00</span></strong>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Total General: <span id="totalGeneral">$0.00</span></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Mostrar modal
+    $('#btnRevisionDatos').click(function() {
+        $('#modalRevisionDatos').show();
+    });
+
+    // Cerrar modal
+    $('#btnClose, #btnSalir, #overlay').click(function() {
+        $('#modalRevisionDatos').hide();
+        $('#resultadosSection').hide();
+    });
+
+    $('#btnProcesarInformacion').click(function() {
+        var formData = $('#formRevisionDatos').serialize();
+        var $btn = $(this);
+        var originalText = $btn.html();
+
+        // Show loading state
+        $btn.html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: '{% url "app_planCuentas:revision_datos" %}',
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(data) {
+                if (data.success) {
+                    // Show results section
+                    $('#resultadosSection').show();
+
+                    // Populate table with real data
+                    var tbody = $('#tablaResultadosBody');
+                    tbody.empty();
+
+                    var totalRegistros = data.registros ? data.registros.length : 0;
+                    var totalBase = 0;
+                    var totalIva = 0;
+                    var totalGeneral = 0;
+
+                    if (data.registros && data.registros.length > 0) {
+                        data.registros.forEach(function(item) {
+                            var row = '<tr>' +
+                                '<td>' + (item.tipo_doc || 'N/A') + '</td>' +
+                                '<td>' + (item.numero || 'N/A') + '</td>' +
+                                '<td>' + (item.fecha || 'N/A') + '</td>' +
+                                '<td>' + (item.proveedor || item.cliente || 'N/A') + '</td>' +
+                                '<td>$' + (item.base_imponible || '0.00') + '</td>' +
+                                '<td>$' + (item.iva || '0.00') + '</td>' +
+                                '<td>$' + (item.total || '0.00') + '</td>' +
+                                '<td><span class="badge badge-' + (item.estado === 'Válido' ? 'success' : item.estado === 'Pendiente' ? 'warning' : 'info') + '">' + item.estado + '</span></td>' +
+                                '</tr>';
+                            tbody.append(row);
+
+                            totalBase += parseFloat(item.base_imponible || 0);
+                            totalIva += parseFloat(item.iva || 0);
+                            totalGeneral += parseFloat(item.total || 0);
+                        });
+                    } else {
+                        tbody.append('<tr><td colspan="8" class="text-center">No se encontraron registros para los criterios seleccionados</td></tr>');
+                    }
+
+                    // Update totals with real data
+                    $('#totalRegistros').text(totalRegistros);
+                    $('#totalBase').text('$' + totalBase.toFixed(2));
+                    $('#totalIva').text('$' + totalIva.toFixed(2));
+                    $('#totalGeneral').text('$' + totalGeneral.toFixed(2));
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Éxito',
+                        text: 'Información procesada correctamente. Se encontraron ' + totalRegistros + ' registros.',
+                        confirmButtonText: 'OK'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.error || 'Error al procesar información',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error de conexión',
+                    confirmButtonText: 'OK'
+                });
+            },
+            complete: function() {
+                // Restore button state
+                $btn.html(originalText);
+                $btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

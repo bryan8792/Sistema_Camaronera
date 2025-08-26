@@ -3,6 +3,7 @@ from django.urls import path
 from app_factura_detalle.views.factura_gasto import *
 from .views.recibo import *
 from .views.planCuentas import *
+from .views.procesosATS import *
 
 app_name = 'app_planCuentas'
 
@@ -61,5 +62,22 @@ urlpatterns = [
     # PrintExpenseInvoiceView
     path('factura_gasto/print/invoice/<int:pk>/', PrintExpenseInvoiceView.as_view(), name='factura_gasto_print_invoice'),
     path('factura_gasto_bio/print/invoice_bio/<int:pk>/', PrintExpenseInvoiceBIOView.as_view(), name='factura_gasto_bio_print_invoice'),
+
+    # Menú principal
+    path('menu_ats/', ATSMenuView.as_view(), name='menu_ats'),
+
+    # Generación de XML
+    path('generar_xml/', ATSGenerarXMLView.as_view(), name='generar_xml'),
+
+    # Importar datos
+    path('importar_compras/', ATSImportarComprasView.as_view(), name='importar_compras'),
+    path('importar_ventas/', ATSImportarVentasView.as_view(), name='importar_ventas'),
+    path('importar_xml/', ATSImportarXMLView.as_view(), name='importar_xml'),
+
+    # Revisión de datos
+    path('revision_datos/', ATSRevisionDatosView.as_view(), name='revision_datos'),
+
+    # Carpeta XML
+    path('carpeta_xml/', ATSCarpetaXMLView.as_view(), name='carpeta_xml'),
 
 ]

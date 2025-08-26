@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block head %}
+    <style>
+        .ats-toolbar {
+            background-color: #4a4a4a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .ats-button {
+            background-color: #6c757d;
+            border: 1px solid #5a6268;
+            color: white;
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            text-align: center;
+            min-width: 80px;
+            position: relative;
+        }
+        .ats-button:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        .ats-button.active {
+            background-color: #007bff;
+            border-color: #0056b3;
+        }
+        .ats-icon {
+            font-size: 24px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .icon-revision { color: #ff6b6b; }
+        .icon-generar { color: #feca57; }
+        .icon-carpeta { color: #48dbfb; }
+        .icon-compras { color: #1dd1a1; }
+        .icon-ventas { color: #1dd1a1; }
+        .icon-xml { color: #5f27cd; }
+
+        .toolbar-section {
+            display: inline-block;
+            margin-right: 15px;
+            text-align: center;
+        }
+        .toolbar-label {
+            color: white;
+            font-size: 11px;
+            display: block;
+            text-align: center;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <!-- Toolbar ATS -->
+                <div class="ats-toolbar">
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:revision_datos' %}" class="ats-button">
+                            <i class="fas fa-search ats-icon icon-revision"></i>
+                        </a>
+                        <span class="toolbar-label">Revisión Datos</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <span class="toolbar-label" style="color: white; font-size: 11px;">Generación</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:generar_xml' %}" class="ats-button active">
+                            <i class="fas fa-file-code ats-icon icon-generar"></i>
+                        </a>
+                        <span class="toolbar-label">Generar XML</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:carpeta_xml' %}" class="ats-button">
+                            <i class="fas fa-folder ats-icon icon-carpeta"></i>
+                        </a>
+                        <span class="toolbar-label">Carpetas XML Facturas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_compras' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon icon-compras"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Compras</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_ventas' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon icon-ventas"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Ventas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_xml' %}" class="ats-button">
+                            <i class="fas fa-file-import ats-icon icon-xml"></i>
+                        </a>
+                        <span class="toolbar-label">XML ATS<br>Importar</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+{% endblock %}

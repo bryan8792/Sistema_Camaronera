@@ -577,3 +577,232 @@ class AnextoTransaccionalForm(ModelForm):
                                ),
 
         }
+
+
+class ATSGenerarXMLForm(Form):
+    """Formulario para generar XML ATS"""
+    id_receptor = CharField(
+        max_length=13,
+        widget=TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ingrese ID Receptor'
+        }),
+        label="ID Receptor"
+    )
+    nombre = CharField(
+        max_length=200,
+        widget=TextInput(attrs={
+            'class': 'form-control',
+            'readonly': True
+        }),
+        label="Nombre"
+    )
+    periodicidad = ChoiceField(
+        choices=[('mensual', 'Mensual'), ('semestral', 'Semestral')],
+        widget=RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='mensual',
+        label="Periodicidad"
+    )
+    periodo = ChoiceField(
+        choices=[
+            ('Enero', 'Enero'), ('Febrero', 'Febrero'), ('Marzo', 'Marzo'),
+            ('Abril', 'Abril'), ('Mayo', 'Mayo'), ('Junio', 'Junio'),
+            ('Julio', 'Julio'), ('Agosto', 'Agosto'), ('Septiembre', 'Septiembre'),
+            ('Octubre', 'Octubre'), ('Noviembre', 'Noviembre'), ('Diciembre', 'Diciembre')
+        ],
+        widget=Select(attrs={'class': 'form-control'}),
+        initial='Agosto',
+        label="Período"
+    )
+    anio = IntegerField(
+        widget=NumberInput(attrs={
+            'class': 'form-control',
+            'min': 2000,
+            'max': 2050
+        }),
+        initial=datetime.now().year,
+        label="Año"
+    )
+    destino = CharField(
+        widget=TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ruta de destino del archivo'
+        }),
+        required=False,
+        label="Destino"
+    )
+    eliminar_caracteres = BooleanField(
+        widget=CheckboxInput(attrs={'class': 'form-check-input'}),
+        required=False,
+        initial=False,
+        label="Eliminar caracteres de separación de línea y tabulación"
+    )
+
+class ATSImportarComprasForm(Form):
+    """Formulario para importar compras desde XLS"""
+    periodicidad = ChoiceField(
+        choices=[('mensual', 'Mensual'), ('semestral', 'Semestral')],
+        widget=RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='mensual',
+        label="Periodicidad"
+    )
+    periodo = ChoiceField(
+        choices=[
+            ('Enero', 'Enero'), ('Febrero', 'Febrero'), ('Marzo', 'Marzo'),
+            ('Abril', 'Abril'), ('Mayo', 'Mayo'), ('Junio', 'Junio'),
+            ('Julio', 'Julio'), ('Agosto', 'Agosto'), ('Septiembre', 'Septiembre'),
+            ('Octubre', 'Octubre'), ('Noviembre', 'Noviembre'), ('Diciembre', 'Diciembre')
+        ],
+        widget=Select(attrs={'class': 'form-control'}),
+        initial='Agosto',
+        label="Período"
+    )
+    anio = IntegerField(
+        widget=NumberInput(attrs={
+            'class': 'form-control',
+            'min': 2000,
+            'max': 2050
+        }),
+        initial=datetime.now().year,
+        label="Año"
+    )
+    ruta = CharField(
+        widget=TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ruta del archivo XLS'
+        }),
+        label="Ruta"
+    )
+    modo_insercion = ChoiceField(
+        choices=[
+            ('agregar', 'Agregar datos a período'),
+            ('reemplazar', 'Reemplazar período de contribuyente')
+        ],
+        widget=RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='agregar',
+        label="Modo de inserción de datos"
+    )
+
+class ATSImportarVentasForm(Form):
+    """Formulario para importar ventas desde XLS"""
+    periodicidad = ChoiceField(
+        choices=[('mensual', 'Mensual'), ('semestral', 'Semestral')],
+        widget=RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='mensual',
+        label="Periodicidad"
+    )
+    periodo = ChoiceField(
+        choices=[
+            ('Enero', 'Enero'), ('Febrero', 'Febrero'), ('Marzo', 'Marzo'),
+            ('Abril', 'Abril'), ('Mayo', 'Mayo'), ('Junio', 'Junio'),
+            ('Julio', 'Julio'), ('Agosto', 'Agosto'), ('Septiembre', 'Septiembre'),
+            ('Octubre', 'Octubre'), ('Noviembre', 'Noviembre'), ('Diciembre', 'Diciembre')
+        ],
+        widget=Select(attrs={'class': 'form-control'}),
+        initial='Agosto',
+        label="Período"
+    )
+    anio = IntegerField(
+        widget=NumberInput(attrs={
+            'class': 'form-control',
+            'min': 2000,
+            'max': 2050
+        }),
+        initial=datetime.now().year,
+        label="Año"
+    )
+    ruta = CharField(
+        widget=TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ruta del archivo XLS'
+        }),
+        label="Ruta"
+    )
+
+class ATSImportarXMLForm(Form):
+    """Formulario para importar datos desde XML ATS"""
+    archivo_xml = FileField(
+        widget=FileInput(attrs={
+            'class': 'form-control-file',
+            'accept': '.xml'
+        }),
+        label="Ubicación de archivo XML"
+    )
+    modo_insercion = ChoiceField(
+        choices=[
+            ('agregar', 'Agregar datos a período'),
+            ('reemplazar', 'Reemplazar período de contribuyente')
+        ],
+        widget=RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='agregar',
+        label="Modo de inserción de datos"
+    )
+
+class ATSRevisionDatosForm(forms.Form):
+    """Formulario para revisión de datos ATS"""
+    id_receptor = CharField(
+        max_length=13,
+        widget=Select(attrs={'class': 'form-control'}),
+        label="ID Receptor"
+    )
+    periodicidad = ChoiceField(
+        choices=[('mensual', 'Mensual'), ('semestral', 'Semestral')],
+        widget=RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='mensual',
+        label="Periodicidad"
+    )
+    periodo = ChoiceField(
+        choices=[
+            ('Enero', 'Enero'), ('Febrero', 'Febrero'), ('Marzo', 'Marzo'),
+            ('Abril', 'Abril'), ('Mayo', 'Mayo'), ('Junio', 'Junio'),
+            ('Julio', 'Julio'), ('Agosto', 'Agosto'), ('Septiembre', 'Septiembre'),
+            ('Octubre', 'Octubre'), ('Noviembre', 'Noviembre'), ('Diciembre', 'Diciembre')
+        ],
+        widget=Select(attrs={'class': 'form-control'}),
+        initial='Agosto',
+        label="Período"
+    )
+    anio = IntegerField(
+        widget=NumberInput(attrs={
+            'class': 'form-control',
+            'min': 2000,
+            'max': 2050
+        }),
+        initial=datetime.now().year,
+        label="Año"
+    )
+    tipo_transaccion = ChoiceField(
+        choices=[
+            ('compras', 'Compras'),
+            ('ventas', 'Ventas'),
+            ('anulados', 'Anulados')
+        ],
+        widget=RadioSelect(attrs={'class': 'form-check-input'}),
+        initial='compras',
+        label="Tipo de transacción"
+    )
+
+class ATSCarpetaXMLForm(Form):
+    """Formulario para cargar archivos XML desde carpeta"""
+    ubicacion_origen = CharField(
+        widget=TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ubicación origen de archivos XML'
+        }),
+        label="Ubicación Origen de archivos XML"
+    )
+    mostrar_pendientes = BooleanField(
+        widget=CheckboxInput(attrs={'class': 'form-check-input'}),
+        required=False,
+        label="Mostrar solo pendientes"
+    )
+    archivo_bd = BooleanField(
+        widget=CheckboxInput(attrs={'class': 'form-check-input'}),
+        required=False,
+        label="Archivo que no consta en BD"
+    )
+    archivo_consta_bd = BooleanField(
+        widget=CheckboxInput(attrs={'class': 'form-check-input'}),
+        required=False,
+        label="Archivo ya consta en BD"
+    )

@@ -32,6 +32,7 @@ import tempfile
 from io import BytesIO
 from django.core.files import File
 import time
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Cuenta_Prueba(models.Model):
@@ -728,3 +729,163 @@ class VoucherErrors(models.Model):
         verbose_name_plural = 'Errores de los Comprobantes'
 
 
+class ATSConfig(models.Model):
+    """Configuración para generación de ATS"""
+    id_receptor = models.CharField(max_length=13, verbose_name="ID Receptor")
+    nombre_receptor = models.CharField(max_length=200, verbose_name="Nombre Receptor")
+    periodicidad_choices = [
+        ('mensual', 'Mensual'),
+        ('semestral', 'Semestral'),
+    ]
+    periodicidad = models.CharField(max_length=10, choices=periodicidad_choices, default='mensual')
+    activo = models.BooleanField(default=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'tb_configATS'
+        verbose_name = "Configuración ATS"
+        verbose_name_plural = "Configuraciones ATS"
+
+    def __str__(self):
+        return f"{self.id_receptor} - {self.nombre_receptor}"
+
+
+class ATSPeriodo(models.Model):
+    """Períodos para generación de ATS"""
+    config = models.ForeignKey(ATSConfig, on_delete=models.CASCADE)
+    periodo = models.CharField(max_length=20, verbose_name="Período")
+    anio = models.IntegerField(validators=[MinValueValidator(2000), MaxValueValidator(2050)])
+    estado_choices = [
+        ('pendiente', 'Pendiente'),
+        ('procesado', 'Procesado'),
+        ('enviado', 'Enviado'),
+    ]
+    estado = models.CharField(max_length=10, choices=estado_choices, default='pendiente')
+    fecha_generacion = models.DateTimeField(null=True, blank=True)
+    archivo_xml = models.FileField(upload_to='ats_xml/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.periodo} {self.anio} - {self.config.id_receptor}"
+
+    class Meta:
+        db_table = 'tb_periodoATS'
+        verbose_name = "Período ATS"
+        verbose_name_plural = "Períodos ATS"
+        unique_together = ['config', 'periodo', 'anio']
+
+
+class ATSCompra(models.Model):
+    """Registro de compras para ATS"""
+    periodo = models.ForeignKey(ATSPeriodo, on_delete=models.CASCADE)
+    tp_id = models.CharField(max_length=2, verbose_name="TP ID")
+    no_identif = models.CharField(max_length=13, verbose_name="No. Identif.")
+    proveedor = models.CharField(max_length=200, verbose_name="Proveedor")
+    sust_tp = models.CharField(max_length=10, verbose_name="Sust. TP")
+    no_doc = models.CharField(max_length=20, verbose_name="# Doc.")
+    fecha_emision = models.DateField(verbose_name="F.Emisión")
+    valor_objeto_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="V.Ito Obj IVA")
+    excento = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Excento")
+    base_0 = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Base 0%")
+    base_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Base IVA")
+    monto_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Monto IVA")
+    total = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Total")
+    no_retenc = models.CharField(max_length=20, verbose_name="# Retenc.", blank=True)
+    rt_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="RT IVA", default=0)
+    rt_fte = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="RT FTE", default=0)
+
+    def toJSON(self):
+        return {
+            'id': self.id,
+            'tp_id': self.tp_id,
+            'no_identif': self.no_identif,
+            'proveedor': self.proveedor,
+            'sust_tp': self.sust_tp,
+            'no_doc': self.no_doc,
+            'fecha_emision': self.fecha_emision.strftime('%Y-%m-%d'),
+            'valor_objeto_iva': float(self.valor_objeto_iva),
+            'excento': float(self.excento),
+            'base_0': float(self.base_0),
+            'base_iva': float(self.base_iva),
+            'monto_iva': float(self.monto_iva),
+            'total': float(self.total),
+            'no_retenc': self.no_retenc,
+            'rt_iva': float(self.rt_iva),
+            'rt_fte': float(self.rt_fte),
+        }
+
+    class Meta:
+        db_table = 'tb_compraATS'
+        verbose_name = "Compra ATS"
+        verbose_name_plural = "Compras ATS"
+
+
+class ATSVenta(models.Model):
+    """Registro de ventas para ATS"""
+    periodo = models.ForeignKey(ATSPeriodo, on_delete=models.CASCADE)
+    tp_id = models.CharField(max_length=2, verbose_name="TP ID")
+    no_identif = models.CharField(max_length=13, verbose_name="No. Identif.")
+    cliente = models.CharField(max_length=200, verbose_name="Cliente")
+    tp_comp = models.CharField(max_length=10, verbose_name="Tp.Comp.")
+    no_docs = models.CharField(max_length=20, verbose_name="# Docs.")
+    base_imp_0 = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Base Imp. 0%")
+    base_imp_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Base Imp. IVA")
+    monto_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Monto IVA")
+    no_objeto_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="No Objeto IVA")
+    ret_iva = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Ret. IVA", default=0)
+    ret_fte = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Ret. Fte.", default=0)
+
+    def toJSON(self):
+        return {
+            'id': self.id,
+            'tp_id': self.tp_id,
+            'no_identif': self.no_identif,
+            'cliente': self.cliente,
+            'tp_comp': self.tp_comp,
+            'no_docs': self.no_docs,
+            'base_imp_0': float(self.base_imp_0),
+            'base_imp_iva': float(self.base_imp_iva),
+            'monto_iva': float(self.monto_iva),
+            'no_objeto_iva': float(self.no_objeto_iva),
+            'ret_iva': float(self.ret_iva),
+            'ret_fte': float(self.ret_fte),
+        }
+
+    class Meta:
+        db_table = 'tb_ventaATS'
+        verbose_name = "Venta ATS"
+        verbose_name_plural = "Ventas ATS"
+
+
+class ATSAnulado(models.Model):
+    """Registro de documentos anulados para ATS"""
+    periodo = models.ForeignKey(ATSPeriodo, on_delete=models.CASCADE)
+    tp_doc = models.CharField(max_length=2, verbose_name="Tp.Doc")
+    fecha_emision = models.DateField(verbose_name="F.Emisión")
+    no_documento = models.CharField(max_length=20, verbose_name="# Documento")
+    id_emisor = models.CharField(max_length=13, verbose_name="ID. Emisor")
+    razon_social_emisor = models.CharField(max_length=200, verbose_name="Razón Social Emisor")
+    id_receptor = models.CharField(max_length=13, verbose_name="ID. Receptor")
+    razon_social_receptor = models.CharField(max_length=200, verbose_name="Razón Social Receptor")
+    clave_acceso = models.CharField(max_length=49, verbose_name="Clave Acceso")
+
+    class Meta:
+        db_table = 'tb_anuladoATS'
+        verbose_name = "Anulado ATS"
+        verbose_name_plural = "Anulados ATS"
+
+
+class ATSImportacion(models.Model):
+    """Registro de importaciones de archivos XML ATS"""
+    archivo_xml = models.FileField(upload_to='ats_importaciones/')
+    periodo_importado = models.CharField(max_length=20)
+    informante = models.CharField(max_length=200)
+    fecha_importacion = models.DateTimeField(auto_now_add=True)
+    total_compras = models.IntegerField(default=0)
+    total_ventas = models.IntegerField(default=0)
+    total_anulados = models.IntegerField(default=0)
+    estado = models.CharField(max_length=20, default='importado')
+
+    class Meta:
+        db_table = 'tb_importacionATS'
+        verbose_name = "Importación ATS"
+        verbose_name_plural = "Importaciones ATS"

@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block head %}
+    <style>
+        .ats-toolbar {
+            background-color: #4a4a4a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .ats-button {
+            background-color: #6c757d;
+            border: 1px solid #5a6268;
+            color: white;
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            text-align: center;
+            min-width: 80px;
+        }
+        .ats-button:hover {
+            background-color: #5a6268;
+            color: white;
+            text-decoration: none;
+        }
+        .ats-button.active {
+            background-color: #007bff;
+            border-color: #0056b3;
+        }
+        .ats-icon {
+            font-size: 24px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .toolbar-section {
+            display: inline-block;
+            margin-right: 15px;
+            text-align: center;
+        }
+        .toolbar-label {
+            color: white;
+            font-size: 11px;
+            display: block;
+            text-align: center;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+        .modal-ats {
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            z-index: 1050;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header-ats {
+            background: linear-gradient(to bottom, #5f27cd, #341f97);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .modal-body-ats {
+            padding: 15px;
+        }
+        .resumen-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .resumen-item {
+            margin-bottom: 10px;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <!-- Toolbar ATS -->
+                <div class="ats-toolbar">
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:revision_datos' %}" class="ats-button">
+                            <!-- Using Font Awesome icons -->
+                            <i class="fas fa-search ats-icon" style="color: #ff6b6b;"></i>
+                        </a>
+                        <span class="toolbar-label">Revisión Datos</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <span class="toolbar-label" style="color: white; font-size: 11px;">Generación</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:generar_xml' %}" class="ats-button">
+                            <i class="fas fa-file-code ats-icon" style="color: #feca57;"></i>
+                        </a>
+                        <span class="toolbar-label">Generar XML</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:carpeta_xml' %}" class="ats-button">
+                            <i class="fas fa-folder ats-icon" style="color: #48dbfb;"></i>
+                        </a>
+                        <span class="toolbar-label">Carpetas XML Facturas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_compras' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon" style="color: #1dd1a1;"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Compras</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_ventas' %}" class="ats-button">
+                            <i class="fas fa-file-excel ats-icon" style="color: #1dd1a1;"></i>
+                        </a>
+                        <span class="toolbar-label">Plantilla Ventas</span>
+                    </div>
+
+                    <div class="toolbar-section">
+                        <a href="{% url 'app_planCuentas:importar_xml' %}" class="ats-button active">
+                            <i class="fas fa-file-import ats-icon" style="color: #5f27cd;"></i>
+                        </a>
+                        <span class="toolbar-label">XML ATS<br>Importar</span>
+                    </div>
+                </div>
+
+                <!-- Botón para abrir modal -->
+                <div class="text-center">
+                    <button type="button" class="btn btn-info btn-lg" id="btnImportarXML">
+                        <i class="fas fa-file-import"></i> Importar XML ATS
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal Importar XML -->
+    <div id="modalImportarXML" style="display: none;">
+        <div class="overlay" id="overlay"></div>
+        <div class="modal-ats">
+            <div class="modal-header-ats">
+                <div>
+                    <!-- Using Font Awesome icon -->
+                    <i class="fas fa-file-import" style="margin-right: 8px;"></i>
+                    <strong>{{ nombre }}</strong>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm" id="btnMinimize">-</button>
+                    <button type="button" class="btn btn-sm" id="btnMaximize">□</button>
+                    <button type="button" class="btn btn-sm" id="btnClose">×</button>
+                </div>
+            </div>
+            <div class="modal-body-ats">
+                <p><strong>{{ descripcion }}</strong></p>
+
+                <form id="formImportarXML" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h6><strong>Parámetros:</strong></h6>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Archivo XML ATS:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="archivoXMLPath" placeholder="Seleccione archivo XML ATS" readonly>
+                                    <div class="input-group-append">
+                                        <!-- Added functional file selection -->
+                                        <button type="button" class="btn btn-outline-secondary" id="btnUbicarXML">
+                                            <i class="fas fa-folder-open"></i> Ubicar XML
+                                        </button>
+                                        <input type="file" id="fileXML" name="archivo_xml" style="display: none;" accept=".xml">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="button" class="btn btn-primary btn-block" id="btnProcesarXML">
+                                    <i class="fas fa-cog"></i> Procesar XML
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="reemplazarDatos" name="reemplazar_datos">
+                            <label class="form-check-label" for="reemplazarDatos">
+                                Reemplazar datos existentes del período
+                            </label>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Added results section with summary data -->
+                <div id="resumenSection" style="display: none;">
+                    <h6><strong>Resumen de Importación:</strong></h6>
+                    <div class="resumen-section">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="resumen-item">
+                                    <strong>Período:</strong> <span id="resumenPeriodo">-</span>
+                                </div>
+                                <div class="resumen-item">
+                                    <strong>Informante:</strong> <span id="resumenInformante">-</span>
+                                </div>
+                                <div class="resumen-item">
+                                    <strong>RUC:</strong> <span id="resumenRuc">-</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="resumen-item">
+                                    <strong>Fecha Proceso:</strong> <span id="resumenFecha">-</span>
+                                </div>
+                                <div class="resumen-item">
+                                    <strong>Estado:</strong> <span id="resumenEstado" class="badge badge-success">Procesado</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6><strong>Compras:</strong></h6>
+                                <div class="resumen-item">Total Registros: <span id="comprasTotal">0</span></div>
+                                <div class="resumen-item">Base No Grava IVA: $<span id="comprasBaseNoGrava">0.00</span></div>
+                                <div class="resumen-item">Base 0%: $<span id="comprasBase0">0.00</span></div>
+                                <div class="resumen-item">Base Imponible: $<span id="comprasBaseImponible">0.00</span></div>
+                                <div class="resumen-item">Monto IVA: $<span id="comprasMontoIva">0.00</span></div>
+                                <div class="resumen-item">Retención IVA: $<span id="comprasRetIva">0.00</span></div>
+                                <div class="resumen-item">Retención Fuente: $<span id="comprasRetFte">0.00</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6><strong>Ventas:</strong></h6>
+                                <div class="resumen-item">Total Registros: <span id="ventasTotal">0</span></div>
+                                <div class="resumen-item">Base No Grava IVA: $<span id="ventasBaseNoGrava">0.00</span></div>
+                                <div class="resumen-item">Base 0%: $<span id="ventasBase0">0.00</span></div>
+                                <div class="resumen-item">Base Imponible: $<span id="ventasBaseImponible">0.00</span></div>
+                                <div class="resumen-item">Monto IVA: $<span id="ventasMontoIva">0.00</span></div>
+                                <div class="resumen-item">Retención IVA: $<span id="ventasRetIva">0.00</span></div>
+                                <div class="resumen-item">Retención Fuente: $<span id="ventasRetFte">0.00</span></div>
+                            </div>
+                            <div class="col-md-4">
+                                <h6><strong>Anulados:</strong></h6>
+                                <div class="resumen-item">Total Registros: <span id="anuladosTotal">0</span></div>
+                                <div class="resumen-item">Facturas: <span id="anuladosFacturas">0</span></div>
+                                <div class="resumen-item">Notas de Crédito: <span id="anuladosNC">0</span></div>
+                                <div class="resumen-item">Notas de Débito: <span id="anuladosND">0</span></div>
+                                <div class="resumen-item">Retenciones: <span id="anuladosRet">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-secondary" id="btnSalir">
+                        <i class="fas fa-times"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Mostrar modal
+    $('#btnImportarXML').click(function() {
+        $('#modalImportarXML').show();
+    });
+
+    // Cerrar modal
+    $('#btnClose, #btnSalir, #overlay').click(function() {
+        $('#modalImportarXML').hide();
+        $('#resumenSection').hide();
+    });
+
+    $('#btnUbicarXML').click(function() {
+        $('#fileXML').click();
+    });
+
+    $('#fileXML').change(function() {
+        if (this.files.length > 0) {
+            $('#archivoXMLPath').val(this.files[0].name);
+        }
+    });
+
+    $('#btnProcesarXML').click(function() {
+        if (!$('#fileXML')[0].files.length) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Advertencia',
+                text: 'Por favor seleccione un archivo XML',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        var $btn = $(this);
+        var originalText = $btn.html();
+
+        // Show loading state
+        $btn.html('<i class="fas fa-spinner fa-spin"></i> Procesando...');
+        $btn.prop('disabled', true);
+
+        // Simulate processing with detailed sample data
+        setTimeout(function() {
+            // Show results section
+            $('#resumenSection').show();
+
+            // Populate summary with sample data
+            var currentDate = new Date().toLocaleDateString('es-ES');
+            $('#resumenPeriodo').text('Agosto 2025');
+            $('#resumenInformante').text('LEMA TENE FRANCISCO');
+            $('#resumenRuc').text('0602495327001');
+            $('#resumenFecha').text(currentDate);
+
+            // Sample data for compras
+            $('#comprasTotal').text('45');
+            $('#comprasBaseNoGrava').text('1,250.00');
+            $('#comprasBase0').text('850.00');
+            $('#comprasBaseImponible').text('3,500.00');
+            $('#comprasMontoIva').text('420.00');
+            $('#comprasRetIva').text('42.00');
+            $('#comprasRetFte').text('70.00');
+
+            // Sample data for ventas
+            $('#ventasTotal').text('32');
+            $('#ventasBaseNoGrava').text('950.00');
+            $('#ventasBase0').text('650.00');
+            $('#ventasBaseImponible').text('2,800.00');
+            $('#ventasMontoIva').text('336.00');
+            $('#ventasRetIva').text('33.60');
+            $('#ventasRetFte').text('56.00');
+
+            // Sample data for anulados
+            $('#anuladosTotal').text('3');
+            $('#anuladosFacturas').text('1');
+            $('#anuladosNC').text('1');
+            $('#anuladosND').text('0');
+            $('#anuladosRet').text('1');
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Éxito',
+                text: 'Archivo XML procesado correctamente. Se importaron 80 registros en total.',
+                confirmButtonText: 'OK'
+            });
+
+            // Restore button state
+            $btn.html(originalText);
+            $btn.prop('disabled', false);
+        }, 3000);
+    });
+});
+</script>
+{% endblock %}
