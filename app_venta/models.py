@@ -503,7 +503,6 @@ class CtasCollect(models.Model):
         ordering = ['id']
 
 
-
 class PaymentsCtaCollect(models.Model):
     ctas_collect = models.ForeignKey(CtasCollect, on_delete=models.CASCADE, verbose_name='Cuenta por cobrar')
     date_joined = models.DateField(default=datetime.now, verbose_name='Fecha de registro')

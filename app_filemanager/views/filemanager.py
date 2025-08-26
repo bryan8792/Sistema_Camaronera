@@ -65,6 +65,17 @@ def _can_view_folder(user, folder):
     return _user_level_on_folder(user, folder) >= LEVEL_NUM["read"]
 
 
+def _accessible_folders(user, parent=None):
+    if not user.is_authenticated:
+        return Folder.objects.filter(is_public=True, parent=parent)
+
+    return Folder.objects.filter(
+        Q(owner=user) |
+        Q(is_public=True) |
+        Q(custom_permissions__user=user)
+    ).filter(parent=parent).distinct()
+
+
 @login_required
 @require_http_methods(["POST"])
 def ajax_file_upload(request):
@@ -396,7 +407,8 @@ class DashboardView(LoginRequiredMixin, View):
     def get(self, request):
         # Get user statistics
         total_files = File.objects.filter(owner=request.user).count()
-        total_folders = Folder.objects.filter(owner=request.user).count()
+        # total_folders = Folder.objects.filter(owner=request.user).count()
+        total_folders = _accessible_folders(request.user).count()
         total_size = File.objects.filter(owner=request.user).aggregate(
             total=Sum('size'))['total'] or 0
 
@@ -404,7 +416,8 @@ class DashboardView(LoginRequiredMixin, View):
         recent_files = File.objects.filter(owner=request.user)[:10]
 
         # Recent folders - solo carpetas raíz para evitar mostrar subcarpetas como independientes
-        recent_folders = Folder.objects.filter(owner=request.user, parent=None)[:5]
+        # recent_folders = Folder.objects.filter(owner=request.user, parent=None)[:5]
+        recent_folders = _accessible_folders(request.user, parent=None)[:5]
 
         # Shared items
         shared_with_me = SharedLink.objects.filter(shared_with=request.user)[:5]
@@ -549,7 +562,8 @@ class FileListView(LoginRequiredMixin, ListView):
             current_folder = get_object_or_404(Folder, id=folder_id)
 
         # Get folders in current directory con permisos corregidos
-        folders = Folder.objects.filter(parent=current_folder)
+        # folders = Folder.objects.filter(parent=current_folder)
+        folders = _accessible_folders(self.request.user, parent=current_folder)
 
         # Filtrar carpetas por permisos
         accessible_folders = []
