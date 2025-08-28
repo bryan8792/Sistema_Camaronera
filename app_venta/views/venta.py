@@ -59,23 +59,30 @@ class SaleListView(FormView):
                     credit_note.motive = F'NOTA DE CREDITO DE LA VENTA {sale.voucher_number_full}'
                     credit_note.company = company
                     credit_note.environment_type = credit_note.company.environment_type
-                    credit_note.receipt = Recibo.objects.get(voucher_type=VOUCHER_TYPE[1][0], establishment_code=sale.company.establishment_code, issuing_point_code=sale.company.issuing_point_code)
+                    receipt = Recibo.objects.filter(voucher_type=VOUCHER_TYPE[1][0],
+                                                                 establishment_code=sale.company.establishment_code,
+                                                                 issuing_point_code=sale.company.issuing_point_code,
+                                                                 empresa=sale.company
+                                                                ).order_by('-sequence').first()
+                    if not receipt:
+                        raise Exception("No existe un recibo configurado para esta empresa.")
+                    credit_note.receipt = receipt
                     credit_note.voucher_number = credit_note.generate_voucher_number()
                     credit_note.voucher_number_full = credit_note.get_voucher_number_full()
                     credit_note.iva = iva
                     credit_note.save()
                     for sale_detail in sale.saledetail_set.all():
                         detail = CreditNoteDetail()
-                        detail.credit_note_id = credit_note.id
-                        detail.sale_detail_id = sale_detail.id
-                        detail.product_id = sale_detail.product_id
+                        detail.credit_note = credit_note
+                        detail.sale_detail = sale_detail
+                        detail.piscina = sale_detail.piscinas
                         detail.cant = sale_detail.cant
                         detail.price = sale_detail.price
                         detail.dscto = sale_detail.dscto
                         detail.save()
                         credit_note.calculate_detail()
-                        detail.product.stock += detail.cant
-                        detail.product.save()
+                        # detail.piscina.stock += detail.cant
+                        # detail.piscina.save()
                     credit_note.calculate_invoice()
                     data = credit_note.generate_electronic_invoice()
                     if not data['resp']:

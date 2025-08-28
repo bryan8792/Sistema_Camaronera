@@ -20,7 +20,7 @@ from django.forms import model_to_dict
 from django.db import models
 from Sistema_Camaronera import settings
 from app_contabilidad_planCuentas.models import Recibo
-from app_empresa.app_reg_empresa.models import Empresa
+from app_empresa.app_reg_empresa.models import Empresa, Piscinas
 from app_inventario.app_categoria.models import Producto
 from app_venta.models import Sale, SaleDetail
 from utilities import printer
@@ -97,7 +97,7 @@ class CreditNote(models.Model):
         barcode.Code128(self.access_code, writer=barcode.writer.ImageWriter()).write(rv, options={'text_distance': 3.0, 'font_size': 6})
         file = base64.b64encode(rv.getvalue()).decode("ascii")
         context = {'credit_note': self, 'access_code_barcode': f"data:image/png;base64,{file}"}
-        pdf_file = printer.create_pdf(context=context, template_name='credit_note/format/invoice.html')
+        pdf_file = printer.create_pdf(context=context, template_name='app_notaCredito/format/invoice.html')
         with tempfile.NamedTemporaryFile(delete=True) as file_temp:
             file_temp.write(pdf_file)
             file_temp.flush()
@@ -158,8 +158,8 @@ class CreditNote(models.Model):
         xml_details = ElementTree.SubElement(root, 'detalles')
         for detail in self.creditnotedetail_set.all():
             xml_detail = ElementTree.SubElement(xml_details, 'detalle')
-            ElementTree.SubElement(xml_detail, 'codigoInterno').text = detail.product.code
-            ElementTree.SubElement(xml_detail, 'descripcion').text = detail.product.name
+            ElementTree.SubElement(xml_detail, 'codigoInterno').text = str(detail.piscina.orden)
+            ElementTree.SubElement(xml_detail, 'descripcion').text = str(detail.piscina.numero)
             ElementTree.SubElement(xml_detail, 'cantidad').text = f'{detail.cant:.2f}'
             ElementTree.SubElement(xml_detail, 'precioUnitario').text = f'{detail.price:.2f}'
             ElementTree.SubElement(xml_detail, 'descuento').text = f'{detail.total_dscto:.2f}'
@@ -167,7 +167,7 @@ class CreditNote(models.Model):
             xml_taxes = ElementTree.SubElement(xml_detail, 'impuestos')
             xml_tax = ElementTree.SubElement(xml_taxes, 'impuesto')
             ElementTree.SubElement(xml_tax, 'codigo').text = str(TAX_CODES[0][0])
-            if detail.product.with_tax:
+            if detail.piscina.with_tax:
                 ElementTree.SubElement(xml_tax, 'codigoPorcentaje').text = str(self.company.vat_percentage)
                 ElementTree.SubElement(xml_tax, 'tarifa').text = f'{detail.iva * 100:.2f}'
                 ElementTree.SubElement(xml_tax, 'baseImponible').text = f'{detail.total:.2f}'
@@ -229,9 +229,9 @@ class CreditNote(models.Model):
             detail.save()
 
     def calculate_invoice(self):
-        self.subtotal_0 = float(self.creditnotedetail_set.filter(product__with_tax=False).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
-        self.subtotal_12 = float(self.creditnotedetail_set.filter(product__with_tax=True).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
-        self.total_iva = float(self.creditnotedetail_set.filter(product__with_tax=True).aggregate(result=Coalesce(Sum('total_iva'), 0.00, output_field=FloatField()))['result'])
+        self.subtotal_0 = float(self.creditnotedetail_set.filter(piscina__with_tax=False).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
+        self.subtotal_12 = float(self.creditnotedetail_set.filter(piscina__with_tax=True).aggregate(result=Coalesce(Sum('total'), 0.00, output_field=FloatField()))['result'])
+        self.total_iva = float(self.creditnotedetail_set.filter(piscina__with_tax=True).aggregate(result=Coalesce(Sum('total_iva'), 0.00, output_field=FloatField()))['result'])
         self.total_dscto = float(self.creditnotedetail_set.filter().aggregate(result=Coalesce(Sum('total_dscto'), 0.00, output_field=FloatField()))['result'])
         self.total = float(self.get_full_subtotal()) + float(self.total_iva)
         self.save()
@@ -239,8 +239,7 @@ class CreditNote(models.Model):
     def edit(self):
         super(CreditNote, self).save()
 
-    def save(self, force_insert=False, force_update=False, using=None,
-             update_fields=None):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.motive is None:
             self.motive = 'Sin detalles'
         if self.pk is None:
@@ -250,9 +249,9 @@ class CreditNote(models.Model):
 
     def delete(self, using=None, keep_parents=False):
         try:
-            for i in self.creditnotedetail_set.filter(product__inventoried=True):
-                i.product.stock += i.cant
-                i.product.save()
+            for i in self.creditnotedetail_set.filter(piscina__inventoried=True):
+                i.piscina.stock += i.cant
+                i.piscina.save()
                 i.delete()
         except:
             pass
@@ -268,7 +267,7 @@ class CreditNote(models.Model):
 class CreditNoteDetail(models.Model):
     credit_note = models.ForeignKey(CreditNote, on_delete=models.CASCADE)
     sale_detail = models.ForeignKey(SaleDetail, on_delete=models.PROTECT)
-    product = models.ForeignKey(Producto, blank=True, null=True, on_delete=models.PROTECT)
+    piscina = models.ForeignKey(Piscinas, blank=True, null=True, on_delete=models.PROTECT)
     date_joined = models.DateField(default=datetime.now)
     cant = models.IntegerField(default=0)
     price = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
@@ -281,18 +280,18 @@ class CreditNoteDetail(models.Model):
     total = models.DecimalField(max_digits=9, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return self.product.nombre
+        return self.piscina.orden
 
     def toJSON(self):
         item = model_to_dict(self)
         item['date_joined'] = self.date_joined.strftime('%Y-%m-%d')
         item['sale_detail'] = self.sale_detail.toJSON()
-        item['product'] = self.product.toJSON()
+        item['piscina'] = self.piscina.toJSON()
         item['price'] = float(self.price)
         item['price_with_vat'] = float(self.price_with_vat)
         item['subtotal'] = float(self.subtotal)
         item['iva'] = float(self.subtotal)
-        item['total_iva'] = float(self.subtotal)
+        item['total_iva'] = float(self.total_iva)
         item['dscto'] = float(self.dscto)
         item['total_dscto'] = float(self.total_dscto)
         item['total'] = float(self.total)

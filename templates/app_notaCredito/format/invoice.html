@@ -71,36 +71,30 @@
         }
 
         .details thead tr {
-            border: 1px solid black;
-        }
-
-        .details thead tr th {
-            border: 1px solid black !important;
             background-color: #000000;
             color: white;
         }
 
-        .totals {
-            text-transform: uppercase;
+        .details thead tr th {
+            border: 1px solid #ffffff !important;
         }
 
-        .no-visible {
-            visibility: hidden;
+        .totals {
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 <div class="content mt-3">
     <div class="col-50">
-        <img class="img-fluid d-block mx-auto logo" alt="" src="{{ sale.company.get_image }}">
-        <div class="text-content"><p><b>Emisor:</b> {{ sale.company.tradename }}</p></div>
-        <div class="text-content"><p><b>Ruc:</b> {{ sale.company.ruc }}</p></div>
-        <div class="text-content"><p><b>Teléfono:</b> {{ sale.company.phone }}</p></div>
-        <div class="text-content"><p><b>Matriz:</b> {{ sale.company.main_address }}</p></div>
-        <div class="text-content"><p><b>Correo:</b> {{ sale.company.email }}</p></div>
-        <div class="text-content"><p><b>Obligado a llevar contabilidad:</b> {{ sale.company.obligated_accounting }}</p></div>
-        <div class="text-content"><p><b>Contribuyente Especial No.:</b> {{ sale.company.special_taxpayer }}</p></div>
-        <div class="text-content"><p><b>Ambiente:</b> {% if sale.company.environment_type == 1 %} PRUEBAS {% else %} PRODUCCIÓN {% endif %}</p></div>
+        <img class="img-fluid d-block mx-auto logo" alt="" src="{{ credit_note.company.get_image }}">
+        <div class="text-content"><p><b>Emisor:</b> {{ credit_note.company.tradename }}</p></div>
+        <div class="text-content"><p><b>Ruc:</b> {{ credit_note.company.ruc }}</p></div>
+        <div class="text-content"><p><b>Teléfono:</b> {{ credit_note.company.mobile }}</p></div>
+        <div class="text-content"><p><b>Matriz:</b> {{ credit_note.company.main_address }}</p></div>
+        <div class="text-content"><p><b>Correo:</b> {{ credit_note.company.email }}</p></div>
+        <div class="text-content"><p><b>Obligado a llevar contabilidad:</b> {{ credit_note.company.obligated_accounting }}</p></div>
+        <div class="text-content"><p><b>Contribuyente Especial No.:</b> {{ credit_note.company.special_taxpayer }}</p></div>
     </div>
     <div class="col-50">
         <div class="text-content">
@@ -108,10 +102,10 @@
                 <thead>
                 <tr>
                     <th style="width: 50%;; text-align: left;">
-                        <p style="width: 100%; font-size: 22px; margin-bottom: 0"><b>Factura</b></p>
+                        <p style="width: 100%; font-size: 16px; margin-bottom: 0"><b>Nota de Credito</b></p>
                     </th>
                     <th style="width: 50%;; text-align: right;">
-                        <p style="width: 100%; font-size: 22px; margin-bottom: 0"><b>{{ sale.voucher_number_full }}</b></p>
+                        <p style="width: 100%; font-size: 22px; margin-bottom: 0"><b>{{ credit_note.voucher_number_full }}</b></p>
                     </th>
                 </tr>
                 </thead>
@@ -120,13 +114,13 @@
         <div class="text-content">
             <p>
                 <b>Autorización:</b><br>
-                <span style="font-size: 12px">{{ sale.access_code }}</span>
+                <span style="font-size: 12px">{{ credit_note.access_code }}</span>
             </p>
         </div>
         <div class="text-content">
             <p>
                 <b>Fecha de autorización:</b><br>
-                {{ sale.get_authorization_date }}
+                {{ credit_note.get_authorization_date }}
             </p>
         </div>
         <div class="text-content">
@@ -139,16 +133,17 @@
 </div>
 <div class="content">
     <div class="col-50">
-        <div class="text-content"><p><b>Datos del Cliente:</b></p></div>
-        <div class="text-content"><p><b>Razón Social:</b> {{ sale.client.user.names }}</p></div>
-        <div class="text-content"><p><b>Fecha de emisión:</b> {{ sale.get_date_joined }}</p></div>
-        <div class="text-content"><p><b>Correo electrónico:</b> {{ sale.client.user.email }}</p></div>
+        <div class="text-content"><p><b>Razón Social:</b> {{ credit_note.sale.client.user.names }}</p></div>
+        <div class="text-content"><p><b>Fecha Emisión:</b> {{ credit_note.sale.get_date_joined }}</p></div>
+        <div class="text-content"><p><b>Correo electrónico:</b> {{ credit_note.sale.client.user.email }}</p></div>
+        <div class="text-content"><p><b>Comprobante que se modifica:</b> FACTURA {{ credit_note.sale.voucher_number_full }}</p></div>
+        <div class="text-content"><p><b>Razón de modificación:</b> {{ credit_note.motive }}</p></div>
     </div>
     <div class="col-50">
-        <div class="text-content"><p class="no-visible"><b><br></b></p></div>
-        <div class="text-content"><p><b>RUC/CI:</b> {{ sale.client.dni }}</p></div>
-        <div class="text-content"><p><b>Teléfono:</b> {{ sale.client.mobile }}</p></div>
-        <div class="text-content"><p><b>Dirección:</b> {{ sale.client.address }}</p></div>
+        <div class="text-content"><p><b>RUC/CI:</b> {{ credit_note.sale.client.dni }}</p></div>
+        <div class="text-content"><p><b>Teléfono::</b> {{ credit_note.sale.client.mobile }}</p></div>
+        <div class="text-content"><p><b>Dirección:</b> {{ credit_note.sale.client.address }}</p></div>
+        <div class="text-content"><p><b>Fecha de emisión (Comprobante a modificar):</b> {{ credit_note.get_date_joined }}</p></div>
     </div>
 </div>
 <div class="content">
@@ -165,11 +160,11 @@
             </tr>
             </thead>
             <tbody>
-            {% for detail in sale.saledetail_set.all %}
+            {% for detail in credit_note.creditnotedetail_set.all %}
                 <tr>
-                    <td class="text-center">{{ detail.piscinas.orden }}</td>
+                    <td class="text-center">{{ detail.product.code }}</td>
                     <td class="text-center">{{ detail.cant }}</td>
-                    <td>{{ detail.observacion }}</td>
+                    <td>{{ detail.product.get_short_name }}</td>
                     <td class="text-center">{{ detail.price|floatformat:2 }}</td>
                     <td class="text-center">{{ detail.total_dscto|floatformat:2 }}</td>
                     <td class="text-center">{{ detail.total|floatformat:2 }}</td>
@@ -184,42 +179,24 @@
         <table class="details" style="width: 100%;">
             <thead>
             <tr>
-                <th colspan="2" class="text-center text-uppercase">forma de pago</th>
+                <th colspan="2" class="text-center text-uppercase">información adicional</th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td class="text-left"><b>Días</b></td>
-                <td class="text-center">{{ sale.time_limit }}</td>
+                <td class="text-left"><b>Teléfono</b></td>
+                <td class="text-center">{{ credit_note.sale.client.mobile }}</td>
             </tr>
             <tr>
-                <td class="text-left"><b>Monto</b></td>
-                <td class="text-center">{{ sale.total|floatformat:2 }}</td>
+                <td class="text-left"><b>Email</b></td>
+                <td class="text-center">{{ credit_note.sale.client.user.email }}</td>
             </tr>
             <tr>
-                <td class="text-left"><b>Forma de Pago</b></td>
-                <td class="text-center">{{ sale.get_payment_method_display }}</td>
+                <td class="text-left"><b>Dirección</b></td>
+                <td class="text-center">{{ credit_note.sale.client.address }}</td>
             </tr>
             </tbody>
         </table>
-        <br>
-        {% if sale.additional_info %}
-            <table class="details" style="width: 100%;">
-                <thead>
-                <tr>
-                    <th colspan="2" class="text-center text-uppercase">información adicional</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for additional_info in sale.additional_info %}
-                    <tr>
-                        <td class="text-left"><b>{{ additional_info.name }}</b></td>
-                        <td class="text-center">{{ additional_info.value }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
     </div>
     <div class="col-50">
         <table class="totals" style="width: 100%;">
@@ -232,27 +209,27 @@
             <tbody>
             <tr>
                 <td class="float-right font-weight-bold">Subtotal sin impuestos</td>
-                <td class="text-right">{{ sale.get_subtotal_without_taxes|floatformat:2 }}</td>
+                <td class="text-right">{{ credit_note.get_subtotal_without_taxes|floatformat:2 }}</td>
             </tr>
             <tr>
                 <td class="float-right font-weight-bold">Descuentos</td>
-                <td class="text-right">{{ sale.total_dscto|floatformat:2 }}</td>
+                <td class="text-right">{{ credit_note.total_dscto|floatformat:2 }}</td>
             </tr>
             <tr>
-                <td class="float-right font-weight-bold">Subtotal {{ sale.get_iva_percent }}%</td>
-                <td class="text-right">{{ sale.subtotal_12|floatformat:2 }}</td>
+                <td class="float-right font-weight-bold">Subtotal {{ credit_note.get_iva_percent }}%</td>
+                <td class="text-right">{{ credit_note.subtotal_12|floatformat:2 }}</td>
             </tr>
             <tr>
                 <td class="float-right font-weight-bold">Subtotal 0%</td>
-                <td class="text-right">{{ sale.subtotal_0|floatformat:2 }}</td>
+                <td class="text-right">{{ credit_note.subtotal_0|floatformat:2 }}</td>
             </tr>
             <tr>
-                <td class="float-right font-weight-bold">IVA {{ sale.get_iva_percent }}%</td>
-                <td class="text-right">{{ sale.total_iva|floatformat:2 }}</td>
+                <td class="float-right font-weight-bold">IVA {{ credit_note.get_iva_percent }}%</td>
+                <td class="text-right">{{ credit_note.total_iva|floatformat:2 }}</td>
             </tr>
             <tr>
                 <td class="float-right font-weight-bold">Total</td>
-                <td class="text-right">{{ sale.total|floatformat:2 }}</td>
+                <td class="text-right">{{ credit_note.total|floatformat:2 }}</td>
             </tr>
             </tbody>
         </table>
