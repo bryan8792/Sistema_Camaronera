@@ -12,7 +12,7 @@ var debts_pay = {
             parameters['start_date'] = '';
             parameters['end_date'] = '';
         }
-        tblDebtsPay = $('#data').DataTable({
+        tblDebtsPay = $('#tblCtasPagar').DataTable({
             autoWidth: false,
             destroy: true,
             ajax: {
@@ -105,7 +105,7 @@ $(function () {
         debts_pay.list(true);
     });
 
-    $('#data tbody')
+    $('#tblCtasPagar tbody')
         .off()
         .on('click', 'a[rel="payments"]', function () {
             $('.tooltip').remove();

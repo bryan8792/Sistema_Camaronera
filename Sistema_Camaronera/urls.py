@@ -42,6 +42,7 @@ urlpatterns = [
     path('venta/', include('app_venta.urls')),
     path('cuentasCobrar/', include('app_cuentasCobrar.urls')),
     path('cuentasPagar/', include('app_cuentasPagar.urls')),
+    path('notaCredito/', include('app_notaCredito.urls')),
     path('filemanager/', include('app_filemanager.urls')),
 
 ]

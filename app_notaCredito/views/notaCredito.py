@@ -13,7 +13,7 @@ from app_reportes.forms import ReportForm
 
 
 class CreditNoteListView(FormView):
-    template_name = 'credit_note/admin/list.html'
+    template_name = 'app_notaCredito/admin/list.html'
     form_class = ReportForm
     permission_required = 'view_credit_note'
 
@@ -56,10 +56,9 @@ class CreditNoteListView(FormView):
 
 class CreditNoteCreateView(CreateView):
     model = CreditNote
-    template_name = 'credit_note/admin/create.html'
+    template_name = 'app_notaCredito/admin/create.html'
     form_class = CreditNoteForm
     success_url = reverse_lazy('credit_note_admin_list')
-    permission_required = 'add_credit_note'
 
     def post(self, request, *args, **kwargs):
         action = request.POST['action']

@@ -53,7 +53,7 @@ class DebtsPayListView( FormView):
 
 class DebtsPayCreateView(CreateView):
     model = DebtsPay
-    template_name = 'debts_pay/create.html'
+    template_name = 'app_cuentasPagar/create.html'
     form_class = PaymentsDebtsPayForm
     success_url = reverse_lazy('debts_pay_list')
 
