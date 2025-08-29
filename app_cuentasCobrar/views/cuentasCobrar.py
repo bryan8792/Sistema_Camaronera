@@ -47,6 +47,7 @@ class CtasCollectListView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Cuentas por Cobrar'
+        context['nombre'] = 'Cuentas por Cobrar'
         context['create_url'] = reverse_lazy('ctas_collect_create')
         return context
 
@@ -87,6 +88,7 @@ class CtasCollectCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
         context['title'] = 'Nuevo registro de un Pago'
+        context['nombre'] = 'Cuentas por Cobrar'
         context['list_url'] = self.success_url
         context['action'] = 'add'
         return context

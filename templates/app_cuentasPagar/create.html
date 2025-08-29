@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block head %}
+
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/bootstrap-touchspin-4.2.5/css/jquery.bootstrap-touchspin.css' %}"/>
+    <script src="{% static 'lib/bootstrap-touchspin-4.2.5/js/jquery.bootstrap-touchspin.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus-bootstrap-4.5.37.0/js/tempusdominus-bootstrap.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/tempusdominus-bootstrap-4.5.37.0/css/tempusdominus-bootstrap.css' %}"/>
+    <script src="{% static 'acciones/app_cuentasCobrar/js/form.js' %}"></script>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <!-- Main content -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Registro de {{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+
+    <!-- /.container-fluid -->
+    <section class="content">
+        <form class="form fv-plugins-bootstrap fv-plugins-framework" method="post" action="."
+              enctype="multipart/form-data" id="frmForm" autocomplete="off">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="card">
+                        <!-- /.card-header -->
+                        <div class="card-header">
+                            <h3 class="card-title">Registro de: <strong> {{ nombre }}</strong></h3>
+                        </div>
+
+                        <!-- /.card-body -->
+                        <div class="card-body">
+
+                            <div class="form-group">
+                                <label>{{ form.debts_pay.label }}:</label>
+                                {{ form.debts_pay }}
+                            </div>
+                            <div class="form-group">
+                                <label>{{ form.date_joined.label }}:</label>
+                                {{ form.date_joined }}
+                            </div>
+                            <div class="form-group">
+                                <label>{{ form.valor.label }}:</label> <span
+                                    class="badge badge-secondary badge-pill deuda">Deuda: $0.00</span>
+                                {{ form.valor }}
+                            </div>
+                            <div class="form-group">
+                                <label>{{ form.description.label }}:</label>
+                                {{ form.description }}
+                            </div>
+
+
+                        </div>
+
+                        <!-- /.card-footer -->
+                        <div class="class card-footer">
+
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <button type="submit" class="btn btn-primary btn-flat">
+                                        <i class="fas fa-save"></i> Guardar registro
+                                    </button>
+                                    <a href="{% url 'app_cuentasCobrar:ctas_collect_list' %}"
+                                       class="btn btn-danger">
+                                        <i class="fas fa-times"></i> Cancelar
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col -->
+
+            <!-- /.row -->
+        </form>
+    </section>
+    <!-- /.content -->
+    <div id="myModalPayments" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bold">
+                        <i class="fa fa-search"></i> Listado de Pagos
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <table style="width:100%;" class="table table-bordered table-sm" id="tblPayments">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 10%;">Id</th>
+                                        <th style="width: 30%;">Fecha de registro</th>
+                                        <th style="width: 20%;">Valor</th>
+                                        <th style="width: 25%;">Detalles</th>
+                                        <th style="width: 15%;">Opciones</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
