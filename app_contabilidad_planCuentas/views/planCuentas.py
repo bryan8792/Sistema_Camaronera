@@ -10,7 +10,7 @@ from openpyxl import load_workbook
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.template import RequestContext, loader
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
@@ -761,47 +761,113 @@ class crearTransaccionPlanView(CreateView):
         return context
 
 
+# class TransaccionInvoicePdfView(View):
+#
+#     def get(self, request, *args, **kwargs):
+#         try:
+#             template = get_template('app_reportes/reporte_transaccion.html')
+#
+#             encabezado = EncabezadoCuentasPlanCuenta.objects.get(pk=self.kwargs['pk'])
+#             detalle = DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=encabezado)
+#
+#             print('encabezado')
+#             print(encabezado)
+#             print("detalle")
+#             print(detalle)
+#
+#             # Acceso correcto a empresa según tu modelo
+#             empresa = getattr(encabezado, 'empresa', None)
+#             empresa_nombre = empresa.nombre if empresa else ''  # <-- CORREGIDO
+#
+#             # Totales calculados en Python
+#             total_debe = detalle.aggregate(total=Sum('debe'))['total'] or 0
+#             total_haber = detalle.aggregate(total=Sum('haber'))['total'] or 0
+#
+#             context = {
+#                 'sale': encabezado,
+#                 'comp': {
+#                     'name': 'INDUSTRIA PESQUERA',
+#                     'address': 'MACHALA - EL ORO - ECUADOR',
+#                     'numero': '(072) 920 371',
+#                     'comprobante': 'COMPROBANTE DE INGRESOS DE PRODUCTOS'
+#                 },
+#                 'icon': '{}{}'.format(settings.MEDIA_URL, 'logo.png'),
+#                 'empresa': empresa_nombre,
+#                 'detalle_fac': detalle,
+#                 'total_debe': total_debe,
+#                 'total_haber': total_haber,
+#             }
+#
+#             html = template.render(context)
+#             css_url = os.path.join(settings.BASE_DIR, 'static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css')
+#             pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(stylesheets=[CSS(css_url)])
+#
+#             return HttpResponse(pdf, content_type='application/pdf')
+#         except Exception as e:
+#             print("Error en PDF:", e)
+#             return HttpResponseRedirect(
+#                 reverse_lazy('app_planCuentas:reporte_pdf', kwargs={'pk': self.kwargs['pk']})
+#             )
+
+
+
 class TransaccionInvoicePdfView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            template = get_template('app_reportes/reporte_transaccion.html')
+            # Encabezado (pk de la URL)
+            encabezado = get_object_or_404(
+                EncabezadoCuentasPlanCuenta.objects.select_related("empresa"),
+                pk=self.kwargs['pk']
+            )
 
-            encabezado = EncabezadoCuentasPlanCuenta.objects.get(pk=self.kwargs['pk'])
-            detalle = DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=encabezado)
+            # Detalle relacionado (optimizado)
+            detalles = (
+                DetalleCuentasPlanCuenta.objects
+                .filter(encabezadocuentaplan=encabezado)
+                .select_related("cuenta")  # ⚡ reduce queries
+                .order_by("id")
+            )
 
-            # Acceso correcto a empresa según tu modelo
-            empresa = getattr(encabezado, 'empresa', None)
-            empresa_nombre = empresa.nombre if empresa else ''  # <-- CORREGIDO
+            # Totales en una sola consulta
+            totales = detalles.aggregate(
+                total_debe=Sum("debe"),
+                total_haber=Sum("haber")
+            )
+            total_debe = totales["total_debe"] or 0
+            total_haber = totales["total_haber"] or 0
+            diferencia = total_debe - total_haber
 
-            # Totales calculados en Python
-            total_debe = detalle.aggregate(total=Sum('debe'))['total'] or 0
-            total_haber = detalle.aggregate(total=Sum('haber'))['total'] or 0
-
+            # Contexto
             context = {
-                'sale': encabezado,
-                'comp': {
-                    'name': 'INDUSTRIA PESQUERA',
-                    'address': 'MACHALA - EL ORO - ECUADOR',
-                    'numero': '(072) 920 371',
-                    'comprobante': 'COMPROBANTE DE INGRESOS DE PRODUCTOS'
-                },
-                'icon': '{}{}'.format(settings.MEDIA_URL, 'logo.png'),
-                'empresa': empresa_nombre,
-                'detalle_fac': detalle,
-                'total_debe': total_debe,
-                'total_haber': total_haber,
+                "encabezado": encabezado,
+                "detalles": detalles,
+                "empresa": encabezado.empresa,
+                "total_debe": total_debe,
+                "total_haber": total_haber,
+                "diferencia": diferencia,
+                "icon": f"{settings.MEDIA_URL}logo.png",
             }
 
+            # Render HTML
+            template = get_template("app_reportes/reporte_transaccion.html")
             html = template.render(context)
-            css_url = os.path.join(settings.BASE_DIR, 'static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css')
-            pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(stylesheets=[CSS(css_url)])
 
-            return HttpResponse(pdf, content_type='application/pdf')
+            # PDF con Bootstrap
+            css_url = os.path.join(
+                settings.BASE_DIR,
+                "static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css"
+            )
+            pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
+                stylesheets=[CSS(css_url)]
+            )
+
+            return HttpResponse(pdf, content_type="application/pdf")
+
         except Exception as e:
-            print("Error en PDF:", e)
+            print("❌ Error en PDF:", e)
             return HttpResponseRedirect(
-                reverse_lazy('app_planCuentas:reporte_pdf', kwargs={'pk': self.kwargs['pk']})
+                reverse_lazy("app_planCuentas:reporte_pdf", kwargs={"pk": self.kwargs["pk"]})
             )
 
 

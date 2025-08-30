@@ -50,6 +50,7 @@ class CreditNoteListView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Notas de Credito'
+        context['nombre'] = 'Notas de Credito'
         context['create_url'] = reverse_lazy('credit_note_admin_create')
         return context
 

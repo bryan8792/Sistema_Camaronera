@@ -47,6 +47,7 @@ class DebtsPayListView( FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['title'] = 'Listado de Cuentas por Pagar'
+        context['nombre'] = 'Cuentas por Pagar'
         context['create_url'] = reverse_lazy('debts_pay_create')
         return context
 
