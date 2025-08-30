@@ -97,9 +97,9 @@ $(function () {
                     console.log(type)
                     var buttons = '';
                     buttons += '<a href="/planCuentas/transaccionbio/editar/'+ row.id + '/" class="btn btn-warning btn-xs btn-flat"><i class="fas fa-edit"></i></a> ';
-                    /*buttons += '&nbsp';
-                    buttons += '<a href="#" target="_blank" class="btn btn-info btn-xs"><i class="fas fa-file-pdf"></i></a>';
                     buttons += '&nbsp';
+                    buttons += '<a href="/planCuentas/reporte/pdf/' + row.id + '/" target="_blank" class="btn btn-info btn-xs"><i class="fas fa-file-pdf"></i></a>';
+                    /*buttons += '&nbsp';
                     buttons += '<a href="#" class="btn btn-danger btn-xs"><i class="fas fa-trash"></i></a>';*/
                     return buttons;
                 }

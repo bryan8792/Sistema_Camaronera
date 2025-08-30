@@ -1,9 +1,11 @@
 import json
 import os
 from datetime import datetime
+from django.conf import settings
 from io import BytesIO
 import xlsxwriter
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.template.loader import get_template
 from openpyxl import load_workbook
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -27,6 +29,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import transaction
 from django.db.models import Sum, F, Q
+from weasyprint import HTML, CSS
 from django.db.models.functions import Coalesce
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -756,6 +759,53 @@ class crearTransaccionPlanView(CreateView):
         context['planCuenta2'] = planCuenta2
         context['det'] = []
         return context
+
+
+class TransaccionInvoicePdfView(View):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            template = get_template('app_reportes/reporte_transaccion.html')
+
+            encabezado = EncabezadoCuentasPlanCuenta.objects.get(pk=self.kwargs['pk'])
+            detalle = DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=encabezado)
+
+            # Acceso correcto a empresa según tu modelo
+            empresa = getattr(encabezado, 'empresa', None)
+            empresa_nombre = empresa.nombre if empresa else ''  # <-- CORREGIDO
+
+            # Totales calculados en Python
+            total_debe = detalle.aggregate(total=Sum('debe'))['total'] or 0
+            total_haber = detalle.aggregate(total=Sum('haber'))['total'] or 0
+
+            context = {
+                'sale': encabezado,
+                'comp': {
+                    'name': 'INDUSTRIA PESQUERA',
+                    'address': 'MACHALA - EL ORO - ECUADOR',
+                    'numero': '(072) 920 371',
+                    'comprobante': 'COMPROBANTE DE INGRESOS DE PRODUCTOS'
+                },
+                'icon': '{}{}'.format(settings.MEDIA_URL, 'logo.png'),
+                'empresa': empresa_nombre,
+                'detalle_fac': detalle,
+                'total_debe': total_debe,
+                'total_haber': total_haber,
+            }
+
+            html = template.render(context)
+            css_url = os.path.join(settings.BASE_DIR, 'static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css')
+            pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(stylesheets=[CSS(css_url)])
+
+            return HttpResponse(pdf, content_type='application/pdf')
+        except Exception as e:
+            print("Error en PDF:", e)
+            return HttpResponseRedirect(
+                reverse_lazy('app_planCuentas:reporte_pdf', kwargs={'pk': self.kwargs['pk']})
+            )
+
+
+
 
 
 # # CREAR TRANSACCIONES DEL PLAN DE CUENTAS

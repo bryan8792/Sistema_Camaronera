@@ -26,6 +26,7 @@ urlpatterns = [
     # REQUISITOS PARA EL MODULO TRANSACCION DEL PLAN DE CUENTAS
     path('transaccionpsm/listar/', listarTransaccionPlanView.as_view(), name='listar_transaccionPlan'),
     path('transaccionbio/listar/', listarTransaccionPlanBIOView.as_view(), name='listar_transaccionPlan_bio'),
+    path('reporte/pdf/<int:pk>/', TransaccionInvoicePdfView.as_view(), name='reporte_pdf'),
     path('transaccion/crear/', crearTransaccionPlanView.as_view(), name='crear_transaccionPlan'),
     path('transaccionbio/crear/', crearTransaccionPlanBIOView.as_view(), name='crear_transaccionPlan_bio'),
     path('transaccion/editar/<int:pk>/', editarTransaccionPlanView.as_view(), name='editar_transaccionPlan'),
