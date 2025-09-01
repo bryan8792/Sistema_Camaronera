@@ -6,6 +6,128 @@ var deb = 0.00, hab = 0.00;
 var date_now = new moment().format('YYYY-MM-DD');
 const fecha_actual = new Date();
 
+
+
+// ======================= VARIABLES GLOBALES DE BÚSQUEDA =======================
+var currentPage = 1;
+var totalPages = 1;
+var isLoadingMore = false;
+var allPlanData = [];
+var currentSearchTerm = "";
+var currentSearchType = "all"; // 'all', 'exact', 'partial'
+var planCuentasCache = null;
+var lastLoadTime = null;
+var CACHE_DURATION = 3600000; // 1 hora en ms
+var isLoadingPlan = false;
+var isSearchActive = false;
+var originalSearchTerm = "";
+
+// ======================= FUNCIONES AUXILIARES =======================
+
+function updateSearchStatus(message) {
+  const $status = $("#searchStatus");
+  $status.html(`<small class="text-info"><i class="fas fa-info-circle"></i> ${message}</small>`);
+  $status.show();
+}
+
+function showErrorMessage(message) {
+  $("#table-tree").html(`
+        <tr>
+            <td colspan="4" class="text-center text-danger p-3">
+                <i class="fas fa-exclamation-triangle mb-2"></i>
+                <p class="mb-2">${message}</p>
+                <button class="btn btn-sm btn-primary" onclick="loadPlanCuentasBIO(true)">
+                    <i class="fas fa-redo"></i> Reintentar
+                </button>
+            </td>
+        </tr>
+    `);
+}
+
+function showTemporaryMessage(message, type = "info") {
+  const alertClass =
+    type === "success"
+      ? "alert-success"
+      : type === "warning"
+      ? "alert-warning"
+      : type === "error"
+      ? "alert-danger"
+      : "alert-info";
+
+  const $alert = $(`
+    <div class="alert ${alertClass} alert-dismissible fade show temporary-alert" role="alert">
+      <i class="fas fa-${type === "success" ? "check" : "info"}-circle"></i> ${message}
+      <button type="button" class="close" data-dismiss="alert">
+        <span>&times;</span>
+      </button>
+    </div>
+  `);
+
+  $(".table-responsive").first().prepend($alert);
+
+  setTimeout(() => {
+    $alert.fadeOut(() => $alert.remove());
+  }, 3000);
+}
+
+function generarCodigoSecuencial(tipoCuenta) {
+  const action = $('input[name="action"]').val();
+
+  if (action === "edit") {
+    const codigoOriginal = $('input[name="codigo"]').val();
+    return Promise.resolve(codigoOriginal);
+  }
+
+  $('input[name="codigo"]').val("Generando...");
+  const fechaActual = new Date();
+  let mes = fechaActual.getMonth() + 1;
+  mes = mes < 10 ? "0" + mes : mes.toString();
+
+  let digitoTipo = "1";
+  const tipoCuentaTexto = $('select[name="tip_cuenta"] option:selected').text().trim();
+  if (tipoCuentaTexto === "COMPROBANTE PAGO") digitoTipo = "2";
+  else if (tipoCuentaTexto === "INGRESO A CAJA") digitoTipo = "3";
+  else if (tipoCuentaTexto === "EGRESO DE CAJA") digitoTipo = "4";
+
+  return new Promise((resolve) => {
+    $.ajax({
+      url: window.location.pathname,
+      type: "POST",
+      data: {
+        action: "obtener_ultima_secuencia",
+        mes: mes,
+        tipo: digitoTipo,
+      },
+      dataType: "json",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      success: (response) => {
+        if (response.es_edicion) {
+          resolve(response.codigo_original);
+          return;
+        }
+
+        let ultimaSecuencia = response.secuencia !== undefined ? parseInt(response.secuencia) : 0;
+        const siguienteSecuencia = ultimaSecuencia + 1;
+        const secuenciaFormateada =
+          siguienteSecuencia < 10
+            ? "00" + siguienteSecuencia
+            : siguienteSecuencia < 100
+            ? "0" + siguienteSecuencia
+            : siguienteSecuencia.toString();
+
+        const codigoFinal = mes + digitoTipo + secuenciaFormateada;
+        resolve(codigoFinal);
+      },
+      error: () => {
+        const codigoFinal = mes + digitoTipo + "001";
+        resolve(codigoFinal);
+      },
+    });
+  });
+}
+
 var vents = {
     items: {
         codigo: 0,
@@ -39,13 +161,20 @@ var vents = {
         console.log(debe)
         console.log(haber)
         calculos_prod(this.items.products, debe, haber);
-
         /*$('input[name="debe_resp"]').val(this.items.debe.toFixed(2));
         $('input[name="haber_resp"]').val(this.items.haber.toFixed(2));*/
     },
     add: function (item) {
-        console.log('item: ', item)
-        this.items.products.push(item);
+        // Asegurarse que tenga todas las claves necesarias
+        const nuevoItem = {
+            id: item.id || '',
+            codigo: item.codigo || '',   // 👈 Garantiza que exista 'codigo'
+            nombre: item.nombre || '',
+            detalle: item.detalle || '',
+            debe: parseFloat(item.debe || 0).toFixed(2),
+            haber: parseFloat(item.haber || 0).toFixed(2),
+        };
+        this.items.products.push(nuevoItem);
         this.list();
     },
     searchVoucherNumber: function () {
@@ -73,7 +202,7 @@ var vents = {
         }
 
         $.ajax({
-            url: window.location.pathname, // Ruta actual de la vista
+            url: window.location.pathname,
             data: {
                 action: 'search_voucher_number',
                 receipt: receipt,
@@ -121,9 +250,8 @@ var vents = {
             return;
         }
 
-
         $.ajax({
-            url: window.location.pathname, // Ruta actual de la vista
+            url: window.location.pathname,
             data: {
                 action: 'search_recibo',
                 company: company,
@@ -236,7 +364,6 @@ var vents = {
                 {"data": "detalle", "width": "47%"},
                 {"data": "debe", "width": "10%"},
                 {"data": "haber", "width": "10%"},
-
             ],
             columnDefs: [
                 {
@@ -367,30 +494,6 @@ var vents = {
     }
 };
 
-function formatRepo(repo) {
-    if (repo.loading) {
-        return repo.text;
-    }
-
-    var option = $(
-        '<div class="wrapper container">' +
-        '<div class="row">' +
-        '<div class="col-lg-1">' +
-        '<i class=\'fa fa-sort-amount-down-alt\'></i>' +
-        '</div>' +
-        '<div class="col-lg-11">' +
-        '<p style="margin-bottom: 0;">' +
-        '<b>Codigo:</b>' + '&nbsp;&nbsp;&nbsp;' + repo.codigo + '<br>' +
-        '<b>Nombre:</b>' + '&nbsp;&nbsp;' + repo.nombre + '<br>' +
-        '<b>Nivel:</b>' + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + repo.nivel + '<br>' +
-        '<b>Detalle de Cuenta Padre:</b>' + '&nbsp;&nbsp;' + repo.cuenta_padre + '<br>' +
-        '</p>' +
-        '</div>' +
-        '</div>' +
-        '</div>');
-
-    return option;
-}
 
 
 
