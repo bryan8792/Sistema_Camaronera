@@ -82,7 +82,7 @@ $(function () {
                 class: 'text-center',
                 orderable: false,
                 render: function (data, type, row) {
-                    var buttons = '<a href="/factura/editar/' + data + '/" class="btn btn-primary btn-xs"><i class="fas fa-edit"></i></a>';
+                    var buttons = '<a href="/factura/editar/' + data + '/" class="btn btn-info btn-xs"><i class="fas fa-edit"></i></a>';
                     buttons += '&nbsp';
                     buttons += '<a href="/factura/reporte/pdf/' + row.id + '/" target="_blank" class="btn btn-info btn-xs"><i class="fas fa-file-pdf"></i></a>';
                     buttons += '&nbsp';

@@ -1,8 +1,10 @@
 import json
 import os
+import re
 from datetime import datetime
 from io import BytesIO
 import xlsxwriter
+from django.core.paginator import Paginator
 from openpyxl import load_workbook
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -354,32 +356,35 @@ class crearFacturaGastoBIOView(CreateView):
         data = {}
         try:
             action = request.POST['action']
-            if action == 'search_plan':
-                data = []
-                empresa = request.POST['empresa']
-                print('empresa de search plan')
-                print(empresa)
-                queryset = PlanCuenta.objects.all()
-                ids_exclude = json.loads(request.POST['ids'])
-                queryset = queryset.filter(empresa__siglas=empresa).exclude(id__in=ids_exclude)
-                # if len(ids_exclude):
-                #     queryset = queryset.filter().exclude(id__in=ids_exclude)
-                for i in queryset:
-                    item = i.toJSON()
-                    item['detalle'] = ""
-                    data.append(item)
+            # if action == 'search_plan':
+            #     data = []
+            #     empresa = request.POST['empresa']
+            #     print('empresa de search plan')
+            #     print(empresa)
+            #     queryset = PlanCuenta.objects.all()
+            #     ids_exclude = json.loads(request.POST['ids'])
+            #     queryset = queryset.filter(empresa__siglas=empresa).exclude(id__in=ids_exclude)
+            #     # if len(ids_exclude):
+            #     #     queryset = queryset.filter().exclude(id__in=ids_exclude)
+            #     for i in queryset:
+            #         item = i.toJSON()
+            #         item['detalle'] = ""
+            #         data.append(item)
 
-            elif action == 'search_autocomplete':
-                data = []
-                ids_exclude = json.loads(request.POST['ids'])
-                term = request.POST['term'].strip()
-                data.append({'codigo': term, 'text': term})
-                plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
-                for i in plan_detail[0:50]:
-                    item = i.toJSON()
-                    item['codigo'] = i.codigo
-                    item['text'] = i.nombre
-                    data.append(item)
+            if action == 'search_plan':
+                return self.search_plan_improved(request)
+
+            # elif action == 'search_autocomplete':
+            #     data = []
+            #     ids_exclude = json.loads(request.POST['ids'])
+            #     term = request.POST['term'].strip()
+            #     data.append({'codigo': term, 'text': term})
+            #     plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
+            #     for i in plan_detail[0:50]:
+            #         item = i.toJSON()
+            #         item['codigo'] = i.codigo
+            #         item['text'] = i.nombre
+            #         data.append(item)
 
             elif action == 'upload_xml':
                 data = []
@@ -499,12 +504,181 @@ class crearFacturaGastoBIOView(CreateView):
                         cuerpo.haber = int(i['haber']) if i.get('haber') else 0
                         cuerpo.save()
                     data['pk'] = encabezado.pk
+
+
+
+
+            elif action == 'search_autocomplete':
+                data = []
+                ids_exclude = json.loads(request.POST.get('ids', '[]'))
+                term = request.POST.get('term', '').strip()
+
+                # Agregar el término de búsqueda como primera opción
+                data.append({'codigo': term, 'text': term, 'id': None})
+
+                # Buscar cuentas que coincidan con el término
+                plan_detail = PlanCuenta.objects.filter(
+                    Q(nombre__icontains=term) | Q(codigo__icontains=term),
+                    empresa__siglas__exact='BIO'
+                ).exclude(id__in=ids_exclude).order_by('codigo')[:50]
+
+                for i in plan_detail:
+                    item = i.toJSON()
+                    item['codigo'] = i.codigo
+                    item['text'] = f"{i.codigo} - {i.nombre}"
+                    item['id'] = int(i.id) if i.id else None
+                    data.append(item)
+
+            elif action == 'obtener_ultima_secuencia':
+                mes = request.POST.get('mes')
+                tipo = request.POST.get('tipo')
+
+                print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
+
+                try:
+                    patron_mes = mes.lstrip('0')
+                    patron1 = f"{mes}{tipo}"
+                    patron2 = f"{patron_mes}{tipo}"
+
+                    encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+                        Q(codigo__startswith=patron1) | Q(codigo__startswith=patron2)
+                    ).order_by('-codigo')
+
+                    ultima_secuencia = 0
+                    if encabezados.exists():
+                        for encabezado in encabezados:
+                            codigo = str(encabezado.codigo) if encabezado.codigo is not None else ""
+                            print(f"Analizando código: {codigo}")
+
+                            match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
+                            if match:
+                                mes_encontrado = match.group(1)
+                                tipo_encontrado = match.group(2)
+                                secuencia_str = match.group(3)
+
+                                if (mes_encontrado == mes or mes_encontrado == patron_mes) and tipo_encontrado == tipo:
+                                    try:
+                                        secuencia = int(secuencia_str)
+                                        ultima_secuencia = max(ultima_secuencia, secuencia)
+                                        print(f"Secuencia encontrada: {secuencia}")
+                                    except ValueError:
+                                        print(f"Error al convertir secuencia: {secuencia_str}")
+
+                    data['secuencia'] = ultima_secuencia
+                    print(f"Secuencia devuelta: {ultima_secuencia}")
+
+                except Exception as e:
+                    import traceback
+                    print(f"Error al buscar secuencia: {str(e)}")
+                    print(traceback.format_exc())
+                    data['secuencia'] = 0
+                    data['error'] = str(e)
+
+
             else:
                 print('erlo')
                 data['error'] = 'Ha ocurrido un error'
+
         except Exception as e:
-            data['error'] = 'el error es : ' + str(e)
+            import traceback
+            print("Error en la vista:")
+            print(traceback.format_exc())
+            data['error'] = f'Error: {str(e)}'
         return JsonResponse(data, safe=False)
+
+
+    def search_plan_improved(self, request):
+        """Función mejorada para búsqueda del plan de cuentas"""
+        try:
+            empresa = request.POST.get('empresa', 'BIO')
+            page = int(request.POST.get('page', 1))
+            page_size = int(request.POST.get('page_size', 500))
+            search_term = request.POST.get('search', '').strip()
+            search_type = request.POST.get('search_type', 'all')  # 'all', 'exact', 'partial'
+            print(f'Búsqueda: página={page}, tamaño={page_size}, término="{search_term}", tipo={search_type}')
+            # Obtener IDs a excluir
+            ids_exclude = []
+            try:
+                ids_exclude = json.loads(request.POST.get('ids', '[]'))
+            except:
+                ids_exclude = []
+            # Construir queryset base
+            queryset = PlanCuenta.objects.filter(
+                empresa__siglas__exact=empresa
+            ).exclude(id__in=ids_exclude)
+            # Aplicar filtros de búsqueda
+            if search_term:
+                if search_type == 'exact':
+                    # Búsqueda exacta por código
+                    queryset = queryset.filter(codigo__exact=search_term)
+                elif search_type == 'partial':
+                    # Búsqueda parcial
+                    queryset = queryset.filter(
+                        Q(codigo__icontains=search_term) |
+                        Q(nombre__icontains=search_term)
+                    )
+                else:
+                    # Búsqueda general (por defecto)
+                    queryset = queryset.filter(
+                        Q(codigo__icontains=search_term) |
+                        Q(nombre__icontains=search_term) |
+                        Q(tipo_cuenta__icontains=search_term)
+                    )
+            # Ordenar para consistencia
+            queryset = queryset.order_by('codigo', 'nombre')
+            total_count = queryset.count()
+            print(f'Total de registros encontrados: {total_count}')
+            # Aplicar paginación
+            paginator = Paginator(queryset, page_size)
+            try:
+                page_obj = paginator.get_page(page)
+            except:
+                page_obj = paginator.get_page(1)
+            # Convertir a JSON
+            data = []
+            for item in page_obj:
+                item_data = item.toJSON()
+                item_data['detalle'] = ""
+                data.append(item_data)
+            # Respuesta con metadatos de paginación
+            response_data = {
+                'data': data,
+                'pagination': {
+                    'current_page': page_obj.number,
+                    'total_pages': paginator.num_pages,
+                    'total_records': total_count,
+                    'has_next': page_obj.has_next(),
+                    'has_previous': page_obj.has_previous(),
+                    'page_size': page_size
+                },
+                'search_info': {
+                    'term': search_term,
+                    'type': search_type,
+                    'found_count': total_count
+                }
+            }
+
+            print(f'Enviando {len(data)} registros de {total_count} totales')
+            return JsonResponse(response_data, safe=False)
+
+        except Exception as e:
+            print(f'Error en search_plan_improved: {str(e)}')
+            import traceback
+            print(traceback.format_exc())
+
+            return JsonResponse({
+                'error': f'Error al cargar datos: {str(e)}',
+                'data': [],
+                'pagination': {
+                    'current_page': 1,
+                    'total_pages': 0,
+                    'total_records': 0,
+                    'has_next': False,
+                    'has_previous': False,
+                    'page_size': page_size
+                }
+            }, status=500)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -512,15 +686,25 @@ class crearFacturaGastoBIOView(CreateView):
         context['fac_gas'] = 'ES FACTURA DE GASTO'
         context['list_url'] = self.success_url
         context['action'] = 'create'
-        planCuenta = PlanCuenta.objects.filter(parentId=None)
+        # Filtrar solo cuentas BIO
+        planCuenta = PlanCuenta.objects.filter(parentId=None, empresa__siglas__exact='BIO')
         context['planCuenta'] = planCuenta
-        planCuenta2 = PlanCuenta.objects.all()
+        planCuenta2 = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
         context['planCuenta2'] = planCuenta2
+        context['empresa'] = 'BIO'
         context['det'] = []
         context['existe'] = False
         context['detATS'] = []
         context['frmAnextoTransaccional'] = AnextoTransaccionalForm()
+        try:
+            empresa_bio = Empresa.objects.get(siglas='BIO')
+            form = self.get_form()
+            form.fields['empresa'].initial = empresa_bio.id
+            context['form'] = form
+        except Exception as e:
+            print(f"Error al preseleccionar empresa BIO: {e}")
         return context
+
 
 
 class editarFacturaGastoView(UpdateView):

@@ -83,303 +83,80 @@
 
         <form id="frmFacturaGasto" method="post">
 
-            {% comment %}<section class="content">
-
-            <!-- /.card -->
-            <div class="card">
-                <div class="card-header" style="background-color:#3498DB">
-                    <h3 class="card-title">Ingreso del Registro:<strong> {{ nombre }}</strong></h3>
-                </div>
-
-                <!-- /.card-body -->
-                <div class="card-body">
-
-                    {% csrf_token %}
-
-                    <div class="form-group">
-                        <label for="{{ form.codigo.label }}">{{ form.codigo.label }}:</label>
-                        {{ form.codigo }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.nombre.label }}">{{ form.nombre.label }}:</label>
-                        {{ form.nombre }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.nivel.label }}">{{ form.nivel.label }}:</label>
-                        {{ form.nivel }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.tipo_cuenta.label }}">{{ form.tipo_cuenta.label }}:</label>
-                        {{ form.tipo_cuenta }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.empresa.label }}">{{ form.empresa.label }}:</label>
-                        {{ form.empresa }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.periodo.label }}">{{ form.periodo.label }}:</label>
-                        {{ form.periodo }}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="{{ form.cuentasuma.label }}">{{ form.cuentasuma.label }}:</label>
-                        {{ form.cuentasuma }}
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label for="{{ form.estado.label }}">{{ form.estado.label }}:</label>
-                            {{ form.estado }}
-                        </div>
-
-                        <div class="form-group col-md-6">
-                            <label for="{{ form.band_total.label }}">{{ form.band_total.label }}:</label>
-                            &nbsp;{{ form.band_total }}
-                        </div>
-                    </div>
-
-
-                </div>
-                <div class="card-footer navbar-white">
-                    <button type="submit" class="btn btn-primary btn-flat btnTest">
-                        <i class="fas fa-save"></i> Guardar registro
-                    </button>
-                    <a href="{% url 'app_planCuentas:listar_planCuenta' %}" class="btn btn-danger btn-file">
-                        <i class="fas fa-times"></i> Cancelar
-                    </a>
-                </div>
-
-            </div>
-
-            <!-- /.card -->
-
-            <!-- /.row -->
-        </section>{% endcomment %}
-
             <div class="container-fluid">
-                {% comment %}<div class="row">
-                    <div class="col-12">
-                        <div class="callout callout-info">
-                            <h5><i class="fas fa-info"></i> &nbsp; <strong>Información:</strong></h5>
-                            Llene todos los campos verificando que la informacion ingresada sea correcta.
-                        </div>
+                <div class="row">
 
-                        <!-- Main content -->
-                        <div class="invoice p-3 mb-3">
-                            <!-- title row -->
-                            <div class="row">
-                                <div class="col-12">
-                                    <h4>
-                                        <i class="fas fa-calculator"></i> &nbsp;<strong>Modulo de Contabilidad</strong>
-                                        <small class="float-right">
-                                            <button class="btn btn-primary" type="button" id="btnBuscarPlan">
-                                                <i class="fas fa-search"></i> <strong>Buscar Plan</strong>
+                    <div class="col-lg-4">
+                        <div class="card card-white">
+                            <div class="card-header">
+                                <h1 class="card-title"><i class="fas fa-calculator"></i>
+                                    &nbsp; <strong>Plan de Cuentas BIO:</strong>
+                                </h1>
+                            </div>
+                            <div class="card-body">
+
+                                <div class="form-group">
+                                    <label>Buscar Cuenta del Plan:</label>
+                                    <div class="input-group">
+                                        <select class="form-control select2" name="search"></select>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <!-- Contenedor de búsqueda mejorado -->
+                                <div id="searchContainer" class="search-container" style="display: none;">
+                                    <div class="buscar-container">
+                                        <label class="buscar-label">BUSCAR:</label>
+                                        <input type="search"
+                                               class="form-control form-control-sm buscar-input"
+                                               id="searchPlanInput"
+                                               placeholder="Ej: 201070101001 o nombre de cuenta...">
+                                        <div class="search-buttons">
+                                            <button type="button" class="btn btn-sm btn-warning" id="clearSearchBtn" style="display: none;">
+                                                <i class="fas fa-times"></i> Limpiar
                                             </button>
-                                        </small>
-                                    </h4>
-                                </div>
-                                <!-- /.col -->
-                            </div>
-
-                            <hr>
-
-                            <div class="row invoice-info">
-                                <input type="hidden" name="action" value="{{ action }}">
-                                <div class="col-sm-6 invoice-col">
-                                    <div class="form-group row">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Código:</label>
-                                        <div class="col-sm-3">
-                                            {{ form.codigo }}
-                                            {#                                            <input type="email" class="form-control" id="inputEmail3" placeholder="Ingresar una descripción">#}
-                                        </div>
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Tipo Cuenta:</label>
-                                        <div class="col-sm-5">
-                                            {{ form.tip_cuenta }}
-                                            {#                                            <input type="email" class="form-control" id="inputEmail3" placeholder="Ingresar una descripción">#}
                                         </div>
                                     </div>
 
-                                    <div class="form-group row">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Descripción:</label>
-                                        <div class="col-sm-10">
-                                            {{ form.descripcion }}
-                                        </div>
+                                    <div class="search-type-buttons">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="searchExactBtn">
+                                            <i class="fas fa-bullseye"></i> Exacta
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info btn-sm" id="searchPartialBtn">
+                                            <i class="fas fa-search"></i> Parcial
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success btn-sm" id="searchAllBtn">
+                                            <i class="fas fa-list"></i> Todas
+                                        </button>
                                     </div>
 
+                                    <div class="search-status mt-2" id="searchStatus" style="display: none;"></div>
                                 </div>
 
-                                <div class="col-sm-1 invoice-col"></div>
-
-                                <div class="col-sm-5 invoice-col">
-
-                                    <div class="form-group row">
-                                        <label for="inputEmail3" class="col-sm-3 col-form-label">Fecha Contable:</label>
-                                        <div class="col-sm-9">
-                                            {{ form.fecha|attr:"type:date" }}
-                                            {#                                            <input type="email" class="form-control border-width-2" id="inputEmail3" placeholder="Ingresar una fecha">#}
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <label for="inputEmail3" class="col-sm-2 col-form-label">Comprobante:</label>
-                                        <div class="col-sm-10">
-                                            {{ form.comprobante }}
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <hr>
-
-                            <!-- Table row -->
-                            <div class="row">
-                                <div class="col-12 table-responsive">
-                                    <table class="table table-striped">
-                                        <thead>
-                                        <tr>
-                                            <th>Qty</th>
-                                            <th>Product</th>
-                                            <th>Serial #</th>
-                                            <th>Description</th>
-                                            <th>Subtotal</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Call of Duty</td>
-                                            <td>455-981-221</td>
-                                            <td>El snort testosterone trophy driving gloves handsome</td>
-                                            <td>$64.50</td>
-                                        </tr>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Need for Speed IV</td>
-                                            <td>247-925-726</td>
-                                            <td>Wes Anderson umami biodiesel</td>
-                                            <td>$50.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Monsters DVD</td>
-                                            <td>735-845-642</td>
-                                            <td>Terry Richardson helvetica tousled street art master</td>
-                                            <td>$10.70</td>
-                                        </tr>
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Grown Ups Blue Ray</td>
-                                            <td>422-568-642</td>
-                                            <td>Tousled lomo letterpress</td>
-                                            <td>$25.99</td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-
-
-                                    <table class="table table-sm  table-sm" id="tbl_transaccionPlan">
-                                        <thead style="background-color:#3498DB">
-                                        <tr class="text-center">
-                                            <th>Codigo</th>
-                                            <th>Nombre</th>
-                                            <th>Detalle</th>
-                                            <th>Debe</th>
-                                            <th>Haber</th>
-                                            <th><i class="fas fa-list"></i></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        </tbody>
-                                        <tfoot>
-                                        <tr>
-                                            <th colspan="3">
-                                                <h5 class="text-left"><strong>Total:</strong></h5>
-                                            </th>
-                                            <th>
-                                                <input type="text" class="form-control text-center" readonly
-                                                       name="debe_resp" value="0.00">
-                                            </th>
-                                            <th>
-                                                <input type="text" class="form-control text-center" readonly
-                                                       name="haber_resp" value="0.00">
-                                            </th>
-                                            <th></th>
-                                        </tr>
-                                        </tfoot>
-                                    </table>
-
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <!-- accepted payments column -->
-                                <div class="col-6">
-                                    <p class="lead">Payment Methods:</p>
-                                    <img src="../../dist/img/credit/visa.png" alt="Visa">
-                                    <img src="../../dist/img/credit/mastercard.png" alt="Mastercard">
-                                    <img src="../../dist/img/credit/american-express.png" alt="American Express">
-                                    <img src="../../dist/img/credit/paypal2.png" alt="Paypal">
-
-                                    <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
-                                        Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles, weebly ning
-                                        heekya handango imeem
-                                        plugg
-                                        dopplr jibjab, movity jajah plickers sifteo edmodo ifttt zimbra.
-                                    </p>
-                                </div>
-                                <!-- /.col -->
-                                <div class="col-6">
-                                    <p class="lead">Amount Due 2/22/2014</p>
-
-                                    <div class="table-responsive">
-                                        <table class="table">
+                                <div class="row">
+                                    <div class="col-12 table-responsive">
+                                        <table id="tblSearchPlan" class="table table-sm table-striped table-bordered">
+                                            <thead>
                                             <tr>
-                                                <th style="width:50%">Subtotal:</th>
-                                                <td>$250.30</td>
+                                                <th>Código</th>
+                                                <th>Tipo</th>
+                                                <th>Nombre Cuenta</th>
+                                                <th>Agregar</th>
                                             </tr>
-                                            <tr>
-                                                <th>Tax (9.3%)</th>
-                                                <td>$10.34</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Shipping:</th>
-                                                <td>$5.80</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Total:</th>
-                                                <td>$265.24</td>
-                                            </tr>
+                                            </thead>
+                                            <tbody id="table-tree">
+                                            <!-- Contenido de la tabla -->
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>
-                                <!-- /.col -->
                             </div>
 
-                            <hr>
-
-                            <!-- this row will not appear when printing -->
-                            <div class="row no-print">
-                                <div class="col-12">
-                                    {#                                    <a href="#" rel="noopener" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>#}
-                                    <button type="button" class="btn btn-success float-left btnSave">
-                                        <i class="far fa-save"></i> Guardar
-                                    </button>
-                                    <button type="button" class="btn btn-primary float-left" style="margin-right: 5px;">
-                                        <i class="fas fa-download"></i> Generate PDF
-                                    </button>
-                                </div>
-                            </div>
                         </div>
                     </div>
-                </div>{% endcomment %}
-                <div class="row">
-                    <div class="col-lg-12">
+
+                    <div class="col-lg-8">
                         <div class="card card-white">
                             <div class="card-header">
                                 <h1 class="card-title"><i class="fas fa-book"></i>

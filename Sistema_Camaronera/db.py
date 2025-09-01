@@ -19,7 +19,7 @@ POSTGRESQL = {
         'USER': 'postgres',
         'PASSWORD': 'root',
         'HOST': 'localhost',
-        'PORT': '5434',
+        'PORT': '5432',
         'ATOMIC_REQUESTS': True,
     }
 }

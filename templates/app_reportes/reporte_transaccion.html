@@ -5,93 +5,133 @@
     <meta charset="UTF-8">
     <title>Comprobante {{ encabezado.codigo }}</title>
     <style>
-        body { font-family: "Roboto", Arial, sans-serif; font-size: 12px; color: black; margin: 30px; }
-        h3, h4, p { margin: 2px 0; }
-        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-        th, td { border: 1px solid black; padding: 5px; font-size: 11px; }
-        th { background: #f2f2f2; }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-        .no-border { border: none !important; }
-        .section-title { font-weight: bold; margin-top: 15px; text-decoration: underline; }
+        body {
+            font-family: "Roboto", Arial, sans-serif;
+            font-size: 12px;
+            color: black;
+            margin: 30px;
+        }
+
+        h3, h4, p {
+            margin: 2px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 5px;
+            font-size: 11px;
+        }
+
+        th {
+            background: #f2f2f2;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .no-border {
+            border: none !important;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 15px;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOGO -->
-    <div class="text-center">
-        <img src="{% static 'img/img_empresa/logo123.png' %}" width="160" height="70">
-    </div>
+<!-- LOGO -->
+{% comment %}<div class="text-center">
+        <img src="{% static 'img/img_empresa/logo123.png' %}" width="10" height="10">
+    </div>{% endcomment %}
 
-    <!-- EMPRESA -->
-    <h3 class="text-center" style="text-transform: uppercase;">{{ empresa.nombre|default:"NOMBRE EMPRESA" }}</h3>
-    <p class="text-center">
-        {{ empresa.direccion|default:"Dirección de la empresa" }}<br>
-        <b>Teléfono:</b> {{ empresa.telefono|default:"---" }}<br>
-        <b>COMPROBANTE CONTABLE</b>
-    </p>
+<!-- EMPRESA -->
+<h3 class="text-center" style="text-transform: uppercase;">{{ empresa.nombre|default:"NOMBRE EMPRESA" }}</h3>
+<p class="text-center">
+    {{ empresa.direccion|default:"Dirección de la empresa" }}<br>
+    <b>Teléfono:</b> {{ empresa.telefono|default:"---" }}<br>
+    <b>COMPROBANTE CONTABLE</b>
+</p>
 
-    <!-- ENCABEZADO -->
-    <table>
+<!-- ENCABEZADO -->
+<table>
+    <tr>
+        <td><b>Código:</b> {{ encabezado.codigo }}</td>
+        <td><b>Tipo:</b> {{ encabezado.tip_cuenta|default:"---" }}</td>
+        <td><b>Fecha:</b> {{ encabezado.fecha|date:"d/m/Y" }}</td>
+    </tr>
+    <tr>
+        <td><b>Comprobante:</b>
+            {% if encabezado.comprobante == 'DC' %}
+                DIARIO CONTABLE
+            {% elif encabezado.comprobante == 'RC' %}
+                RECIBO DE CAJA
+            {% elif encabezado.comprobante == 'FC' %}
+                FACTURA DE COMPRA
+            {% else %}
+                OTRO TIPO DE COMPROBANTE
+            {% endif %}
+        </td>
+        <td colspan="2"><b>Descripción:</b> {{ encabezado.descripcion }}</td>
+    </tr>
+    <tr>
+        <td><b>RUC:</b> {{ encabezado.ruc|default:"0000000000000" }}</td>
+        <td><b>Proveedor:</b> {{ encabezado.proveedor.nombre|default:"No hay proveedor registrado" }}</td>
+        <td><b>Dirección:</b> {{ encabezado.direccion|default:"---" }}</td>
+    </tr>
+</table>
+
+<!-- DETALLE -->
+<p class="section-title">Detalle de la Transacción</p>
+<table>
+    <thead>
+    <tr>
+        <th style="width: 15%;">Código</th>
+        <th style="width: 30%;">Cuenta</th>
+        <th style="width: 30%;">Detalle</th>
+        <th style="width: 12.5%;" class="text-center">Debe</th>
+        <th style="width: 12.5%;" class="text-center">Haber</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for det in detalles %}
         <tr>
-            <td><b>Código:</b> {{ encabezado.codigo }}</td>
-            <td><b>Tipo:</b> {{ encabezado.tip_cuenta|default:"---" }}</td>
-            <td><b>Fecha:</b> {{ encabezado.fecha|date:"d/m/Y" }}</td>
+            <td class="text-center">{{ det.cuenta.codigo }}</td>
+            <td>{{ det.cuenta.nombre }}</td>
+            <td>{{ det.detalle }}</td>
+            <td class="text-right">{{ det.debe|floatformat:2 }}</td>
+            <td class="text-right">{{ det.haber|floatformat:2 }}</td>
         </tr>
-        <tr>
-            <td><b>Comprobante:</b> {{ encabezado.comprobante }}</td>
-            <td colspan="2"><b>Descripción:</b> {{ encabezado.descripcion }}</td>
-        </tr>
-        <tr>
-            <td><b>RUC:</b> {{ encabezado.ruc|default:"---" }}</td>
-            <td><b>Proveedor:</b> {{ encabezado.proveedor.nombre|default:"---" }}</td>
-            <td><b>Dirección:</b> {{ encabezado.direccion|default:"---" }}</td>
-        </tr>
-    </table>
+    {% endfor %}
+    <tr>
+        <td colspan="3" class="text-right"><b>TOTALES:</b></td>
+        <td class="text-right"><b>{{ total_debe|floatformat:2 }}</b></td>
+        <td class="text-right"><b>{{ total_haber|floatformat:2 }}</b></td>
+    </tr>
+    </tbody>
+</table>
 
-    <!-- DETALLE -->
-    <p class="section-title">Detalle de la Transacción</p>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 15%;">Código</th>
-                <th style="width: 30%;">Cuenta</th>
-                <th style="width: 30%;">Detalle</th>
-                <th style="width: 12.5%;" class="text-center">Debe</th>
-                <th style="width: 12.5%;" class="text-center">Haber</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for det in detalles %}
-            <tr>
-                <td class="text-center">{{ det.cuenta.codigo }}</td>
-                <td>{{ det.cuenta.nombre }}</td>
-                <td>{{ det.detalle }}</td>
-                <td class="text-right">{{ det.debe|floatformat:2 }}</td>
-                <td class="text-right">{{ det.haber|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-            <tr>
-                <td colspan="3" class="text-right"><b>TOTALES:</b></td>
-                <td class="text-right"><b>{{ total_debe|floatformat:2 }}</b></td>
-                <td class="text-right"><b>{{ total_haber|floatformat:2 }}</b></td>
-            </tr>
-            <tr>
-                <td colspan="5" class="text-center">
-                    <b>DIFERENCIA:</b> {{ diferencia|floatformat:2 }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- FIRMAS -->
-    <table class="no-border" style="margin-top: 50px;">
-        <tr class="no-border">
-            <td class="no-border text-center">-------------------------------<br>ELABORADO</td>
-            <td class="no-border text-center">-------------------------------<br>REVISADO</td>
-            <td class="no-border text-center">-------------------------------<br>VISTO BUENO</td>
-        </tr>
-    </table>
+<!-- FIRMAS -->
+<table class="no-border" style="margin-top: 50px;">
+    <tr class="no-border">
+        <td class="no-border text-center">-------------------------------<br>ELABORADO</td>
+        <td class="no-border text-center">-------------------------------<br>REVISADO</td>
+        <td class="no-border text-center">-------------------------------<br>VISTO BUENO</td>
+    </tr>
+</table>
 
 </body>
 </html>

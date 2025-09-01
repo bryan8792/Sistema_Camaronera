@@ -810,18 +810,15 @@ class crearTransaccionPlanView(CreateView):
 #             )
 
 
-
 class TransaccionInvoicePdfView(View):
 
     def get(self, request, *args, **kwargs):
         try:
-            # Encabezado (pk de la URL)
             encabezado = get_object_or_404(
                 EncabezadoCuentasPlanCuenta.objects.select_related("empresa"),
                 pk=self.kwargs['pk']
             )
 
-            # Detalle relacionado (optimizado)
             detalles = (
                 DetalleCuentasPlanCuenta.objects
                 .filter(encabezadocuentaplan=encabezado)
@@ -829,7 +826,6 @@ class TransaccionInvoicePdfView(View):
                 .order_by("id")
             )
 
-            # Totales en una sola consulta
             totales = detalles.aggregate(
                 total_debe=Sum("debe"),
                 total_haber=Sum("haber")
@@ -838,7 +834,6 @@ class TransaccionInvoicePdfView(View):
             total_haber = totales["total_haber"] or 0
             diferencia = total_debe - total_haber
 
-            # Contexto
             context = {
                 "encabezado": encabezado,
                 "detalles": detalles,
@@ -849,28 +844,15 @@ class TransaccionInvoicePdfView(View):
                 "icon": f"{settings.MEDIA_URL}logo.png",
             }
 
-            # Render HTML
             template = get_template("app_reportes/reporte_transaccion.html")
             html = template.render(context)
-
-            # PDF con Bootstrap
-            css_url = os.path.join(
-                settings.BASE_DIR,
-                "static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css"
-            )
-            pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(
-                stylesheets=[CSS(css_url)]
-            )
-
+            css_url = os.path.join(settings.BASE_DIR, "static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css")
+            pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(stylesheets=[CSS(css_url)])
             return HttpResponse(pdf, content_type="application/pdf")
 
         except Exception as e:
             print("❌ Error en PDF:", e)
-            return HttpResponseRedirect(
-                reverse_lazy("app_planCuentas:reporte_pdf", kwargs={"pk": self.kwargs["pk"]})
-            )
-
-
+            return HttpResponseRedirect(reverse_lazy("app_planCuentas:reporte_pdf", kwargs={"pk": self.kwargs["pk"]}))
 
 
 
@@ -1127,51 +1109,39 @@ class crearTransaccionPlanBIOView(CreateView):
             search_term = request.POST.get('search', '').strip()
             search_type = request.POST.get('search_type', 'all')  # 'all', 'exact', 'partial'
             print(f'Búsqueda: página={page}, tamaño={page_size}, término="{search_term}", tipo={search_type}')
-            # Obtener IDs a excluir
             ids_exclude = []
             try:
                 ids_exclude = json.loads(request.POST.get('ids', '[]'))
             except:
                 ids_exclude = []
-            # Construir queryset base
-            queryset = PlanCuenta.objects.filter(
-                empresa__siglas__exact=empresa
-            ).exclude(id__in=ids_exclude)
-            # Aplicar filtros de búsqueda
+            queryset = PlanCuenta.objects.filter(empresa__siglas__exact=empresa).exclude(id__in=ids_exclude)
             if search_term:
                 if search_type == 'exact':
-                    # Búsqueda exacta por código
                     queryset = queryset.filter(codigo__exact=search_term)
                 elif search_type == 'partial':
-                    # Búsqueda parcial
                     queryset = queryset.filter(
                         Q(codigo__icontains=search_term) |
                         Q(nombre__icontains=search_term)
                     )
                 else:
-                    # Búsqueda general (por defecto)
                     queryset = queryset.filter(
                         Q(codigo__icontains=search_term) |
                         Q(nombre__icontains=search_term) |
                         Q(tipo_cuenta__icontains=search_term)
                     )
-            # Ordenar para consistencia
             queryset = queryset.order_by('codigo', 'nombre')
             total_count = queryset.count()
             print(f'Total de registros encontrados: {total_count}')
-            # Aplicar paginación
             paginator = Paginator(queryset, page_size)
             try:
                 page_obj = paginator.get_page(page)
             except:
                 page_obj = paginator.get_page(1)
-            # Convertir a JSON
             data = []
             for item in page_obj:
                 item_data = item.toJSON()
                 item_data['detalle'] = ""
                 data.append(item_data)
-            # Respuesta con metadatos de paginación
             response_data = {
                 'data': data,
                 'pagination': {
@@ -1188,7 +1158,6 @@ class crearTransaccionPlanBIOView(CreateView):
                     'found_count': total_count
                 }
             }
-
             print(f'Enviando {len(data)} registros de {total_count} totales')
             return JsonResponse(response_data, safe=False)
 
@@ -1215,15 +1184,12 @@ class crearTransaccionPlanBIOView(CreateView):
         context['nombre'] = 'Formulario de Registro de Transacción'
         context['list_url'] = self.success_url
         context['action'] = 'create'
-
-        # Filtrar solo cuentas BIO
         planCuenta = PlanCuenta.objects.filter(parentId=None, empresa__siglas__exact='BIO')
         context['planCuenta'] = planCuenta
         planCuenta2 = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
         context['planCuenta2'] = planCuenta2
         context['empresa'] = 'BIO'
         context['det'] = []
-
         try:
             empresa_bio = Empresa.objects.get(siglas='BIO')
             form = self.get_form()
@@ -1231,7 +1197,6 @@ class crearTransaccionPlanBIOView(CreateView):
             context['form'] = form
         except Exception as e:
             print(f"Error al preseleccionar empresa BIO: {e}")
-
         return context
 
 
