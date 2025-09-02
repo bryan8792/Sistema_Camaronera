@@ -2,6 +2,7 @@ import json
 import os
 import re
 from datetime import datetime
+from decimal import Decimal
 from io import BytesIO
 import xlsxwriter
 from django.core.paginator import Paginator
@@ -472,38 +473,70 @@ class crearFacturaGastoBIOView(CreateView):
                 print('llego a create')
                 print('request.POST')
                 print(request.POST)
-                # print("request.POST['empresa']")
-                # print(request.POST['empresa'])
+
                 with transaction.atomic():
                     items = json.loads(request.POST['items'])
                     encabezado = EncabezadoCuentasPlanCuenta()
                     encabezado.codigo = request.POST['codigo']
                     encabezado.tip_cuenta = request.POST['tip_cuenta']
                     encabezado.fecha = request.POST['fecha']
-                    encabezado.ruc = request.POST['ruc']
+                    encabezado.ruc = request.POST.get('ruc', '')  # evita MultiValueDictKeyError
                     encabezado.tip_transa = request.POST['tip_transa']
                     encabezado.reg_control = 'FG'
                     encabezado.empresa_id = request.POST['empresa']
-                    # empresa_id = request.POST['empresa']
-                    # print('empresa_id')
-                    # print(empresa_id)
-                    # try:
-                    #     encabezado.empresa = Empresa.objects.get(pk=empresa_id)
-                    # except Empresa.DoesNotExist:
-                    #     return JsonResponse({'error': 'La empresa especificada no existe.'}, status=400)
                     encabezado.comprobante = request.POST['comprobante']
                     encabezado.descripcion = request.POST['descripcion']
                     encabezado.direccion = request.POST['direccion']
                     encabezado.save()
+
                     for i in items:
                         cuerpo = DetalleCuentasPlanCuenta()
                         cuerpo.encabezadocuentaplan_id = encabezado.pk
                         cuerpo.cuenta_id = int(i['id'])
-                        cuerpo.detalle = i['detalle']
-                        cuerpo.debe = int(i['debe']) if i.get('debe') else 0
-                        cuerpo.haber = int(i['haber']) if i.get('haber') else 0
+                        cuerpo.detalle = i.get('detalle', '')
+                        cuerpo.debe = Decimal(i.get('debe') or 0)
+                        cuerpo.haber = Decimal(i.get('haber') or 0)
                         cuerpo.save()
+
                     data['pk'] = encabezado.pk
+
+
+            # elif action == 'create':
+            #     print('llego a create')
+            #     print('request.POST')
+            #     print(request.POST)
+            #     # print("request.POST['empresa']")
+            #     # print(request.POST['empresa'])
+            #     with transaction.atomic():
+            #         items = json.loads(request.POST['items'])
+            #         encabezado = EncabezadoCuentasPlanCuenta()
+            #         encabezado.codigo = request.POST['codigo']
+            #         encabezado.tip_cuenta = request.POST['tip_cuenta']
+            #         encabezado.fecha = request.POST['fecha']
+            #         encabezado.ruc = request.POST['ruc']
+            #         encabezado.tip_transa = request.POST['tip_transa']
+            #         encabezado.reg_control = 'FG'
+            #         encabezado.empresa_id = request.POST['empresa']
+            #         # empresa_id = request.POST['empresa']
+            #         # print('empresa_id')
+            #         # print(empresa_id)
+            #         # try:
+            #         #     encabezado.empresa = Empresa.objects.get(pk=empresa_id)
+            #         # except Empresa.DoesNotExist:
+            #         #     return JsonResponse({'error': 'La empresa especificada no existe.'}, status=400)
+            #         encabezado.comprobante = request.POST['comprobante']
+            #         encabezado.descripcion = request.POST['descripcion']
+            #         encabezado.direccion = request.POST['direccion']
+            #         encabezado.save()
+            #         for i in items:
+            #             cuerpo = DetalleCuentasPlanCuenta()
+            #             cuerpo.encabezadocuentaplan_id = encabezado.pk
+            #             cuerpo.cuenta_id = int(i['id'])
+            #             cuerpo.detalle = i['detalle']
+            #             cuerpo.debe = int(i['debe']) if i.get('debe') else 0
+            #             cuerpo.haber = int(i['haber']) if i.get('haber') else 0
+            #             cuerpo.save()
+            #         data['pk'] = encabezado.pk
 
 
 
