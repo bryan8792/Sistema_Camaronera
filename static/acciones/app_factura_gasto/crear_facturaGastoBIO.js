@@ -2096,7 +2096,7 @@ $(function () {
         // options
     });*/
 
-    $('#tblSearchPlan tbody').on('click', 'a[rel="add"]', function () {
+    /*$('#tblSearchPlan tbody').on('click', 'a[rel="add"]', function () {
         var tr = tblSearchPlan.cell($(this).closest('td, li')).index();
         var product = tblSearchPlan.row(tr.row).data();
         product.detalle = $('input[name="descripcion"]').val();
@@ -2105,7 +2105,7 @@ $(function () {
         vents.add(product);
         tblSearchPlan.row($(this).parents('tr')).remove().draw();
     });
-
+*/
 
     $('.btnAdd').on('click', function () {
         console.log('x', this);

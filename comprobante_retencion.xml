@@ -6,21 +6,21 @@
     <razonSocial>BIOCASCAJAL</razonSocial>
     <nombreComercial>BIOCASCAJAL</nombreComercial>
     <ruc>0790101804001</ruc>
-    <claveAcceso>0606202507079010180400110010020000000033046487919</claveAcceso>
+    <claveAcceso>0209202507079010180400110010020000000045376754017</claveAcceso>
     <codDoc>07</codDoc>
     <estab>001</estab>
     <ptoEmi>002</ptoEmi>
-    <secuencial>000000003</secuencial>
+    <secuencial>000000004</secuencial>
     <dirMatriz>GUAYAS / SUCRE Y 25 DE JUNIO</dirMatriz>
   </infoTributaria>
   <infoCompRetencion>
-    <fechaEmision>06/06/2025</fechaEmision>
+    <fechaEmision>02/09/2025</fechaEmision>
     <dirEstablecimiento>GUAYAS / SUCRE Y 25 DE JUNIO</dirEstablecimiento>
     <obligadoContabilidad>NO</obligadoContabilidad>
     <tipoIdentificacionSujetoRetenido>04</tipoIdentificacionSujetoRetenido>
     <parteRel>NO</parteRel>
-    <razonSocialSujetoRetenido>BIOCASCAJAL</razonSocialSujetoRetenido>
-    <identificacionSujetoRetenido>0790046617001</identificacionSujetoRetenido>
+    <razonSocialSujetoRetenido>eee</razonSocialSujetoRetenido>
+    <identificacionSujetoRetenido>0706396132001</identificacionSujetoRetenido>
     <periodoFiscal>12/2024</periodoFiscal>
   </infoCompRetencion>
   <docsSustento>
@@ -28,8 +28,8 @@
       <codSustento>02</codSustento>
       <codDocSustento>01</codDocSustento>
       <numDocSustento>001002000000313</numDocSustento>
-      <fechaEmisionDocSustento>05/06/2025</fechaEmisionDocSustento>
-      <fechaRegistroContable>05/06/2025</fechaRegistroContable>
+      <fechaEmisionDocSustento>19/08/2025</fechaEmisionDocSustento>
+      <fechaRegistroContable>19/08/2025</fechaRegistroContable>
       <numAutDocSustento>0412202401170970439700120010020000003130000031617</numAutDocSustento>
       <pagoLocExt>01</pagoLocExt>
       <totalSinImpuestos>274.45</totalSinImpuestos>
