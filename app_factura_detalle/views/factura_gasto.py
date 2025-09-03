@@ -1201,7 +1201,7 @@ class editarFacturaGastoBIOView(UpdateView):
                     recibo.sequence = recibo.sequence + 1
                     recibo.save()
                     data = {
-                        'print_url': str(reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))}
+                        'print_url': str(reverse('planCuentas:factura_gasto_bio_print_invoice', kwargs={'pk': frmATS.id}))}
                     # data = {'print_url': str(reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))}
                     print('continuaa al generate invoice')
                     if frmATS.create_electronic_invoice:

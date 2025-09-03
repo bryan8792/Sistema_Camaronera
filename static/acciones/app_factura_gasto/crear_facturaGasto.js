@@ -1072,7 +1072,7 @@ $(function () {
                         btnClass: 'btn-primary',
                         action: function () {
                             window.open(response.print_url, '_blank');
-                            location.href = '/planCuentas/fact_gasto/listar/';
+                            location.href = '/planCuentas/fact_gasto_bio/listar/';
                             $('#myModalClient').modal('hide');
                             return true;
                         }

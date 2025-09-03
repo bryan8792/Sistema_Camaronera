@@ -50,9 +50,23 @@
                             <input type="hidden" name="action" value="{{ action }}">
 
                             <div class="form-group">
-                                <label for="nombre">{{ form.ruc.label }}:</label>
-                                {{ form.ruc }}
+                                <label for="id_ruc">{{ form.ruc.label }}</label>
+                                <div class="input-group">
+                                    {{ form.ruc }}
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-info btn-flat btnSearchRUCInSRI"
+                                                id="btnSearchRUCInSRI">
+                                            <i class="fas fa-search"></i> Buscar RUC en el SRI
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="form-text text-red">Presiona el botón para autocompletar desde el
+                                    SRI.</small>
                             </div>
+                            {% comment %}
+                                <!-- Div opcional para mostrar detalle rápido -->
+                                <div id="sri_result_summary" class="mt-2" style="display:none; border-left:4px solid #17a2b8; padding:10px;"></div>
+                            {% endcomment %}
 
                             <div class="form-group">
                                 <label for="{{ form.razon_soc.label }}">{{ form.razon_soc.label }}:</label>
@@ -74,7 +88,8 @@
                                 <div class="input-group">
                                     {{ form.cod_contable }}
                                     <div class="input-group-append">
-                                        <button class="btn btn-success btn-flat btnAddClient" id="regPlan" type="button">
+                                        <button class="btn btn-success btn-flat btnAddClient" id="regPlan"
+                                                type="button">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
@@ -190,10 +205,10 @@
                         </button>
                     </div>
                     <div class="modal-body">
-{#                        <input type="hidden" name="action" value="{{ action }}">#}
+                        {#                        <input type="hidden" name="action" value="{{ action }}">#}
                         <div class="form-group">
                             <label for="email">{{ frmPlan.codigo.label }}:</label>
-                            {{  frmPlan.codigo|add_class:'form-control'|attr:'autocomplete:off' }}
+                            {{ frmPlan.codigo|add_class:'form-control'|attr:'autocomplete:off' }}
                         </div>
 
                         <div class="form-group">
@@ -228,7 +243,7 @@
 
                         <div class="form-group">
                             <label for="email">{{ frmPlan.estado.label }}:</label>
-                            {{  frmPlan.estado }}
+                            {{ frmPlan.estado }}
                         </div>
 
                     </div>

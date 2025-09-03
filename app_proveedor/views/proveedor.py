@@ -11,6 +11,7 @@ from app_contabilidad_planCuentas.forms import PlanCuentaForm
 from app_contabilidad_planCuentas.models import PlanCuenta
 from app_proveedor.forms import ProveedorForm
 from app_proveedor.models import Proveedor
+from utilities.script import SRI
 
 
 class crearProveedorView(CreateView):
@@ -48,9 +49,14 @@ class crearProveedorView(CreateView):
                     else:
                         data['error'] = frmClient.errors
 
+            elif action == 'search_ruc_in_sri':
+                ruc = request.POST.get('ruc')
+                sri = SRI()
+                result = sri.lookup_ruc(ruc=ruc)
+                return JsonResponse(result['data'], safe=False)
+
             elif action == 'create':
                 print('LLEGÓ A CREATE')
-                # Procesa los datos enviados para crear un nuevo proveedor
                 form = self.form_class(request.POST)
                 if form.is_valid():
                     proveedor = form.save()
@@ -76,6 +82,7 @@ class crearProveedorView(CreateView):
         # context['list_url'] = self.success_url
         context['entity'] = 'Llego valor'
         context['action'] = 'create'
+        context['nombre'] = 'Proveedor'
         context['estado_activo'] = False
         return context
 
