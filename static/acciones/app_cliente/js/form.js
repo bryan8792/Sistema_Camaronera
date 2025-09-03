@@ -18,19 +18,37 @@ var client = {
             dataType: 'json',
             beforeSend: function () {
                 $('input[name="names"]').val('');
+                $('input[name="address"]').val('');
             },
             success: function (request) {
                 if (!request.hasOwnProperty('error')) {
-                    $('input[name="names"]').val(request.razonSocial);
+                    // el JSON viene dentro de request.data
+                    var info = request.data;
+
+                    // llenar campos del formulario
+                    $('input[name="names"]').val(info.razonSocial || '');
+                    $('input[name="address"]').val(
+                        info.establecimientos && info.establecimientos.length > 0
+                            ? info.establecimientos[0].direccionCompleta
+                            : ''
+                    );
+
+                    // construir modal con info detallada
                     var content = '<dl>';
-                    Object.entries(request).forEach(([key, value]) => {
-                        content += '<dt>' + key.toUpperCase() + '</dt>';
-                        if (typeof (value) == "object") {
-                            content += '<dd>' + JSON.stringify(value) + '</dd>'
-                        } else {
-                            content += '<dd>' + value + '</dd>'
-                        }
-                    });
+                    content += '<dt>RUC</dt><dd>' + (info.numeroRuc || 'N/A') + '</dd>';
+                    content += '<dt>RAZÓN SOCIAL</dt><dd>' + (info.razonSocial || 'N/A') + '</dd>';
+                    content += '<dt>ESTADO</dt><dd>' + (info.estadoContribuyenteRuc || 'N/A') + '</dd>';
+                    content += '<dt>ACTIVIDAD PRINCIPAL</dt><dd>' + (info.actividadEconomicaPrincipal || 'N/A') + '</dd>';
+                    content += '<dt>TIPO CONTRIBUYENTE</dt><dd>' + (info.tipoContribuyente || 'N/A') + '</dd>';
+                    content += '<dt>RÉGIMEN</dt><dd>' + (info.regimen || 'N/A') + '</dd>';
+                    content += '<dt>OBLIGADO A LLEVAR CONTABILIDAD</dt><dd>' + (info.obligadoLlevarContabilidad || 'N/A') + '</dd>';
+                    content += '<dt>DIRECCIÓN MATRIZ</dt><dd>' +
+                        ((info.establecimientos && info.establecimientos.length > 0)
+                            ? info.establecimientos[0].direccionCompleta
+                            : 'N/A') +
+                        '</dd>';
+                    content += '</dl>';
+
                     $('#details').html(content);
                     $('#myModalSRI').modal('show');
                     return false;

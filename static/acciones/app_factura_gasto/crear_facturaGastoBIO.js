@@ -353,7 +353,7 @@ var vents = {
             responsive: true,
             autoWidth: false,
             bFilter: false,
-            scrollY: "305px",
+            scrollY: "542px",
             destroy: true,
             data: this.items.products,
             // order : [[0, 'asc']],

@@ -9,6 +9,7 @@ from django.views.generic import *
 from Sistema_Camaronera import settings
 from app_cliente.forms import ClientForm, Client, ClientUserForm
 from utilities.sri import SRI
+from utilities.script import SRI
 
 
 class ClientListView(ListView):
@@ -86,7 +87,7 @@ class ClientCreateView(CreateView):
                 elif pattern == 'email':
                     data['valid'] = not queryset.filter(user__email=parameter).exists()
             elif action == 'search_ruc_in_sri':
-                data = SRI().search_ruc_in_sri(ruc=request.POST['dni'])
+                data = SRI().lookup_ruc(ruc=request.POST['dni'])
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:
@@ -149,7 +150,7 @@ class ClientUpdateView(UpdateView):
                 elif pattern == 'email':
                     data['valid'] = not queryset.filter(user__email=parameter).exists()
             elif action == 'search_ruc_in_sri':
-                data = SRI().search_ruc_in_sri(ruc=request.POST['dni'])
+                data = SRI().lookup_ruc(ruc=request.POST['dni'])
             else:
                 data['error'] = 'No ha seleccionado ninguna opción'
         except Exception as e:

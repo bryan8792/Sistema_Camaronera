@@ -323,7 +323,7 @@ class AnexoTransaccional(models.Model):
     encabezadocuentaplan = models.ForeignKey(EncabezadoCuentasPlanCuenta, on_delete=models.CASCADE, null=True,
                                              blank=True)
     # detallecuentaplan = models.ForeignKey(DetalleCuentasPlanCuenta, on_delete=models.CASCADE, null=True, blank=True)
-    estab = models.CharField(max_length=5, default=000, verbose_name='Establecimiento')
+    estab = models.CharField(max_length=6, default=000, verbose_name='Establecimiento')
     company = models.ForeignKey(Empresa, on_delete=models.PROTECT, verbose_name='Seleccionar empresa')
     estab_serie = models.CharField(max_length=6, default=000, verbose_name='Establecimiento - Serie')
     # DATOS COMPROBANTE DE VENTA
@@ -588,10 +588,8 @@ class AnexoTransaccional(models.Model):
             ET.SubElement(detalle, "codDocSustento").text = "01" # Tipo Comprobante
             # ET.SubElement(detalle, "numDocSustento").text = self.receipt.establishment_code+self.receipt.issuing_point_code+self.voucher_number
             ET.SubElement(detalle, "numDocSustento").text = '001002000000313'
-            ET.SubElement(detalle, "fechaEmisionDocSustento").text = datetime.strptime(self.comp_fecha_em,
-                                                                                       "%Y-%m-%d").strftime("%d/%m/%Y")
-            ET.SubElement(detalle, "fechaRegistroContable").text = datetime.strptime(self.comp_fecha_reg,
-                                                                                     "%Y-%m-%d").strftime("%d/%m/%Y")
+            ET.SubElement(detalle, "fechaEmisionDocSustento").text = datetime.strptime(self.comp_fecha_em,"%Y-%m-%d").strftime("%d/%m/%Y")
+            ET.SubElement(detalle, "fechaRegistroContable").text = datetime.strptime(self.comp_fecha_reg,"%Y-%m-%d").strftime("%d/%m/%Y")
             # ET.SubElement(detalle, "numAutDocSustento").text = self.n_autoriz
             ET.SubElement(detalle, "numAutDocSustento").text = '0412202401170970439700120010020000003130000031617'
             ET.SubElement(detalle, "pagoLocExt").text = '01'
