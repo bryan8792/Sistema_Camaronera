@@ -45,7 +45,7 @@ class SRI(object):
         """
         Consulta la información de un único RUC en el SRI.
         """
-        for ruc in [ruc]:  # 👈 aquí está la adaptación que pediste
+        for ruc in [ruc]:
             try:
                 if not self.exists_ruc(ruc):
                     return {

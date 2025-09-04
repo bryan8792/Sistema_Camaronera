@@ -155,7 +155,7 @@ class listarProveedorView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Proveedores'
-        context['proveedor'] = Proveedor.objects.all()
+        # context['proveedor'] = Proveedor.objects.all()
         return context
 
 

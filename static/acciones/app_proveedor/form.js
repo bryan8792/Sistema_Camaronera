@@ -1,19 +1,13 @@
-/*
-  form.js - completo y con debug para Buscar RUC en SRI
-  Reemplaza todo el contenido actual por este archivo.
-*/
 
 (function ($) {
     "use strict";
 
-    // helper: lee cookie csrftoken si no existe la variable global csrftoken
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
             var cookies = document.cookie.split(';');
             for (var i = 0; i < cookies.length; i++) {
                 var cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
                 if (cookie.substring(0, name.length + 1) === (name + '=')) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
@@ -23,14 +17,12 @@
         return cookieValue;
     }
 
-    // asegurarnos csrftoken
     var csrftoken = window.csrftoken || getCookie('csrftoken');
 
     $(function () {
 
-        console.log('[form.js] cargado - iniciando script');
+        console.log('[form.js] cargado');
 
-        // --- SELECT2: Buscar plan contable (tu código existente) ---
         $('select[name="cod_contable"]').select2({
             theme: "bootstrap4",
             language: 'es',
@@ -40,28 +32,24 @@
                 type: 'POST',
                 url: window.location.pathname,
                 data: function (params) {
-                    var queryParameters = {
+                    return {
                         term: params.term,
                         action: 'search_clients'
                     };
-                    return queryParameters;
                 },
                 processResults: function (data) {
-                    return {
-                        results: data
-                    };
+                    return { results: data };
                 },
             },
             placeholder: 'Ingrese una descripción',
             minimumInputLength: 1,
         });
 
-        // --- Modal para crear plan contable desde proveedor ---
         $('.btnAddClient').on('click', function () {
             $('#myModalClient').modal('show');
         });
 
-        $('#myModalClient').on('hidden.bs.modal', function (e) {
+        $('#myModalClient').on('hidden.bs.modal', function () {
             $('#frmClient').trigger('reset');
         });
 
@@ -77,23 +65,14 @@
                 });
         });
 
-        // --- BOTÓN BUSCAR RUC EN EL SRI ---
-        var input_ruc = $('input[name="ruc"]'); // debe existir name="ruc"
+        var input_ruc = $('input[name="ruc"]');
         var btn_search_ruc = $('.btnSearchRUCInSRI');
-
-        // debug: mostrar si los elementos fueron localizados
-        console.log('[form.js] input_ruc.length =', input_ruc.length);
-        console.log('[form.js] btn_search_ruc.length =', btn_search_ruc.length);
 
         btn_search_ruc.on('click', function (e) {
             e.preventDefault();
-            console.log('[form.js] click en Buscar RUC');
-
             var ruc_value = input_ruc.val() ? input_ruc.val().trim() : '';
-            console.log('[form.js] ruc_value =', ruc_value);
 
             if (!ruc_value) {
-                // mensaje rápido
                 Swal.fire({
                     icon: 'warning',
                     title: 'RUC vacío',
@@ -102,71 +81,102 @@
                 return;
             }
 
-            // mostrar carga
             btn_search_ruc.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Buscando...');
 
             $.ajax({
                 url: window.location.pathname,
                 type: 'POST',
-                data: {
-                    'action': 'search_ruc_in_sri',
-                    'ruc': ruc_value
-                },
-                headers: {
-                    'X-CSRFToken': csrftoken
-                },
+                data: { action: 'search_ruc_in_sri', ruc: ruc_value },
+                headers: { 'X-CSRFToken': csrftoken },
                 dataType: 'json',
                 timeout: 20000,
             })
             .done(function (request) {
-                console.log('[form.js] AJAX done:', request);
+                if (!request) return;
 
-                // si la vista devuelve {'error': '...'} o similar
-                if (request && request.hasOwnProperty('error')) {
-                    console.warn('[form.js] respuesta con error:', request.error);
-                    message_error(request.error || 'Error en la consulta');
+                if (request.error) {
+                    Swal.fire('Error', request.error, 'error');
                     return;
                 }
 
-                // Caso normal: request contiene el objeto con claves SRI
-                // comprobamos que tenga numeroRuc o razonSocial
-                var info = request || {};
+                $('input[name="ruc"]').val(request.numeroRuc || '');
+                $('input[name="razon_soc"]').val(request.razonSocial || '');
+                $('input[name="nombre_com"]').val(request.nombreComercial || request.razonSocial || '');
+                $('input[name="actividad_com"]').val(request.actividadEconomicaPrincipal || '');
+                $('input[name="estado"]').val(request.estadoContribuyenteRuc || '');
 
-                // Si tu vista envolvía en {data: {...}} ajusta: var info = request.data || request;
-                // ejemplo: var info = request.data ? request.data : request;
-
-                // Autocompletar campos del formulario Proveedor
-                $('input[name="razon_soc"]').val(info.razonSocial || '');
-                $('input[name="nombre_com"]').val(info.razonSocial || '');
-                $('input[name="actividad_com"]').val(info.actividadEconomicaPrincipal || '');
-
-                if (info.establecimientos && info.establecimientos.length > 0) {
-                    $('input[name="direccion1"]').val(info.establecimientos[0].direccionCompleta || '');
+                if (request.establecimientos && request.establecimientos.length > 0) {
+                    var matriz = request.establecimientos.find(function (ee) {
+                        return ee.matriz === true || (typeof ee.matriz === 'string' && ee.matriz.toUpperCase() === 'SI');
+                    });
+                    if (!matriz) {
+                        matriz = request.establecimientos[0];
+                    }
+                    $('input[name="direccion1"]').val(matriz.direccionCompleta || '');
+                    $('input[name="ciudad"]').val(matriz.provincia || matriz.ciudad || '');
                 }
 
-                // si el SRI devuelve telefonos o correos en el futuro, puedes mapear aquí
-                // $('input[name="telef1"]').val(info.telefono || '');
-                // $('input[name="mail"]').val(info.correo || '');
+                var content = '<h5><strong>Información del RUC</strong></h5>';
+                content += '<table class="table table-sm table-bordered">';
+                content += '<tr><th>RUC</th><td>' + (request.numeroRuc || '') + '</td></tr>';
+                content += '<tr><th>Razón Social</th><td>' + (request.razonSocial || '') + '</td></tr>';
+                content += '<tr><th>Nombre Comercial</th><td>' + (request.nombreComercial || request.razonSocial || '') + '</td></tr>';
+                content += '<tr><th>Estado</th><td>' + (request.estadoContribuyenteRuc || '') + '</td></tr>';
+                content += '<tr><th>Tipo Contribuyente</th><td>' + (request.tipoContribuyente || '') + '</td></tr>';
+                content += '<tr><th>Actividad Principal</th><td>' + (request.actividadEconomicaPrincipal || '') + '</td></tr>';
+                content += '<tr><th>Agente Retención</th><td>' + (request.agenteRetencion || '') + '</td></tr>';
+                content += '<tr><th>Contribuyente Especial</th><td>' + (request.contribuyenteEspecial || '') + '</td></tr>';
+                content += '<tr><th>Obligado a llevar contabilidad</th><td>' + (request.obligadoLlevarContabilidad || '') + '</td></tr>';
+                content += '<tr><th>Regimen</th><td>' + (request.regimen || '') + '</td></tr>';
 
-                // mostrar resumen en pantalla (opcional)
-                var summary = '<strong>RUC:</strong> ' + (info.numeroRuc || 'N/A') + '<br>' +
-                              '<strong>Razón Social:</strong> ' + (info.razonSocial || 'N/A') + '<br>' +
-                              '<strong>Actividad:</strong> ' + (info.actividadEconomicaPrincipal || 'N/A');
+                var f = request.informacionFechasContribuyente || {};
+                content += '<tr><th>Fecha Inicio Actividades</th><td>' + (f.fechaInicioActividades || '') + '</td></tr>';
+                content += '<tr><th>Fecha Cese</th><td>' + (f.fechaCese || '') + '</td></tr>';
+                content += '<tr><th>Fecha Reinicio</th><td>' + (f.fechaReinicioActividades || '') + '</td></tr>';
+                content += '<tr><th>Última Actualización</th><td>' + (f.fechaActualizacion || '') + '</td></tr>';
+                content += '</table>';
 
-                $('#sri_result_summary').html(summary).show();
+                if (request.representantesLegales && request.representantesLegales.length) {
+                    content += '<br>';
+                    content += '<h5><strong>Representante Legal</strong></h5>';
+                    content += '<table class="table table-sm table-bordered">';
+                    content += '<tr><th>Identificación</th><th>Nombre</th></tr>';
+                    request.representantesLegales.forEach(function (r) {
+                        content += '<tr><td>' + (r.identificacion || '') + '</td><td>' + (r.nombre || '') + '</td></tr>';
+                    });
+                    content += '</table>';
+                }
 
-                console.log('[form.js] campos autocompletados OK');
+                if (request.establecimientos && request.establecimientos.length) {
+                    content += '<br>';
+                    content += '<h5><strong>Establecimientos</strong></h5>';
+                    content += '<table class="table table-sm table-bordered">';
+                    content += '<tr><th>Número</th><th>Tipo</th><th>Dirección</th><th>Estado</th><th>Matriz</th></tr>';
+                    request.establecimientos.forEach(function (e, idx) {
+                        content += '<tr>' +
+                            '<td>' + String(idx + 1).padStart(3, '0') + '</td>' +
+                            '<td>' + (e.tipoEstablecimiento || '') + '</td>' +
+                            '<td>' + (e.direccionCompleta || '') + '</td>' +
+                            '<td>' + (e.estado || '') + '</td>' +
+                            '<td>' + ((e.matriz === true || (typeof e.matriz === 'string' && e.matriz.toUpperCase() === 'SI')) ? 'SI' : 'NO') + '</td>' +
+                            '</tr>';
+                    });
+                    content += '</table>';
+                }
+
+                $('#sri_result_summary').html(content);
+                $('#myModalRUC').modal('show');
+
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
-                console.error('[form.js] AJAX fail:', textStatus, errorThrown, jqXHR);
-                var msg = 'Error en la consulta: ' + (errorThrown || textStatus);
-                message_error(msg);
+                Swal.fire('Error', 'No se pudo consultar el RUC: ' + (errorThrown || textStatus), 'error');
             })
             .always(function () {
                 btn_search_ruc.prop('disabled', false).html('<i class="fas fa-search"></i> Buscar RUC en el SRI');
             });
+
         });
 
-    }); // end ready
+    });
 
 })(jQuery);

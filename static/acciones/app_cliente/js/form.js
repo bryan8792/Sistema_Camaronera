@@ -22,7 +22,6 @@ var client = {
             },
             success: function (request) {
                 if (!request.hasOwnProperty('error')) {
-                    // el JSON viene dentro de request.data
                     var info = request.data;
 
                     // llenar campos del formulario
@@ -33,21 +32,57 @@ var client = {
                             : ''
                     );
 
-                    // construir modal con info detallada
-                    var content = '<dl>';
-                    content += '<dt>RUC</dt><dd>' + (info.numeroRuc || 'N/A') + '</dd>';
-                    content += '<dt>RAZÓN SOCIAL</dt><dd>' + (info.razonSocial || 'N/A') + '</dd>';
-                    content += '<dt>ESTADO</dt><dd>' + (info.estadoContribuyenteRuc || 'N/A') + '</dd>';
-                    content += '<dt>ACTIVIDAD PRINCIPAL</dt><dd>' + (info.actividadEconomicaPrincipal || 'N/A') + '</dd>';
-                    content += '<dt>TIPO CONTRIBUYENTE</dt><dd>' + (info.tipoContribuyente || 'N/A') + '</dd>';
-                    content += '<dt>RÉGIMEN</dt><dd>' + (info.regimen || 'N/A') + '</dd>';
-                    content += '<dt>OBLIGADO A LLEVAR CONTABILIDAD</dt><dd>' + (info.obligadoLlevarContabilidad || 'N/A') + '</dd>';
-                    content += '<dt>DIRECCIÓN MATRIZ</dt><dd>' +
-                        ((info.establecimientos && info.establecimientos.length > 0)
-                            ? info.establecimientos[0].direccionCompleta
-                            : 'N/A') +
-                        '</dd>';
-                    content += '</dl>';
+                    // 🔥 construir contenido
+                    var content = `<h5>Información del RUC</h5>
+                        <table class="table table-bordered table-sm">
+                            <tbody>
+                                <tr><th>RUC</th><td>${info.numeroRuc || ''}</td></tr>
+                                <tr><th>Razón Social</th><td>${info.razonSocial || ''}</td></tr>
+                                <tr><th>Estado</th><td>${info.estadoContribuyenteRuc || ''}</td></tr>
+                                <tr><th>Tipo Contribuyente</th><td>${info.tipoContribuyente || ''}</td></tr>
+                                <tr><th>Actividad Principal</th><td>${info.actividadEconomicaPrincipal || ''}</td></tr>
+                            </tbody>
+                        </table>`;
+
+                    // 🔹 Fechas
+                    if (info.informacionFechasContribuyente) {
+                        var fechas = info.informacionFechasContribuyente;
+                        content += `<h6 class="mt-3 font-weight-bold">Fechas del Contribuyente</h6>
+                            <table class="table table-bordered table-sm">
+                                <tbody>
+                                    <tr><th>Inicio Actividades</th><td>${fechas.fechaInicioActividades || ''}</td></tr>
+                                    <tr><th>Cese</th><td>${fechas.fechaCese || ''}</td></tr>
+                                    <tr><th>Reinicio</th><td>${fechas.fechaReinicioActividades || ''}</td></tr>
+                                    <tr><th>Última Actualización</th><td>${fechas.fechaActualizacion || ''}</td></tr>
+                                </tbody>
+                            </table>`;
+                    }
+
+                    // 🔹 Establecimientos
+                    if (info.establecimientos && info.establecimientos.length > 0) {
+                        content += `<h6 class="mt-3 font-weight-bold">Establecimientos</h6>
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        <th>Tipo</th>
+                                        <th>Dirección</th>
+                                        <th>Estado</th>
+                                        <th>Matriz</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                        info.establecimientos.forEach(est => {
+                            content += `<tr>
+                                <td>${est.numeroEstablecimiento || ''}</td>
+                                <td>${est.tipoEstablecimiento || ''}</td>
+                                <td>${est.direccionCompleta || ''}</td>
+                                <td>${est.estado || ''}</td>
+                                <td>${est.matriz || ''}</td>
+                            </tr>`;
+                        });
+                        content += `</tbody></table>`;
+                    }
 
                     $('#details').html(content);
                     $('#myModalSRI').modal('show');
@@ -80,17 +115,13 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 names: {
                     validators: {
                         notEmpty: {},
-                        stringLength: {
-                            min: 2,
-                        },
+                        stringLength: { min: 2 }
                     }
                 },
                 dni: {
                     validators: {
                         notEmpty: {},
-                        stringLength: {
-                            min: 10
-                        },
+                        stringLength: { min: 10 },
                         digits: {},
                         callback: {
                             message: 'El número de cedula o ruc es incorrecto',
@@ -109,18 +140,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
                             },
                             message: 'El número de cédula ya se encuentra registrado',
                             method: 'POST',
-                            headers: {
-                                'X-CSRFToken': csrftoken
-                            },
+                            headers: { 'X-CSRFToken': csrftoken },
                         }
                     }
                 },
                 mobile: {
                     validators: {
                         notEmpty: {},
-                        stringLength: {
-                            min: 7
-                        },
+                        stringLength: { min: 7 },
                         digits: {},
                         remote: {
                             url: pathname,
@@ -133,18 +160,14 @@ document.addEventListener('DOMContentLoaded', function (e) {
                             },
                             message: 'El número de teléfono ya se encuentra registrado',
                             method: 'POST',
-                            headers: {
-                                'X-CSRFToken': csrftoken
-                            },
+                            headers: { 'X-CSRFToken': csrftoken },
                         }
                     }
                 },
                 email: {
                     validators: {
                         notEmpty: {},
-                        stringLength: {
-                            min: 5
-                        },
+                        stringLength: { min: 5 },
                         regexp: {
                             regexp: /^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/i,
                             message: 'El formato email no es correcto'
@@ -160,30 +183,24 @@ document.addEventListener('DOMContentLoaded', function (e) {
                             },
                             message: 'El email ya se encuentra registrado',
                             method: 'POST',
-                            headers: {
-                                'X-CSRFToken': csrftoken
-                            },
+                            headers: { 'X-CSRFToken': csrftoken },
                         }
                     }
                 },
                 address: {
                     validators: {
                         notEmpty: {},
-                        stringLength: {
-                            min: 4,
-                        }
+                        stringLength: { min: 4 }
                     }
                 },
                 birthdate: {
                     validators: {
-                        notEmpty: {
-                            message: 'La fecha es obligatoria'
-                        },
+                        notEmpty: { message: 'La fecha es obligatoria' },
                         date: {
                             format: 'YYYY-MM-DD',
                             message: 'La fecha no es válida'
                         }
-                    },
+                    }
                 },
                 image: {
                     validators: {
@@ -197,25 +214,18 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 },
                 identification_type: {
                     validators: {
-                        notEmpty: {
-                            message: 'Seleccione un item'
-                        }
+                        notEmpty: { message: 'Seleccione un item' }
                     }
                 },
             },
-        }
-    )
+        })
         .on('core.element.validated', function (e) {
             if (e.valid) {
                 const groupEle = FormValidation.utils.closest(e.element, '.form-group');
                 if (groupEle) {
-                    FormValidation.utils.classSet(groupEle, {
-                        'has-success': false,
-                    });
+                    FormValidation.utils.classSet(groupEle, { 'has-success': false });
                 }
-                FormValidation.utils.classSet(e.element, {
-                    'is-valid': false,
-                });
+                FormValidation.utils.classSet(e.element, { 'is-valid': false });
             }
             const iconPlugin = fv.getPlugin('icon');
             const iconElement = iconPlugin && iconPlugin.icons.has(e.element) ? iconPlugin.icons.get(e.element) : null;
@@ -231,10 +241,7 @@ document.addEventListener('DOMContentLoaded', function (e) {
             }
         })
         .on('core.form.valid', function () {
-            var args = {
-                'params': new FormData(fv.form),
-                'form': fv.form
-            };
+            var args = { 'params': new FormData(fv.form), 'form': fv.form };
             submit_with_formdata(args);
         });
 });
@@ -242,13 +249,9 @@ document.addEventListener('DOMContentLoaded', function (e) {
 $(function () {
     input_dni = $('input[name="dni"]');
     btn_search_ruc_in_sri = $('.btnSearchRUCInSRI');
-
     input_birthdate = $('input[name="birthdate"]');
 
-    $('.select2').select2({
-        theme: 'bootstrap4',
-        language: "es"
-    });
+    $('.select2').select2({ theme: 'bootstrap4', language: "es" });
 
     input_birthdate.datetimepicker({
         useCurrent: false,
@@ -262,20 +265,18 @@ $(function () {
     });
 
     $('input[name="names"]').on('keypress', function (e) {
-        return validate_text_box({'event': e, 'type': 'letters'});
+        return validate_text_box({ 'event': e, 'type': 'letters' });
     });
 
-    input_dni
-        .on('keyup', function () {
-            var dni = $(this).val();
-            btn_search_ruc_in_sri.prop('disabled', dni.length < 10);
-        })
-        .on('keypress', function (e) {
-            return validate_text_box({'event': e, 'type': 'numbers'});
-        });
+    input_dni.on('keyup', function () {
+        var dni = $(this).val();
+        btn_search_ruc_in_sri.prop('disabled', dni.length < 10);
+    }).on('keypress', function (e) {
+        return validate_text_box({ 'event': e, 'type': 'numbers' });
+    });
 
     $('input[name="mobile"]').on('keypress', function (e) {
-        return validate_text_box({'event': e, 'type': 'numbers'});
+        return validate_text_box({ 'event': e, 'type': 'numbers' });
     });
 
     btn_search_ruc_in_sri.on('click', function () {
