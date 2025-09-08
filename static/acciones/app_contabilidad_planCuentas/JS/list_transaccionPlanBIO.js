@@ -42,7 +42,7 @@ $(function () {
                 class: 'text-center',
                 orderable: false,
                 render: function (data, type, row) {
-                     return '<b>'+ data +'</b>';
+                    return '<b>' + data + '</b>';
                 }
             },
             {
@@ -74,7 +74,7 @@ $(function () {
                 //class: 'text-center',
                 orderable: false,
                 render: function (data, type, row) {
-                    return '<b>'+ data +'</b>';
+                    return '<b>' + data + '</b>';
                 }
             },
             {
@@ -89,19 +89,19 @@ $(function () {
                 targets: [-1],
                 class: 'text-center',
                 render: function (data, type, row) {
-                    console.log('data')
-                    console.log(data)
-                    console.log('row')
-                    console.log(row)
-                    console.log('type')
-                    console.log(type)
-                    var buttons = '';
+                    var buttons = '<div class="dropdown">';
+                    buttons += '<button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">';
+                    buttons += '<i class="fas fa-list"></i> Opciones</button>';
+                    buttons += '<div class="dropdown-menu dropdown-menu-right">';
+                    buttons += '<a class="dropdown-item" href="/planCuentas/fact_gasto/editar/' + row.id + '/"><i class="fas fa-edit"></i> Actualizar</a>';
+                    buttons += '<a class="dropdown-item" href="/planCuentas/reporte/pdf/' + row.id + '/" target="_blank"><i class="fas fa-file-pdf"></i> Imprimir</a>';
+                    return buttons += '</div></div>';
+
+                    /*var buttons = '';
                     buttons += '<a href="/planCuentas/fact_gasto/editar/'+ row.id + '/" class="btn btn-warning btn-xs btn-flat"><i class="fas fa-edit"></i></a> ';
-                    /*buttons += '&nbsp';
-                    buttons += '<a href="#" target="_blank" class="btn btn-info btn-xs"><i class="fas fa-file-pdf"></i></a>';
                     buttons += '&nbsp';
-                    buttons += '<a href="#" class="btn btn-danger btn-xs"><i class="fas fa-trash"></i></a>';*/
-                    return buttons;
+                    buttons += '<a href="/planCuentas/reporte/pdf/' + row.id + '/" target="_blank" class="btn btn-info btn-xs"><i class="fas fa-file-pdf"></i></a>';
+                    return buttons;*/
                 }
             },
         ],
