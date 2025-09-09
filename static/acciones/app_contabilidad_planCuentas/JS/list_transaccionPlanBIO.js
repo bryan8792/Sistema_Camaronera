@@ -90,11 +90,12 @@ $(function () {
                 class: 'text-center',
                 render: function (data, type, row) {
                     var buttons = '<div class="dropdown">';
-                    buttons += '<button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">';
+                    buttons += '<button class="btn btn-info btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">';
                     buttons += '<i class="fas fa-list"></i> Opciones</button>';
                     buttons += '<div class="dropdown-menu dropdown-menu-right">';
                     buttons += '<a class="dropdown-item" href="/planCuentas/fact_gasto/editar/' + row.id + '/"><i class="fas fa-edit"></i> Actualizar</a>';
-                    buttons += '<a class="dropdown-item" href="/planCuentas/reporte/pdf/' + row.id + '/" target="_blank"><i class="fas fa-file-pdf"></i> Imprimir</a>';
+                    buttons += '<a class="dropdown-item" href="/planCuentas/reporte/pdf/' + row.id + '/" target="_blank"><i class="fas fa-file-pdf"></i> Imprimir Diario</a>';
+                    buttons += '<a class="dropdown-item" href="" target="_blank"><i class="fas fa-file-pdf"></i> Imprimir ATS</a>';
                     return buttons += '</div></div>';
 
                     /*var buttons = '';
