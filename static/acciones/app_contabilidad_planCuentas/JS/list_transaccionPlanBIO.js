@@ -95,8 +95,20 @@ $(function () {
                     buttons += '<div class="dropdown-menu dropdown-menu-right">';
                     buttons += '<a class="dropdown-item" href="/planCuentas/fact_gasto/editar/' + row.id + '/"><i class="fas fa-edit"></i> Actualizar</a>';
                     buttons += '<a class="dropdown-item" href="/planCuentas/reporte/pdf/' + row.id + '/" target="_blank"><i class="fas fa-file-pdf"></i> Imprimir Diario</a>';
-                    buttons += '<a class="dropdown-item" href="" target="_blank"><i class="fas fa-file-pdf"></i> Imprimir ATS</a>';
-                    return buttons += '</div></div>';
+                    // Botones ATS (PDF y XML si existen)
+                    if (row.detATS && row.detATS.length > 0) {
+                        let ats = row.detATS[0];
+                        if (ats.pdf_authorized) {
+                            buttons += '<a class="dropdown-item" href="' + ats.pdf_authorized + '" target="_blank" download>';
+                            buttons += '<i class="fas fa-file-pdf"></i> Imprimir ATS (PDF)</a>';
+                        }
+                        if (ats.xml_authorized) {
+                            buttons += '<a class="dropdown-item" href="' + ats.xml_authorized + '" target="_blank" download>';
+                            buttons += '<i class="fas fa-file-code"></i> Descargar ATS (XML)</a>';
+                        }
+                    }
+                    buttons += '</div></div>';
+                    return buttons;
 
                     /*var buttons = '';
                     buttons += '<a href="/planCuentas/fact_gasto/editar/'+ row.id + '/" class="btn btn-warning btn-xs btn-flat"><i class="fas fa-edit"></i></a> ';
