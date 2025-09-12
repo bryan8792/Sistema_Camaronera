@@ -1030,16 +1030,19 @@ class editarFacturaGastoBIOView(UpdateView):
         data = {}
         try:
             action = request.POST['action']
+            # if action == 'search_plan':
+            #     data = []
+            #     queryset = PlanCuenta.objects.all()
+            #     ids_exclude = json.loads(request.POST['ids'])
+            #     if len(ids_exclude):
+            #         queryset = queryset.filter().exclude(id__in=ids_exclude).order_by('codigo')
+            #     for i in queryset.order_by('id'):
+            #         item = i.toJSON()
+            #         item['detalle'] = ""
+            #         data.append(item)
+
             if action == 'search_plan':
-                data = []
-                queryset = PlanCuenta.objects.all()
-                ids_exclude = json.loads(request.POST['ids'])
-                if len(ids_exclude):
-                    queryset = queryset.filter().exclude(id__in=ids_exclude).order_by('codigo')
-                for i in queryset.order_by('id'):
-                    item = i.toJSON()
-                    item['detalle'] = ""
-                    data.append(item)
+                return self.search_plan_improved(request)
 
             elif action == 'search_autocomplete':
                 data = []
@@ -1052,6 +1055,15 @@ class editarFacturaGastoBIOView(UpdateView):
                     item['codigo'] = i.codigo
                     item['text'] = i.nombre
                     data.append(item)
+
+            elif action == 'upload_xml':
+                data = []
+                archive = request.FILES['archive']
+                factura_data = XML().read(path=archive)
+                json_data = json.dumps(factura_data, ensure_ascii=False)
+                data.append(json_data)
+                print('json_data')
+                print(json_data)
 
             elif action == 'search_recibo':
                 recibos = []
@@ -1070,6 +1082,31 @@ class editarFacturaGastoBIOView(UpdateView):
                     recibos.append(item)
                 data['recibos'] = recibos
 
+            # elif action == 'search_voucher_number':
+            #     try:
+            #         print('LLEGO A search_voucher_number')
+            #         print(f"Tipo de recibo recibido: {request.POST.get('receipt', '')}")
+            #         company_id = request.POST.get('company', None)
+            #         receipt_type = request.POST.get('receipt', None)
+            #         if not company_id:
+            #             data['error'] = 'Debe seleccionar una empresa válida.'
+            #         elif not receipt_type:
+            #             data['error'] = 'Debe seleccionar un tipo de recibo válido.'
+            #         else:
+            #             try:
+            #                 company = Empresa.objects.get(id=company_id)
+            #                 receipt = Recibo.objects.filter(
+            #                     pk=receipt_type
+            #                 ).order_by('-sequence').first()
+            #                 if receipt:
+            #                     data['voucher_number'] = f'{receipt.sequence + 1:09d}'
+            #                 else:
+            #                     data['voucher_number'] = f'{1:09d}'
+            #             except Empresa.DoesNotExist:
+            #                 data['error'] = 'La empresa seleccionada no existe.'
+            #     except Exception as e:
+            #         data['error'] = f'Ocurrió un error inesperado: {str(e)}'
+
             elif action == 'search_voucher_number':
                 try:
                     print('LLEGO A search_voucher_number')
@@ -1084,7 +1121,10 @@ class editarFacturaGastoBIOView(UpdateView):
                         try:
                             company = Empresa.objects.get(id=company_id)
                             receipt = Recibo.objects.filter(
-                                pk=receipt_type
+                                voucher_type=receipt_type,
+                                establishment_code=company.establishment_code,
+                                issuing_point_code=company.issuing_point_code,
+                                empresa=company
                             ).order_by('-sequence').first()
                             if receipt:
                                 data['voucher_number'] = f'{receipt.sequence + 1:09d}'
@@ -1104,8 +1144,11 @@ class editarFacturaGastoBIOView(UpdateView):
                     encabezado = self.get_object()
                     encabezado.codigo = request.POST['codigo']
                     encabezado.tip_cuenta = request.POST['tip_cuenta']
-                    encabezado.tip_transa = request.POST['tip_transa']
                     encabezado.fecha = request.POST['fecha']
+                    encabezado.ruc = request.POST.get('ruc', '')
+                    encabezado.tip_transa = request.POST['tip_transa']
+                    encabezado.reg_control = 'FG'
+                    encabezado.empresa_id = request.POST['empresa']
                     encabezado.comprobante = request.POST['comprobante']
                     encabezado.descripcion = request.POST['descripcion']
                     encabezado.direccion = request.POST['direccion']
@@ -1220,6 +1263,7 @@ class editarFacturaGastoBIOView(UpdateView):
                     encabezado.tip_cuenta = request.POST['tip_cuenta']
                     encabezado.tip_transa = request.POST['tip_transa']
                     encabezado.fecha = request.POST['fecha']
+                    encabezado.ruc = request.POST.get('ruc', '')
                     encabezado.comprobante = request.POST['comprobante']
                     encabezado.descripcion = request.POST['descripcion']
                     encabezado.direccion = request.POST['direccion']
