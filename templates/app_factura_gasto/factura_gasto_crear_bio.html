@@ -128,6 +128,285 @@
                                     <br>
                                     <hr>
 
+                                    <form id="frmAnextoTransaccional" method="post" enctype="multipart/form-data">
+                                        <div class="row">
+
+                                            <!-- Card: Datos ATS -->
+                                            <div class="col-lg-12">
+                                                <div class="card card-white">
+                                                    <div class="card-header">
+                                                        <h1 class="card-title">
+                                                            <i class="fas fa-book"></i>&nbsp; <strong>Anexo Transaccional - Registro</strong>
+                                                        </h1>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <input type="hidden" name="action" value="search_ats">
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Establecimiento -
+                                                                Serie:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.estab_serie|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Agente de
+                                                                Retención:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.ag_ret|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Sustento
+                                                                Tributario:</label>
+                                                            <div class="col-sm-10">
+                                                                {{ frmAnextoTransaccional.sust_trib|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Empresa:</label>
+                                                            <div class="col-sm-10">
+                                                                {{ frmAnextoTransaccional.company|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card: Comprobante de Venta -->
+                                            <div class="col-lg-12">
+                                                <div class="card card-white">
+                                                    <div class="card-header">
+                                                        <h1 class="card-title">
+                                                            <i class="fas fa-file-invoice"></i>&nbsp; <strong>Comprobante de Venta</strong>
+                                                        </h1>
+                                                    </div>
+                                                    <div class="card-body">
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Escoger Comprobante:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.receipt|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Número
+                                                                Comprobante:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.comp_numero|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-3 col-form-label">Crear comprobante
+                                                                electrónico:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.create_electronic_invoice }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Tipo
+                                                                Comprobante:</label>
+                                                            <div class="col-sm-6">
+                                                                {{ frmAnextoTransaccional.tipo_comp|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Fecha
+                                                                Registro:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.comp_fecha_reg|attr:"type:date"|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Serie:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.comp_serie|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Secuencia:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.comp_secuencia|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Fecha
+                                                                Emisión:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.comp_fecha_em|attr:"type:date"|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">N°
+                                                                Autorización:</label>
+                                                            <div class="col-sm-10">
+                                                                {{ frmAnextoTransaccional.n_autoriz|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Bases IVA -->
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Base IVA 0%:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.base_iva0|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Base IVA 12%:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.base_iva12|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Base No Objeto
+                                                                IVA:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.base_noobj|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Base Exento
+                                                                IVA:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.base_exento|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Monto ICE:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.monto_ice|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Monto Total:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.monto_total|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card: Retenciones IVA -->
+                                            <div class="col-lg-12">
+                                                <div class="card card-white">
+                                                    <div class="card-header">
+                                                        <h1 class="card-title">
+                                                            <i class="fas fa-percentage"></i>&nbsp; <strong>Retenciones
+                                                            IVA</strong>
+                                                        </h1>
+                                                    </div>
+                                                    <div class="card-body">
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Retención IVA
+                                                                30%:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.ret_iva30|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Retención IVA
+                                                                70%:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.ret_iva70|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Retención IVA
+                                                                100%:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.ret_iva100|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card: Retenciones en la Fuente -->
+                                            <div class="col-lg-12">
+                                                <div class="card card-white">
+                                                    <div class="card-header">
+                                                        <h1 class="card-title">
+                                                            <i class="fas fa-coins"></i>&nbsp; <strong>Retenciones en la
+                                                            Fuente</strong>
+                                                        </h1>
+                                                    </div>
+                                                    <div class="card-body">
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">% Retención:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.ret_fuente1|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Base:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.base_ret1|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Monto:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.monto_ret1|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">% Retención:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.ret_fuente2|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Base:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.base_ret2|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Monto:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.monto_ret2|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">% Retención:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.ret_fuente3|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Base:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.base_ret3|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Monto:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.monto_ret3|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Card: Forma de Pago -->
+                                            <div class="col-lg-12">
+                                                <div class="card card-white">
+                                                    <div class="card-header">
+                                                        <h1 class="card-title">
+                                                            <i class="fas fa-credit-card"></i>&nbsp; <strong>Forma de
+                                                            Pago</strong>
+                                                        </h1>
+                                                    </div>
+                                                    <div class="card-body">
+
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Forma de
+                                                                Pago:</label>
+                                                            <div class="col-sm-5">
+                                                                {{ frmAnextoTransaccional.tip_form|add_class:'form-control' }}
+                                                            </div>
+                                                            <label class="col-sm-2 col-form-label">Detalle:</label>
+                                                            <div class="col-sm-3">
+                                                                {{ frmAnextoTransaccional.det_form|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="card-footer text-center">
+                                                        <button type="submit" class="btn btn-success">
+                                                            <i class="fas fa-save"></i>&nbsp; Guardar ATS
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </form>
 
 
                                 </div>
@@ -324,7 +603,8 @@
                                                         <div class="row">
                                                             <div class="col-12 table-responsive">
 
-                                                                <table class="table table-sm w-100" id="tbl_transaccionPlan" style="width: 100%;">
+                                                                <table class="table table-sm w-100"
+                                                                       id="tbl_transaccionPlan" style="width: 100%;">
                                                                     <thead style="background-color:#3498DB">
                                                                     <tr class="text-center">
                                                                         <th><i class="fas fa-list"></i></th>
@@ -393,7 +673,6 @@
                                         </div>
 
                                     </form>
-
                                 </div>
                             </div>
                         </div>
