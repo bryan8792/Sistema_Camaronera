@@ -146,12 +146,12 @@
                                                             <label class="col-sm-2 col-form-label">Establecimiento -
                                                                 Serie:</label>
                                                             <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.estab_serie|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.estab_serie|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
                                                             <label class="col-sm-2 col-form-label">Agente de
                                                                 Retención:</label>
                                                             <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.ag_ret|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.ag_ret|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
 
@@ -159,16 +159,44 @@
                                                             <label class="col-sm-2 col-form-label">Sustento
                                                                 Tributario:</label>
                                                             <div class="col-sm-10">
-                                                                {{ frmAnextoTransaccional.sust_trib|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.sust_trib|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Empresa:</label>
+                                                            <label class="col-sm-2 col-form-label">Seleccionar la
+                                                                Empresa:</label>
                                                             <div class="col-sm-10">
                                                                 {{ frmAnextoTransaccional.company|add_class:'form-control' }}
                                                             </div>
                                                         </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Escoger
+                                                                Comprobante:</label>
+                                                            <div class="col-sm-4">
+                                                                {{ frmAnextoTransaccional.receipt|add_class:'form-control' }}
+                                                            </div>
+
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Número
+                                                                comprobante:</label>
+                                                            <div class="col-sm-4 text-right">
+                                                                {{ frmAnextoTransaccional.comp_numero|add_class:'form-control' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-3 col-form-label">Crear
+                                                                comprobante electrónico:</label>
+                                                            <div class="col-sm-3 text-right">
+                                                                {{ frmAnextoTransaccional.create_electronic_invoice|add_class:'form-control' }}
+                                                            </div>
+                                                            <label for="inputEmail3"
+                                                                   class="col-sm-3 col-form-label"></label>
+                                                            <div class="col-sm-3 text-right">
+                                                            </div>
+                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -184,97 +212,124 @@
                                                     <div class="card-body">
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Escoger Comprobante:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.receipt|add_class:'form-control' }}
-                                                            </div>
-                                                            <label class="col-sm-2 col-form-label">Número
-                                                                Comprobante:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.comp_numero|add_class:'form-control' }}
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="form-group row">
-                                                            <label class="col-sm-3 col-form-label">Crear comprobante
-                                                                electrónico:</label>
-                                                            <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.create_electronic_invoice }}
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Tipo
-                                                                Comprobante:</label>
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Tipo Comprobante:</label>
                                                             <div class="col-sm-6">
-                                                                {{ frmAnextoTransaccional.tipo_comp|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.tipo_comp|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Fecha
-                                                                Registro:</label>
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Fecha Registro Contable</label>
                                                             <div class="col-sm-2">
-                                                                {{ frmAnextoTransaccional.comp_fecha_reg|attr:"type:date"|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.comp_fecha_reg|attr:"type:date"|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Serie:</label>
+                                                            <label for="inputEmail3"
+                                                                   class="col-sm-2 col-form-label">{{ frmAnextoTransaccional.comp_serie.label }}:</label>
                                                             <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.comp_serie|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.comp_serie|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Secuencia:</label>
                                                             <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.comp_secuencia|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.comp_secuencia|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Fecha
-                                                                Emisión:</label>
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Fecha
+                                                                de Emisión:</label>
                                                             <div class="col-sm-2">
-                                                                {{ frmAnextoTransaccional.comp_fecha_em|attr:"type:date"|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.comp_fecha_em|attr:"type:date"|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">N°
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">N.
                                                                 Autorización:</label>
                                                             <div class="col-sm-10">
-                                                                {{ frmAnextoTransaccional.n_autoriz|add_class:'form-control' }}
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Bases IVA -->
-                                                        <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Base IVA 0%:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.base_iva0|add_class:'form-control' }}
-                                                            </div>
-                                                            <label class="col-sm-2 col-form-label">Base IVA 12%:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.base_iva12|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.n_autoriz|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Base No Objeto
-                                                                IVA:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.base_noobj|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Base
+                                                                0%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.base_cero_bruto|add_class:'form-control text-center'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Base Exento
-                                                                IVA:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.base_exento|add_class:'form-control' }}
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.base_cero_bruto_fcientocuatro|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-7 col-form-label"><b>F104</b></label>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Base IVA Normal:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.base_iva_normal_bruto|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.base_iva_normal_bruto_fcientocuatro|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>F104</b></label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.base_iva_normal_porcen|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>%</b></label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b></b></label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>Monto IVA</b></label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.monto_iva_normal|add_class:'form-control text-center'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Monto ICE:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.monto_ice|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Base IVA Bienes:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.base_iva_bienes_bruto|add_class:'form-control text-center'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Monto Total:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.monto_total|add_class:'form-control' }}
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.base_iva_bienes_bruto_fcientocuatro|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>F104</b></label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.base_iva_bienes_porcen|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>%</b></label>
+                                                            <label for="inputEmail3"
+                                                                   class="col-sm-1 col-form-label"><b></b></label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>Monto IVA</b></label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.monto_iva_bienes|add_class:'form-control text-center'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Base no Aplicable:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.base_no_obj_iva|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b></b></label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>Base ICE:</b></label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.base_ice|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.porcent_ice|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>Monto ICE</b></label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.monto_ice|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">Base Excento:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.base_no_obj_iva|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-5 col-form-label"><b></b></label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>TOTAL:</b></label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.monto_total|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -284,32 +339,116 @@
                                                 <div class="card card-white">
                                                     <div class="card-header">
                                                         <h1 class="card-title">
-                                                            <i class="fas fa-percentage"></i>&nbsp; <strong>Retenciones
-                                                            IVA</strong>
+                                                            <i class="fas fa-percentage"></i>&nbsp; <strong>Retenciones IVA</strong>
                                                         </h1>
                                                     </div>
                                                     <div class="card-body">
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Retención IVA
-                                                                30%:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.ret_iva30|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-2 col-form-label">No. Ser/Sec:</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_serie|add_class:'form-control text-center'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Retención IVA
-                                                                70%:</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_numero|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
                                                             <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.ret_iva70|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.ret_numero_full|add_class:'form-control text-left'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b></b></label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label"><b>F. Emisión:</b></label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.ret_fecha|attr:"type:date"|attr:'required:True'|add_class:'form-control text-center'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Retención IVA
-                                                                100%:</label>
-                                                            <div class="col-sm-4">
-                                                                {{ frmAnextoTransaccional.ret_iva100|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">IVA 0%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.iva_cero|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_iva_cero|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.cant_iva_cero|add_class:'form-control text-left'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <hr>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">IVA 50%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.iva_cinc|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_iva_cinc|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.cant_iva_cinc|add_class:'form-control text-left'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">IVA 10%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.iva_diez|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_iva_diez|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.cant_iva_diez|add_class:'form-control text-left'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <hr>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">IVA 70%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.iva_setn|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_iva_setn|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.cant_iva_setn|add_class:'form-control text-left'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">IVA 20%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.iva_veint|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_iva_veint|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.cant_iva_veint|add_class:'form-control text-left'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <hr>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">IVA 100%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.iva_cien|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_iva_cien|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.cant_iva_cien|add_class:'form-control text-left'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group row">
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">IVA 30%:</label>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.iva_treint|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_iva_treint|add_class:'form-control text-center'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <div class="col-sm-2">
+                                                                {{ frmAnextoTransaccional.cant_iva_treint|add_class:'form-control text-left'|attr:'autocomplete:off' }}
+                                                            </div>
+                                                            <hr>
+                                                            <label for="inputEmail3" class="col-sm-6 col-form-label"><b></b></label>
+                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -319,56 +458,86 @@
                                                 <div class="card card-white">
                                                     <div class="card-header">
                                                         <h1 class="card-title">
-                                                            <i class="fas fa-coins"></i>&nbsp; <strong>Retenciones en la
-                                                            Fuente</strong>
+                                                            <i class="fas fa-coins"></i>&nbsp; <strong>Retenciones en la Fuente</strong>
                                                         </h1>
                                                     </div>
                                                     <div class="card-body">
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">% Retención:</label>
-                                                            <div class="col-sm-2">
-                                                                {{ frmAnextoTransaccional.ret_fuente1|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">Base:</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_cero_uno|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Base:</label>
-                                                            <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.base_ret1|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">0%
+                                                                IVA</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_uno|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Monto:</label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">%
+                                                                IVA</label>
                                                             <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.monto_ret1|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_anexo_uno|attr:'required:True'|add_class:'form-control' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_porcent_uno|attr:'required:True'|add_class:'form-control' }}
+                                                            </div>
+                                                            <label for="inputEmail3"
+                                                                   class="col-sm-1 col-form-label">%</label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">Monto:</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_monto_uno|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">% Retención:</label>
-                                                            <div class="col-sm-2">
-                                                                {{ frmAnextoTransaccional.ret_fuente2|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">Base (Tra):</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_cero_dos|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Base:</label>
-                                                            <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.base_ret2|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">0% IVA</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_dos|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Monto:</label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">% IVA</label>
                                                             <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.monto_ret2|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_anexo_dos|attr:'required:True'|add_class:'form-control' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_porcent_dos|attr:'required:True'|add_class:'form-control' }}
+                                                            </div>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">%</label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">Monto:</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_monto_dos|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">% Retención:</label>
-                                                            <div class="col-sm-2">
-                                                                {{ frmAnextoTransaccional.ret_fuente3|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">Base:</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_cero_tres|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Base:</label>
-                                                            <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.base_ret3|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">0%
+                                                                IVA</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_tres|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Monto:</label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">%
+                                                                IVA</label>
                                                             <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.monto_ret3|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_anexo_tres|attr:'required:True'|add_class:'form-control' }}
+                                                            </div>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_porcent_tres|attr:'required:True'|add_class:'form-control' }}
+                                                            </div>
+                                                            <label for="inputEmail3"
+                                                                   class="col-sm-1 col-form-label">%</label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">Monto:</label>
+                                                            <div class="col-sm-1">
+                                                                {{ frmAnextoTransaccional.ret_fue_iva_monto_tres|attr:'required:True'|add_class:'form-control' }}
                                                             </div>
                                                         </div>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -378,26 +547,24 @@
                                                 <div class="card card-white">
                                                     <div class="card-header">
                                                         <h1 class="card-title">
-                                                            <i class="fas fa-credit-card"></i>&nbsp; <strong>Forma de
-                                                            Pago</strong>
+                                                            <i class="fas fa-credit-card"></i>&nbsp; <strong>Forma de Pago</strong>
                                                         </h1>
                                                     </div>
                                                     <div class="card-body">
 
                                                         <div class="form-group row">
-                                                            <label class="col-sm-2 col-form-label">Forma de
-                                                                Pago:</label>
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">F/PAGO:</label>
                                                             <div class="col-sm-5">
-                                                                {{ frmAnextoTransaccional.tip_form|add_class:'form-control' }}
+                                                                {{ frmAnextoTransaccional.tip_form|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
-                                                            <label class="col-sm-2 col-form-label">Detalle:</label>
-                                                            <div class="col-sm-3">
-                                                                {{ frmAnextoTransaccional.det_form|add_class:'form-control' }}
+                                                            <label for="inputEmail3" class="col-sm-1 col-form-label">DETALLE:</label>
+                                                            <div class="col-sm-5">
+                                                                {{ frmAnextoTransaccional.det_form|add_class:'form-control'|attr:'autocomplete:off' }}
                                                             </div>
                                                         </div>
 
                                                     </div>
-                                                    <div class="card-footer text-center">
+                                                    <div class="card-footer text-left">
                                                         <button type="submit" class="btn btn-success">
                                                             <i class="fas fa-save"></i>&nbsp; Guardar ATS
                                                         </button>
@@ -561,9 +728,7 @@
                                                                     {% if fac_gas %}
                                                                         <div class="form-group row">
                                                                             <label for="inputEmail3"
-                                                                                   class="col-sm-3 col-form-label">Tipo
-                                                                                de
-                                                                                Transacción:</label>
+                                                                                   class="col-sm-3 col-form-label">Tipo de Transacción:</label>
                                                                             <div class="col-sm-9">
                                                                                 {{ form.tip_transa }}
                                                                             </div>

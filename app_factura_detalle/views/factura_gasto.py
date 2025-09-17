@@ -396,6 +396,30 @@ class crearFacturaGastoBIOView(CreateView):
                 print('json_data')
                 print(json_data)
 
+            elif action == 'search_recibo':
+                recibos = []
+                VOUCHER_TYPE = {
+                    '01': 'FACTURA',
+                    '04': 'NOTA DE CRÉDITO',
+                    '08': 'TICKET DE VENTA',
+                    '07': 'COMPROBANTE DE RETENCIÓN',
+                }
+                company = json.loads(request.POST['company'])
+                queryset = Recibo.objects.filter(empresa_id=company)
+                for r in queryset:
+                    next_seq = r.sequence + 1
+                    item = {
+                        'codigo': r.voucher_type,  # mantén string '07' para no perder ceros
+                        'text': VOUCHER_TYPE.get(r.voucher_type, r.get_voucher_type_display()),
+                        'establishment_code': r.establishment_code,
+                        'issuing_point_code': r.issuing_point_code,
+                        'current_sequence': f'{r.sequence:09d}',  # ej. '000000006'
+                        'next_sequence': f'{next_seq:09d}',  # ej. '000000007'
+                        'next_sequence_raw': next_seq,  # ej. 7 (entero)
+                    }
+                    recibos.append(item)
+                data['recibos'] = recibos
+
             elif action == 'search_ats':
                 print('LLEGO A SEARCH ATS')
                 print(request.POST)
@@ -562,6 +586,51 @@ class crearFacturaGastoBIOView(CreateView):
                     item['id'] = int(i.id) if i.id else None
                     data.append(item)
 
+            # elif action == 'obtener_ultima_secuencia':
+            #     mes = request.POST.get('mes')
+            #     tipo = request.POST.get('tipo')
+            #
+            #     print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
+            #
+            #     try:
+            #         patron_mes = mes.lstrip('0')
+            #         patron1 = f"{mes}{tipo}"
+            #         patron2 = f"{patron_mes}{tipo}"
+            #
+            #         encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+            #             Q(codigo__startswith=patron1) | Q(codigo__startswith=patron2)
+            #         ).order_by('-codigo')
+            #
+            #         ultima_secuencia = 0
+            #         if encabezados.exists():
+            #             for encabezado in encabezados:
+            #                 codigo = str(encabezado.codigo) if encabezado.codigo is not None else ""
+            #                 print(f"Analizando código: {codigo}")
+            #
+            #                 match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
+            #                 if match:
+            #                     mes_encontrado = match.group(1)
+            #                     tipo_encontrado = match.group(2)
+            #                     secuencia_str = match.group(3)
+            #
+            #                     if (mes_encontrado == mes or mes_encontrado == patron_mes) and tipo_encontrado == tipo:
+            #                         try:
+            #                             secuencia = int(secuencia_str)
+            #                             ultima_secuencia = max(ultima_secuencia, secuencia)
+            #                             print(f"Secuencia encontrada: {secuencia}")
+            #                         except ValueError:
+            #                             print(f"Error al convertir secuencia: {secuencia_str}")
+            #
+            #         data['secuencia'] = ultima_secuencia
+            #         print(f"Secuencia devuelta: {ultima_secuencia}")
+            #
+            #     except Exception as e:
+            #         import traceback
+            #         print(f"Error al buscar secuencia: {str(e)}")
+            #         print(traceback.format_exc())
+            #         data['secuencia'] = 0
+            #         data['error'] = str(e)
+
             elif action == 'obtener_ultima_secuencia':
                 mes = request.POST.get('mes')
                 tipo = request.POST.get('tipo')
@@ -569,8 +638,14 @@ class crearFacturaGastoBIOView(CreateView):
                 print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
 
                 try:
-                    patron_mes = mes.lstrip('0')
-                    patron1 = f"{mes}{tipo}"
+                    # Aseguramos mes en dos dígitos
+                    try:
+                        mes_str = f"{int(mes):02d}"
+                    except Exception:
+                        mes_str = mes or "00"
+
+                    patron_mes = mes_str.lstrip('0')
+                    patron1 = f"{mes_str}{tipo}"
                     patron2 = f"{patron_mes}{tipo}"
 
                     encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
@@ -580,7 +655,7 @@ class crearFacturaGastoBIOView(CreateView):
                     ultima_secuencia = 0
                     if encabezados.exists():
                         for encabezado in encabezados:
-                            codigo = str(encabezado.codigo) if encabezado.codigo is not None else ""
+                            codigo = str(encabezado.codigo) if encabezado.codigo else ""
                             print(f"Analizando código: {codigo}")
 
                             match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
@@ -589,7 +664,9 @@ class crearFacturaGastoBIOView(CreateView):
                                 tipo_encontrado = match.group(2)
                                 secuencia_str = match.group(3)
 
-                                if (mes_encontrado == mes or mes_encontrado == patron_mes) and tipo_encontrado == tipo:
+                                if (
+                                        mes_encontrado == mes_str or mes_encontrado == patron_mes) and tipo_encontrado == str(
+                                        tipo):
                                     try:
                                         secuencia = int(secuencia_str)
                                         ultima_secuencia = max(ultima_secuencia, secuencia)
@@ -597,8 +674,16 @@ class crearFacturaGastoBIOView(CreateView):
                                     except ValueError:
                                         print(f"Error al convertir secuencia: {secuencia_str}")
 
+                    siguiente = ultima_secuencia + 1
+                    next_seq_str = f"{siguiente:03d}"
+                    next_codigo = f"{mes_str}{tipo}{next_seq_str}"
+
                     data['secuencia'] = ultima_secuencia
-                    print(f"Secuencia devuelta: {ultima_secuencia}")
+                    data['next_sequence'] = siguiente
+                    data['next_sequence_formatted'] = next_seq_str
+                    data['next_codigo'] = next_codigo
+
+                    print(f"Última secuencia={ultima_secuencia}, siguiente={siguiente}, next_codigo={next_codigo}")
 
                 except Exception as e:
                     import traceback
@@ -606,6 +691,7 @@ class crearFacturaGastoBIOView(CreateView):
                     print(traceback.format_exc())
                     data['secuencia'] = 0
                     data['error'] = str(e)
+
 
 
             else:
