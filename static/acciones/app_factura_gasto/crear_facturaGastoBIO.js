@@ -2364,19 +2364,20 @@ function calculos_prod(json, debe, haber) {
 
     const csrftoken = getCookie('csrftoken');
 
-    // Prevent native form submit to avoid browser validation across tabs
-    $(document).on('submit', 'form', function (e) {
+    // ✅ Evitar validaciones entre tabs, solo aplica al formulario actual
+    $(document).on('submit', '#frmAnextoTransaccional', function (e) {
         e.preventDefault();
     });
 
-    // ATS save button
-    // ATS save button
+// ✅ Guardar ATS
     $(document).on('click', '.btn-save-ats', function (e) {
         e.preventDefault();
         const $btn = $(this);
-        const $form = $btn.closest('form');
+        const $form = $('#frmAnextoTransaccional');
         const data = $form.serialize();
+
         $btn.prop('disabled', true);
+
         $.ajax({
             url: $form.attr('action'),
             type: 'POST',
@@ -2384,25 +2385,31 @@ function calculos_prod(json, debe, haber) {
             headers: {'X-CSRFToken': csrftoken},
             dataType: 'json'
         }).done(function (resp) {
-            Swal.fire({icon: 'success', title: 'Guardado', text: 'Datos ATS guardados correctamente.'});
-
-            // 🔹 Si la respuesta trae print_url, ofrecer impresión
-            if (resp && resp.print_url) {
-                Swal.fire({
-                    title: '¿Desea imprimir el comprobante?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonText: 'Imprimir',
-                    cancelButtonText: 'Cerrar'
-                }).then(result => {
-                    if (result.isConfirmed) {
-                        window.open(resp.print_url, '_blank');
-                    }
-                });
-            }
+            Swal.fire({
+                icon: 'success',
+                title: 'Guardado',
+                text: 'Datos ATS guardados correctamente.'
+            }).then(() => {
+                // 🔹 Si la respuesta trae print_url, preguntar si quiere imprimir
+                if (resp && resp.print_url) {
+                    Swal.fire({
+                        title: '¿Desea imprimir el comprobante?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Imprimir',
+                        cancelButtonText: 'Cerrar'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            window.open(resp.print_url, '_blank');
+                        }
+                    });
+                }
+            });
         }).fail(function (xhr, status, err) {
             let msg = 'Ocurrió un error al guardar ATS.';
-            if (xhr && xhr.responseJSON && xhr.responseJSON.error) msg = xhr.responseJSON.error;
+            if (xhr && xhr.responseJSON && xhr.responseJSON.error) {
+                msg = xhr.responseJSON.error;
+            }
             Swal.fire({icon: 'error', title: 'Error', text: msg});
         }).always(function () {
             $btn.prop('disabled', false);

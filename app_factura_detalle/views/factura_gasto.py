@@ -341,6 +341,490 @@ class crearFacturaGastoView(CreateView):
         return context
 
 
+# class crearFacturaGastoBIOView(CreateView):
+#     model = EncabezadoCuentasPlanCuenta
+#     form_class = EncabezadoCuentasPlanCuentaForm
+#     template_name = 'app_factura_gasto/factura_gasto_crear_bio.html'
+#     success_url = reverse_lazy('app_planCuentas:listar_fact_gasto_bio')
+#     url_redirect = success_url
+#
+#     @method_decorator(csrf_exempt)
+#     @method_decorator(login_required)
+#     def dispatch(self, request, *args, **kwargs):
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     def post(self, request, *args, **kwargs):
+#         data = {}
+#         try:
+#             action = request.POST['action']
+#             # if action == 'search_plan':
+#             #     data = []
+#             #     empresa = request.POST['empresa']
+#             #     print('empresa de search plan')
+#             #     print(empresa)
+#             #     queryset = PlanCuenta.objects.all()
+#             #     ids_exclude = json.loads(request.POST['ids'])
+#             #     queryset = queryset.filter(empresa__siglas=empresa).exclude(id__in=ids_exclude)
+#             #     # if len(ids_exclude):
+#             #     #     queryset = queryset.filter().exclude(id__in=ids_exclude)
+#             #     for i in queryset:
+#             #         item = i.toJSON()
+#             #         item['detalle'] = ""
+#             #         data.append(item)
+#
+#             if action == 'search_plan':
+#                 return self.search_plan_improved(request)
+#
+#             # elif action == 'search_autocomplete':
+#             #     data = []
+#             #     ids_exclude = json.loads(request.POST['ids'])
+#             #     term = request.POST['term'].strip()
+#             #     data.append({'codigo': term, 'text': term})
+#             #     plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
+#             #     for i in plan_detail[0:50]:
+#             #         item = i.toJSON()
+#             #         item['codigo'] = i.codigo
+#             #         item['text'] = i.nombre
+#             #         data.append(item)
+#
+#             elif action == 'upload_xml':
+#                 data = []
+#                 archive = request.FILES['archive']
+#                 factura_data = XML().read(path=archive)
+#                 json_data = json.dumps(factura_data, ensure_ascii=False)
+#                 data.append(json_data)
+#                 print('json_data')
+#                 print(json_data)
+#
+#             elif action == 'search_recibo':
+#                 recibos = []
+#                 VOUCHER_TYPE = {
+#                     '01': 'FACTURA',
+#                     '04': 'NOTA DE CRÉDITO',
+#                     '08': 'TICKET DE VENTA',
+#                     '07': 'COMPROBANTE DE RETENCIÓN',
+#                 }
+#                 company = json.loads(request.POST['company'])
+#                 queryset = Recibo.objects.filter(empresa_id=company)
+#                 for r in queryset:
+#                     next_seq = r.sequence + 1
+#                     item = {
+#                         'codigo': r.voucher_type,  # mantén string '07' para no perder ceros
+#                         'text': VOUCHER_TYPE.get(r.voucher_type, r.get_voucher_type_display()),
+#                         'establishment_code': r.establishment_code,
+#                         'issuing_point_code': r.issuing_point_code,
+#                         'current_sequence': f'{r.sequence:09d}',  # ej. '000000006'
+#                         'next_sequence': f'{next_seq:09d}',  # ej. '000000007'
+#                         'next_sequence_raw': next_seq,  # ej. 7 (entero)
+#                     }
+#                     recibos.append(item)
+#                 data['recibos'] = recibos
+#
+#             elif action == 'search_ats':
+#                 print('LLEGO A SEARCH ATS')
+#                 print(request.POST)
+#                 print("request.POST['receipt']")
+#                 print(request.POST['receipt'])
+#                 with transaction.atomic():
+#                     encabezado = EncabezadoCuentasPlanCuenta()
+#                     encabezado.codigo = request.POST['codigo']
+#                     encabezado.tip_cuenta = request.POST['tip_cuenta']
+#                     encabezado.tip_transa = request.POST['tip_transa']
+#                     encabezado.fecha = request.POST['fecha']
+#                     encabezado.comprobante = request.POST['comprobante']
+#                     encabezado.descripcion = request.POST['descripcion']
+#                     encabezado.direccion = request.POST['direccion']
+#                     encabezado.reg_ats = 'CON REGISTRO DE ATS'
+#                     encabezado.save()
+#                     frmATS = AnexoTransaccional()
+#                     frmATS.encabezadocuentaplan_id = encabezado.pk
+#                     frmATS.comp_fecha_reg = request.POST['comp_fecha_reg']
+#                     frmATS.comp_fecha_em = request.POST['comp_fecha_em']
+#                     frmATS.n_autoriz = request.POST['n_autoriz']
+#                     frmATS.company = Empresa.objects.get(
+#                         siglas__exact=Empresa.objects.get(id=request.POST['company']).siglas)
+#                     frmATS.environment_type = frmATS.company.environment_type
+#                     frmATS.receipt = Recibo.objects.get(
+#                         voucher_type=request.POST['receipt'],
+#                         establishment_code=frmATS.company.establishment_code,
+#                         issuing_point_code=frmATS.company.issuing_point_code,
+#                         empresa=frmATS.company
+#                     )
+#                     frmATS.voucher_number = frmATS.generate_voucher_number()
+#                     frmATS.voucher_number_full = frmATS.get_voucher_number_full()
+#                     frmATS.save()
+#                     data = {
+#                         'print_url': str(reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))}
+#                     # data = {'print_url': str(reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))}
+#                     print('continuaa al generate invoice')
+#                     if False:  # frmATS.create_electronic_invoice:
+#                         data = frmATS.generate_electronic_invoice()
+#                         if not data['resp']:
+#                             print('roolback')
+#                             transaction.set_rollback(True)
+#                 if 'error' in data:
+#                     SRI().create_voucher_errors(frmATS, data)
+#
+#             elif action == 'search_voucher_number':
+#                 try:
+#                     print('LLEGO A search_voucher_number')
+#                     print(f"Tipo de recibo recibido: {request.POST.get('receipt', '')}")
+#                     company_id = request.POST.get('company', None)
+#                     receipt_type = request.POST.get('receipt', None)
+#                     if not company_id:
+#                         data['error'] = 'Debe seleccionar una empresa válida.'
+#                     elif not receipt_type:
+#                         data['error'] = 'Debe seleccionar un tipo de recibo válido.'
+#                     else:
+#                         try:
+#                             company = Empresa.objects.get(id=company_id)
+#                             receipt = Recibo.objects.filter(
+#                                 voucher_type=receipt_type,
+#                                 establishment_code=company.establishment_code,
+#                                 issuing_point_code=company.issuing_point_code,
+#                                 empresa=company
+#                             ).order_by('-sequence').first()
+#                             if receipt:
+#                                 data['voucher_number'] = f'{receipt.sequence + 1:09d}'
+#                             else:
+#                                 data['voucher_number'] = f'{1:09d}'
+#                         except Empresa.DoesNotExist:
+#                             data['error'] = 'La empresa seleccionada no existe.'
+#                 except Exception as e:
+#                     data['error'] = f'Ocurrió un error inesperado: {str(e)}'
+#
+#             elif action == 'create':
+#                 print('llego a create')
+#                 print('request.POST')
+#                 print(request.POST)
+#
+#                 with transaction.atomic():
+#                     items = json.loads(request.POST['items'])
+#                     encabezado = EncabezadoCuentasPlanCuenta()
+#                     encabezado.codigo = request.POST['codigo']
+#                     encabezado.tip_cuenta = request.POST['tip_cuenta']
+#                     encabezado.fecha = request.POST['fecha']
+#                     encabezado.ruc = request.POST.get('ruc', '')  # evita MultiValueDictKeyError
+#                     encabezado.tip_transa = request.POST['tip_transa']
+#                     encabezado.reg_control = 'FG'
+#                     encabezado.empresa_id = request.POST['empresa']
+#                     encabezado.comprobante = request.POST['comprobante']
+#                     encabezado.descripcion = request.POST['descripcion']
+#                     encabezado.direccion = request.POST['direccion']
+#                     encabezado.save()
+#
+#                     for i in items:
+#                         cuerpo = DetalleCuentasPlanCuenta()
+#                         cuerpo.encabezadocuentaplan_id = encabezado.pk
+#                         cuerpo.cuenta_id = int(i['id'])
+#                         cuerpo.detalle = i.get('detalle', '')
+#                         cuerpo.debe = Decimal(i.get('debe') or 0)
+#                         cuerpo.haber = Decimal(i.get('haber') or 0)
+#                         cuerpo.save()
+#
+#                     data['pk'] = encabezado.pk
+#
+#
+#             # elif action == 'create':
+#             #     print('llego a create')
+#             #     print('request.POST')
+#             #     print(request.POST)
+#             #     # print("request.POST['empresa']")
+#             #     # print(request.POST['empresa'])
+#             #     with transaction.atomic():
+#             #         items = json.loads(request.POST['items'])
+#             #         encabezado = EncabezadoCuentasPlanCuenta()
+#             #         encabezado.codigo = request.POST['codigo']
+#             #         encabezado.tip_cuenta = request.POST['tip_cuenta']
+#             #         encabezado.fecha = request.POST['fecha']
+#             #         encabezado.ruc = request.POST['ruc']
+#             #         encabezado.tip_transa = request.POST['tip_transa']
+#             #         encabezado.reg_control = 'FG'
+#             #         encabezado.empresa_id = request.POST['empresa']
+#             #         # empresa_id = request.POST['empresa']
+#             #         # print('empresa_id')
+#             #         # print(empresa_id)
+#             #         # try:
+#             #         #     encabezado.empresa = Empresa.objects.get(pk=empresa_id)
+#             #         # except Empresa.DoesNotExist:
+#             #         #     return JsonResponse({'error': 'La empresa especificada no existe.'}, status=400)
+#             #         encabezado.comprobante = request.POST['comprobante']
+#             #         encabezado.descripcion = request.POST['descripcion']
+#             #         encabezado.direccion = request.POST['direccion']
+#             #         encabezado.save()
+#             #         for i in items:
+#             #             cuerpo = DetalleCuentasPlanCuenta()
+#             #             cuerpo.encabezadocuentaplan_id = encabezado.pk
+#             #             cuerpo.cuenta_id = int(i['id'])
+#             #             cuerpo.detalle = i['detalle']
+#             #             cuerpo.debe = int(i['debe']) if i.get('debe') else 0
+#             #             cuerpo.haber = int(i['haber']) if i.get('haber') else 0
+#             #             cuerpo.save()
+#             #         data['pk'] = encabezado.pk
+#
+#
+#
+#
+#             elif action == 'search_autocomplete':
+#                 data = []
+#                 ids_exclude = json.loads(request.POST.get('ids', '[]'))
+#                 term = request.POST.get('term', '').strip()
+#
+#                 # Agregar el término de búsqueda como primera opción
+#                 data.append({'codigo': term, 'text': term, 'id': None})
+#
+#                 # Buscar cuentas que coincidan con el término
+#                 plan_detail = PlanCuenta.objects.filter(
+#                     Q(nombre__icontains=term) | Q(codigo__icontains=term),
+#                     empresa__siglas__exact='BIO'
+#                 ).exclude(id__in=ids_exclude).order_by('codigo')[:50]
+#
+#                 for i in plan_detail:
+#                     item = i.toJSON()
+#                     item['codigo'] = i.codigo
+#                     item['text'] = f"{i.codigo} - {i.nombre}"
+#                     item['id'] = int(i.id) if i.id else None
+#                     data.append(item)
+#
+#             # elif action == 'obtener_ultima_secuencia':
+#             #     mes = request.POST.get('mes')
+#             #     tipo = request.POST.get('tipo')
+#             #
+#             #     print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
+#             #
+#             #     try:
+#             #         patron_mes = mes.lstrip('0')
+#             #         patron1 = f"{mes}{tipo}"
+#             #         patron2 = f"{patron_mes}{tipo}"
+#             #
+#             #         encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+#             #             Q(codigo__startswith=patron1) | Q(codigo__startswith=patron2)
+#             #         ).order_by('-codigo')
+#             #
+#             #         ultima_secuencia = 0
+#             #         if encabezados.exists():
+#             #             for encabezado in encabezados:
+#             #                 codigo = str(encabezado.codigo) if encabezado.codigo is not None else ""
+#             #                 print(f"Analizando código: {codigo}")
+#             #
+#             #                 match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
+#             #                 if match:
+#             #                     mes_encontrado = match.group(1)
+#             #                     tipo_encontrado = match.group(2)
+#             #                     secuencia_str = match.group(3)
+#             #
+#             #                     if (mes_encontrado == mes or mes_encontrado == patron_mes) and tipo_encontrado == tipo:
+#             #                         try:
+#             #                             secuencia = int(secuencia_str)
+#             #                             ultima_secuencia = max(ultima_secuencia, secuencia)
+#             #                             print(f"Secuencia encontrada: {secuencia}")
+#             #                         except ValueError:
+#             #                             print(f"Error al convertir secuencia: {secuencia_str}")
+#             #
+#             #         data['secuencia'] = ultima_secuencia
+#             #         print(f"Secuencia devuelta: {ultima_secuencia}")
+#             #
+#             #     except Exception as e:
+#             #         import traceback
+#             #         print(f"Error al buscar secuencia: {str(e)}")
+#             #         print(traceback.format_exc())
+#             #         data['secuencia'] = 0
+#             #         data['error'] = str(e)
+#
+#             elif action == 'obtener_ultima_secuencia':
+#                 mes = request.POST.get('mes')
+#                 tipo = request.POST.get('tipo')
+#
+#                 print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
+#
+#                 try:
+#                     # Aseguramos mes en dos dígitos
+#                     try:
+#                         mes_str = f"{int(mes):02d}"
+#                     except Exception:
+#                         mes_str = mes or "00"
+#
+#                     patron_mes = mes_str.lstrip('0')
+#                     patron1 = f"{mes_str}{tipo}"
+#                     patron2 = f"{patron_mes}{tipo}"
+#
+#                     encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+#                         Q(codigo__startswith=patron1) | Q(codigo__startswith=patron2)
+#                     ).order_by('-codigo')
+#
+#                     ultima_secuencia = 0
+#                     if encabezados.exists():
+#                         for encabezado in encabezados:
+#                             codigo = str(encabezado.codigo) if encabezado.codigo else ""
+#                             print(f"Analizando código: {codigo}")
+#
+#                             match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
+#                             if match:
+#                                 mes_encontrado = match.group(1)
+#                                 tipo_encontrado = match.group(2)
+#                                 secuencia_str = match.group(3)
+#
+#                                 if (
+#                                         mes_encontrado == mes_str or mes_encontrado == patron_mes) and tipo_encontrado == str(
+#                                         tipo):
+#                                     try:
+#                                         secuencia = int(secuencia_str)
+#                                         ultima_secuencia = max(ultima_secuencia, secuencia)
+#                                         print(f"Secuencia encontrada: {secuencia}")
+#                                     except ValueError:
+#                                         print(f"Error al convertir secuencia: {secuencia_str}")
+#
+#                     siguiente = ultima_secuencia + 1
+#                     next_seq_str = f"{siguiente:03d}"
+#                     next_codigo = f"{mes_str}{tipo}{next_seq_str}"
+#
+#                     data['secuencia'] = ultima_secuencia
+#                     data['next_sequence'] = siguiente
+#                     data['next_sequence_formatted'] = next_seq_str
+#                     data['next_codigo'] = next_codigo
+#
+#                     print(f"Última secuencia={ultima_secuencia}, siguiente={siguiente}, next_codigo={next_codigo}")
+#
+#                 except Exception as e:
+#                     import traceback
+#                     print(f"Error al buscar secuencia: {str(e)}")
+#                     print(traceback.format_exc())
+#                     data['secuencia'] = 0
+#                     data['error'] = str(e)
+#
+#
+#
+#             else:
+#                 print('erlo')
+#                 data['error'] = 'Ha ocurrido un error'
+#
+#         except Exception as e:
+#             import traceback
+#             print("Error en la vista:")
+#             print(traceback.format_exc())
+#             data['error'] = f'Error: {str(e)}'
+#         return JsonResponse(data, safe=False)
+#
+#
+#     def search_plan_improved(self, request):
+#         """Función mejorada para búsqueda del plan de cuentas"""
+#         try:
+#             empresa = request.POST.get('empresa', 'BIO')
+#             page = int(request.POST.get('page', 1))
+#             page_size = int(request.POST.get('page_size', 500))
+#             search_term = request.POST.get('search', '').strip()
+#             search_type = request.POST.get('search_type', 'all')  # 'all', 'exact', 'partial'
+#             print(f'Búsqueda: página={page}, tamaño={page_size}, término="{search_term}", tipo={search_type}')
+#             # Obtener IDs a excluir
+#             ids_exclude = []
+#             try:
+#                 ids_exclude = json.loads(request.POST.get('ids', '[]'))
+#             except:
+#                 ids_exclude = []
+#             # Construir queryset base
+#             queryset = PlanCuenta.objects.filter(
+#                 empresa__siglas__exact=empresa
+#             ).exclude(id__in=ids_exclude)
+#             # Aplicar filtros de búsqueda
+#             if search_term:
+#                 if search_type == 'exact':
+#                     # Búsqueda exacta por código
+#                     queryset = queryset.filter(codigo__exact=search_term)
+#                 elif search_type == 'partial':
+#                     # Búsqueda parcial
+#                     queryset = queryset.filter(
+#                         Q(codigo__icontains=search_term) |
+#                         Q(nombre__icontains=search_term)
+#                     )
+#                 else:
+#                     # Búsqueda general (por defecto)
+#                     queryset = queryset.filter(
+#                         Q(codigo__icontains=search_term) |
+#                         Q(nombre__icontains=search_term) |
+#                         Q(tipo_cuenta__icontains=search_term)
+#                     )
+#             # Ordenar para consistencia
+#             queryset = queryset.order_by('codigo', 'nombre')
+#             total_count = queryset.count()
+#             print(f'Total de registros encontrados: {total_count}')
+#             # Aplicar paginación
+#             paginator = Paginator(queryset, page_size)
+#             try:
+#                 page_obj = paginator.get_page(page)
+#             except:
+#                 page_obj = paginator.get_page(1)
+#             # Convertir a JSON
+#             data = []
+#             for item in page_obj:
+#                 item_data = item.toJSON()
+#                 item_data['detalle'] = ""
+#                 data.append(item_data)
+#             # Respuesta con metadatos de paginación
+#             response_data = {
+#                 'data': data,
+#                 'pagination': {
+#                     'current_page': page_obj.number,
+#                     'total_pages': paginator.num_pages,
+#                     'total_records': total_count,
+#                     'has_next': page_obj.has_next(),
+#                     'has_previous': page_obj.has_previous(),
+#                     'page_size': page_size
+#                 },
+#                 'search_info': {
+#                     'term': search_term,
+#                     'type': search_type,
+#                     'found_count': total_count
+#                 }
+#             }
+#
+#             print(f'Enviando {len(data)} registros de {total_count} totales')
+#             return JsonResponse(response_data, safe=False)
+#
+#         except Exception as e:
+#             print(f'Error en search_plan_improved: {str(e)}')
+#             import traceback
+#             print(traceback.format_exc())
+#
+#             return JsonResponse({
+#                 'error': f'Error al cargar datos: {str(e)}',
+#                 'data': [],
+#                 'pagination': {
+#                     'current_page': 1,
+#                     'total_pages': 0,
+#                     'total_records': 0,
+#                     'has_next': False,
+#                     'has_previous': False,
+#                     'page_size': page_size
+#                 }
+#             }, status=500)
+#
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['nombre'] = 'Registro de Factura de Gasto'
+#         context['fac_gas'] = 'ES FACTURA DE GASTO'
+#         context['list_url'] = self.success_url
+#         context['action'] = 'create'
+#         # Filtrar solo cuentas BIO
+#         planCuenta = PlanCuenta.objects.filter(parentId=None, empresa__siglas__exact='BIO')
+#         context['planCuenta'] = planCuenta
+#         planCuenta2 = PlanCuenta.objects.filter(empresa__siglas__exact='BIO')
+#         context['planCuenta2'] = planCuenta2
+#         context['empresa'] = 'BIO'
+#         context['det'] = []
+#         context['existe'] = False
+#         context['detATS'] = []
+#         context['frmAnextoTransaccional'] = AnextoTransaccionalForm()
+#         try:
+#             empresa_bio = Empresa.objects.get(siglas='BIO')
+#             form = self.get_form()
+#             form.fields['empresa'].initial = empresa_bio.id
+#             context['form'] = form
+#         except Exception as e:
+#             print(f"Error al preseleccionar empresa BIO: {e}")
+#         return context
+
+
 class crearFacturaGastoBIOView(CreateView):
     model = EncabezadoCuentasPlanCuenta
     form_class = EncabezadoCuentasPlanCuentaForm
@@ -420,50 +904,315 @@ class crearFacturaGastoBIOView(CreateView):
                     recibos.append(item)
                 data['recibos'] = recibos
 
+
+
+
             elif action == 'search_ats':
+
                 print('LLEGO A SEARCH ATS')
+
                 print(request.POST)
-                print("request.POST['receipt']")
-                print(request.POST['receipt'])
-                with transaction.atomic():
-                    encabezado = EncabezadoCuentasPlanCuenta()
-                    encabezado.codigo = request.POST['codigo']
-                    encabezado.tip_cuenta = request.POST['tip_cuenta']
-                    encabezado.tip_transa = request.POST['tip_transa']
-                    encabezado.fecha = request.POST['fecha']
-                    encabezado.comprobante = request.POST['comprobante']
-                    encabezado.descripcion = request.POST['descripcion']
-                    encabezado.direccion = request.POST['direccion']
-                    encabezado.reg_ats = 'CON REGISTRO DE ATS'
-                    encabezado.save()
-                    frmATS = AnexoTransaccional()
-                    frmATS.encabezadocuentaplan_id = encabezado.pk
-                    frmATS.comp_fecha_reg = request.POST['comp_fecha_reg']
-                    frmATS.comp_fecha_em = request.POST['comp_fecha_em']
-                    frmATS.n_autoriz = request.POST['n_autoriz']
-                    frmATS.company = Empresa.objects.get(
-                        siglas__exact=Empresa.objects.get(id=request.POST['company']).siglas)
-                    frmATS.environment_type = frmATS.company.environment_type
-                    frmATS.receipt = Recibo.objects.get(
-                        voucher_type=request.POST['receipt'],
-                        establishment_code=frmATS.company.establishment_code,
-                        issuing_point_code=frmATS.company.issuing_point_code,
-                        empresa=frmATS.company
-                    )
-                    frmATS.voucher_number = frmATS.generate_voucher_number()
-                    frmATS.voucher_number_full = frmATS.get_voucher_number_full()
-                    frmATS.save()
-                    data = {
-                        'print_url': str(reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))}
-                    # data = {'print_url': str(reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))}
-                    print('continuaa al generate invoice')
-                    if False:  # frmATS.create_electronic_invoice:
-                        data = frmATS.generate_electronic_invoice()
-                        if not data['resp']:
-                            print('roolback')
-                            transaction.set_rollback(True)
-                if 'error' in data:
-                    SRI().create_voucher_errors(frmATS, data)
+
+                try:
+
+                    with transaction.atomic():
+
+                        # 1) Crear encabezado
+                        encabezado = EncabezadoCuentasPlanCuenta()
+
+                        encabezado.codigo = request.POST.get('codigo', '')
+
+                        encabezado.tip_cuenta = request.POST.get('tip_cuenta', '')
+
+                        encabezado.tip_transa = request.POST.get('tip_transa', '')
+
+                        encabezado.fecha = request.POST.get('fecha')
+
+                        encabezado.comprobante = request.POST.get('comprobante', '')
+
+                        encabezado.descripcion = request.POST.get('descripcion', '')
+
+                        encabezado.direccion = request.POST.get('direccion', '')
+
+                        encabezado.reg_ats = 'CON REGISTRO DE ATS'
+
+                        encabezado.save()
+
+                        # 2) Obtener o crear ATS relacionado
+
+                        frmATS, created = AnexoTransaccional.objects.get_or_create(
+
+                            encabezadocuentaplan_id=encabezado.pk
+
+                        )
+
+                        # 3) Asignar campos del ATS (uso .get para seguridad)
+
+                        frmATS.estab = request.POST.get('estab_serie', '')
+
+                        frmATS.comp_serie = request.POST.get('comp_serie', '')
+
+                        frmATS.comp_secuencia = request.POST.get('comp_secuencia', '')
+
+                        frmATS.comp_numero = request.POST.get('comp_numero', '')
+
+                        frmATS.tipo_comp = request.POST.get('tipo_comp', '')
+
+                        frmATS.comp_fecha_reg = request.POST.get('comp_fecha_reg') or None
+
+                        frmATS.comp_fecha_em = request.POST.get('comp_fecha_em') or None
+
+                        frmATS.n_autoriz = request.POST.get('n_autoriz', '')
+
+                        frmATS.ag_ret = request.POST.get('ag_ret', '')
+
+                        frmATS.sust_trib = request.POST.get('sust_trib', '')
+
+                        # 4) Empresa y entorno
+
+                        company_id = request.POST.get('company')
+
+                        if not company_id:
+                            raise ValueError('Debe indicar la empresa en el formulario.')
+
+                        company = Empresa.objects.get(id=company_id)
+
+                        frmATS.company = company
+
+                        frmATS.environment_type = company.environment_type
+
+                        # 5) Valores / totales (usa get con valores por defecto)
+
+                        frmATS.cant_iva_cero = request.POST.get('cant_iva_cero', 0)
+
+                        frmATS.base_cero_bruto = request.POST.get('base_cero_bruto', 0)
+
+                        frmATS.base_cero_bruto_fcientocuatro = request.POST.get('base_cero_bruto_fcientocuatro', 0)
+
+                        frmATS.base_iva_normal_bruto_fcientocuatro = request.POST.get(
+                            'base_iva_normal_bruto_fcientocuatro', 0)
+
+                        frmATS.base_iva_normal_porcen = request.POST.get('base_iva_normal_porcen', 0)
+
+                        frmATS.monto_iva_normal = request.POST.get('monto_iva_normal', 0)
+
+                        frmATS.base_iva_bienes_bruto = request.POST.get('base_iva_bienes_bruto', 0)
+
+                        frmATS.base_iva_bienes_bruto_fcientocuatro = request.POST.get(
+                            'base_iva_bienes_bruto_fcientocuatro', 0)
+
+                        frmATS.base_iva_bienes_porcen = request.POST.get('base_iva_bienes_porcen', 0)
+
+                        frmATS.monto_iva_bienes = request.POST.get('monto_iva_bienes', 0)
+
+                        frmATS.base_no_obj_iva = request.POST.get('base_no_obj_iva', 0)
+
+                        frmATS.base_ice = request.POST.get('base_ice', 0)
+
+                        frmATS.porcent_ice = request.POST.get('porcent_ice', 0)
+
+                        frmATS.monto_ice = request.POST.get('monto_ice', 0)
+
+                        frmATS.monto_total = request.POST.get('monto_total', 0)
+
+                        # 6) Retenciones
+
+                        frmATS.ret_serie = request.POST.get('ret_serie', '')
+
+                        frmATS.ret_numero = request.POST.get('ret_numero', '')
+
+                        frmATS.ret_numero_full = request.POST.get('ret_numero_full', '')
+
+                        frmATS.ret_fecha = request.POST.get('ret_fecha') or None
+
+                        frmATS.iva_cero = request.POST.get('iva_cero', 0)
+
+                        frmATS.iva_cinc = request.POST.get('iva_cinc', 0)
+
+                        frmATS.ret_iva_cinc = request.POST.get('ret_iva_cinc', 0)
+
+                        frmATS.cant_iva_cinc = request.POST.get('cant_iva_cinc', 0)
+
+                        frmATS.iva_diez = request.POST.get('iva_diez', 0)
+
+                        frmATS.ret_iva_diez = request.POST.get('ret_iva_diez', 0)
+
+                        frmATS.cant_iva_diez = request.POST.get('cant_iva_diez', 0)
+
+                        frmATS.iva_setn = request.POST.get('iva_setn', 0)
+
+                        frmATS.ret_iva_setn = request.POST.get('ret_iva_setn', 0)
+
+                        frmATS.cant_iva_setn = request.POST.get('cant_iva_setn', 0)
+
+                        frmATS.iva_veint = request.POST.get('iva_veint', 0)
+
+                        frmATS.ret_iva_veint = request.POST.get('ret_iva_veint', 0)
+
+                        frmATS.cant_iva_veint = request.POST.get('cant_iva_veint', 0)
+
+                        frmATS.iva_cien = request.POST.get('iva_cien', 0)
+
+                        frmATS.ret_iva_cien = request.POST.get('ret_iva_cien', 0)
+
+                        frmATS.cant_iva_cien = request.POST.get('cant_iva_cien', 0)
+
+                        frmATS.iva_treint = request.POST.get('iva_treint', 0)
+
+                        frmATS.ret_iva_treint = request.POST.get('ret_iva_treint', 0)
+
+                        frmATS.cant_iva_treint = request.POST.get('cant_iva_treint', 0)
+
+                        # 7) Retenciones fuente (si aplica)
+
+                        frmATS.ret_fue_iva_cero_uno = request.POST.get('ret_fue_iva_cero_uno', 0)
+
+                        frmATS.ret_fue_iva_uno = request.POST.get('ret_fue_iva_uno', 0)
+
+                        frmATS.ret_fue_iva_anexo_uno = request.POST.get('ret_fue_iva_anexo_uno', 0)
+
+                        frmATS.ret_fue_iva_porcent_uno = request.POST.get('ret_fue_iva_porcent_uno', 0)
+
+                        frmATS.ret_fue_iva_monto_uno = request.POST.get('ret_fue_iva_monto_uno', 0)
+
+                        frmATS.ret_fue_iva_cero_dos = request.POST.get('ret_fue_iva_cero_dos', 0)
+
+                        frmATS.ret_fue_iva_dos = request.POST.get('ret_fue_iva_dos', 0)
+
+                        frmATS.ret_fue_iva_anexo_dos = request.POST.get('ret_fue_iva_anexo_dos', 0)
+
+                        frmATS.ret_fue_iva_porcent_dos = request.POST.get('ret_fue_iva_porcent_dos', 0)
+
+                        frmATS.ret_fue_iva_monto_dos = request.POST.get('ret_fue_iva_monto_dos', 0)
+
+                        frmATS.ret_fue_iva_cero_tres = request.POST.get('ret_fue_iva_cero_tres', 0)
+
+                        frmATS.ret_fue_iva_tres = request.POST.get('ret_fue_iva_tres', 0)
+
+                        frmATS.ret_fue_iva_anexo_tres = request.POST.get('ret_fue_iva_anexo_tres', 0)
+
+                        frmATS.ret_fue_iva_porcent_tres = request.POST.get('ret_fue_iva_porcent_tres', 0)
+
+                        frmATS.ret_fue_iva_monto_tres = request.POST.get('ret_fue_iva_monto_tres', 0)
+
+                        # 8) Resolver recibo (puede venir como pk o como voucher_type)
+
+                        recibo = None
+
+                        receipt_post = request.POST.get('receipt', '')
+
+                        # intentar por pk primero
+
+                        try:
+
+                            if receipt_post:
+
+                                # si es numérico -> pk
+
+                                if str(receipt_post).isdigit():
+
+                                    recibo = Recibo.objects.get(pk=int(receipt_post))
+
+                                else:
+
+                                    # buscar por voucher_type y empresa
+
+                                    recibo = Recibo.objects.get(
+
+                                        voucher_type=str(receipt_post),
+
+                                        empresa=frmATS.company
+
+                                    )
+
+                        except Recibo.DoesNotExist:
+
+                            # fallback: intentar búsqueda por empresa + establishment/issuing codes
+
+                            try:
+
+                                recibo = Recibo.objects.filter(empresa=frmATS.company).first()
+
+                            except Exception:
+
+                                recibo = None
+
+                        if not recibo:
+                            raise ValueError('No se encontró un Recibo válido para la empresa seleccionada.')
+
+                        frmATS.receipt = recibo
+
+                        # 9) Generar numeración y guardar ATS
+
+                        frmATS.voucher_number = frmATS.generate_voucher_number()
+
+                        frmATS.voucher_number_full = frmATS.get_voucher_number_full()
+
+                        frmATS.save()
+
+                        # 10) Incrementar secuencia en Recibo
+
+                        try:
+
+                            recibo.sequence = (recibo.sequence or 0) + 1
+
+                            recibo.save()
+
+                        except Exception:
+
+                            # no fatal: solo log
+
+                            print('No se pudo incrementar la secuencia del Recibo.')
+
+                        # 11) Preparar respuesta con print_url
+
+                        data = {
+
+                            'print_url': str(
+                                reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))
+
+                        }
+
+                        print('continua al generate invoice')
+
+                        # 12) Generar documento electrónico si se solicitó o si la bandera del modelo lo indica
+
+                        create_electronic = request.POST.get('create_electronic_invoice') == 'on' or getattr(frmATS,
+                                                                                                             'create_electronic_invoice',
+                                                                                                             False)
+
+                        if create_electronic:
+
+                            res = frmATS.generate_electronic_invoice()
+
+                            # res debe ser un dict con 'resp' indicando éxito
+
+                            if not res.get('resp', False):
+
+                                print('Error en generate_electronic_invoice, haciendo rollback:', res)
+
+                                transaction.set_rollback(True)
+
+                                data = res
+
+                            else:
+
+                                # si todo OK, sobrescribimos print_url si la respuesta trae otro
+
+                                if res.get('print_url'):
+                                    data['print_url'] = res['print_url']
+
+
+                except Exception as e:
+
+                    import traceback
+
+                    print('Error en SEARCH ATS:', str(e))
+
+                    print(traceback.format_exc())
+
+                    data = {'error': str(e)}
+
 
             elif action == 'search_voucher_number':
                 try:
@@ -823,7 +1572,6 @@ class crearFacturaGastoBIOView(CreateView):
         except Exception as e:
             print(f"Error al preseleccionar empresa BIO: {e}")
         return context
-
 
 
 class editarFacturaGastoView(UpdateView):
