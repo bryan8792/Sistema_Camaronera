@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from django.utils import timezone
 from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
@@ -905,8 +906,6 @@ class crearFacturaGastoBIOView(CreateView):
                 data['recibos'] = recibos
 
 
-
-
             elif action == 'search_ats':
 
                 print('LLEGO A SEARCH ATS')
@@ -917,36 +916,58 @@ class crearFacturaGastoBIOView(CreateView):
 
                     with transaction.atomic():
 
-                        # 1) Crear encabezado
-                        encabezado = EncabezadoCuentasPlanCuenta()
+                        # Empresa obligatoria
 
-                        encabezado.codigo = request.POST.get('codigo', '')
+                        company_id = request.POST.get('company')
 
-                        encabezado.tip_cuenta = request.POST.get('tip_cuenta', '')
+                        if not company_id:
+                            return JsonResponse({'error': 'Debe seleccionar una empresa válida.'}, status=400)
 
-                        encabezado.tip_transa = request.POST.get('tip_transa', '')
+                        company = Empresa.objects.get(id=company_id)
 
-                        encabezado.fecha = request.POST.get('fecha')
+                        # Generar código correlativo (ej: 091008)
 
-                        encabezado.comprobante = request.POST.get('comprobante', '')
+                        mes = request.POST.get('mes', timezone.now().strftime("%m"))
 
-                        encabezado.descripcion = request.POST.get('descripcion', '')
+                        tipo = request.POST.get('tip_cuenta', '0')  # tipo contable
 
-                        encabezado.direccion = request.POST.get('direccion', '')
+                        ultima = self.get_last_sequence(mes, tipo)
 
-                        encabezado.reg_ats = 'CON REGISTRO DE ATS'
+                        codigo_generado = f"{int(mes):02d}{tipo}{ultima + 1:03d}"
 
-                        encabezado.save()
+                        # Crear encabezado
 
-                        # 2) Obtener o crear ATS relacionado
+                        encabezado = EncabezadoCuentasPlanCuenta.objects.create(
 
-                        frmATS, created = AnexoTransaccional.objects.get_or_create(
+                            codigo=codigo_generado,
 
-                            encabezadocuentaplan_id=encabezado.pk
+                            tip_cuenta=tipo,
+
+                            tip_transa=request.POST.get('tip_transa', ''),
+
+                            fecha=request.POST.get('fecha'),
+
+                            comprobante=request.POST.get('comprobante', ''),
+
+                            descripcion=request.POST.get('descripcion', ''),
+
+                            direccion=request.POST.get('direccion', ''),
+
+                            reg_ats='CON REGISTRO DE ATS',
+
+                            empresa=company
 
                         )
 
-                        # 3) Asignar campos del ATS (uso .get para seguridad)
+                        # Crear/actualizar ATS
+
+                        frmATS, created = AnexoTransaccional.objects.get_or_create(
+
+                            encabezadocuentaplan=encabezado,
+
+                            defaults={'company': company}
+
+                        )
 
                         frmATS.estab = request.POST.get('estab_serie', '')
 
@@ -968,181 +989,36 @@ class crearFacturaGastoBIOView(CreateView):
 
                         frmATS.sust_trib = request.POST.get('sust_trib', '')
 
-                        # 4) Empresa y entorno
-
-                        company_id = request.POST.get('company')
-
-                        if not company_id:
-                            raise ValueError('Debe indicar la empresa en el formulario.')
-
-                        company = Empresa.objects.get(id=company_id)
-
                         frmATS.company = company
 
                         frmATS.environment_type = company.environment_type
 
-                        # 5) Valores / totales (usa get con valores por defecto)
-
-                        frmATS.cant_iva_cero = request.POST.get('cant_iva_cero', 0)
-
-                        frmATS.base_cero_bruto = request.POST.get('base_cero_bruto', 0)
-
-                        frmATS.base_cero_bruto_fcientocuatro = request.POST.get('base_cero_bruto_fcientocuatro', 0)
-
-                        frmATS.base_iva_normal_bruto_fcientocuatro = request.POST.get(
-                            'base_iva_normal_bruto_fcientocuatro', 0)
-
-                        frmATS.base_iva_normal_porcen = request.POST.get('base_iva_normal_porcen', 0)
-
-                        frmATS.monto_iva_normal = request.POST.get('monto_iva_normal', 0)
-
-                        frmATS.base_iva_bienes_bruto = request.POST.get('base_iva_bienes_bruto', 0)
-
-                        frmATS.base_iva_bienes_bruto_fcientocuatro = request.POST.get(
-                            'base_iva_bienes_bruto_fcientocuatro', 0)
-
-                        frmATS.base_iva_bienes_porcen = request.POST.get('base_iva_bienes_porcen', 0)
-
-                        frmATS.monto_iva_bienes = request.POST.get('monto_iva_bienes', 0)
-
-                        frmATS.base_no_obj_iva = request.POST.get('base_no_obj_iva', 0)
-
-                        frmATS.base_ice = request.POST.get('base_ice', 0)
-
-                        frmATS.porcent_ice = request.POST.get('porcent_ice', 0)
-
-                        frmATS.monto_ice = request.POST.get('monto_ice', 0)
-
-                        frmATS.monto_total = request.POST.get('monto_total', 0)
-
-                        # 6) Retenciones
-
-                        frmATS.ret_serie = request.POST.get('ret_serie', '')
-
-                        frmATS.ret_numero = request.POST.get('ret_numero', '')
-
-                        frmATS.ret_numero_full = request.POST.get('ret_numero_full', '')
-
-                        frmATS.ret_fecha = request.POST.get('ret_fecha') or None
-
-                        frmATS.iva_cero = request.POST.get('iva_cero', 0)
-
-                        frmATS.iva_cinc = request.POST.get('iva_cinc', 0)
-
-                        frmATS.ret_iva_cinc = request.POST.get('ret_iva_cinc', 0)
-
-                        frmATS.cant_iva_cinc = request.POST.get('cant_iva_cinc', 0)
-
-                        frmATS.iva_diez = request.POST.get('iva_diez', 0)
-
-                        frmATS.ret_iva_diez = request.POST.get('ret_iva_diez', 0)
-
-                        frmATS.cant_iva_diez = request.POST.get('cant_iva_diez', 0)
-
-                        frmATS.iva_setn = request.POST.get('iva_setn', 0)
-
-                        frmATS.ret_iva_setn = request.POST.get('ret_iva_setn', 0)
-
-                        frmATS.cant_iva_setn = request.POST.get('cant_iva_setn', 0)
-
-                        frmATS.iva_veint = request.POST.get('iva_veint', 0)
-
-                        frmATS.ret_iva_veint = request.POST.get('ret_iva_veint', 0)
-
-                        frmATS.cant_iva_veint = request.POST.get('cant_iva_veint', 0)
-
-                        frmATS.iva_cien = request.POST.get('iva_cien', 0)
-
-                        frmATS.ret_iva_cien = request.POST.get('ret_iva_cien', 0)
-
-                        frmATS.cant_iva_cien = request.POST.get('cant_iva_cien', 0)
-
-                        frmATS.iva_treint = request.POST.get('iva_treint', 0)
-
-                        frmATS.ret_iva_treint = request.POST.get('ret_iva_treint', 0)
-
-                        frmATS.cant_iva_treint = request.POST.get('cant_iva_treint', 0)
-
-                        # 7) Retenciones fuente (si aplica)
-
-                        frmATS.ret_fue_iva_cero_uno = request.POST.get('ret_fue_iva_cero_uno', 0)
-
-                        frmATS.ret_fue_iva_uno = request.POST.get('ret_fue_iva_uno', 0)
-
-                        frmATS.ret_fue_iva_anexo_uno = request.POST.get('ret_fue_iva_anexo_uno', 0)
-
-                        frmATS.ret_fue_iva_porcent_uno = request.POST.get('ret_fue_iva_porcent_uno', 0)
-
-                        frmATS.ret_fue_iva_monto_uno = request.POST.get('ret_fue_iva_monto_uno', 0)
-
-                        frmATS.ret_fue_iva_cero_dos = request.POST.get('ret_fue_iva_cero_dos', 0)
-
-                        frmATS.ret_fue_iva_dos = request.POST.get('ret_fue_iva_dos', 0)
-
-                        frmATS.ret_fue_iva_anexo_dos = request.POST.get('ret_fue_iva_anexo_dos', 0)
-
-                        frmATS.ret_fue_iva_porcent_dos = request.POST.get('ret_fue_iva_porcent_dos', 0)
-
-                        frmATS.ret_fue_iva_monto_dos = request.POST.get('ret_fue_iva_monto_dos', 0)
-
-                        frmATS.ret_fue_iva_cero_tres = request.POST.get('ret_fue_iva_cero_tres', 0)
-
-                        frmATS.ret_fue_iva_tres = request.POST.get('ret_fue_iva_tres', 0)
-
-                        frmATS.ret_fue_iva_anexo_tres = request.POST.get('ret_fue_iva_anexo_tres', 0)
-
-                        frmATS.ret_fue_iva_porcent_tres = request.POST.get('ret_fue_iva_porcent_tres', 0)
-
-                        frmATS.ret_fue_iva_monto_tres = request.POST.get('ret_fue_iva_monto_tres', 0)
-
-                        # 8) Resolver recibo (puede venir como pk o como voucher_type)
-
-                        recibo = None
+                        # Resolver recibo
 
                         receipt_post = request.POST.get('receipt', '')
 
-                        # intentar por pk primero
+                        recibo = None
 
-                        try:
+                        if receipt_post:
 
-                            if receipt_post:
+                            if str(receipt_post).isdigit():
 
-                                # si es numérico -> pk
+                                recibo = Recibo.objects.get(pk=int(receipt_post))
 
-                                if str(receipt_post).isdigit():
+                            else:
 
-                                    recibo = Recibo.objects.get(pk=int(receipt_post))
+                                recibo = Recibo.objects.filter(
 
-                                else:
+                                    voucher_type=receipt_post,
 
-                                    # buscar por voucher_type y empresa
+                                    empresa=company
 
-                                    recibo = Recibo.objects.get(
-
-                                        voucher_type=str(receipt_post),
-
-                                        empresa=frmATS.company
-
-                                    )
-
-                        except Recibo.DoesNotExist:
-
-                            # fallback: intentar búsqueda por empresa + establishment/issuing codes
-
-                            try:
-
-                                recibo = Recibo.objects.filter(empresa=frmATS.company).first()
-
-                            except Exception:
-
-                                recibo = None
+                                ).first()
 
                         if not recibo:
                             raise ValueError('No se encontró un Recibo válido para la empresa seleccionada.')
 
                         frmATS.receipt = recibo
-
-                        # 9) Generar numeración y guardar ATS
 
                         frmATS.voucher_number = frmATS.generate_voucher_number()
 
@@ -1150,57 +1026,23 @@ class crearFacturaGastoBIOView(CreateView):
 
                         frmATS.save()
 
-                        # 10) Incrementar secuencia en Recibo
+                        # Incrementar secuencia
 
-                        try:
+                        recibo.sequence = (recibo.sequence or 0) + 1
 
-                            recibo.sequence = (recibo.sequence or 0) + 1
-
-                            recibo.save()
-
-                        except Exception:
-
-                            # no fatal: solo log
-
-                            print('No se pudo incrementar la secuencia del Recibo.')
-
-                        # 11) Preparar respuesta con print_url
+                        recibo.save()
 
                         data = {
 
-                            'print_url': str(
-                                reverse('planCuentas:factura_gasto_print_invoice', kwargs={'pk': frmATS.id}))
+                            'codigo': encabezado.codigo,
+
+                            'ats_id': frmATS.id,
+
+                            'print_url': str(reverse('planCuentas:factura_gasto_print_invoice',
+
+                                                     kwargs={'pk': frmATS.id}))
 
                         }
-
-                        print('continua al generate invoice')
-
-                        # 12) Generar documento electrónico si se solicitó o si la bandera del modelo lo indica
-
-                        create_electronic = request.POST.get('create_electronic_invoice') == 'on' or getattr(frmATS,
-                                                                                                             'create_electronic_invoice',
-                                                                                                             False)
-
-                        if create_electronic:
-
-                            res = frmATS.generate_electronic_invoice()
-
-                            # res debe ser un dict con 'resp' indicando éxito
-
-                            if not res.get('resp', False):
-
-                                print('Error en generate_electronic_invoice, haciendo rollback:', res)
-
-                                transaction.set_rollback(True)
-
-                                data = res
-
-                            else:
-
-                                # si todo OK, sobrescribimos print_url si la respuesta trae otro
-
-                                if res.get('print_url'):
-                                    data['print_url'] = res['print_url']
 
 
                 except Exception as e:
@@ -1381,65 +1223,14 @@ class crearFacturaGastoBIOView(CreateView):
             #         data['error'] = str(e)
 
             elif action == 'obtener_ultima_secuencia':
+
                 mes = request.POST.get('mes')
+
                 tipo = request.POST.get('tipo')
 
-                print(f"Buscando secuencia para mes={mes}, tipo={tipo}")
+                secuencia, next_codigo = self.get_last_sequence(mes, tipo, return_next=True)
 
-                try:
-                    # Aseguramos mes en dos dígitos
-                    try:
-                        mes_str = f"{int(mes):02d}"
-                    except Exception:
-                        mes_str = mes or "00"
-
-                    patron_mes = mes_str.lstrip('0')
-                    patron1 = f"{mes_str}{tipo}"
-                    patron2 = f"{patron_mes}{tipo}"
-
-                    encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
-                        Q(codigo__startswith=patron1) | Q(codigo__startswith=patron2)
-                    ).order_by('-codigo')
-
-                    ultima_secuencia = 0
-                    if encabezados.exists():
-                        for encabezado in encabezados:
-                            codigo = str(encabezado.codigo) if encabezado.codigo else ""
-                            print(f"Analizando código: {codigo}")
-
-                            match = re.search(r'(\d{1,2})(\d)(\d{3})$', codigo)
-                            if match:
-                                mes_encontrado = match.group(1)
-                                tipo_encontrado = match.group(2)
-                                secuencia_str = match.group(3)
-
-                                if (
-                                        mes_encontrado == mes_str or mes_encontrado == patron_mes) and tipo_encontrado == str(
-                                        tipo):
-                                    try:
-                                        secuencia = int(secuencia_str)
-                                        ultima_secuencia = max(ultima_secuencia, secuencia)
-                                        print(f"Secuencia encontrada: {secuencia}")
-                                    except ValueError:
-                                        print(f"Error al convertir secuencia: {secuencia_str}")
-
-                    siguiente = ultima_secuencia + 1
-                    next_seq_str = f"{siguiente:03d}"
-                    next_codigo = f"{mes_str}{tipo}{next_seq_str}"
-
-                    data['secuencia'] = ultima_secuencia
-                    data['next_sequence'] = siguiente
-                    data['next_sequence_formatted'] = next_seq_str
-                    data['next_codigo'] = next_codigo
-
-                    print(f"Última secuencia={ultima_secuencia}, siguiente={siguiente}, next_codigo={next_codigo}")
-
-                except Exception as e:
-                    import traceback
-                    print(f"Error al buscar secuencia: {str(e)}")
-                    print(traceback.format_exc())
-                    data['secuencia'] = 0
-                    data['error'] = str(e)
+                data['next_codigo'] = next_codigo
 
 
 
@@ -1547,6 +1338,28 @@ class crearFacturaGastoBIOView(CreateView):
                 }
             }, status=500)
 
+    def get_last_sequence(self, mes, tipo, return_next=False):
+        try:
+            mes_str = f"{int(mes):02d}"
+        except:
+            mes_str = "00"
+
+        patron1 = f"{mes_str}{tipo}"
+        encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+            codigo__startswith=patron1
+        ).order_by('-codigo')
+
+        ultima_secuencia = 0
+        if encabezados.exists():
+            for encabezado in encabezados:
+                match = re.search(r'(\d{2})(\d)(\d{3})$', str(encabezado.codigo))
+                if match:
+                    secuencia_str = match.group(3)
+                    ultima_secuencia = max(ultima_secuencia, int(secuencia_str))
+
+        siguiente = ultima_secuencia + 1
+        next_codigo = f"{mes_str}{tipo}{siguiente:03d}"
+        return (ultima_secuencia, next_codigo) if return_next else ultima_secuencia
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
