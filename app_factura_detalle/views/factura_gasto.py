@@ -906,154 +906,298 @@ class crearFacturaGastoBIOView(CreateView):
                 data['recibos'] = recibos
 
 
+
+
+
+            # Dentro de tu vista factura_gasto.py
+
+            # elif action == "search_ats":
+            #
+            #     try:
+            #
+            #         # ---- RECIBO ----
+            #
+            #         receipt_code = request.POST.get("receipt", None)  # ej: '07'
+            #
+            #         empresa_id = request.POST.get("company")
+            #
+            #         # Establecimiento y punto de emisión
+            #
+            #         estab_serie = request.POST.get("estab_serie", "001002")  # ejemplo '001002'
+            #
+            #         establishment_code = estab_serie[:3] if len(estab_serie) >= 3 else "001"
+            #
+            #         issuing_point_code = estab_serie[3:6] if len(estab_serie) >= 6 else "001"
+            #
+            #         # Crear o recuperar Recibo
+            #
+            #         receipt_obj, _ = Recibo.objects.get_or_create(
+            #
+            #             voucher_type=receipt_code,
+            #
+            #             empresa_id=empresa_id,
+            #
+            #             establishment_code=establishment_code,
+            #
+            #             issuing_point_code=issuing_point_code,
+            #
+            #             defaults={"sequence": 0},
+            #
+            #         )
+            #
+            #         # ---- ATS ----
+            #
+            #         comp_numero = request.POST.get("comp_numero")
+            #
+            #         frmATS, created = AnexoTransaccional.objects.update_or_create(
+            #
+            #             receipt=receipt_obj,
+            #
+            #             company_id=empresa_id,
+            #
+            #             comp_numero=comp_numero,
+            #
+            #             defaults={
+            #
+            #                 "ag_ret": request.POST.get("ag_ret", "Si"),
+            #
+            #                 "sust_trib": request.POST.get("sust_trib", "No existe sustituto tributario"),
+            #
+            #                 "tipo_comp": request.POST.get("tipo_comp", "No existe tipo de comprobante"),
+            #
+            #                 "comp_fecha_em": request.POST.get("comp_fecha_em"),
+            #
+            #                 "n_autoriz": request.POST.get("n_autoriz", "No existe ingreso"),
+            #
+            #                 "base_cero_bruto": float(request.POST.get("base_cero_bruto", 0.0)),
+            #
+            #                 "base_iva_normal_bruto": float(request.POST.get("base_iva_normal_bruto", 0.0)),
+            #
+            #                 "monto_iva_normal": float(request.POST.get("monto_iva_normal", 0.0)),
+            #
+            #                 "monto_total": float(request.POST.get("monto_total", 0.0)),
+            #
+            #                 "det_form": request.POST.get("det_form", "NINGUNO"),
+            #
+            #             }
+            #
+            #         )
+            #
+            #         return JsonResponse({
+            #
+            #             "success": True,
+            #
+            #             "id": frmATS.id,
+            #
+            #             "created": created,
+            #
+            #             "receipt_id": receipt_obj.id,
+            #
+            #             "secuencia": receipt_obj.get_sequence()
+            #
+            #         })
+            #
+            #
+            #     except Exception as e:
+            #
+            #         import traceback
+            #
+            #         print("Error en SEARCH ATS:", str(e))
+            #
+            #         traceback.print_exc()
+            #
+            #         return JsonResponse({"error": str(e)}, status=500)
+
             elif action == 'search_ats':
 
                 print('LLEGO A SEARCH ATS')
 
                 print(request.POST)
 
-                try:
+                with transaction.atomic():
 
-                    with transaction.atomic():
+                    # ---- Crear encabezado ----
 
-                        # Empresa obligatoria
+                    encabezado = EncabezadoCuentasPlanCuenta()
 
-                        company_id = request.POST.get('company')
+                    encabezado.codigo = request.POST.get('codigo', '')
 
-                        if not company_id:
-                            return JsonResponse({'error': 'Debe seleccionar una empresa válida.'}, status=400)
+                    encabezado.tip_cuenta = request.POST.get('tip_cuenta', '')
 
-                        company = Empresa.objects.get(id=company_id)
+                    encabezado.fecha = request.POST.get('fecha') or timezone.now().date()
 
-                        # Generar código correlativo (ej: 091008)
+                    encabezado.ruc = request.POST.get('ruc', '')
 
-                        mes = request.POST.get('mes', timezone.now().strftime("%m"))
+                    encabezado.tip_transa = request.POST.get('tip_transa', '')
 
-                        tipo = request.POST.get('tip_cuenta', '0')  # tipo contable
+                    encabezado.reg_control = 'FG'
 
-                        ultima = self.get_last_sequence(mes, tipo)
+                    encabezado.empresa_id = request.POST.get('empresa')
 
-                        codigo_generado = f"{int(mes):02d}{tipo}{ultima + 1:03d}"
+                    encabezado.comprobante = request.POST.get('comprobante', '')
 
-                        # Crear encabezado
+                    encabezado.descripcion = request.POST.get('descripcion', '')
 
-                        encabezado = EncabezadoCuentasPlanCuenta.objects.create(
+                    encabezado.direccion = request.POST.get('direccion', '')
 
-                            codigo=codigo_generado,
+                    encabezado.reg_ats = 'CON REGISTRO DE ATS'
 
-                            tip_cuenta=tipo,
+                    encabezado.save()
 
-                            tip_transa=request.POST.get('tip_transa', ''),
+                    # ---- Crear o actualizar AnexoTransaccional ----
 
-                            fecha=request.POST.get('fecha'),
+                    try:
+                        frmATS = AnexoTransaccional.objects.get(encabezadocuentaplan_id=encabezado.pk)
+                    except AnexoTransaccional.DoesNotExist:
+                        frmATS = AnexoTransaccional(encabezadocuentaplan_id=encabezado.pk)
 
-                            comprobante=request.POST.get('comprobante', ''),
+                    frmATS.estab = request.POST.get('estab_serie', '')
 
-                            descripcion=request.POST.get('descripcion', ''),
+                    frmATS.comp_serie = request.POST.get('comp_serie', '')
 
-                            direccion=request.POST.get('direccion', ''),
+                    frmATS.comp_secuencia = request.POST.get('comp_secuencia', '')
 
-                            reg_ats='CON REGISTRO DE ATS',
+                    frmATS.comp_numero = request.POST.get('comp_numero', '')
 
-                            empresa=company
+                    frmATS.tipo_comp = request.POST.get('tipo_comp', '')
+
+                    frmATS.comp_fecha_reg = request.POST.get('comp_fecha_reg')
+
+                    frmATS.comp_fecha_em = request.POST.get('comp_fecha_em')
+
+                    frmATS.n_autoriz = request.POST.get('n_autoriz', '')
+
+                    frmATS.ag_ret = request.POST.get('ag_ret', 'No')
+
+                    frmATS.sust_trib = request.POST.get('sust_trib', '')
+
+                    frmATS.company = Empresa.objects.get(
+
+                        siglas__exact=Empresa.objects.get(id=request.POST.get('company')).siglas
+
+                    )
+
+                    frmATS.environment_type = frmATS.company.environment_type
+
+                    # ---- Montos y bases ----
+
+                    campos_montos = [
+
+                        'cant_iva_cero', 'base_cero_bruto', 'base_cero_bruto_fcientocuatro',
+
+                        'base_iva_normal_bruto_fcientocuatro', 'base_iva_normal_porcen',
+
+                        'monto_iva_normal', 'base_iva_bienes_bruto', 'base_iva_bienes_bruto_fcientocuatro',
+
+                        'base_iva_bienes_porcen', 'monto_iva_bienes', 'base_no_obj_iva', 'base_ice',
+
+                        'porcent_ice', 'monto_ice', 'monto_total'
+
+                    ]
+
+                    for campo in campos_montos:
+
+                        valor = request.POST.get(campo, '0')
+
+                        try:
+
+                            setattr(frmATS, campo, Decimal(valor))
+
+                        except:
+
+                            setattr(frmATS, campo, Decimal(0))
+
+                    # ---- Retenciones ----
+
+                    campos_retenciones = [
+
+                        'ret_serie', 'ret_numero', 'ret_numero_full', 'ret_fecha',
+
+                        'iva_cero', 'iva_cinc', 'ret_iva_cinc', 'cant_iva_cinc',
+
+                        'iva_diez', 'ret_iva_diez', 'cant_iva_diez',
+
+                        'iva_setn', 'ret_iva_setn', 'cant_iva_setn',
+
+                        'iva_veint', 'ret_iva_veint', 'cant_iva_veint',
+
+                        'iva_cien', 'ret_iva_cien', 'cant_iva_cien',
+
+                        'iva_treint', 'ret_iva_treint', 'cant_iva_treint'
+
+                    ]
+
+                    for campo in campos_retenciones:
+                        frmATS.__setattr__(campo, request.POST.get(campo))
+
+                    # ---- Retenciones adicionales ----
+
+                    campos_ret_adicionales = [
+
+                        'ret_fue_iva_cero_uno', 'ret_fue_iva_uno', 'ret_fue_iva_anexo_uno',
+
+                        'ret_fue_iva_porcent_uno', 'ret_fue_iva_monto_uno',
+
+                        'ret_fue_iva_cero_dos', 'ret_fue_iva_dos', 'ret_fue_iva_anexo_dos',
+
+                        'ret_fue_iva_porcent_dos', 'ret_fue_iva_monto_dos',
+
+                        'ret_fue_iva_cero_tres', 'ret_fue_iva_tres', 'ret_fue_iva_anexo_tres',
+
+                        'ret_fue_iva_porcent_tres', 'ret_fue_iva_monto_tres'
+
+                    ]
+
+                    for campo in campos_ret_adicionales:
+                        frmATS.__setattr__(campo, request.POST.get(campo))
+
+                    # ---- Vincular recibo ----
+
+                    recibo = Recibo.objects.get(pk=request.POST.get('receipt'))
+
+                    frmATS.receipt = recibo
+
+                    frmATS.voucher_number = frmATS.generate_voucher_number()
+
+                    frmATS.voucher_number_full = frmATS.get_voucher_number_full()
+
+                    frmATS.save()
+
+                    # Incrementar secuencia del recibo
+
+                    recibo.sequence += 1
+
+                    recibo.save()
+
+                    # ---- Generar respuesta ----
+
+                    data = {
+
+                        'print_url': str(
+
+                            reverse('planCuentas:factura_gasto_bio_print_invoice', kwargs={'pk': frmATS.id})
 
                         )
 
-                        # Crear/actualizar ATS
+                    }
 
-                        frmATS, created = AnexoTransaccional.objects.get_or_create(
+                    if frmATS.create_electronic_invoice:
 
-                            encabezadocuentaplan=encabezado,
+                        data = frmATS.generate_electronic_invoice()
 
-                            defaults={'company': company}
+                        if not data.get('resp', True):
+                            transaction.set_rollback(True)
 
-                        )
+                    if 'error' in data:
+                        SRI().create_voucher_errors(frmATS, data)
 
-                        frmATS.estab = request.POST.get('estab_serie', '')
-
-                        frmATS.comp_serie = request.POST.get('comp_serie', '')
-
-                        frmATS.comp_secuencia = request.POST.get('comp_secuencia', '')
-
-                        frmATS.comp_numero = request.POST.get('comp_numero', '')
-
-                        frmATS.tipo_comp = request.POST.get('tipo_comp', '')
-
-                        frmATS.comp_fecha_reg = request.POST.get('comp_fecha_reg') or None
-
-                        frmATS.comp_fecha_em = request.POST.get('comp_fecha_em') or None
-
-                        frmATS.n_autoriz = request.POST.get('n_autoriz', '')
-
-                        frmATS.ag_ret = request.POST.get('ag_ret', '')
-
-                        frmATS.sust_trib = request.POST.get('sust_trib', '')
-
-                        frmATS.company = company
-
-                        frmATS.environment_type = company.environment_type
-
-                        # Resolver recibo
-
-                        receipt_post = request.POST.get('receipt', '')
-
-                        recibo = None
-
-                        if receipt_post:
-
-                            if str(receipt_post).isdigit():
-
-                                recibo = Recibo.objects.get(pk=int(receipt_post))
-
-                            else:
-
-                                recibo = Recibo.objects.filter(
-
-                                    voucher_type=receipt_post,
-
-                                    empresa=company
-
-                                ).first()
-
-                        if not recibo:
-                            raise ValueError('No se encontró un Recibo válido para la empresa seleccionada.')
-
-                        frmATS.receipt = recibo
-
-                        frmATS.voucher_number = frmATS.generate_voucher_number()
-
-                        frmATS.voucher_number_full = frmATS.get_voucher_number_full()
-
-                        frmATS.save()
-
-                        # Incrementar secuencia
-
-                        recibo.sequence = (recibo.sequence or 0) + 1
-
-                        recibo.save()
-
-                        data = {
-
-                            'codigo': encabezado.codigo,
-
-                            'ats_id': frmATS.id,
-
-                            'print_url': str(reverse('planCuentas:factura_gasto_print_invoice',
-
-                                                     kwargs={'pk': frmATS.id}))
-
-                        }
+                    return JsonResponse(data)
 
 
-                except Exception as e:
 
-                    import traceback
 
-                    print('Error en SEARCH ATS:', str(e))
 
-                    print(traceback.format_exc())
 
-                    data = {'error': str(e)}
 
 
             elif action == 'search_voucher_number':

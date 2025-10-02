@@ -6,21 +6,21 @@
     <razonSocial>BIOCASCAJAL</razonSocial>
     <nombreComercial>BIOCASCAJAL</nombreComercial>
     <ruc>0790101804001</ruc>
-    <claveAcceso>1009202507079010180400110010020000000062238191717</claveAcceso>
-    <codDoc>07</codDoc>
+    <claveAcceso>0210202501079010180400110010020000000126864469518</claveAcceso>
+    <codDoc>01</codDoc>
     <estab>001</estab>
     <ptoEmi>002</ptoEmi>
-    <secuencial>000000006</secuencial>
+    <secuencial>000000012</secuencial>
     <dirMatriz>GUAYAS / SUCRE Y 25 DE JUNIO</dirMatriz>
   </infoTributaria>
   <infoCompRetencion>
-    <fechaEmision>10/09/2025</fechaEmision>
+    <fechaEmision>02/10/2025</fechaEmision>
     <dirEstablecimiento>GUAYAS / SUCRE Y 25 DE JUNIO</dirEstablecimiento>
     <obligadoContabilidad>NO</obligadoContabilidad>
     <tipoIdentificacionSujetoRetenido>04</tipoIdentificacionSujetoRetenido>
     <parteRel>NO</parteRel>
-    <razonSocialSujetoRetenido>Consultora Internacional de Seguridad y Salud Ocupacional Safety MMP S.A.</razonSocialSujetoRetenido>
-    <identificacionSujetoRetenido>0791785162001</identificacionSujetoRetenido>
+    <razonSocialSujetoRetenido>aaaa</razonSocialSujetoRetenido>
+    <identificacionSujetoRetenido>11</identificacionSujetoRetenido>
     <periodoFiscal>12/2024</periodoFiscal>
   </infoCompRetencion>
   <docsSustento>
@@ -28,8 +28,8 @@
       <codSustento>02</codSustento>
       <codDocSustento>01</codDocSustento>
       <numDocSustento>001002000000313</numDocSustento>
-      <fechaEmisionDocSustento>10/09/2025</fechaEmisionDocSustento>
-      <fechaRegistroContable>10/09/2025</fechaRegistroContable>
+      <fechaEmisionDocSustento>02/10/2025</fechaEmisionDocSustento>
+      <fechaRegistroContable>02/10/2025</fechaRegistroContable>
       <numAutDocSustento>0412202401170970439700120010020000003130000031617</numAutDocSustento>
       <pagoLocExt>01</pagoLocExt>
       <totalSinImpuestos>274.45</totalSinImpuestos>
