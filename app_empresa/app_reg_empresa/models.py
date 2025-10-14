@@ -122,20 +122,21 @@ class Piscinas(models.Model):
         item['empresa'] = self.empresa.toJSON()
         return item
 
-    def get_area_hectareas(self):
-        """
-        Convierte el campo hect a un valor decimal para cálculos
-        """
-        try:
-            return float(self.hect)
-        except (ValueError, TypeError):
-            return 0.0
+    # def get_area_hectareas(self):
+    #     """
+    #     Convierte el campo hect a un valor decimal para cálculos
+    #     """
+    #     try:
+    #         return float(self.hect)
+    #     except (ValueError, TypeError):
+    #         return 0.0
 
     class Meta:
         db_table = 'tb_piscina'
         verbose_name = 'Piscina'
         verbose_name_plural = 'Piscinas'
         ordering = ['id']
+
 
 
 # Nuevos modelos para el cálculo de costo-utilidad por hectárea

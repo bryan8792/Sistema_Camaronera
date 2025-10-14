@@ -128,7 +128,6 @@ class DetalleDiaDieta(models.Model):
                         producto.responsable_ingreso = usuario_actual
                         producto.detalle_dieta_id = self.pk
                         producto.save()
-
             return nuevo_detalle
         except Exception as exc:
             pass
@@ -138,7 +137,6 @@ class DetalleDiaDieta(models.Model):
         sql = 'UPDATE stock_prod SET activo = FALSE where detalle_dieta_id = %s;' % self.pk
         cursor.execute(sql)
         super(DetalleDiaDieta, self).delete()
-
 
     def toJSON(self):
         item = model_to_dict(self)

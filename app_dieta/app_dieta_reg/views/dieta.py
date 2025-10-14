@@ -118,88 +118,75 @@ class crearDiaDietaView(CreateView):
                         inv.gramaje4 = int(i['gramaje4']) if i.get('gramaje4') else 0
                         inv.save()
 
+
             elif action == 'upload_excel':
                 print('LLEGO A UPLOAD EXCELL Y EMPEZO A RECORRER EL PYTHON DESDE AJAX')
-                # with transaction.atomic():
-                archive = request.FILES['archive']
-                workbook = load_workbook(filename=archive, data_only=True)
-                excel = workbook[workbook.sheetnames[0]]
-                factura = DiaDietaRegistro.objects.get(id=self.kwargs['pk'])
-                factura.mes_dieta_id = factura.mes_dieta.pk
-                factura.fecha = request.POST['fecha']
-                factura.tip_dieta = True
-                factura.save()
-                for row in range(3, excel.max_row + 1):
-                    inv = DetalleDiaDieta()
-                    orden = int(excel.cell(row=row, column=1).value)
-                    cant_bal = float(excel.cell(row=row, column=2).value)
-                    name_balanceado = excel.cell(row=row, column=4).value
-                    name_insumo1 = excel.cell(row=row, column=6).value
-                    cant_insum1 = float(excel.cell(row=row, column=7).value)
-                    name_insumo2 = excel.cell(row=row, column=9).value
-                    cant_insum2 = float(excel.cell(row=row, column=10).value)
-                    name_insumo3 = excel.cell(row=row, column=12).value
-                    cant_insum3 = float(excel.cell(row=row, column=13).value)
-                    name_insumo4 = excel.cell(row=row, column=15).value
-                    cant_insum4 = float(excel.cell(row=row, column=16).value)
-                    if Piscinas.objects.filter(orden=orden).exists():
-                        piscina = Piscinas.objects.get(orden=orden)
-                        print('piscina')
-                        print(piscina)
-                        # if piscina is not None:
-                        inv.piscinas_id = piscina.id
-                    inv.dieta_id = factura.pk
-                    if Producto.objects.filter(nombre__exact=name_balanceado).exists():
-                        balanceado = Producto.objects.get(nombre__exact=name_balanceado)
-                        # print('balanceado')
-                        # print(balanceado)
-                        # if balanceado is not None:
-                        inv.balanceado_id = balanceado.id
-                        inv.cantidad = float(excel.cell(row=row, column=2).value)
-                        # else:
-                        #     inv.balanceado_id = 0
-                        #     inv.cantidad = 0
-                    if Producto.objects.filter(nombre__exact=name_insumo1).exists():
-                        insumo1 = Producto.objects.get(nombre__exact=name_insumo1)
-                        # print('insumo1')
-                        # print(insumo1)
-                        # if insumo1 > 0:
-                        inv.insumo1 = insumo1.id
-                        inv.gramaje1 = float(excel.cell(row=row, column=7).value)
-                        # else:
-                        #     inv.insumo1 = 0
-                        #     inv.gramaje1 = 0.00
-                    if Producto.objects.filter(nombre__exact=name_insumo2).exists():
-                        insumo2 = Producto.objects.get(nombre__exact=name_insumo2)
-                        # print('insumo2')
-                        # print(insumo2)
-                        # if insumo2 > 0:
-                        inv.insumo2 = insumo2.id
-                        inv.gramaje2 = float(excel.cell(row=row, column=10).value)
-                        # else:
-                        #     inv.insumo2 = 0
-                        #     inv.gramaje2 = 0.00
-                    if Producto.objects.filter(nombre__exact=name_insumo3).exists():
-                        insumo3 = Producto.objects.get(nombre__exact=name_insumo3)
-                        # print('insumo3')
-                        # print(insumo3)
-                        # if insumo3 > 0:
-                        inv.insumo3 = insumo3.id
-                        inv.gramaje3 = float(excel.cell(row=row, column=13).value)
-                        # else:
-                        #     inv.insumo3 = 0
-                        #     inv.gramaje3 = 0.00
-                    if Producto.objects.filter(nombre__exact=name_insumo4).exists():
-                        insumo4 = Producto.objects.get(nombre__exact=name_insumo4)
-                        # print('insumo4')
-                        # print(insumo4)
-                        # if insumo4 > 0:
-                        inv.insumo4 = insumo4.id
-                        inv.gramaje4 = float(excel.cell(row=row, column=16).value)
-                        # else:
-                        #     inv.insumo4 = 0
-                        #     inv.gramaje4 = 0.00
-                    inv.save()
+                try:
+                    def safe_float(value):
+                        try:
+                            if value in [None, '-', '']:
+                                return 0.0
+                            return float(str(value).replace(',', '.'))
+                        except:
+                            return 0.0
+                    archive = request.FILES['archive']
+                    workbook = load_workbook(filename=archive, data_only=True)
+                    excel = workbook[workbook.sheetnames[0]]
+                    factura = DiaDietaRegistro.objects.get(id=self.kwargs['pk'])
+                    factura.mes_dieta_id = factura.mes_dieta.pk
+                    factura.fecha = request.POST.get('fecha')
+                    factura.tip_dieta = True
+                    factura.save()
+                    for row in range(3, excel.max_row + 1):
+                        orden = excel.cell(row=row, column=1).value
+                        if not orden:
+                            continue
+                        print(f"Procesando fila del Excell: {row} - Orden de Piscina: {orden}")
+                        inv = DetalleDiaDieta(dieta_id=factura.pk)
+                        # Buscar piscina
+                        piscina = Piscinas.objects.filter(orden=orden).first()
+                        if piscina:
+                            inv.piscinas_id = piscina.id
+                            print(f"Piscina encontrada: {piscina}")
+                        else:
+                            print(f"Piscina con orden {orden} no encontrada")
+                        # Balanceado
+                        name_balanceado = excel.cell(row=row, column=4).value
+                        if name_balanceado and Producto.objects.filter(nombre__exact=name_balanceado).exists():
+                            balanceado = Producto.objects.get(nombre__exact=name_balanceado)
+                            inv.balanceado_id = balanceado.id
+                            inv.cantidad = safe_float(excel.cell(row=row, column=2).value)
+                            print(f"Balanceado: {balanceado.nombre} ({inv.cantidad} lb)")
+                        else:
+                            print(f"Balanceado no encontrado: {name_balanceado}")
+                            inv.cantidad = 0
+                        # INSUMOS (Desde el 1 hasta el 4 insumo)
+                        insumo_cols = [(6, 7), (9, 10), (12, 13), (15, 16)]
+                        for idx, (col_name, col_cant) in enumerate(insumo_cols, start=1):
+                            name_insumo = excel.cell(row=row, column=col_name).value
+                            cant_insumo = safe_float(excel.cell(row=row, column=col_cant).value)
+                            if name_insumo and name_insumo not in ['-', '', None]:
+                                insumo = Producto.objects.filter(nombre__exact=name_insumo).first()
+                                if insumo:
+                                    setattr(inv, f"insumo{idx}", insumo.id)
+                                    setattr(inv, f"gramaje{idx}", cant_insumo)
+                                    print(f" Insumo {idx}: {name_insumo} ({cant_insumo} g)")
+                                else:
+                                    print(f" Insumo {idx} no encontrado: {name_insumo}")
+                                    setattr(inv, f"insumo{idx}", 0)
+                                    setattr(inv, f"gramaje{idx}", 0)
+                            else:
+                                setattr(inv, f"insumo{idx}", 0)
+                                setattr(inv, f"gramaje{idx}", 0)
+                        inv.save()
+
+                    print("Proceso de carga completada sin errores.")
+                    data['success'] = True
+                except Exception as e:
+                    import traceback
+                    print("ERROR GENERAL EN UPLOAD EXCEL:", e)
+                    traceback.print_exc()
+                    data['error'] = str(e)
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
