@@ -21,6 +21,21 @@
     <!--datables estilo bootstrap 4 CSS-->
     <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
 
+    <style>
+    tr.group {
+    background-color: rgb(237, 208, 0) !important;
+    color: #000;
+    font-weight: 700;
+    text-align: center;
+}
+
+tr.total {
+    background-color: #fdfdfd !important;
+    font-weight: 700;
+}
+
+    </style>
+
 {% endblock %}
 
 {% block contenido %}
