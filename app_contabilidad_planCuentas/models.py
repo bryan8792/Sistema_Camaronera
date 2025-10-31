@@ -506,11 +506,11 @@ class AnexoTransaccional(models.Model):
         rv = BytesIO()
         barcode.Code128(sale.access_code,
                         writer=barcode.writer.ImageWriter()).write(rv,
-                                                                    options={'text_distance': 3.0,
-                                                                             'font_size': 6})
+                                                                   options={'text_distance': 3.0,
+                                                                            'font_size': 6})
         file = base64.b64encode(rv.getvalue()).decode("ascii")
         context = {'sale': sale, 'encabezado': encabezado, 'height': 450, 'detalle': detalle,
-                       'access_code_barcode': f"data:image/png;base64,{file}"}
+                   'access_code_barcode': f"data:image/png;base64,{file}"}
         pdf_file = printer.create_pdf(context=context, template_name='app_factura_gasto/format/invoice.html')
 
         with tempfile.NamedTemporaryFile(delete=True) as file_temp:
@@ -526,23 +526,56 @@ class AnexoTransaccional(models.Model):
         return label
 
     def generate_electronic_invoice(self):
-        sri = SRI()
-        result = sri.create_xml(self)
-        print('continuaa proceso SRI()')
-        if result['resp']:
+        try:
+            xml_content, access_key = self.generate_xml()
+            print('→ XML de retención creado correctamente')
+            print(f'→ Clave de acceso: {access_key}')
+            result = {'resp': True, 'xml': xml_content}
+            # Firmar el XML
+            sri = SRI()
             result = sri.firm_xml(instance=self, xml=result['xml'])
+            print(f'→ Firmado XML: {result["resp"]}')
             if result['resp']:
+                # Validar el XML
                 result = sri.validate_xml(instance=self, xml=result['xml'])
+                print(f'→ Validado XML: {result["resp"]}')
                 if result['resp']:
+                    # Autorizar el XML
                     result = sri.authorize_xml(instance=self)
+                    print(f'→ Autorización intento 1: {result["resp"]}')
+                    # Reintentar hasta 3 veces si falla
                     index = 1
                     while not result['resp'] and index < 3:
                         time.sleep(1)
                         result = sri.authorize_xml(instance=self)
+                        print(f'→ Autorización intento {index + 1}: {result["resp"]}')
                         index += 1
                     if result['resp']:
+                        # <CHANGE> Solo incrementar secuencia después de autorización exitosa
+                        self.receipt.sequence += 1
+                        self.receipt.save()
+                        print(f'→ Secuencia del recibo incrementada a: {self.receipt.sequence}')
+
                         result['print_url'] = self.get_pdf_authorized()
-                    return result
+                        print(f'→ Comprobante autorizado exitosamente')
+                        print(f'→ XML guardado en: {self.get_xml_authorized()}')
+                        print(f'→ PDF guardado en: {self.get_pdf_authorized()}')
+                    else:
+                        print(f'→ Error en autorización después de 3 intentos')
+                else:
+                    print(f'→ Error en validación del XML')
+            else:
+                print(f'→ Error al firmar el XML')
+
+        except Exception as e:
+            import traceback
+            print(f'→ Error al generar comprobante electrónico: {str(e)}')
+            print(traceback.format_exc())
+            result = {
+                'resp': False,
+                'error': f'Error al generar comprobante: {str(e)}'
+            }
+
         return result
 
     def generate_xml(self):
@@ -552,6 +585,9 @@ class AnexoTransaccional(models.Model):
             print("Clave de acceso generada:", access_key)
             if not access_key:
                 raise ValueError("La clave de acceso no fue generada correctamente.")
+
+            # Almacenar access_code en el modelo
+            self.access_code = access_key
 
             # Crear el elemento raíz
             comprobante = ET.Element("comprobanteRetencion", id="comprobante", version="2.0.0")
@@ -567,95 +603,90 @@ class AnexoTransaccional(models.Model):
             ET.SubElement(infoTributaria, "codDoc").text = self.receipt.voucher_type
             ET.SubElement(infoTributaria, "estab").text = self.receipt.establishment_code
             ET.SubElement(infoTributaria, "ptoEmi").text = self.receipt.issuing_point_code
-            ET.SubElement(infoTributaria, "secuencial").text = self.voucher_number
+            ET.SubElement(infoTributaria, "secuencial").text = self.comp_numero
             ET.SubElement(infoTributaria, "dirMatriz").text = self.company.main_address
 
             # Agregar la información de la factura
             infoFactura = ET.SubElement(comprobante, "infoCompRetencion")
-            ET.SubElement(infoFactura, "fechaEmision").text = datetime.now().strftime('%d/%m/%Y')
+            ET.SubElement(infoFactura, "fechaEmision").text = datetime.strptime(self.comp_fecha_em,
+                                                                                '%Y-%m-%d').strftime(
+                '%d/%m/%Y') if isinstance(self.comp_fecha_em, str) else self.comp_fecha_em.strftime('%d/%m/%Y')
             ET.SubElement(infoFactura, "dirEstablecimiento").text = self.company.establishment_address
-            # ET.SubElement(infoFactura, "contribuyenteEspecial").text = "00"
             ET.SubElement(infoFactura, "obligadoContabilidad").text = self.company.obligated_accounting
             ET.SubElement(infoFactura, "tipoIdentificacionSujetoRetenido").text = "04"
             ET.SubElement(infoFactura, "parteRel").text = "NO"
             ET.SubElement(infoFactura, "razonSocialSujetoRetenido").text = self.encabezadocuentaplan.descripcion
             ET.SubElement(infoFactura, "identificacionSujetoRetenido").text = self.encabezadocuentaplan.ruc
-            ET.SubElement(infoFactura, "periodoFiscal").text = "12/2024"
+            periodo_fiscal = datetime.strptime(self.comp_fecha_em, '%Y-%m-%d').strftime('%m/%Y') if isinstance(
+                self.comp_fecha_em, str) else self.comp_fecha_em.strftime('%m/%Y')
+            ET.SubElement(infoFactura, "periodoFiscal").text = periodo_fiscal
 
             detalles = ET.SubElement(comprobante, "docsSustento")
             detalle = ET.SubElement(detalles, "docSustento")
-            ET.SubElement(detalle, "codSustento").text = "02" # Sustento Tributario
-            ET.SubElement(detalle, "codDocSustento").text = "01" # Tipo Comprobante
-            # ET.SubElement(detalle, "numDocSustento").text = self.receipt.establishment_code+self.receipt.issuing_point_code+self.voucher_number
-            ET.SubElement(detalle, "numDocSustento").text = '001002000000313'
-            ET.SubElement(detalle, "fechaEmisionDocSustento").text = datetime.strptime(self.comp_fecha_em,"%Y-%m-%d").strftime("%d/%m/%Y")
-            ET.SubElement(detalle, "fechaRegistroContable").text = datetime.strptime(self.comp_fecha_reg,"%Y-%m-%d").strftime("%d/%m/%Y")
-            # ET.SubElement(detalle, "numAutDocSustento").text = self.n_autoriz
-            ET.SubElement(detalle, "numAutDocSustento").text = '0412202401170970439700120010020000003130000031617'
+            ET.SubElement(detalle, "codSustento").text = "02"  # Sustento Tributario
+            ET.SubElement(detalle, "codDocSustento").text = "01"  # Tipo Comprobante
+            ET.SubElement(detalle, "numDocSustento").text = f'{self.comp_serie}{self.comp_secuencia}'
+            ET.SubElement(detalle, "fechaEmisionDocSustento").text = datetime.strptime(self.comp_fecha_em,
+                                                                                       "%Y-%m-%d").strftime("%d/%m/%Y")
+            ET.SubElement(detalle, "fechaRegistroContable").text = datetime.strptime(self.comp_fecha_reg,
+                                                                                     "%Y-%m-%d").strftime("%d/%m/%Y")
+            ET.SubElement(detalle, "numAutDocSustento").text = self.n_autoriz
             ET.SubElement(detalle, "pagoLocExt").text = '01'
-            # ET.SubElement(detalle, "totalSinImpuestos").text = f'{self.cant_iva_cero:.2f}'
-            ET.SubElement(detalle, "totalSinImpuestos").text = '274.45'
-            # ET.SubElement(detalle, "importeTotal").text = f'{self.monto_total:.2f}'
-            ET.SubElement(detalle, "importeTotal").text = '315.62'
+            total_sin_impuestos = float(self.base_cero) + float(self.base_iva_normal)
+            ET.SubElement(detalle, "totalSinImpuestos").text = f'{total_sin_impuestos:.2f}'
+            ET.SubElement(detalle, "importeTotal").text = f'{float(self.monto_total):.2f}'
 
             impuestos = ET.SubElement(detalle, "impuestosDocSustento")
-            impuesto = ET.SubElement(impuestos, "impuestoDocSustento")
-            ET.SubElement(impuesto, "codImpuestoDocSustento").text = "2"
-            ET.SubElement(impuesto, "codigoPorcentaje").text = "4"
-            # ET.SubElement(impuesto, "baseImponible").text = "{:.2f}".format(100.00)
-            ET.SubElement(impuesto, "baseImponible").text = '274.45'
-            ET.SubElement(impuesto, "tarifa").text = "15"
-            # ET.SubElement(impuesto, "valorImpuesto").text = "{:.2f}".format(12.00)
-            ET.SubElement(impuesto, "valorImpuesto").text = '41.17'
+            if float(self.base_iva_normal) > 0:
+                impuesto = ET.SubElement(impuestos, "impuestoDocSustento")
+                ET.SubElement(impuesto, "codImpuestoDocSustento").text = "2"
+                ET.SubElement(impuesto, "codigoPorcentaje").text = "4"  # 15% IVA
+                ET.SubElement(impuesto, "baseImponible").text = f'{float(self.base_iva_normal):.2f}'
+                ET.SubElement(impuesto, "tarifa").text = "15"
+                ET.SubElement(impuesto, "valorImpuesto").text = f'{float(self.monto_iva_normal):.2f}'
 
             retenciones = ET.SubElement(detalle, "retenciones")
-            # codigo: 1 cuando es de retencion
-            # codigo: 2 cuando es de iva
-            if self.iva_treint:
+            if float(self.iva_treint) > 0:
                 retencion = ET.SubElement(retenciones, "retencion")
                 ET.SubElement(retencion, "codigo").text = "2"
                 ET.SubElement(retencion, "codigoRetencion").text = "1"
-                ET.SubElement(retencion, "baseImponible").text = self.iva_treint
+                ET.SubElement(retencion, "baseImponible").text = f'{float(self.iva_treint):.2f}'
                 ET.SubElement(retencion, "porcentajeRetener").text = "30"
-                ET.SubElement(retencion, "valorRetenido").text = self.cant_iva_treint
-            if self.iva_veint:
+                ET.SubElement(retencion, "valorRetenido").text = f'{float(self.cant_iva_treint):.2f}'
+
+            if float(self.iva_veint) > 0:
                 retencion = ET.SubElement(retenciones, "retencion")
                 ET.SubElement(retencion, "codigo").text = "2"
                 ET.SubElement(retencion, "codigoRetencion").text = "10"
-                ET.SubElement(retencion, "baseImponible").text = self.iva_veint
+                ET.SubElement(retencion, "baseImponible").text = f'{float(self.iva_veint):.2f}'
                 ET.SubElement(retencion, "porcentajeRetener").text = "20"
-                ET.SubElement(retencion, "valorRetenido").text = self.cant_iva_veint
+                ET.SubElement(retencion, "valorRetenido").text = f'{float(self.cant_iva_veint):.2f}'
+
+            if float(self.iva_cien) > 0:
+                retencion = ET.SubElement(retenciones, "retencion")
+                ET.SubElement(retencion, "codigo").text = "2"
+                ET.SubElement(retencion, "codigoRetencion").text = "2"
+                ET.SubElement(retencion, "baseImponible").text = f'{float(self.iva_cien):.2f}'
+                ET.SubElement(retencion, "porcentajeRetener").text = "100"
+                ET.SubElement(retencion, "valorRetenido").text = f'{float(self.cant_iva_cien):.2f}'
 
             pagos = ET.SubElement(detalle, "pagos")
             pago = ET.SubElement(pagos, "pago")
             ET.SubElement(pago, "formaPago").text = "20"
-            ET.SubElement(pago, "total").text = "315.62"
+            ET.SubElement(pago, "total").text = f'{float(self.monto_total):.2f}'
 
             # Formatear el XML con sangrías
             xml_string = ET.tostring(comprobante, encoding='unicode')
-            print("Contenido XML bruto:")
-            print(xml_string)
-            try:
-                xml_pretty = xml.dom.minidom.parseString(xml_string).toprettyxml(indent="  ")
-                print("XML formateado:")
-                print(xml_pretty)
-            except Exception as e:
-                print("Error al formatear el XML:")
-                print(str(e))
-                raise
+            print("Contenido XML generado correctamente")
 
-            # Guardar el archivo XML
-            with open("comprobante_retencion.xml", "w", encoding="utf-8", errors="replace") as f:
-                f.write(xml_pretty)
-            print("Archivo 'comprobante_retencion.xml' generado con éxito.")
-            return ET.tostring(comprobante, xml_declaration=True, encoding='utf-8').decode('utf-8').replace("'",
-                                                                                                            '"'), access_key
+            xml_pretty = xml.dom.minidom.parseString(xml_string).toprettyxml(indent="  ")
+
+            return xml_pretty, access_key
 
         except Exception as e:
-            print("Error en generate_xml_retencion:", str(e))
+            print("Error en generate_xml:", str(e))
             traceback.print_exc()
             raise
-
 
     def is_invoice(self):
         return self.receipt.voucher_type == VOUCHER_TYPE[0][0]
@@ -669,28 +700,7 @@ class AnexoTransaccional(models.Model):
         item['comp_fecha_em'] = '' if self.comp_fecha_em is None else self.comp_fecha_em.strftime('%Y-%m-%d')
         item['xml_authorized'] = self.get_xml_authorized()
         item['pdf_authorized'] = self.get_pdf_authorized()
-        # item['xml_authorized'] = self.xml_authorized.url if self.xml_authorized else None
-        # item['pdf_authorized'] = self.pdf_authorized.url if self.pdf_authorized else None
-        # item['receipt'] = self.receipt.toJSON() if self.receipt else 'None'
-        # item['codigo_asiento_transaccion'] = self.encabezadocuentaplan.codigo
-        # item['fecha_asiento_transaccion'] = self.encabezadocuentaplan.fecha
-        # item['nombre_asiento_transaccion'] = self.encabezadocuentaplan.tip_cuenta
         return item
-
-    # def edit(self):
-    #     super(AnexoTransaccional, self).save()
-
-    # def edit(self, **kwargs):
-    #     # Lógica de edición personalizada
-    #     for attr, value in kwargs.items():
-    #         setattr(self, attr, value)
-    #     self.save()
-    #
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-    #     if self.pk is None:
-    #         self.receipt.sequence = int(self.voucher_number)
-    #         self.receipt.save()
-    #     super(AnexoTransaccional, self).save()
 
     class Meta:
         db_table = 'tb_anexoTransaccional'

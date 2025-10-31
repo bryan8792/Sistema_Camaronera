@@ -3,24 +3,24 @@
   <infoTributaria>
     <ambiente>1</ambiente>
     <tipoEmision>1</tipoEmision>
-    <razonSocial>BIOCASCAJAL</razonSocial>
-    <nombreComercial>BIOCASCAJAL</nombreComercial>
-    <ruc>0790101804001</ruc>
-    <claveAcceso>0210202501079010180400110010020000000126864469518</claveAcceso>
+    <razonSocial>PESQUERA SAN MIGUEL</razonSocial>
+    <nombreComercial>PESQUERA SAN MIGUEL</nombreComercial>
+    <ruc>0790046617001</ruc>
+    <claveAcceso>3010202501079004661700110010020000000126902230711</claveAcceso>
     <codDoc>01</codDoc>
     <estab>001</estab>
     <ptoEmi>002</ptoEmi>
     <secuencial>000000012</secuencial>
-    <dirMatriz>GUAYAS / SUCRE Y 25 DE JUNIO</dirMatriz>
+    <dirMatriz>GUAYAS 1811 E/SUCRE Y 25 JUNIO</dirMatriz>
   </infoTributaria>
   <infoCompRetencion>
-    <fechaEmision>02/10/2025</fechaEmision>
-    <dirEstablecimiento>GUAYAS / SUCRE Y 25 DE JUNIO</dirEstablecimiento>
-    <obligadoContabilidad>NO</obligadoContabilidad>
+    <fechaEmision>30/10/2025</fechaEmision>
+    <dirEstablecimiento>GUAYAS 1811 E/ SUCRE Y 25 DE JUNIO</dirEstablecimiento>
+    <obligadoContabilidad>SI</obligadoContabilidad>
     <tipoIdentificacionSujetoRetenido>04</tipoIdentificacionSujetoRetenido>
     <parteRel>NO</parteRel>
-    <razonSocialSujetoRetenido>aaaa</razonSocialSujetoRetenido>
-    <identificacionSujetoRetenido>11</identificacionSujetoRetenido>
+    <razonSocialSujetoRetenido>FREFEWRF</razonSocialSujetoRetenido>
+    <identificacionSujetoRetenido>01020301020</identificacionSujetoRetenido>
     <periodoFiscal>12/2024</periodoFiscal>
   </infoCompRetencion>
   <docsSustento>
@@ -28,8 +28,8 @@
       <codSustento>02</codSustento>
       <codDocSustento>01</codDocSustento>
       <numDocSustento>001002000000313</numDocSustento>
-      <fechaEmisionDocSustento>02/10/2025</fechaEmisionDocSustento>
-      <fechaRegistroContable>02/10/2025</fechaRegistroContable>
+      <fechaEmisionDocSustento>30/10/2025</fechaEmisionDocSustento>
+      <fechaRegistroContable>30/10/2025</fechaRegistroContable>
       <numAutDocSustento>0412202401170970439700120010020000003130000031617</numAutDocSustento>
       <pagoLocExt>01</pagoLocExt>
       <totalSinImpuestos>274.45</totalSinImpuestos>
