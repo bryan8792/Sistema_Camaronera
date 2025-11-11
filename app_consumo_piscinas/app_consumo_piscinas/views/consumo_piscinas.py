@@ -10,7 +10,8 @@ import pandas as pd
 from app_consumo_piscinas.app_consumo_piscinas.forms import ReportForm
 from app_empresa.app_reg_empresa.models import Piscinas
 from app_stock.app_detalle_stock.models import Producto_Stock
-
+from django.db.models.functions import Cast
+from django.db.models import IntegerField
 
 # METODO PARA LISTAR LA VENTANA PRINCIPAL DEL CONSUMO DE PISCINAS
 class listarConsumoView(ListView):
@@ -139,6 +140,58 @@ class listarConsumoGeneralView(ListView):
         context['form'] = ReportForm()
         return context
 
+
+class listarConsumoGeneralEmpresasView(ListView):
+    model = Piscinas
+    template_name = 'app_consumo_piscinas/consumo_piscina_conglomerado_general_empresas.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'search_report_insumos_conglomerado':
+                print('Se busco por Conglomerado General de Consumos')
+                data = []
+                start_date = request.POST.get('start_date', '')
+                end_date = request.POST.get('end_date', '')
+                empresa = request.POST.get('empresa', '')
+
+                print(f'[v0] Parametro empresa recibido: "{empresa}"')
+
+                searchdata = Producto_Stock.objects.filter(activo__exact=True).exclude(piscinas__exact='Todas las Piscinas')
+
+                if empresa:
+                    print(f'[v0] Aplicando filtro para empresa: {empresa}')
+                    # Filtrar por las siglas de la empresa asociada a cada piscina
+                    searchdata = searchdata.filter(piscinas__empresa__siglas=empresa)
+                    print(f'[v0] Filtro aplicado: piscinas__empresa__siglas={empresa}')
+
+                if len(start_date) and len(end_date):
+                    searchdata = searchdata.filter(fecha_ingreso__range=[start_date, end_date])
+
+                for i in searchdata:
+                    data.append(i.toJSON())
+
+                print(f'[v0] Total registros retornados: {len(data)}')
+            else:
+                data = {'error': 'Ha ocurrido un error'}
+        except Exception as e:
+            print(f'[v0] Error: {str(e)}')
+            data = {'error': str(e)}
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'CONSUMO POR PISCINAS'
+        context['numero'] = Piscinas.objects.all()
+        context['numero_piscina'] = Piscinas.objects.all()
+        context['form'] = ReportForm()
+        return context
 
 
 # VENTANA PAR LISTAR EL CONSUMO DE PISCINAS POR DETALLES DE BUSQUEDA EJEMPLO: ID

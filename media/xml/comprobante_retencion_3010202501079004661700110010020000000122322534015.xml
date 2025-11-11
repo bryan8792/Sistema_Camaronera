@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<comprobanteRetencion id="comprobante" version="2.0.0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>PESQUERA SAN MIGUEL</razonSocial>
+    <nombreComercial>PESQUERA SAN MIGUEL</nombreComercial>
+    <ruc>0790046617001</ruc>
+    <claveAcceso>3010202501079004661700110010020000000122322534015</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>001</estab>
+    <ptoEmi>002</ptoEmi>
+    <secuencial>000000044</secuencial>
+    <dirMatriz>GUAYAS 1811 E/SUCRE Y 25 JUNIO</dirMatriz>
+  </infoTributaria>
+  <infoCompRetencion>
+    <fechaEmision>30/10/2025</fechaEmision>
+    <dirEstablecimiento>GUAYAS 1811 E/ SUCRE Y 25 DE JUNIO</dirEstablecimiento>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <tipoIdentificacionSujetoRetenido>04</tipoIdentificacionSujetoRetenido>
+    <parteRel>NO</parteRel>
+    <razonSocialSujetoRetenido>FREFEWRF</razonSocialSujetoRetenido>
+    <identificacionSujetoRetenido>01020301020</identificacionSujetoRetenido>
+    <periodoFiscal>10/2025</periodoFiscal>
+  </infoCompRetencion>
+  <docsSustento>
+    <docSustento>
+      <codSustento>02</codSustento>
+      <codDocSustento>01</codDocSustento>
+      <numDocSustento>00</numDocSustento>
+      <fechaEmisionDocSustento>30/10/2025</fechaEmisionDocSustento>
+      <fechaRegistroContable>30/10/2025</fechaRegistroContable>
+      <numAutDocSustento>No existe ingreso</numAutDocSustento>
+      <pagoLocExt>01</pagoLocExt>
+      <totalSinImpuestos>0.00</totalSinImpuestos>
+      <importeTotal>0.00</importeTotal>
+      <impuestosDocSustento/>
+      <retenciones/>
+      <pagos>
+        <pago>
+          <formaPago>20</formaPago>
+          <total>0.00</total>
+        </pago>
+      </pagos>
+    </docSustento>
+  </docsSustento>
+</comprobanteRetencion>
