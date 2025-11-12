@@ -155,33 +155,77 @@ class listarConsumoGeneralEmpresasView(ListView):
         try:
             action = request.POST['action']
             if action == 'search_report_insumos_conglomerado':
-                print('Se busco por Conglomerado General de Consumos')
+                print('=== BUSCANDO CONGLOMERADO GENERAL ===')
                 data = []
                 start_date = request.POST.get('start_date', '')
                 end_date = request.POST.get('end_date', '')
                 empresa = request.POST.get('empresa', '')
 
-                print(f'[v0] Parametro empresa recibido: "{empresa}"')
+                print(f'[BACKEND] Parámetros recibidos:')
+                print(f'[BACKEND] - Empresa: "{empresa}"')
+                print(f'[BACKEND] - Fecha inicio: "{start_date}"')
+                print(f'[BACKEND] - Fecha fin: "{end_date}"')
 
-                searchdata = Producto_Stock.objects.filter(activo__exact=True).exclude(piscinas__exact='Todas las Piscinas')
+                # QUERY BASE - EXCLUIR "TODAS LAS PISCINAS"
+                searchdata = Producto_Stock.objects.filter(
+                    activo=True
+                ).exclude(
+                    piscinas='Todas las Piscinas'
+                )
 
-                if empresa:
-                    print(f'[v0] Aplicando filtro para empresa: {empresa}')
-                    # Filtrar por las siglas de la empresa asociada a cada piscina
-                    searchdata = searchdata.filter(piscinas__empresa__siglas=empresa)
-                    print(f'[v0] Filtro aplicado: piscinas__empresa__siglas={empresa}')
+                print(f'[BACKEND] Registros antes de filtrar: {searchdata.count()}')
 
-                if len(start_date) and len(end_date):
+                # FILTRO POR EMPRESA - CORREGIDO
+                if empresa and empresa != "":
+                    print(f'[BACKEND] Aplicando filtro para empresa: {empresa}')
+
+                    # Obtener TODAS las piscinas de esta empresa
+                    piscinas_empresa = Piscinas.objects.filter(
+                        empresa__siglas=empresa
+                    )
+
+                    # Extraer los números de piscina
+                    numeros_piscinas = list(piscinas_empresa.values_list('numero', flat=True))
+                    print(f'[BACKEND] Piscinas de {empresa}: {numeros_piscinas}')
+
+                    if numeros_piscinas:
+                        # Filtrar por los números de piscina
+                        searchdata = searchdata.filter(piscinas__in=numeros_piscinas)
+                    else:
+                        # Si no hay piscinas, mostrar vacío
+                        searchdata = searchdata.none()
+
+                    print(f'[BACKEND] Registros después de filtrar por empresa: {searchdata.count()}')
+
+                # FILTRO POR FECHAS
+                if start_date and end_date:
                     searchdata = searchdata.filter(fecha_ingreso__range=[start_date, end_date])
+                    print(f'[BACKEND] Registros después de filtrar por fecha: {searchdata.count()}')
 
+                # DEBUG: Mostrar primeros registros
+                print(f'[BACKEND] === REGISTROS ENCONTRADOS ===')
+                for i, item in enumerate(searchdata[:3]):
+                    print(f'[BACKEND] Registro {i}: Piscina="{item.piscinas}"')
+
+                # CONVERTIR A JSON
                 for i in searchdata:
-                    data.append(i.toJSON())
+                    item_data = i.toJSON()
+                    # Agregar información de empresa para debugging
+                    try:
+                        piscina_obj = Piscinas.objects.get(numero=i.piscinas)
+                        item_data['empresa_info'] = piscina_obj.empresa.siglas
+                    except:
+                        item_data['empresa_info'] = 'No encontrada'
+                    data.append(item_data)
 
-                print(f'[v0] Total registros retornados: {len(data)}')
+                print(f'[BACKEND] Total registros retornados: {len(data)}')
+
             else:
-                data = {'error': 'Ha ocurrido un error'}
+                data = {'error': 'Acción no válida'}
         except Exception as e:
-            print(f'[v0] Error: {str(e)}')
+            print(f'[BACKEND] ERROR: {str(e)}')
+            import traceback
+            print(f'[BACKEND] TRACEBACK: {traceback.format_exc()}')
             data = {'error': str(e)}
         return JsonResponse(data, safe=False)
 

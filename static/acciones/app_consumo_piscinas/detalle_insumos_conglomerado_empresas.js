@@ -1,4 +1,3 @@
-
 var date_range = null
 var multiplicadora = 0,
   total_stock = 0
@@ -9,17 +8,9 @@ var cant_tot = 0,
 var date_now = moment().format("YYYY-MM-DD")
 var empresa_seleccionada = ""
 
-function get_piscinas_por_empresa(empresa) {
-  var piscinas_map = {
-    PSM: { min: 1, max: 20 },
-    BIO: { min: 21, max: 45 },
-  }
-  return piscinas_map[empresa] || null
-}
-
 function generate_report_insumos() {
-  console.log("=== Generando reporte ===")
-  console.log("Empresa seleccionada:", empresa_seleccionada)
+  console.log("[v0] === Generando reporte ===")
+  console.log("[v0] Empresa seleccionada:", empresa_seleccionada)
 
   var parameters = {
     action: "search_report_insumos_conglomerado",
@@ -27,21 +18,26 @@ function generate_report_insumos() {
     end_date: date_now,
   }
 
-  if (empresa_seleccionada) {
+  if (empresa_seleccionada && empresa_seleccionada !== "") {
     parameters["empresa"] = empresa_seleccionada
-    console.log("Parámetro empresa agregado:", parameters["empresa"])
+    console.log("[v0] Parámetro empresa enviado al servidor:", empresa_seleccionada)
+  } else {
+    console.log("[v0] No se envía filtro de empresa (todos los registros)")
   }
 
   if (date_range !== null) {
     parameters["start_date"] = date_range.startDate.format("YYYY-MM-DD")
     parameters["end_date"] = date_range.endDate.format("YYYY-MM-DD")
-    console.log("Rango de fechas:", parameters["start_date"], "a", parameters["end_date"])
+    console.log("[v0] Rango de fechas:", parameters["start_date"], "a", parameters["end_date"])
   }
+
+  console.log("[v0] Parámetros completos a enviar:", parameters)
 
   var groupColumn = 0
 
   if ($.fn.DataTable.isDataTable("#tb_resumen_conglomerado")) {
     $("#tb_resumen_conglomerado").DataTable().destroy()
+    console.log("[v0] Tabla anterior destruida")
   }
 
   tb_resumen_conglomerado = $("#tb_resumen_conglomerado").DataTable({
@@ -69,7 +65,7 @@ function generate_report_insumos() {
       type: "POST",
       data: parameters,
       dataSrc: (json) => {
-        console.log("Datos recibidos del servidor:", json.length, "registros")
+        console.log("[v0] Datos recibidos del servidor:", json.length, "registros")
         return json
       },
     },
@@ -277,7 +273,7 @@ function generate_report_insumos() {
         total2 = 0
       var filas = api.column(groupColumn, { page: "current" }).data()
 
-      console.log("Calculando totales en drawCallback, filas:", filas.length)
+      console.log("[v0] Calculando totales en drawCallback, filas:", filas.length)
 
       filas.each((group, i) => {
         if (last !== group) {
@@ -293,7 +289,7 @@ function generate_report_insumos() {
                                 <td class="text-center" style="width: 15%;font-weight:700;background-color:rgb(255, 255, 255)">${total2.toFixed(4)}</td>   
                             </tr>`,
               )
-            console.log("Subtotal para grupo", last, "- Cantidad:", total.toFixed(2), "Valor:", total2.toFixed(4))
+            console.log("[v0] Subtotal para grupo", last, "- Cantidad:", total.toFixed(2), "Valor:", total2.toFixed(4))
             total = 0
             total2 = 0
           }
@@ -322,17 +318,22 @@ function generate_report_insumos() {
                             <td class="text-center" style="width: 15%;font-weight:700;background-color:rgb(255, 255, 255)">${total2.toFixed(4)}</td>   
                         </tr>`,
             )
-          console.log("Total final - Cantidad:", total.toFixed(2), "Valor:", total2.toFixed(4))
+          console.log("[v0] Total final - Cantidad:", total.toFixed(2), "Valor:", total2.toFixed(4))
         }
       })
     },
     initComplete: (settings, json) => {
-      console.log("DataTable inicializado completamente")
+      console.log("[v0] DataTable inicializado completamente")
     },
   })
 }
 
 $(() => {
+  var selectEmpresa = $("#select_empresa")
+  console.log("[v0] Select empresa encontrado:", selectEmpresa.length > 0)
+  console.log("[v0] ID del select:", selectEmpresa.attr("id"))
+  console.log("[v0] Valor inicial del select:", selectEmpresa.val())
+
   $('input[name="date_range"]')
     .daterangepicker({
       locale: {
@@ -343,7 +344,7 @@ $(() => {
     })
     .on("apply.daterangepicker", (ev, picker) => {
       date_range = picker
-      console.log("Aplicando rango de fechas")
+      console.log("[v0] Aplicando rango de fechas")
       generate_report_insumos()
     })
     .on("cancel.daterangepicker", function (ev, picker) {
@@ -354,11 +355,24 @@ $(() => {
     })
 
   $("#select_empresa").on("change", function () {
-    empresa_seleccionada = $(this).val()
-    console.log("Empresa seleccionada cambiada a:", empresa_seleccionada)
-    generate_report_insumos()
+    var valorSeleccionado = $(this).val()
+    console.log("[v0] ========================================")
+    console.log("[v0] EVENTO CHANGE DISPARADO")
+    console.log("[v0] Valor seleccionado:", valorSeleccionado)
+    console.log("[v0] Texto seleccionado:", $(this).find("option:selected").text())
+    console.log("[v0] ========================================")
+
+    empresa_seleccionada = valorSeleccionado
+
+    if (empresa_seleccionada && empresa_seleccionada !== "") {
+      console.log("[v0] Generando reporte con filtro de empresa:", empresa_seleccionada)
+      generate_report_insumos()
+    } else {
+      console.log("[v0] Valor vacío seleccionado, mostrando todos los registros")
+      generate_report_insumos()
+    }
   })
 
-  console.log("Inicializando aplicación - Detalle Insumos por Piscinas")
+  console.log("[v0] Inicializando aplicación - Detalle Insumos por Piscinas")
   generate_report_insumos()
 })
