@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}"/>
+    <style>
+        .card-header {
+            background-color: #3498DB;
+            color: white;
+        }
+        .table-header {
+            background-color: #3498DB;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+        }
+        .table-kardex {
+            font-size: 12px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .section-title {
+            background-color: #34495E;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .btn-export {
+            margin-bottom: 15px;
+        }
+        .info-box {
+            background-color: #ECF0F1;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498DB;
+        }
+        @media print {
+            .btn-export, .breadcrumb, .card-tools {
+                display: none;
+            }
+            body {
+                background-color: white;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ titulo }} <i class="fas fa-warehouse"></i></a></li>
+                        <li class="breadcrumb-item active">Gestión de Stock</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ titulo }}</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Sección de Filtros -->
+                            <div class="info-box">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Rango de Fechas:</label>
+                                            <input type="text" class="form-control" id="daterange" placeholder="Seleccionar rango de fechas">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-right">
+                                        <br>
+                                        <button class="btn btn-primary" id="btn_buscar">
+                                            <i class="fas fa-search"></i> Buscar
+                                        </button>
+                                        <button class="btn btn-success" id="btn_excel">
+                                            <i class="fas fa-file-excel"></i> Exportar Excel
+                                        </button>
+                                        <button class="btn btn-danger" id="btn_pdf">
+                                            <i class="fas fa-file-pdf"></i> Exportar PDF
+                                        </button>
+                                        <button class="btn btn-secondary" id="btn_imprimir">
+                                            <i class="fas fa-print"></i> Imprimir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabla Kardex de Bodega -->
+                            <div class="section-title">
+                                KARDEX BODEGA DE INSUMOS - CONSOLIDADO
+                            </div>
+                            <div class="table-responsive">
+                                <table id="tb_kardex_bodega" class="table table-sm table-striped table-bordered table-kardex">
+                                    <thead class="table-header">
+                                        <tr>
+                                            <th style="width: 30%;">PRODUCTO</th>
+                                            <th style="width: 10%;">PRESENTACIÓN</th>
+                                            <th style="width: 8%;">UNIDAD</th>
+                                            <th style="width: 10%;">STOCK PSM</th>
+                                            <th style="width: 10%;">STOCK BIO</th>
+                                            <th style="width: 10%;">STOCK TOTAL</th>
+                                            <th style="width: 12%;">CONSUMO TOTAL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody_kardex">
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Tabla de Consumo por Piscinas -->
+                            <div class="section-title">
+                                DETALLE DE CONSUMO POR PISCINAS
+                            </div>
+                            <div class="table-responsive">
+                                <table id="tb_consumo_piscinas" class="table table-sm table-striped table-bordered table-kardex">
+                                    <thead class="table-header">
+                                        <tr>
+                                            <th style="width: 8%;">EMPRESA</th>
+                                            <th style="width: 10%;">PISCINA</th>
+                                            <th style="width: 10%;">FECHA</th>
+                                            <th style="width: 20%;">PRODUCTO</th>
+                                            <th style="width: 10%;">CANTIDAD</th>
+                                            <th style="width: 8%;">UNIDAD</th>
+                                            <th style="width: 15%;">RESPONSABLE</th>
+                                            <th style="width: 12%;">GUÍA / DESC.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbody_consumo">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'lib/datatables-1.10.20/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_consumo/js/kardex_bodega.js' %}"></script>
+{% endblock %}

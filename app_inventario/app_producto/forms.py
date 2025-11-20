@@ -74,6 +74,12 @@ class ProductoForm(ModelForm):
                     'class': 'form-control select2'
                 }
             ),
+            'cod_contable': Select(
+                attrs={
+                    'class': 'custom-select select2',
+                    # 'multiple': 'multiple'
+                }
+            ),
             'presentacion': Select(choices=OPCIONES_PRESENTACION,
                 attrs={
                     'class': 'form-control select2'

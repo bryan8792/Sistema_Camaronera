@@ -14,15 +14,18 @@ class Total_Stock(models.Model):
     nombre_prod = models.ForeignKey(Producto, on_delete=models.CASCADE, verbose_name='Producto')
     nombre_empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, verbose_name='Empresa')
     stock = models.DecimalField(verbose_name='Stock', max_digits=9, decimal_places=2, default=0)
+    cod_contable = models.CharField(max_length=50, verbose_name='Código Contable', null=True, blank=True)
 
     def __str__(self):
-        return self.nombre_prod.nombre
+        # return self.nombre_prod.nombre
+        return f"{self.nombre_prod.nombre} - {self.nombre_empresa.siglas}"
 
     def toJSON(self):
         item = model_to_dict(self)
         item['nombre_prod'] = self.nombre_prod.toJSON()
         item['nombre_empresa'] = self.nombre_empresa.toJSON()
         item['stock'] = format(self.stock, '.2f')
+        item['cod_contable'] = self.cod_contable if self.cod_contable else ''
         return item
 
     class Meta:

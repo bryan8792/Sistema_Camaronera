@@ -4,6 +4,7 @@ from django.forms import model_to_dict
 # Create your models here.
 from Sistema_Camaronera.settings import MEDIA_URL, STATIC_URL
 # from app_auditoria.models import BaseModel
+from app_contabilidad_planCuentas.models import PlanCuenta
 from app_empresa.app_reg_empresa.models import Empresa
 from django.db import connection
 
