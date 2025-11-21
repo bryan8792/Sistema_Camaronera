@@ -56,11 +56,11 @@
                                     <table id="tb_stock_directo_insumo_psm" class="table table-sm table-striped table-bordered">
                                         <thead style="background-color:#3498DB">
                                         <tr>
-                                            <th style="width: 65%;">Producto</th>
+                                            <th style="width: 62%;">Producto</th>
                                             <th style="width: 15%;" class="text-center">Cantidad</th>
                                             <th style="width: 10%;" class="text-center">Aplicación</th>
                                             <th style="width: 5%;" class="text-center">Porcentaje</th>
-                                            <th style="width: 5%;" class="text-center">Accion</th>
+                                            <th style="width: 8%;" class="text-center">Accion</th>
                                         </tr>
                                         </thead>
                                         <tbody>
@@ -69,7 +69,7 @@
                                                 <tr>
                                                     <td>
                                                         {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' or dato.nombre_prod.categoria.nombre == 'BALANCEADOS' %}
-                                                            {{ dato.nombre_prod.nombre }}
+                                                            <h6><b>{{ dato.nombre_prod.nombre }}</b></h6>
                                                         {% endif %}
                                                     </td>
                                                     <td class="text-center">
@@ -128,7 +128,7 @@
 {#                                                        {% if dato.nombre_prod.categoria.nombre == 'INSUMOS' %}#}
                                                             <div class="btn-group-sm">
                                                                 <a href="{% url 'app_stock_directo:crear_stock_directo_psm' dato.id %}"
-                                                                   class="btn-primary btn btn-xs">
+                                                                   class="btn-info btn btn-xs">
                                                                     <i class="fas fa-plus"> </i>
                                                                 </a>
                                                                 <a href="{% url 'app_stock_directo:listar_stock_directo_unico_psm' dato.id %}"
