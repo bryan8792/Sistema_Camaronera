@@ -7,11 +7,14 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, CreateView, UpdateView
+from django.utils import timezone
+from datetime import datetime
+from app_contabilidad_planCuentas.models import PlanCuenta, DetalleCuentasPlanCuenta, EncabezadoCuentasPlanCuenta
 from app_dieta.app_dieta_reg.models import DetalleDiaDieta
 from app_empresa.app_reg_empresa.models import Empresa
 from app_inventario.app_categoria.models import Producto
 from app_reportes.utils import render_to_pdf
-from app_stock.app_detalle_stock.forms import ProdStockForm, ProdStockTotalForm
+from app_stock.app_detalle_stock.forms import ProdStockForm, ProdStockTotalForm, StockAccountingForm
 from app_stock.app_detalle_stock.models import Producto_Stock, Total_Stock, InvoiceStock
 import decimal
 
@@ -353,3 +356,245 @@ class listarStockUnicoBIOView(ListView):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Stock Productos BIO'
         return context
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
+class CrearStockConCuentaView(CreateView):
+    model = Total_Stock
+    form_class = StockAccountingForm
+    template_name = 'app_stock/stock_crear_con_cuenta.html'
+    success_url = reverse_lazy('app_stock:listar_stock_bio')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+
+        empresa_id = self.kwargs.get('empresa_id')
+        print("empresa_id:", empresa_id)
+
+        if empresa_id:
+            try:
+                empresa = Empresa.objects.get(pk=empresa_id)
+
+                # Prellenar el campo empresa
+                kwargs.setdefault('initial', {})
+                kwargs['initial']['nombre_empresa'] = empresa
+
+                # Pasar empresa al formulario
+                kwargs['empresa_obj'] = empresa
+
+            except Empresa.DoesNotExist:
+                pass
+
+        return kwargs
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+
+        if self.object.plan_cuenta:
+            self.object.cod_contable = self.object.plan_cuenta.codigo
+            self.object.save(update_fields=['cod_contable'])
+
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        empresa_id = self.kwargs.get('empresa_id')
+
+        if empresa_id:
+            context['empresa'] = Empresa.objects.get(pk=empresa_id)
+            context['plan_cuentas'] = PlanCuenta.objects.filter(
+                empresa_id=empresa_id,
+                estado=True
+            ).order_by('codigo')
+
+        return context
+
+
+
+@method_decorator(login_required, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
+class EditarStockConCuentaView(UpdateView):
+    """
+    Edit stock with accounting plan selection
+    Permite editar un producto de stock y cambiar su plan de cuentas
+    """
+    model = Total_Stock
+    form_class = StockAccountingForm
+    template_name = 'app_stock/stock_editar_con_cuenta.html'
+    success_url = reverse_lazy('app_stock:listar_stock_bio')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Automatically save the accounting plan code
+        if self.object.plan_cuenta:
+            self.object.cod_contable = self.object.plan_cuenta.codigo
+            self.object.save(update_fields=['cod_contable'])
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['plan_cuentas'] = PlanCuenta.objects.filter(
+            empresa=self.object.nombre_empresa,
+            estado=True
+        ).order_by('codigo')
+        return context
+
+
+@login_required
+@csrf_exempt
+def get_cuentas_por_empresa(request):
+    """
+    AJAX endpoint to load accounting plans by company
+    Retorna lista de cuentas contables para una empresa específica
+    """
+    empresa_id = request.GET.get('empresa_id')
+
+    if not empresa_id:
+        return JsonResponse({'error': 'Empresa no especificada'}, status=400)
+
+    try:
+        empresa = Empresa.objects.get(pk=empresa_id)
+        cuentas = PlanCuenta.objects.filter(
+            empresa=empresa,
+            estado=True,
+            nivel__lte=5  # Limit to operational accounts (not summary accounts)
+        ).values('id', 'codigo', 'nombre', 'get_full_hierarchy').order_by('codigo')
+
+        return JsonResponse({
+            'success': True,
+            'cuentas': list(cuentas)
+        })
+    except Empresa.DoesNotExist:
+        return JsonResponse({'error': 'Empresa no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def get_empresa_from_piscina(numero_piscina):
+    """
+    Determine company based on pool number
+    Piscinas 1-20 = PSM
+    Piscinas 21-45 = BIO
+    """
+    try:
+        # Extract number from piscina name if needed
+        if isinstance(numero_piscina, str):
+            num = int(''.join(filter(str.isdigit, numero_piscina)))
+        else:
+            num = numero_piscina
+
+        if 1 <= num <= 20:
+            return 'PSM'
+        elif 21 <= num <= 45:
+            return 'BIO'
+        else:
+            return None
+    except (ValueError, TypeError):
+        return None
+
+
+def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
+    """
+    Signal that automatically creates accounting entries when stock is withdrawn
+    Now automatically determines company from piscina number (1-20=PSM, 21-45=BIO)
+    """
+
+    # Only process EGRESO (withdrawal) movements
+    if instance.tipo_movimiento != 'EGRESO':
+        return
+
+    try:
+        piscina_numero = None
+        if hasattr(instance.piscina, 'nombre'):
+            piscina_numero = instance.piscina.nombre
+        elif hasattr(instance.piscina, 'numero'):
+            piscina_numero = instance.piscina.numero
+
+        empresa_detectada = get_empresa_from_piscina(piscina_numero)
+
+        if not empresa_detectada:
+            print(f"[CONTABILIDAD] No se pudo detectar empresa para piscina {piscina_numero}")
+            return
+
+        # Get related stock record with detected company
+        stock_total = Total_Stock.objects.get(
+            nombre_prod=instance.producto,
+            nombre_empresa__nombre=empresa_detectada
+        )
+
+        # Verify that the product has an accounting plan assigned
+        if not stock_total.plan_cuenta:
+            print(f"[CONTABILIDAD] Producto {instance.producto.nombre} sin plan de cuentas para {empresa_detectada}")
+            return
+
+        # Get company object
+        empresa = stock_total.nombre_empresa
+
+        # Create accounting header (encabezado)
+        encabezado = EncabezadoCuentasPlanCuenta.objects.create(
+            codigo=int(datetime.now().timestamp()),
+            tip_cuenta='EGRESO DE INVENTARIO',
+            tip_transa='EGRESO',
+            fecha=instance.fecha or timezone.now().date(),
+            comprobante=f"EGR-{instance.id}",
+            descripcion=f"Egreso de {instance.producto.nombre} en {piscina_numero} ({empresa_detectada})",
+            empresa=empresa,
+            reg_control='RT'
+        )
+
+        # Create detail entries (detalles)
+        # Entry 1: Debit from inventory (inventario)
+        cuenta_inventario = stock_total.plan_cuenta
+
+        DetalleCuentasPlanCuenta.objects.create(
+            encabezadocuentaplan=encabezado,
+            orden=1,
+            cuenta=cuenta_inventario,
+            detalle=f"Egreso: {instance.producto.nombre}",
+            debe=float(instance.cantidad),
+            haber=0.00,
+            origen='STOCK'
+        )
+
+        # Entry 2: Credit to expense account (gasto)
+        try:
+            # Look for an expense account related to the product
+            cuenta_gasto = PlanCuenta.objects.filter(
+                empresa=empresa,
+                nombre__icontains=instance.producto.categoria.nombre.split()[0],
+                tipo_cuenta='GASTO',
+                estado=True
+            ).first()
+
+            if cuenta_gasto:
+                DetalleCuentasPlanCuenta.objects.create(
+                    encabezadocuentaplan=encabezado,
+                    orden=2,
+                    cuenta=cuenta_gasto,
+                    detalle=f"Gasto: {instance.producto.nombre}",
+                    debe=0.00,
+                    haber=float(instance.cantidad),
+                    origen='STOCK'
+                )
+        except Exception as e:
+            print(f"[CONTABILIDAD] Error creando entrada de gasto: {str(e)}")
+
+        # Save the accounting code to stock_prod for reference
+        instance.cod_contable = stock_total.plan_cuenta.codigo
+        instance.save(update_fields=['cod_contable'])
+
+        print(f"[CONTABILIDAD] Asiento contable creado para egreso ID {instance.id} - Empresa: {empresa_detectada}")
+
+    except Total_Stock.DoesNotExist:
+        print(f"[CONTABILIDAD] Stock total no encontrado para {instance.producto} en empresa detectada")
+    except Exception as e:
+        print(f"[CONTABILIDAD] Error al crear asiento contable: {str(e)}")
+
+
+def connect_signals():
+    """
+    Connect all signals - call this in apps.py ready() method
+    """
+    pass
+

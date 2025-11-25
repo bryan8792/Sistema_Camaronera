@@ -2,6 +2,8 @@
 from django.db import models
 from datetime import datetime
 from django.forms import model_to_dict
+
+from app_contabilidad_planCuentas.models import PlanCuenta
 from app_empresa.app_reg_empresa.models import Empresa
 from app_inventario.app_categoria.models import Producto
 from tkinter import *
@@ -15,6 +17,7 @@ class Total_Stock(models.Model):
     nombre_empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, verbose_name='Empresa')
     stock = models.DecimalField(verbose_name='Stock', max_digits=9, decimal_places=2, default=0)
     cod_contable = models.CharField(max_length=50, verbose_name='Código Contable', null=True, blank=True)
+    plan_cuenta = models.ForeignKey( PlanCuenta, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Plan de Cuentas', help_text='Seleccione la cuenta contable para este producto')
 
     def __str__(self):
         # return self.nombre_prod.nombre
@@ -26,6 +29,11 @@ class Total_Stock(models.Model):
         item['nombre_empresa'] = self.nombre_empresa.toJSON()
         item['stock'] = format(self.stock, '.2f')
         item['cod_contable'] = self.cod_contable if self.cod_contable else ''
+        item['plan_cuenta'] = {
+            'id': self.plan_cuenta.id if self.plan_cuenta else None,
+            'codigo': self.plan_cuenta.codigo if self.plan_cuenta else '',
+            'nombre': self.plan_cuenta.nombre if self.plan_cuenta else '',
+        }
         return item
 
     class Meta:

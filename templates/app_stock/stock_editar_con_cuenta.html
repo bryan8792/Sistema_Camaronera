@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<style>
+    .form-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #27ae60;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        height: 38px;
+    }
+    .btn-success {
+        background-color: #27ae60;
+        border-color: #27ae60;
+    }
+    .btn-success:hover {
+        background-color: #229954;
+        border-color: #229954;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <h1 class="m-0">
+                    <i class="fas fa-edit"></i> Editar Stock con Plan de Cuentas
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card card-success">
+                    <div class="card-header" style="background-color: #27ae60;">
+                        <h3 class="card-title">
+                            <i class="fas fa-boxes"></i> Editar Registro de Stock
+                        </h3>
+                    </div>
+
+                    <form method="post" id="stockForm">
+                        {% csrf_token %}
+
+                        <div class="card-body">
+                            <!-- Empresa Selection -->
+                            <div class="form-section">
+                                <h5><i class="fas fa-building"></i> Información de la Empresa</h5>
+                                <div class="form-group">
+                                    <label class="form-label">Empresa</label>
+                                    <p class="form-control-plaintext">
+                                        <strong>{{ object.nombre_empresa.nombre }}</strong>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Product Information -->
+                            <div class="form-section">
+                                <h5><i class="fas fa-box"></i> Información del Producto</h5>
+                                <div class="form-group">
+                                    <label class="form-label">Producto</label>
+                                    <p class="form-control-plaintext">
+                                        <strong>{{ object.nombre_prod.nombre }}</strong>
+                                    </p>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="{{ form.stock.id_for_label }}">
+                                        {{ form.stock.label }}
+                                    </label>
+                                    {{ form.stock|add_class:"form-control" }}
+                                </div>
+                            </div>
+
+                            <!-- Accounting Plan Selection -->
+                            <div class="form-section">
+                                <h5><i class="fas fa-book"></i> Plan de Cuentas Contables</h5>
+                                <div class="form-group">
+                                    <label class="form-label" for="{{ form.plan_cuenta.id_for_label }}">
+                                        {{ form.plan_cuenta.label }}
+                                    </label>
+                                    {{ form.plan_cuenta|add_class:"form-control select2" }}
+                                    <small class="form-text text-muted">
+                                        Cambie la cuenta contable si lo requiere
+                                    </small>
+                                </div>
+
+                                <!-- Display current account info -->
+                                {% if object.plan_cuenta %}
+                                <div class="alert alert-info">
+                                    <strong>Cuenta Contable Actual:</strong>
+                                    <p>
+                                        <code>{{ object.plan_cuenta.codigo }}</code> - 
+                                        {{ object.plan_cuenta.nombre }}
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                            <a href="{% url 'app_stock:listar_stock_bio' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('.select2').select2({
+        language: "es",
+        theme: "default",
+        width: '100%'
+    });
+});
+</script>
+{% endblock %}

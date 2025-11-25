@@ -1,6 +1,10 @@
 
 from tkinter.tix import Select
 from django.forms import *
+
+from app_contabilidad_planCuentas.models import PlanCuenta
+from app_empresa.app_reg_empresa.models import Empresa
+from app_inventario.app_categoria.models import Producto
 from app_stock.app_detalle_stock.models import Producto_Stock, Total_Stock, InvoiceStock
 
 OPCIONES_ESCOGER = (
@@ -233,7 +237,82 @@ class ProdStockTotalForm(ModelForm):
                     'autocomplete': 'off'
                 }
             ),
-
+            'cod_contable': NumberInput(
+                attrs={
+                    'class': 'form-control',
+                    'autocomplete': 'off'
+                }
+            ),
 
         }
+
+
+class StockAccountingForm(ModelForm):
+    """
+    Form for creating/editing stock with accounting plan selection
+    """
+    plan_cuenta = ModelChoiceField(
+        queryset=PlanCuenta.objects.none(),
+        required=False,
+        empty_label="--- Seleccione una Cuenta Contable ---",
+        help_text="Seleccione el plan de cuentas para este producto",
+        widget=Select(attrs={
+            'class': 'form-control select2',
+            'id': 'id_plan_cuenta',
+            'data-placeholder': 'Buscar cuenta contable...'
+        })
+    )
+
+    nombre_empresa = ModelChoiceField(
+        queryset=Empresa.objects.all(),
+        empty_label="--- Seleccione Empresa ---",
+        widget=Select(attrs={
+            'class': 'form-control',
+            'id': 'id_nombre_empresa',
+            'onchange': 'loadCuentasByEmpresa(this.value)'
+        })
+    )
+
+    nombre_prod = ModelChoiceField(
+        queryset=Producto.objects.filter(estado=True),
+        empty_label="--- Seleccione Producto ---",
+        widget=Select(attrs={
+            'class': 'form-control',
+            'id': 'id_nombre_prod'
+        })
+    )
+
+    class Meta:
+        model = Total_Stock
+        fields = ['nombre_empresa', 'nombre_prod', 'stock', 'plan_cuenta']
+        widgets = {
+            'stock': NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': 'Ingrese cantidad'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        empresa = kwargs.pop('empresa_obj', None)
+        super().__init__(*args, **kwargs)
+
+        # -------- FILTRAR PLAN DE CUENTAS POR EMPRESA ----------
+        if empresa:
+            self.fields['plan_cuenta'].queryset = PlanCuenta.objects.filter(
+                empresa=empresa,
+                estado=True
+            ).order_by('codigo')
+
+            # -------- FILTRAR PRODUCTOS EXISTENTES PARA ESA EMPRESA ----------
+            self.fields['nombre_prod'].queryset = Producto.objects.filter(
+                id__in=Total_Stock.objects.filter(
+                    nombre_empresa=empresa
+                ).values('nombre_prod_id')
+            )
+
+
+
+
 

@@ -17,4 +17,8 @@ urlpatterns = [
     path('crearbio/<int:pk>/', crearStockBIOView.as_view(), name='crear_stock_bio'),
     path('listarbio/', listarStockBIOView.as_view(), name='listar_stock_bio'),
 
+    path('crear_con_cuenta/<int:empresa_id>/', CrearStockConCuentaView.as_view(), name='crear_stock_con_cuenta'),
+    path('editar_con_cuenta/<int:pk>/', EditarStockConCuentaView.as_view(),  name='editar_stock_con_cuenta'),
+    path('api/cuentas_por_empresa/', get_cuentas_por_empresa, name='get_cuentas_por_empresa'),
+
 ]

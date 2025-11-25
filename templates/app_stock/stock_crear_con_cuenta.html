@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<style>
+    .form-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        height: 38px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        padding: 6px 0;
+        color: #495057;
+    }
+    .btn-primary {
+        background-color: #3498db;
+        border-color: #3498db;
+    }
+    .btn-primary:hover {
+        background-color: #2980b9;
+        border-color: #2980b9;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <h1 class="m-0">
+                    <i class="fas fa-plus-circle"></i> Crear Stock con Plan de Cuentas
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 offset-lg-2">
+                <div class="card card-primary">
+                    <div class="card-header" style="background-color: #3498db;">
+                        <h3 class="card-title">
+                            <i class="fas fa-boxes"></i> Nuevo Registro de Stock
+                        </h3>
+                    </div>
+
+                    <form method="post" id="stockForm">
+                        {% csrf_token %}
+
+                        <div class="card-body">
+                            <!-- Empresa Selection -->
+                            <div class="form-section">
+                                <h5><i class="fas fa-building"></i> Información de la Empresa</h5>
+                                <div class="form-group">
+                                    <label class="form-label" for="{{ form.nombre_empresa.id_for_label }}">
+                                        {{ form.nombre_empresa.label }}
+                                    </label>
+                                    {{ form.nombre_empresa|add_class:"form-control" }}
+                                    {% if form.nombre_empresa.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {{ form.nombre_empresa.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Product Selection -->
+                            <div class="form-section">
+                                <h5><i class="fas fa-box"></i> Información del Producto</h5>
+                                <div class="form-group">
+                                    <label class="form-label" for="{{ form.nombre_prod.id_for_label }}">
+                                        {{ form.nombre_prod.label }}
+                                    </label>
+                                    {{ form.nombre_prod|add_class:"form-control" }}
+                                    {% if form.nombre_prod.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {{ form.nombre_prod.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="{{ form.stock.id_for_label }}">
+                                        {{ form.stock.label }}
+                                    </label>
+                                    {{ form.stock|add_class:"form-control" }}
+                                    <small class="form-text text-muted">
+                                        Ingrese la cantidad inicial de stock
+                                    </small>
+                                    {% if form.stock.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {{ form.stock.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Accounting Plan Selection -->
+                            <div class="form-section">
+                                <h5><i class="fas fa-book"></i> Plan de Cuentas Contables</h5>
+                                <div class="form-group">
+                                    <label class="form-label" for="{{ form.plan_cuenta.id_for_label }}">
+                                        {{ form.plan_cuenta.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-control select2" id="id_plan_cuenta" name="plan_cuenta">
+                                        <option value="">--- Seleccione una Cuenta Contable ---</option>
+                                        {% if plan_cuentas %}
+                                            {% for cuenta in plan_cuentas %}
+                                                <option value="{{ cuenta.id }}" data-codigo="{{ cuenta.codigo }}">
+                                                    {{ cuenta.codigo }} - {{ cuenta.nombre }}
+                                                </option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <option value="">Cargando cuentas...</option>
+                                        {% endif %}
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        Seleccione la cuenta contable para relacionar con este producto
+                                    </small>
+                                    {% if form.plan_cuenta.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {{ form.plan_cuenta.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Display selected account info -->
+                                <div id="cuentaInfo" class="alert alert-info" style="display: none;">
+                                    <strong>Cuenta Seleccionada:</strong>
+                                    <p id="cuentaDetalles"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Stock
+                            </button>
+                            <a href="{% url 'app_stock:listar_stock_bio' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        language: "es",
+        theme: "default",
+        width: '100%'
+    });
+
+    // Load accounts when company changes
+    $('#id_nombre_empresa').on('change', function() {
+        const empresaId = $(this).val();
+        if (empresaId) {
+            loadCuentasByEmpresa(empresaId);
+        }
+    });
+
+    // Show account details when selected
+    $('#id_plan_cuenta').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const codigo = selectedOption.data('codigo');
+        const nombre = selectedOption.text();
+        
+        if (codigo) {
+            $('#cuentaDetalles').text(`${codigo} - ${nombre}`);
+            $('#cuentaInfo').show();
+        } else {
+            $('#cuentaInfo').hide();
+        }
+    });
+});
+
+function loadCuentasByEmpresa(empresaId) {
+    const $select = $('#id_plan_cuenta');
+    $select.empty().append('<option value="">Cargando cuentas...</option>');
+
+    $.ajax({
+        url: '{% url "app_stock:get_cuentas_por_empresa" %}',
+        type: 'GET',
+        data: {
+            empresa_id: empresaId
+        },
+        success: function(response) {
+            if (response.success) {
+                $select.empty().append('<option value="">--- Seleccione una Cuenta Contable ---</option>');
+                
+                response.cuentas.forEach(function(cuenta) {
+                    $select.append(
+                        `<option value="${cuenta.id}" data-codigo="${cuenta.codigo}">
+                            ${cuenta.codigo} - ${cuenta.nombre}
+                        </option>`
+                    );
+                });
+                
+                $select.trigger('change');
+            }
+        },
+        error: function(xhr) {
+            alert('Error al cargar las cuentas contables');
+            console.error(xhr);
+        }
+    });
+}
+</script>
+{% endblock %}
