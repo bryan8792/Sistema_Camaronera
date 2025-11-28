@@ -249,11 +249,12 @@ class ProdStockTotalForm(ModelForm):
 
 class StockAccountingForm(ModelForm):
     """
-    Form for creating/editing stock with accounting plan selection
+    Form for updating stock with accounting plan selection
+    Actualiza registros existentes de Total_Stock con plan de cuentas
     """
     plan_cuenta = ModelChoiceField(
         queryset=PlanCuenta.objects.none(),
-        required=False,
+        required=True,  # Changed to required=True to force account assignment
         empty_label="--- Seleccione una Cuenta Contable ---",
         help_text="Seleccione el plan de cuentas para este producto",
         widget=Select(attrs={
@@ -268,49 +269,77 @@ class StockAccountingForm(ModelForm):
         empty_label="--- Seleccione Empresa ---",
         widget=Select(attrs={
             'class': 'form-control',
-            'id': 'id_nombre_empresa',
-            'onchange': 'loadCuentasByEmpresa(this.value)'
+            'id': 'id_nombre_empresa'
         })
     )
 
     nombre_prod = ModelChoiceField(
-        queryset=Producto.objects.filter(estado=True),
+        queryset=Producto.objects.none(),  # Start empty, will be populated via AJAX
         empty_label="--- Seleccione Producto ---",
         widget=Select(attrs={
-            'class': 'form-control',
+            'class': 'form-control select2',
             'id': 'id_nombre_prod'
         })
     )
 
     class Meta:
         model = Total_Stock
-        fields = ['nombre_empresa', 'nombre_prod', 'stock', 'plan_cuenta']
-        widgets = {
-            'stock': NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-                'min': '0',
-                'placeholder': 'Ingrese cantidad'
-            })
-        }
+        fields = ['nombre_empresa', 'nombre_prod', 'plan_cuenta']
 
     def __init__(self, *args, **kwargs):
-        empresa = kwargs.pop('empresa_obj', None)
+        empresa_obj = kwargs.pop('empresa_obj', None)
+        producto_obj = kwargs.pop('producto_obj', None)
+        readonly_mode = kwargs.pop('readonly_mode', False)
+
         super().__init__(*args, **kwargs)
 
-        # -------- FILTRAR PLAN DE CUENTAS POR EMPRESA ----------
-        if empresa:
+        if readonly_mode:
+            self.fields['nombre_empresa'].widget.attrs['disabled'] = 'disabled'
+            self.fields['nombre_empresa'].widget.attrs['readonly'] = 'readonly'
+            self.fields['nombre_prod'].widget.attrs['disabled'] = 'disabled'
+            self.fields['nombre_prod'].widget.attrs['readonly'] = 'readonly'
+
+        if empresa_obj:
             self.fields['plan_cuenta'].queryset = PlanCuenta.objects.filter(
-                empresa=empresa,
+                empresa=empresa_obj,
                 estado=True
             ).order_by('codigo')
 
-            # -------- FILTRAR PRODUCTOS EXISTENTES PARA ESA EMPRESA ----------
-            self.fields['nombre_prod'].queryset = Producto.objects.filter(
-                id__in=Total_Stock.objects.filter(
-                    nombre_empresa=empresa
-                ).values('nombre_prod_id')
-            )
+            if producto_obj:
+                self.fields['nombre_prod'].queryset = Producto.objects.filter(
+                    id=producto_obj.id
+                )
+            else:
+                productos_con_stock = Total_Stock.objects.filter(
+                    nombre_empresa=empresa_obj
+                ).values_list('nombre_prod_id', flat=True).distinct()
+
+                self.fields['nombre_prod'].queryset = Producto.objects.filter(
+                    id__in=productos_con_stock,
+                    estado=True
+                ).order_by('nombre')
+
+        if self.instance and self.instance.pk:
+            if self.instance.nombre_empresa:
+                self.fields['plan_cuenta'].queryset = PlanCuenta.objects.filter(
+                    empresa=self.instance.nombre_empresa,
+                    estado=True
+                ).order_by('codigo')
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.fields['nombre_empresa'].widget.attrs.get('disabled'):
+            if 'nombre_empresa' not in cleaned_data or not cleaned_data['nombre_empresa']:
+                cleaned_data['nombre_empresa'] = self.initial.get('nombre_empresa')
+
+        if self.fields['nombre_prod'].widget.attrs.get('disabled'):
+            if 'nombre_prod' not in cleaned_data or not cleaned_data['nombre_prod']:
+                cleaned_data['nombre_prod'] = self.initial.get('nombre_prod')
+
+        return cleaned_data
+
+
 
 
 

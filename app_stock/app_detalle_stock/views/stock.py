@@ -1,7 +1,7 @@
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -358,9 +358,66 @@ class listarStockUnicoBIOView(ListView):
         return context
 
 
+# @method_decorator(login_required, name='dispatch')
+# @method_decorator(csrf_exempt, name='dispatch')
+# class CrearStockConCuentaView(CreateView):
+#     model = Total_Stock
+#     form_class = StockAccountingForm
+#     template_name = 'app_stock/stock_crear_con_cuenta.html'
+#     success_url = reverse_lazy('app_stock:listar_stock_bio')
+#
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#
+#         empresa_id = self.kwargs.get('empresa_id')
+#         print("empresa_id:", empresa_id)
+#
+#         if empresa_id:
+#             try:
+#                 empresa = Empresa.objects.get(pk=empresa_id)
+#
+#                 # Prellenar el campo empresa
+#                 kwargs.setdefault('initial', {})
+#                 kwargs['initial']['nombre_empresa'] = empresa
+#
+#                 # Pasar empresa al formulario
+#                 kwargs['empresa_obj'] = empresa
+#
+#             except Empresa.DoesNotExist:
+#                 pass
+#
+#         return kwargs
+#
+#     def form_valid(self, form):
+#         response = super().form_valid(form)
+#
+#         if self.object.plan_cuenta:
+#             self.object.cod_contable = self.object.plan_cuenta.codigo
+#             self.object.save(update_fields=['cod_contable'])
+#
+#         return response
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         empresa_id = self.kwargs.get('empresa_id')
+#
+#         if empresa_id:
+#             context['empresa'] = Empresa.objects.get(pk=empresa_id)
+#             context['plan_cuentas'] = PlanCuenta.objects.filter(
+#                 empresa_id=empresa_id,
+#                 estado=True
+#             ).order_by('codigo')
+#
+#         return context
+
+
 @method_decorator(login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class CrearStockConCuentaView(CreateView):
+    """
+    Update existing stock with accounting plan selection
+    Actualiza el registro existente de Total_Stock asignándole plan de cuentas
+    """
     model = Total_Stock
     form_class = StockAccountingForm
     template_name = 'app_stock/stock_crear_con_cuenta.html'
@@ -368,48 +425,115 @@ class CrearStockConCuentaView(CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        empresa_id = self.request.GET.get('empresa_id') or self.kwargs.get('empresa_id')
+        producto_id = self.request.GET.get('producto_id')
 
-        empresa_id = self.kwargs.get('empresa_id')
-        print("empresa_id:", empresa_id)
-
-        if empresa_id:
+        if empresa_id and producto_id:
             try:
                 empresa = Empresa.objects.get(pk=empresa_id)
-
-                # Prellenar el campo empresa
-                kwargs.setdefault('initial', {})
-                kwargs['initial']['nombre_empresa'] = empresa
-
-                # Pasar empresa al formulario
+                producto = Producto.objects.get(pk=producto_id)
+                kwargs['initial'] = {
+                    'nombre_empresa': empresa,
+                    'nombre_prod': producto
+                }
                 kwargs['empresa_obj'] = empresa
-
+                kwargs['producto_obj'] = producto
+                kwargs['readonly_mode'] = True
+            except (Empresa.DoesNotExist, Producto.DoesNotExist):
+                pass
+        elif empresa_id:
+            try:
+                empresa = Empresa.objects.get(pk=empresa_id)
+                kwargs['initial'] = {'nombre_empresa': empresa}
+                kwargs['empresa_obj'] = empresa
             except Empresa.DoesNotExist:
                 pass
-
         return kwargs
 
     def form_valid(self, form):
-        response = super().form_valid(form)
+        empresa_id = self.kwargs.get('empresa_id') or self.request.GET.get('empresa_id')
+        producto_id = self.request.GET.get('producto_id') or self.request.POST.get('nombre_prod')
+        plan_cuenta_id = self.request.POST.get('plan_cuenta')
 
-        if self.object.plan_cuenta:
-            self.object.cod_contable = self.object.plan_cuenta.codigo
-            self.object.save(update_fields=['cod_contable'])
+        if not empresa_id or not producto_id:
+            form.add_error(None, 'Faltan parámetros de empresa o producto')
+            return self.form_invalid(form)
 
-        return response
+        try:
+            empresa = Empresa.objects.get(pk=empresa_id)
+            producto = Producto.objects.get(pk=producto_id)
+            plan_cuenta = PlanCuenta.objects.get(pk=plan_cuenta_id) if plan_cuenta_id else None
+
+            # Find existing Total_Stock record
+            stock_existente = Total_Stock.objects.filter(
+                nombre_empresa=empresa,
+                nombre_prod=producto
+            ).first()
+
+            if stock_existente:
+                # UPDATE existing record
+                stock_existente.plan_cuenta = plan_cuenta
+                if plan_cuenta:
+                    stock_existente.cod_contable = plan_cuenta.codigo
+                stock_existente.save(update_fields=['plan_cuenta', 'cod_contable'])
+                self.object = stock_existente
+            else:
+                # CREATE new record if doesn't exist
+                self.object = Total_Stock.objects.create(
+                    nombre_empresa=empresa,
+                    nombre_prod=producto,
+                    plan_cuenta=plan_cuenta,
+                    cod_contable=plan_cuenta.codigo if plan_cuenta else None,
+                    stock=0
+                )
+
+            return redirect(self.success_url)
+
+        except (Empresa.DoesNotExist, Producto.DoesNotExist, PlanCuenta.DoesNotExist) as e:
+            form.add_error(None, f'Error: {str(e)}')
+            return self.form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        empresa_id = self.kwargs.get('empresa_id')
 
-        if empresa_id:
-            context['empresa'] = Empresa.objects.get(pk=empresa_id)
+        # Get parameters from URL kwargs and GET params
+        empresa_id = self.kwargs.get('empresa_id') or self.request.GET.get('empresa_id')
+        producto_id = self.request.GET.get('producto_id')
+
+        if not empresa_id or not producto_id:
+            context['error'] = 'No se proporcionaron los parámetros de empresa y producto.'
+            return context
+
+        try:
+            empresa = Empresa.objects.get(pk=empresa_id)
+            producto = Producto.objects.get(pk=producto_id)
+
+            context['empresa'] = empresa
+            context['producto'] = producto
+            context['readonly_mode'] = True
+
+            # Get plan de cuentas for this empresa
             context['plan_cuentas'] = PlanCuenta.objects.filter(
-                empresa_id=empresa_id,
+                empresa=empresa,
                 estado=True
             ).order_by('codigo')
 
-        return context
+            # Get stock information
+            try:
+                stock = Total_Stock.objects.get(
+                    nombre_empresa=empresa,
+                    nombre_prod=producto
+                )
+                context['stock_actual'] = stock.stock
+                context['cuenta_actual'] = stock.plan_cuenta
+            except Total_Stock.DoesNotExist:
+                context['stock_actual'] = 0.00
+                context['cuenta_actual'] = None
 
+        except (Empresa.DoesNotExist, Producto.DoesNotExist) as e:
+            context['error'] = f'No se encontró la empresa o producto: {str(e)}'
+
+        return context
 
 
 @method_decorator(login_required, name='dispatch')
@@ -469,6 +593,115 @@ def get_cuentas_por_empresa(request):
         return JsonResponse({'error': 'Empresa no encontrada'}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@csrf_exempt
+def get_productos_por_empresa(request):
+    """
+    AJAX endpoint to load products that have stock for a specific company
+    Retorna productos que tienen registros en Total_Stock para una empresa
+    """
+    empresa_id = request.GET.get('empresa_id')
+
+    if not empresa_id:
+        return JsonResponse({'error': 'Empresa no especificada'}, status=400)
+
+    try:
+        empresa = Empresa.objects.get(pk=empresa_id)
+
+        # Get productos that have stock records for this empresa
+        productos_ids = Total_Stock.objects.filter(
+            nombre_empresa=empresa
+        ).values_list('nombre_prod_id', flat=True).distinct()
+
+        productos = Producto.objects.filter(
+            id__in=productos_ids,
+            estado=True
+        ).values('id', 'nombre_producto').order_by('nombre_producto')
+
+        productos_list = [
+            {
+                'id': p['id'],
+                'nombre': p['nombre_producto']
+            }
+            for p in productos
+        ]
+
+        return JsonResponse({
+            'success': True,
+            'productos': productos_list
+        })
+    except Empresa.DoesNotExist:
+        return JsonResponse({'error': 'Empresa no encontrada'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+@csrf_exempt
+def get_stock_info(request):
+    """
+    AJAX endpoint to get current stock information
+    Retorna información del stock actual para un producto y empresa
+    """
+    empresa_id = request.GET.get('empresa_id')
+    producto_id = request.GET.get('producto_id')
+
+    if not empresa_id or not producto_id:
+        return JsonResponse({'error': 'Parámetros incompletos'}, status=400)
+
+    try:
+        stock = Total_Stock.objects.get(
+            nombre_empresa_id=empresa_id,
+            nombre_prod_id=producto_id
+        )
+
+        cuenta_actual = None
+        if stock.plan_cuenta:
+            cuenta_actual = f"{stock.plan_cuenta.codigo} - {stock.plan_cuenta.nombre}"
+
+        return JsonResponse({
+            'success': True,
+            'producto_nombre': stock.nombre_prod.nombre_producto,
+            'stock': float(stock.stock),
+            'cuenta_actual': cuenta_actual,
+            'cod_contable': stock.cod_contable
+        })
+    except Total_Stock.DoesNotExist:
+        return JsonResponse({'error': 'Stock no encontrado'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# @login_required
+# @csrf_exempt
+# def get_cuentas_por_empresa(request):
+#     """
+#     AJAX endpoint to load accounting plans by company
+#     Retorna lista de cuentas contables para una empresa específica
+#     """
+#     empresa_id = request.GET.get('empresa_id')
+#
+#     if not empresa_id:
+#         return JsonResponse({'error': 'Empresa no especificada'}, status=400)
+#
+#     try:
+#         empresa = Empresa.objects.get(pk=empresa_id)
+#         cuentas = PlanCuenta.objects.filter(
+#             empresa=empresa,
+#             estado=True,
+#             nivel__lte=5  # Limit to operational accounts (not summary accounts)
+#         ).values('id', 'codigo', 'nombre', 'get_full_hierarchy').order_by('codigo')
+#
+#         return JsonResponse({
+#             'success': True,
+#             'cuentas': list(cuentas)
+#         })
+#     except Empresa.DoesNotExist:
+#         return JsonResponse({'error': 'Empresa no encontrada'}, status=404)
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=500)
 
 
 def get_empresa_from_piscina(numero_piscina):

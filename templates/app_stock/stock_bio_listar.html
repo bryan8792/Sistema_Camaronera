@@ -453,9 +453,10 @@
                                                                        class="btn-info btn btn-xs">
                                                                         <i class="fas fa-search"> </i>
                                                                     </a>
-                                                                    <a href="{% url 'app_stock:crear_stock_con_cuenta' dato.nombre_empresa_id %}"
-                                                                       class="btn-info btn btn-xs">
-                                                                        <i class="fas fa-search"> </i>
+                                                                    <a href="{% url 'app_stock:crear_stock_con_cuenta' dato.nombre_empresa.id %}?producto_id={{ dato.nombre_prod.id }}"
+                                                                       class="btn-warning btn btn-xs"
+                                                                       title="Asignar Plan de Cuentas">
+                                                                        <i class="fas fa-file-invoice-dollar"></i>
                                                                     </a>
                                                                 </div>
                                                             {% endif %}
