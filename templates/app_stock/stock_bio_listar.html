@@ -323,7 +323,7 @@
                                      aria-labelledby="custom-tabs-one-home-tab">
                                     <h3 class="card-title text-center">
                                         <strong><i class="fas fa-boxes"></i>
-                                            &nbsp AJUSTE Y DETALLE DE STOCK DE BALANCEADOS - BIO:
+                                            &nbsp; AJUSTE Y DETALLE DE STOCK DE BALANCEADOS - BIO:
                                         </strong>
                                     </h3>
                                     <br>
@@ -334,8 +334,8 @@
                                             <thead style="background-color:#3498DB">
                                             <tr>
                                                 <th style="width: 47%;">Producto</th>
-                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad</th>
-                                                <th style="width: 20%;" class="text-center" colspan="2">Total</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Libras</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Presentación</th>
                                                 <th style="width: 5%;" class="text-center">Porcentaje</th>
                                                 <th style="width: 8%;" class="text-center">Acción</th>
                                             </tr>
@@ -454,7 +454,7 @@
                                                                        class="btn-info btn btn-xs">
                                                                         <i class="fas fa-search"> </i>
                                                                     </a>
-                                                                    <a href="{% url 'app_stock:crear_stock_con_cuenta' dato.nombre_empresa.id %}?producto_id={{ dato.nombre_prod.id }}"
+                                                                    <a href="{% url 'app_stock:crear_stock_con_cuenta_bio' dato.nombre_empresa.id %}?producto_id={{ dato.nombre_prod.id }}"
                                                                        class="btn-warning btn btn-xs"
                                                                        title="Asignar Plan de Cuentas">
                                                                         <i class="fas fa-file-invoice-dollar"></i>
@@ -473,7 +473,7 @@
                                      aria-labelledby="custom-tabs-one-profile-tab">
                                     <h3 class="card-title text-center">
                                         <strong><i class="fas fa-boxes"></i>
-                                            &nbsp AJUSTE Y DETALLE DE STOCK DE INSUMOS - BIO:
+                                            &nbsp; AJUSTE Y DETALLE DE STOCK DE INSUMOS - BIO:
                                         </strong>
                                     </h3>
                                     <br>
@@ -484,8 +484,8 @@
                                             <thead style="background-color:#3498DB">
                                             <tr>
                                                 <th style="width: 47%;">Producto</th>
-                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad</th>
-                                                <th style="width: 20%;" class="text-center" colspan="2">Total</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Libras</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Presentación</th>
                                                 <th style="width: 5%;" class="text-center">Porcentaje</th>
                                                 <th style="width: 8%;" class="text-center">Acción</th>
                                             </tr>
@@ -605,8 +605,11 @@
                                                                        class="btn-info btn btn-xs">
                                                                         <i class="fas fa-search"> </i>
                                                                     </a>
-
-
+                                                                    <a href="{% url 'app_stock:crear_stock_con_cuenta_bio' dato.nombre_empresa.id %}?producto_id={{ dato.nombre_prod.id }}"
+                                                                       class="btn-warning btn btn-xs"
+                                                                       title="Asignar Plan de Cuentas">
+                                                                        <i class="fas fa-file-invoice-dollar"></i>
+                                                                    </a>
                                                                 </div>
                                                             {% endif %}
                                                         </td>

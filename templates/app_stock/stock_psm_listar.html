@@ -2,6 +2,7 @@
 
 {% load static %}
 {% load widget_tweaks %}
+{% load filtros_stock %}
 
 {% block head %}
 
@@ -79,12 +80,12 @@
                         <div class="card-header p-0 pt-1">
                             <ul class="nav nav-tabs" id="custom-tabs-one-tab" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="pill"
+                                    <a class="nav-link active" id="custom-tabs-one-home-tab" data-toggle="tab"
                                        href="#custom-tabs-one-home" role="tab" aria-controls="custom-tabs-one-home"
                                        aria-selected="true"> <b> STOCK DE BALANCEADOS </b> </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="pill"
+                                    <a class="nav-link" id="custom-tabs-one-profile-tab" data-toggle="tab"
                                        href="#custom-tabs-one-profile" role="tab"
                                        aria-controls="custom-tabs-one-profile"
                                        aria-selected="false"> <b> STOCK DE INSUMOS </b> </a>
@@ -121,7 +122,7 @@
                                                 <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Libras</th>
                                                 <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Presentación</th>
                                                 <th style="width: 5%;" class="text-center">Porcentaje</th>
-                                                <th style="width: 8%;" class="text-center">Accion</th>
+                                                <th style="width: 8%;" class="text-center">Acción</th>
                                             </tr>
                                             </thead>
 
@@ -238,6 +239,11 @@
                                                                        class="btn-info btn btn-xs">
                                                                         <i class="fas fa-search"> </i>
                                                                     </a>
+                                                                    <a href="{% url 'app_stock:crear_stock_con_cuenta_psm' dato.nombre_empresa.id %}?producto_id={{ dato.nombre_prod.id }}"
+                                                                       class="btn-warning btn btn-xs"
+                                                                       title="Asignar Plan de Cuentas">
+                                                                        <i class="fas fa-file-invoice-dollar"></i>
+                                                                    </a>
                                                                 </div>
                                                             {% endif %}
                                                         </td>
@@ -260,11 +266,11 @@
                                         <table id="tb_stock_insumo_psm" class="table table-sm table-striped table-bordered">
                                             <thead style="background-color:#3498DB">
                                             <tr>
-                                                <th style="width: 50%;">Producto</th>
-                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad</th>
-                                                <th style="width: 20%;" class="text-center" colspan="2">Total</th>
+                                                <th style="width: 47%;">Producto</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Libras</th>
+                                                <th style="width: 20%;" class="text-center" colspan="2">Cantidad en Presentación</th>
                                                 <th style="width: 5%;" class="text-center">Porcentaje</th>
-                                                <th style="width: 5%;" class="text-center">Accion</th>
+                                                <th style="width: 8%;" class="text-center">Acción</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -381,6 +387,11 @@
                                                                     <a href="{% url 'app_stock:listar_stock_unico_psm' dato.id %}"
                                                                        class="btn-info btn btn-xs">
                                                                         <i class="fas fa-search"> </i>
+                                                                    </a>
+                                                                    <a href="{% url 'app_stock:crear_stock_con_cuenta_psm' dato.nombre_empresa.id %}?producto_id={{ dato.nombre_prod.id }}"
+                                                                       class="btn-warning btn btn-xs"
+                                                                       title="Asignar Plan de Cuentas">
+                                                                        <i class="fas fa-file-invoice-dollar"></i>
                                                                     </a>
                                                                 </div>
                                                             {% endif %}
