@@ -36,5 +36,17 @@ class PiscinasForm(ModelForm):
                     'placeholder': 'Ingrese las Hectáreas de Piscina',
                     'autocomplete': 'off'
                 }
-            )
+            ),
+            'plan_cuenta': Select(
+                attrs={
+                    'class': 'form-control select2',
+                    'autocomplete': 'off'
+                }
+            ),
+            'cuenta_suministros': Select(
+                attrs={
+                    'class': 'form-control select2',
+                    'autocomplete': 'off'
+                }
+            ),
         }
