@@ -17,6 +17,12 @@ from app_reportes.utils import render_to_pdf
 from app_stock.app_detalle_stock.forms import ProdStockForm, ProdStockTotalForm, StockAccountingForm
 from app_stock.app_detalle_stock.models import Producto_Stock, Total_Stock, InvoiceStock
 import decimal
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
+from django.utils import timezone
+from django.db.models import F
+from datetime import datetime
+import re
 
 
 # EMPRESA PRESQUERA SAN MIGUEL
@@ -358,59 +364,6 @@ class listarStockUnicoBIOView(ListView):
         return context
 
 
-# @method_decorator(login_required, name='dispatch')
-# @method_decorator(csrf_exempt, name='dispatch')
-# class CrearStockConCuentaView(CreateView):
-#     model = Total_Stock
-#     form_class = StockAccountingForm
-#     template_name = 'app_stock/stock_crear_con_cuenta.html'
-#     success_url = reverse_lazy('app_stock:listar_stock_bio')
-#
-#     def get_form_kwargs(self):
-#         kwargs = super().get_form_kwargs()
-#
-#         empresa_id = self.kwargs.get('empresa_id')
-#         print("empresa_id:", empresa_id)
-#
-#         if empresa_id:
-#             try:
-#                 empresa = Empresa.objects.get(pk=empresa_id)
-#
-#                 # Prellenar el campo empresa
-#                 kwargs.setdefault('initial', {})
-#                 kwargs['initial']['nombre_empresa'] = empresa
-#
-#                 # Pasar empresa al formulario
-#                 kwargs['empresa_obj'] = empresa
-#
-#             except Empresa.DoesNotExist:
-#                 pass
-#
-#         return kwargs
-#
-#     def form_valid(self, form):
-#         response = super().form_valid(form)
-#
-#         if self.object.plan_cuenta:
-#             self.object.cod_contable = self.object.plan_cuenta.codigo
-#             self.object.save(update_fields=['cod_contable'])
-#
-#         return response
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         empresa_id = self.kwargs.get('empresa_id')
-#
-#         if empresa_id:
-#             context['empresa'] = Empresa.objects.get(pk=empresa_id)
-#             context['plan_cuentas'] = PlanCuenta.objects.filter(
-#                 empresa_id=empresa_id,
-#                 estado=True
-#             ).order_by('codigo')
-#
-#         return context
-
-
 @method_decorator(login_required, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class CrearStockConCuentaView(CreateView):
@@ -674,36 +627,6 @@ def get_stock_info(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
-# @login_required
-# @csrf_exempt
-# def get_cuentas_por_empresa(request):
-#     """
-#     AJAX endpoint to load accounting plans by company
-#     Retorna lista de cuentas contables para una empresa específica
-#     """
-#     empresa_id = request.GET.get('empresa_id')
-#
-#     if not empresa_id:
-#         return JsonResponse({'error': 'Empresa no especificada'}, status=400)
-#
-#     try:
-#         empresa = Empresa.objects.get(pk=empresa_id)
-#         cuentas = PlanCuenta.objects.filter(
-#             empresa=empresa,
-#             estado=True,
-#             nivel__lte=5  # Limit to operational accounts (not summary accounts)
-#         ).values('id', 'codigo', 'nombre', 'get_full_hierarchy').order_by('codigo')
-#
-#         return JsonResponse({
-#             'success': True,
-#             'cuentas': list(cuentas)
-#         })
-#     except Empresa.DoesNotExist:
-#         return JsonResponse({'error': 'Empresa no encontrada'}, status=404)
-#     except Exception as e:
-#         return JsonResponse({'error': str(e)}, status=500)
-
-
 def get_empresa_from_piscina(numero_piscina):
     """
     Determine company based on pool number
@@ -727,102 +650,164 @@ def get_empresa_from_piscina(numero_piscina):
         return None
 
 
+@receiver(post_save, sender=Producto_Stock)
 def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
     """
     Signal that automatically creates accounting entries when stock is withdrawn
-    Now automatically determines company from piscina number (1-20=PSM, 21-45=BIO)
+    Creates accounting entry:
+    DEBE: Piscina Account + SUMINISTROS subcuenta (ej: 102030101002)
+    HABER: Product Inventory Account (ej: 101030101001)
     """
 
-    # Only process EGRESO (withdrawal) movements
-    if instance.tipo_movimiento != 'EGRESO':
+    if not created or instance.tipo != 'EGRESO':
         return
 
     try:
+        # Get piscina information
+        piscina_obj = instance.piscinas
+        if not piscina_obj:
+            print(f"[CONTABILIDAD] No hay piscina asignada al egreso ID {instance.id}")
+            return
+
         piscina_numero = None
-        if hasattr(instance.piscina, 'nombre'):
-            piscina_numero = instance.piscina.nombre
-        elif hasattr(instance.piscina, 'numero'):
-            piscina_numero = instance.piscina.numero
+        piscina_nombre = str(piscina_obj)
 
-        empresa_detectada = get_empresa_from_piscina(piscina_numero)
+        # Try to extract number from piscina name (e.g., "PISCINA 21" -> 21)
+        match = re.search(r'\d+', piscina_nombre)
+        if match:
+            piscina_numero = int(match.group())
 
-        if not empresa_detectada:
-            print(f"[CONTABILIDAD] No se pudo detectar empresa para piscina {piscina_numero}")
+        if not piscina_numero:
+            print(f"[CONTABILIDAD] No se pudo extraer número de piscina de: {piscina_nombre}")
             return
 
-        # Get related stock record with detected company
-        stock_total = Total_Stock.objects.get(
-            nombre_prod=instance.producto,
-            nombre_empresa__nombre=empresa_detectada
-        )
+        if 1 <= piscina_numero <= 20:
+            empresa_siglas = 'PSM'
+        elif 21 <= piscina_numero <= 45:
+            empresa_siglas = 'BIO'
+        else:
+            print(f"[CONTABILIDAD] Número de piscina {piscina_numero} fuera de rango (1-20=PSM, 21-45=BIO)")
+            return
 
-        # Verify that the product has an accounting plan assigned
+        # Get the product from Total_Stock with the detected company
+        stock_total = Total_Stock.objects.filter(
+            nombre_prod=instance.producto_empresa.nombre_prod,
+            nombre_empresa__siglas=empresa_siglas
+        ).first()
+
+        if not stock_total:
+            print(
+                f"[CONTABILIDAD] No se encontró Total_Stock para producto {instance.producto_empresa.nombre_prod.nombre} empresa {empresa_siglas}")
+            return
+
         if not stock_total.plan_cuenta:
-            print(f"[CONTABILIDAD] Producto {instance.producto.nombre} sin plan de cuentas para {empresa_detectada}")
+            print(
+                f"[CONTABILIDAD] ERROR: Producto '{instance.producto_empresa.nombre_prod.nombre}' NO tiene plan de cuentas asignado. Debe asignarlo primero.")
             return
 
-        # Get company object
         empresa = stock_total.nombre_empresa
+        cuenta_producto = stock_total.plan_cuenta
 
-        # Create accounting header (encabezado)
+        if stock_total.cod_contable:
+            instance.cod_contable = stock_total.cod_contable
+            Producto_Stock.objects.filter(pk=instance.pk).update(cod_contable=stock_total.cod_contable)
+
+        cuenta_piscina = None
+
+        # Strategy 1: Search by SIEMBRA #P{numero}
+        cuenta_piscina = PlanCuenta.objects.filter(
+            empresa=empresa,
+            nombre__iregex=r'SIEMBRA\s*#\s*P\s*0?' + str(piscina_numero) + r'\b',
+            estado=True
+        ).first()
+
+        # Strategy 2: Search by PISCINA# {numero}
+        if not cuenta_piscina:
+            cuenta_piscina = PlanCuenta.objects.filter(
+                empresa=empresa,
+                nombre__iregex=r'PISCINA\s*#?\s*0?' + str(piscina_numero) + r'\b',
+                estado=True
+            ).first()
+
+        # Strategy 3: Search in code range 10203 with piscina number
+        if not cuenta_piscina:
+            cuenta_piscina = PlanCuenta.objects.filter(
+                empresa=empresa,
+                codigo__startswith='10203',
+                nombre__icontains=str(piscina_numero),
+                estado=True
+            ).first()
+
+        if not cuenta_piscina:
+            print(
+                f"[CONTABILIDAD] ERROR: No se encontró cuenta para Piscina {piscina_numero} en empresa {empresa_siglas}")
+            print(
+                f"[CONTABILIDAD] Busque una cuenta con nombre 'SIEMBRA #P{piscina_numero}' o 'PISCINA#{piscina_numero}'")
+            return
+
+        print(f"[CONTABILIDAD] Cuenta piscina encontrada: {cuenta_piscina.codigo} - {cuenta_piscina.nombre}")
+
+        cuenta_suministros = PlanCuenta.objects.filter(
+            empresa=empresa,
+            parentId=cuenta_piscina,
+            nombre__icontains='SUMINISTROS',
+            estado=True
+        ).first()
+
+        if not cuenta_suministros:
+            print(
+                f"[CONTABILIDAD] ERROR: No se encontró subcuenta 'SUMINISTROS' bajo la cuenta {cuenta_piscina.codigo}")
+            print(f"[CONTABILIDAD] Debe crear una subcuenta llamada 'SUMINISTROS' bajo {cuenta_piscina.nombre}")
+            return
+
+        print(
+            f"[CONTABILIDAD] Cuenta suministros encontrada: {cuenta_suministros.codigo} - {cuenta_suministros.nombre}")
+
+        monto = float(instance.cantidad_egreso or 0)
+
+        if monto <= 0:
+            print(f"[CONTABILIDAD] Monto de egreso es 0 o negativo, no se crea asiento")
+            return
+
         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
             codigo=int(datetime.now().timestamp()),
             tip_cuenta='EGRESO DE INVENTARIO',
             tip_transa='EGRESO',
-            fecha=instance.fecha or timezone.now().date(),
-            comprobante=f"EGR-{instance.id}",
-            descripcion=f"Egreso de {instance.producto.nombre} en {piscina_numero} ({empresa_detectada})",
+            fecha=instance.fecha_ingreso or timezone.now().date(),
+            comprobante=f"EGR-{instance.id}-P{piscina_numero}",
+            descripcion=f"Consumo de {instance.producto_empresa.nombre_prod.nombre} en Piscina {piscina_numero} - {instance.numero_guia}",
             empresa=empresa,
             reg_control='RT'
         )
 
-        # Create detail entries (detalles)
-        # Entry 1: Debit from inventory (inventario)
-        cuenta_inventario = stock_total.plan_cuenta
-
         DetalleCuentasPlanCuenta.objects.create(
             encabezadocuentaplan=encabezado,
             orden=1,
-            cuenta=cuenta_inventario,
-            detalle=f"Egreso: {instance.producto.nombre}",
-            debe=float(instance.cantidad),
+            cuenta=cuenta_suministros,
+            detalle=f"{instance.producto_empresa.nombre_prod.nombre} - P#{piscina_numero}",
+            debe=monto,
             haber=0.00,
             origen='STOCK'
         )
 
-        # Entry 2: Credit to expense account (gasto)
-        try:
-            # Look for an expense account related to the product
-            cuenta_gasto = PlanCuenta.objects.filter(
-                empresa=empresa,
-                nombre__icontains=instance.producto.categoria.nombre.split()[0],
-                tipo_cuenta='GASTO',
-                estado=True
-            ).first()
+        DetalleCuentasPlanCuenta.objects.create(
+            encabezadocuentaplan=encabezado,
+            orden=2,
+            cuenta=cuenta_producto,
+            detalle=f"Egreso inventario: {instance.producto_empresa.nombre_prod.nombre}",
+            debe=0.00,
+            haber=monto,
+            origen='STOCK'
+        )
 
-            if cuenta_gasto:
-                DetalleCuentasPlanCuenta.objects.create(
-                    encabezadocuentaplan=encabezado,
-                    orden=2,
-                    cuenta=cuenta_gasto,
-                    detalle=f"Gasto: {instance.producto.nombre}",
-                    debe=0.00,
-                    haber=float(instance.cantidad),
-                    origen='STOCK'
-                )
-        except Exception as e:
-            print(f"[CONTABILIDAD] Error creando entrada de gasto: {str(e)}")
+        print(f"[CONTABILIDAD] ✓ Asiento #{encabezado.codigo} creado exitosamente:")
+        print(f"[CONTABILIDAD]   DEBE:  {cuenta_suministros.codigo} {cuenta_suministros.nombre} = ${monto}")
+        print(f"[CONTABILIDAD]   HABER: {cuenta_producto.codigo} {cuenta_producto.nombre} = ${monto}")
 
-        # Save the accounting code to stock_prod for reference
-        instance.cod_contable = stock_total.plan_cuenta.codigo
-        instance.save(update_fields=['cod_contable'])
-
-        print(f"[CONTABILIDAD] Asiento contable creado para egreso ID {instance.id} - Empresa: {empresa_detectada}")
-
-    except Total_Stock.DoesNotExist:
-        print(f"[CONTABILIDAD] Stock total no encontrado para {instance.producto} en empresa detectada")
     except Exception as e:
-        print(f"[CONTABILIDAD] Error al crear asiento contable: {str(e)}")
+        print(f"[CONTABILIDAD] ✗ Error al crear asiento contable: {str(e)}")
+        import traceback
+        traceback.print_exc()
 
 
 def connect_signals():
@@ -830,4 +815,6 @@ def connect_signals():
     Connect all signals - call this in apps.py ready() method
     """
     pass
+
+
 
