@@ -779,176 +779,176 @@ def get_empresa_from_piscina(numero_piscina):
 def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
     """
     Signal que crea automáticamente asientos contables cuando hay un EGRESO de stock
-
-    Lógica contable:
-    DEBE:  Cuenta Piscina + Subcuenta SUMINISTROS (ej: 102030101002)
-    HABER: Cuenta de Inventario del Producto (ej: 101030101001)
     """
 
     if not created or instance.tipo != 'EGRESO':
         return
 
+    print(f"\n{'=' * 60}")
+    print(f"[CONTABILIDAD] INICIANDO PROCESO DE ASIENTO CONTABLE")
+    print(f"{'=' * 60}")
+
     try:
-        print(f"\n{'=' * 60}")
-        print(f"[CONTABILIDAD] INICIANDO PROCESO DE ASIENTO CONTABLE")
-        print(f"{'=' * 60}")
+        print(f"[CONTABILIDAD] ID Producto_Stock: {instance.id}")
+        print(f"[CONTABILIDAD] Tipo: {instance.tipo}")
+        print(f"[CONTABILIDAD] Cantidad egreso: {instance.cantidad_egreso}")
 
         piscina_obj = instance.piscinas
         if not piscina_obj:
-            print(f"[CONTABILIDAD] ✗ ERROR: No hay piscina asignada al egreso ID {instance.id}")
+            print(f"[CONTABILIDAD] ERROR: No hay piscina asignada")
             return
 
         piscina_nombre = str(piscina_obj)
-        match = re.search(r'\d+', piscina_nombre)
+        print(f"[CONTABILIDAD] Piscina: {piscina_nombre}")
 
+        match = re.search(r'\d+', piscina_nombre)
         if not match:
-            print(f"[CONTABILIDAD] ✗ ERROR: No se pudo extraer número de: {piscina_nombre}")
+            print(f"[CONTABILIDAD] ERROR: No se pudo extraer número de piscina")
             return
 
         piscina_numero = int(match.group())
+        print(f"[CONTABILIDAD] Piscina número: {piscina_numero}")
 
-        if 1 <= piscina_numero <= 20:
-            empresa_siglas = 'PSM'
-        elif 21 <= piscina_numero <= 45:
-            empresa_siglas = 'BIO'
-        else:
-            print(f"[CONTABILIDAD] ✗ ERROR: Piscina {piscina_numero} fuera de rango (1-20=PSM, 21-45=BIO)")
+        empresa_siglas = 'PSM' if 1 <= piscina_numero <= 20 else 'BIO' if 21 <= piscina_numero <= 45 else None
+        if not empresa_siglas:
+            print(f"[CONTABILIDAD] ERROR: Piscina fuera de rango")
             return
 
-        print(f"[CONTABILIDAD] Piscina: {piscina_numero} | Empresa: {empresa_siglas}")
+        print(f"[CONTABILIDAD] Empresa: {empresa_siglas}")
 
-        producto_nombre = instance.producto_empresa.nombre_prod.nombre
-        print(f"[CONTABILIDAD] Buscando producto: {producto_nombre}")
-
-        stock_total = Total_Stock.objects.filter(
-            nombre_prod=instance.producto_empresa.nombre_prod,
-            nombre_empresa__siglas=empresa_siglas
-        ).first()
-
-        if not stock_total:
-            print(f"[CONTABILIDAD] ✗ ERROR: No existe Total_Stock para {producto_nombre} en {empresa_siglas}")
+        print(f"[CONTABILIDAD] Buscando empresa...")
+        try:
+            empresa_obj = Empresa.objects.filter(siglas=empresa_siglas).first()
+            print(f"[CONTABILIDAD] Empresa query ejecutada: {empresa_obj}")
+        except Exception as e:
+            print(f"[CONTABILIDAD] ERROR en query Empresa: {e}")
             return
 
-        if not stock_total.plan_cuenta:
-            print(f"[CONTABILIDAD] ✗ ERROR: Producto '{producto_nombre}' NO tiene plan de cuentas asignado")
-            print(f"[CONTABILIDAD] SOLUCIÓN: Asigne una cuenta contable al producto desde el listado de stock")
+        if not empresa_obj:
+            print(f"[CONTABILIDAD] ERROR: Empresa no encontrada")
             return
 
-        empresa = stock_total.nombre_empresa
-        cuenta_producto = stock_total.plan_cuenta
+        print(f"[CONTABILIDAD] Empresa OK: {empresa_obj.nombre}")
 
-        print(f"[CONTABILIDAD] ✓ Cuenta producto: {cuenta_producto.codigo} - {cuenta_producto.nombre}")
+        print(f"[CONTABILIDAD] Buscando producto...")
+        try:
+            producto_id = instance.producto_empresa.nombre_prod.id
+            print(f"[CONTABILIDAD] Producto ID: {producto_id}")
+        except Exception as e:
+            print(f"[CONTABILIDAD] ERROR accediendo a producto: {e}")
+            import traceback
+            traceback.print_exc()
+            return
 
-        print(f"[CONTABILIDAD] Buscando cuentas de piscina {piscina_numero}...")
-
-        if piscina_obj.plan_cuenta and piscina_obj.cuenta_suministros:
-            cuenta_piscina = piscina_obj.plan_cuenta
-            cuenta_suministros = piscina_obj.cuenta_suministros
-
-            print(f"[CONTABILIDAD] ✓ Cuenta piscina (FK): {cuenta_piscina.codigo} - {cuenta_piscina.nombre}")
-            print(
-                f"[CONTABILIDAD] ✓ Cuenta suministros (FK): {cuenta_suministros.codigo} - {cuenta_suministros.nombre}")
-        else:
-            print(f"[CONTABILIDAD] ⚠ Piscina sin cuentas asignadas, buscando por nombre...")
-
-            cuenta_piscina = PlanCuenta.objects.filter(
-                empresa=empresa,
-                nombre__icontains=f'PISCINA#{piscina_numero}',
-                estado=True
+        print(f"[CONTABILIDAD] Buscando Total_Stock...")
+        try:
+            stock_total = Total_Stock.objects.filter(
+                nombre_prod__id=producto_id,
+                nombre_empresa__id=empresa_obj.id
             ).first()
+            print(f"[CONTABILIDAD] Total_Stock: {stock_total}")
+        except Exception as e:
+            print(f"[CONTABILIDAD] ERROR en query Total_Stock: {e}")
+            import traceback
+            traceback.print_exc()
+            return
 
-            if not cuenta_piscina:
+        if not stock_total or not stock_total.plan_cuenta:
+            print(f"[CONTABILIDAD] ERROR: Producto sin plan de cuentas")
+            return
+
+        cuenta_producto = stock_total.plan_cuenta
+        print(f"[CONTABILIDAD] Cuenta producto: {cuenta_producto.codigo}")
+
+        print(f"[CONTABILIDAD] Buscando cuenta SUMINISTROS...")
+        cuenta_suministros = None
+
+        if hasattr(piscina_obj, 'cuenta_suministros') and piscina_obj.cuenta_suministros:
+            cuenta_suministros = piscina_obj.cuenta_suministros
+            print(f"[CONTABILIDAD] Cuenta SUMINISTROS (FK): {cuenta_suministros.codigo}")
+        else:
+            # Buscar por nombre
+            cuenta_piscina = None
+            for formato in [f'PISCINA#{piscina_numero}', f'PISCINA# {piscina_numero}']:
                 cuenta_piscina = PlanCuenta.objects.filter(
-                    empresa=empresa,
-                    nombre__icontains=f'PISCINA {piscina_numero}',
+                    empresa=empresa_obj,
+                    nombre__icontains=formato,
                     estado=True
                 ).first()
+                if cuenta_piscina:
+                    break
 
             if not cuenta_piscina:
-                cuenta_piscina = PlanCuenta.objects.filter(
-                    empresa=empresa,
-                    nombre__icontains=f'SIEMBRA #P{piscina_numero}',
-                    estado=True
-                ).first()
-
-            if not cuenta_piscina:
-                print(f"[CONTABILIDAD] ✗ ERROR: No existe cuenta para Piscina {piscina_numero}")
-                print(f"[CONTABILIDAD] SOLUCIÓN: Asigne la cuenta contable a la piscina o verifique el plan de cuentas")
+                print(f"[CONTABILIDAD] ERROR: No existe cuenta piscina")
                 return
 
-            print(f"[CONTABILIDAD] ✓ Cuenta piscina: {cuenta_piscina.codigo} - {cuenta_piscina.nombre}")
-
             cuenta_suministros = PlanCuenta.objects.filter(
-                empresa=empresa,
+                empresa=empresa_obj,
                 parentId=cuenta_piscina,
                 nombre__iexact='SUMINISTROS',
                 estado=True
             ).first()
 
             if not cuenta_suministros:
-                print(f"[CONTABILIDAD] ✗ ERROR: No existe subcuenta 'SUMINISTROS' bajo {cuenta_piscina.codigo}")
-                print(f"[CONTABILIDAD] SOLUCIÓN: Cree subcuenta 'SUMINISTROS' o asigne cuenta_suministros a la piscina")
+                print(f"[CONTABILIDAD] ERROR: No existe subcuenta SUMINISTROS")
                 return
 
-            print(f"[CONTABILIDAD] ✓ Cuenta suministros: {cuenta_suministros.codigo} - {cuenta_suministros.nombre}")
+        print(f"[CONTABILIDAD] Cuenta SUMINISTROS: {cuenta_suministros.codigo}")
 
         monto = float(instance.cantidad_egreso or 0)
-
         if monto <= 0:
-            print(f"[CONTABILIDAD] ⚠ ADVERTENCIA: Monto es 0, no se crea asiento contable")
+            print(f"[CONTABILIDAD] ERROR: Monto inválido")
             return
 
-        print(f"[CONTABILIDAD] Monto a contabilizar: ${monto:.2f}")
+        print(f"[CONTABILIDAD] Monto: ${monto:.2f}")
 
-        print(f"[CONTABILIDAD] Creando asiento contable...")
-
+        print(f"[CONTABILIDAD] Creando encabezado...")
         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
             codigo=int(datetime.now().timestamp()),
             tip_cuenta='EGRESO DE INVENTARIO',
             tip_transa='EGRESO',
             fecha=instance.fecha_ingreso or timezone.now().date(),
             comprobante=f"EGR-{instance.id}-P{piscina_numero}",
-            descripcion=f"Consumo de {producto_nombre} en Piscina {piscina_numero}",
-            empresa=empresa,
+            descripcion=f"Consumo en Piscina {piscina_numero}",
+            empresa=empresa_obj,
             reg_control='RT'
         )
+        print(f"[CONTABILIDAD] Encabezado creado ID: {encabezado.id}")
 
-        print(f"[CONTABILIDAD] ✓ Encabezado #{encabezado.codigo} creado")
-
-        DetalleCuentasPlanCuenta.objects.create(
+        detalle_debe = DetalleCuentasPlanCuenta.objects.create(
             encabezadocuentaplan=encabezado,
             orden=1,
             cuenta=cuenta_suministros,
-            detalle=f"{producto_nombre} - P#{piscina_numero}",
+            detalle=f"Consumo P#{piscina_numero}",
             debe=monto,
             haber=0.00,
             origen='STOCK'
         )
+        print(f"[CONTABILIDAD] DEBE creado ID: {detalle_debe.id} - ${monto} - ${detalle_debe.orden}")
 
-        print(f"[CONTABILIDAD] ✓ DEBE:  {cuenta_suministros.codigo} = ${monto:.2f}")
-
-        DetalleCuentasPlanCuenta.objects.create(
+        detalle_haber = DetalleCuentasPlanCuenta.objects.create(
             encabezadocuentaplan=encabezado,
             orden=2,
             cuenta=cuenta_producto,
-            detalle=f"Egreso inventario: {producto_nombre}",
+            detalle=f"Egreso inventario",
             debe=0.00,
             haber=monto,
             origen='STOCK'
         )
+        print(f"[CONTABILIDAD] HABER creado ID: {detalle_haber.id} - ${monto}")
 
-        print(f"[CONTABILIDAD] ✓ HABER: {cuenta_producto.codigo} = ${monto:.2f}")
         print(f"{'=' * 60}")
-        print(f"[CONTABILIDAD] ✓✓✓ ASIENTO CONTABLE CREADO EXITOSAMENTE ✓✓✓")
+        print(f"[CONTABILIDAD] ASIENTO CONTABLE CREADO EXITOSAMENTE")
+        print(f"[CONTABILIDAD] Comprobante: {encabezado.comprobante}")
         print(f"{'=' * 60}\n")
 
     except Exception as e:
-        print(f"\n{'=' * 60}")
-        print(f"[CONTABILIDAD] ✗✗✗ ERROR CRÍTICO ✗✗✗")
-        print(f"[CONTABILIDAD] {str(e)}")
-        print(f"{'=' * 60}\n")
+        print(f"{'=' * 60}")
+        print(f"[CONTABILIDAD] ERROR CRITICO EN SIGNAL")
+        print(f"[CONTABILIDAD] Error: {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()
+        print(f"{'=' * 60}\n")
 
 
 def connect_signals():

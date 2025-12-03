@@ -56,8 +56,16 @@ $(function () {
                     console.log(row)
                     if (row.tip_cuenta == 1) {
                         return 'DIARIO CONTABLE';
-                    } else {
+                    } else if (row.tip_cuenta == 2) {
+                        return 'COMPROBANTE PAGO';
+                    } else if (row.tip_cuenta == 3) {
                         return 'INGRESO A CAJA';
+                    } else if (row.tip_cuenta == 4) {
+                        return 'EGRESO DE CAJA';
+                    } else if (row.tip_cuenta == 5) {
+                        return 'COMPROBANTE SISTEMA';
+                    } else {
+                        return 'SIN REGISTRO';
                     }
                 }
             },

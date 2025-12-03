@@ -11,9 +11,9 @@ class PiscinasForm(ModelForm):
         widgets = {
             'orden': TextInput(
                 attrs={
-                    'class':'form-control',
-                    'placeholder':'Número de piscina',
-                    'autocomplete':'off'
+                    'class': 'form-control',
+                    'placeholder': 'Número de piscina',
+                    'autocomplete': 'off'
                 }
             ),
             'numero': TextInput(
@@ -26,7 +26,7 @@ class PiscinasForm(ModelForm):
             ),
             'empresa': Select(
                 attrs={
-                    'class': 'form-control',
+                    'class': 'form-control select2',
                     'autocomplete': 'off'
                 }
             ),

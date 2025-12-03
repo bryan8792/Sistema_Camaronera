@@ -412,6 +412,106 @@ class eliminarPlanCuentaPSMView(DeleteView):
 
 
 #     LISTAR PLAN DE CUENTAS PSM
+# class listarPlanCuentaPSMView(TemplateView):
+#     model = PlanCuenta
+#     template_name = 'app_contabilidad_planCuentas/parts_Plan/foldersPSM.html'
+#
+#     @method_decorator(csrf_exempt)
+#     @method_decorator(login_required)
+#     def dispatch(self, request, *args, **kwargs):
+#         # _inicializar()
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     # def post(self, request, *args, **kwargs):
+#     #     data = {}
+#     #     try:
+#     #         data = PlanCuenta.objects.get(pk=request.POST['id']).toJSON()
+#     #         print('data')
+#     #         print(data)
+#     #     except Exception as e:
+#     #         data['error'] = str(e)
+#     #     return JsonResponse(data)
+#
+#     def post(self, request, *args, **kwargs):
+#         data = {}
+#         action = request.POST['action']
+#         try:
+#             if action == 'searchdataPSM':
+#                 data = []
+#                 empresa = request.POST['empresa']
+#                 queryset = PlanCuenta.objects.all()
+#                 queryset = queryset.filter(empresa__siglas=empresa).order_by('codigo')
+#                 for i in queryset:
+#                     data.append(i.toJSON())
+#
+#             elif action == 'upload_excel':
+#                 print('llego a Upload excell empezo a recorrer en el python desde ajax')
+#                 with transaction.atomic():
+#                     archive = request.FILES['archive']
+#                     workbook = load_workbook(filename=archive, data_only=True)
+#                     excel = workbook[workbook.sheetnames[0]]
+#
+#                     for row in range(2, excel.max_row + 1):
+#                         name_empresa = excel.cell(row=row, column=7).value
+#
+#                         # Validar si la empresa existe por sus siglas
+#                         empresa, created = Empresa.objects.get_or_create(
+#                             siglas=name_empresa,
+#                             defaults={
+#                                 'nombre': name_empresa  # Ajustar según sea necesario si las siglas son distintas
+#                             }
+#                         )
+#
+#                         print(
+#                             f"{'Nueva empresa creada' if created else 'Empresa existente'}: {empresa.nombre} con siglas {empresa.siglas}")
+#
+#                         # Buscar o inicializar la cuenta contable
+#                         codigo_cuenta = excel.cell(row=row, column=2).value
+#                         product, created = PlanCuenta.objects.get_or_create(
+#                             empresa=empresa,
+#                             codigo=codigo_cuenta,
+#                             defaults={
+#                                 'nombre': excel.cell(row=row, column=3).value,
+#                                 'nivel': int(excel.cell(row=row, column=4).value),
+#                                 'tipo_cuenta': excel.cell(row=row, column=5).value,
+#                                 'periodo': int(excel.cell(row=row, column=8).value)
+#                             }
+#                         )
+#
+#                         # Si la cuenta ya existe, actualizarla con los nuevos valores
+#                         if not created:
+#                             product.nombre = excel.cell(row=row, column=3).value
+#                             product.nivel = int(excel.cell(row=row, column=4).value)
+#                             product.tipo_cuenta = excel.cell(row=row, column=5).value
+#                             product.periodo = int(excel.cell(row=row, column=8).value)
+#
+#                         # Manejo del padre (cuenta superior)
+#                         codigo_padre = excel.cell(row=row, column=6).value
+#                         if codigo_padre:
+#                             try:
+#                                 padre = PlanCuenta.objects.get(codigo=codigo_padre, empresa=empresa)
+#                                 product.parentId = padre
+#                             except PlanCuenta.DoesNotExist:
+#                                 # Si no existe el padre, mostrar un mensaje o manejar el error
+#                                 print(
+#                                     f"Cuenta padre con código {codigo_padre} no existe para la empresa {empresa.siglas}")
+#
+#                         product.save()
+#             else:
+#                 data['error'] = 'Ha ocurrido un error'
+#         except Exception as e:
+#             data['error'] = str(e)
+#         return HttpResponse(json.dumps(data), content_type='application/json')
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['nombre'] = 'Listado de Plan de Cuentas'
+#         planCuenta = PlanCuenta.objects.filter(parentId=None)
+#         context['planCuenta'] = planCuenta
+#         folders = Folder.objects.filter(parent=None)
+#         context['folders'] = folders
+#         return context
+
 class listarPlanCuentaPSMView(TemplateView):
     model = PlanCuenta
     template_name = 'app_contabilidad_planCuentas/parts_Plan/foldersPSM.html'
@@ -421,16 +521,6 @@ class listarPlanCuentaPSMView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         # _inicializar()
         return super().dispatch(request, *args, **kwargs)
-
-    # def post(self, request, *args, **kwargs):
-    #     data = {}
-    #     try:
-    #         data = PlanCuenta.objects.get(pk=request.POST['id']).toJSON()
-    #         print('data')
-    #         print(data)
-    #     except Exception as e:
-    #         data['error'] = str(e)
-    #     return JsonResponse(data)
 
     def post(self, request, *args, **kwargs):
         data = {}
@@ -443,6 +533,59 @@ class listarPlanCuentaPSMView(TemplateView):
                 queryset = queryset.filter(empresa__siglas=empresa).order_by('codigo')
                 for i in queryset:
                     data.append(i.toJSON())
+
+            # if action == 'get_children':
+            #     data = []
+            #     empresa_sigla = request.POST.get('empresa')
+            #     parent_id = request.POST.get('parent_id')  # puede ser vacío o un ID
+            #
+            #     # Raíz (padre null)
+            #     if parent_id == "#":
+            #         cuentas = PlanCuenta.objects.filter(parentId__isnull=True, empresa__siglas=empresa_sigla).order_by(
+            #             'codigo')
+            #     else:
+            #         cuentas = PlanCuenta.objects.filter(parentId_id=parent_id, empresa__siglas=empresa_sigla).order_by(
+            #             'codigo')
+            #
+            #     for cuenta in cuentas:
+            #         has_children = PlanCuenta.objects.filter(parentId=cuenta).exists()
+            #         data.append({
+            #             "id": str(cuenta.id),
+            #             "text": f"<strong>{cuenta.codigo}</strong> &nbsp; {cuenta.nombre}",
+            #             "children": has_children,  # Esto le dice a JSTree si debe seguir cargando al expandir
+            #             "data": {
+            #                 "nivel": cuenta.nivel
+            #             }
+            #         })
+
+            if action == 'get_plan':
+                data = []
+                empresa_sigla = request.POST.get('empresa')
+                parent_id = request.POST.get('parent_id')
+
+                if parent_id == "#":
+                    cuentas = PlanCuenta.objects.filter(parentId__isnull=True, empresa__siglas=empresa_sigla).order_by(
+                        'codigo')
+                else:
+                    cuentas = PlanCuenta.objects.filter(parentId_id=parent_id, empresa__siglas=empresa_sigla).order_by(
+                        'codigo')
+
+                for cuenta in cuentas:
+                    has_children = PlanCuenta.objects.filter(parentId=cuenta).exists()
+                    icon_type = 'jstree-folder' if has_children else 'jstree-file'
+
+                    data.append({
+                        "id": str(cuenta.id),
+                        "text": f"""
+                            <span class='context-menu-one'>
+                                <strong>{cuenta.codigo}</strong> &nbsp; {cuenta.nombre}
+                            </span>
+                            <span class='nivel-info' style="position: absolute; right: 0;"><b>Nivel {cuenta.nivel}</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> 
+                        """,
+                        "children": has_children,
+                        "icon": icon_type
+                    })
+
 
             elif action == 'upload_excel':
                 print('llego a Upload excell empezo a recorrer en el python desde ajax')
@@ -511,6 +654,7 @@ class listarPlanCuentaPSMView(TemplateView):
         folders = Folder.objects.filter(parent=None)
         context['folders'] = folders
         return context
+
 
 
 # EXPORTAR A EXCELL PLAN DE CUENTAS

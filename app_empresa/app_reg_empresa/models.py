@@ -104,7 +104,6 @@ class Piscinas(models.Model):
     estado = models.BooleanField(default=True, verbose_name="Estado ")
     inventoried = models.BooleanField(default=True, verbose_name='¿Es inventariado?')
     with_tax = models.BooleanField(default=True, verbose_name='¿Se cobra impuesto?')
-
     plan_cuenta = models.ForeignKey(
         'app_contabilidad_planCuentas.PlanCuenta',
         on_delete=models.SET_NULL,
@@ -128,9 +127,6 @@ class Piscinas(models.Model):
     def __str__(self):
         return self.numero
 
-    # -----------------------
-    # MÉTODO CORREGIDO
-    # -----------------------
     def get_area_hectareas(self):
         """
         Convierte el campo hect (texto) en número decimal
@@ -143,6 +139,8 @@ class Piscinas(models.Model):
     def toJSON(self):
         item = model_to_dict(self)
         item['empresa'] = self.empresa.toJSON()
+        item['plan_cuenta'] = self.plan_cuenta.toJSON()
+        item['cuenta_suministros'] = self.cuenta_suministros.toJSON()
         return item
 
     class Meta:
