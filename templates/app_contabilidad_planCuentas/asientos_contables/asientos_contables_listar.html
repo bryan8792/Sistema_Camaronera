@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.bootstrap4.min.css">
+<style>
+    .asiento-header {
+        background-color: #f8f9fa;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-left: 4px solid #007bff;
+    }
+    .detalle-row {
+        padding: 5px 10px;
+    }
+    .debe-column {
+        text-align: right;
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .haber-column {
+        text-align: right;
+        color: #28a745;
+        font-weight: bold;
+    }
+    .total-row {
+        background-color: #e9ecef;
+        font-weight: bold;
+        border-top: 2px solid #000;
+    }
+    .cuenta-codigo {
+        font-family: monospace;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title">
+            <i class="fas fa-file-invoice"></i> {{ nombre }}
+        </h3>
+    </div>
+    <div class="card-body">
+        <!-- Filtros -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <form method="GET" class="form-inline">
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Desde:</label>
+                        <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde }}">
+                    </div>
+                    <div class="form-group mr-2">
+                        <label class="mr-2">Hasta:</label>
+                        <input type="date" name="fecha_hasta" class="form-control" value="{{ fecha_hasta }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                    <a href="{% url 'app_stock:listar_asientos_contables' %}" class="btn btn-secondary ml-2">
+                        <i class="fas fa-sync"></i> Limpiar
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de asientos -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover" id="tb_asientos">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Comprobante</th>
+                        <th>Descripción</th>
+                        <th>Cuenta</th>
+                        <th>Detalle</th>
+                        <th class="text-right">Debe</th>
+                        <th class="text-right">Haber</th>
+                        <th>Empresa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in asientos_data %}
+                        {% for detalle in item.detalles %}
+                        <tr>
+                            {% if forloop.first %}
+                            <td rowspan="{{ item.detalles|length }}">
+                                {{ item.asiento.fecha|date:"Y-m-d" }}
+                            </td>
+                            <td rowspan="{{ item.detalles|length }}">
+                                <span class="badge badge-info">{{ item.asiento.comprobante }}</span>
+                            </td>
+                            <td rowspan="{{ item.detalles|length }}">
+                                {{ item.asiento.descripcion }}
+                            </td>
+                            {% endif %}
+                            
+                            <td>
+                                <span class="cuenta-codigo">
+                                    {{ detalle.cuenta.codigo|default:"-" }}
+                                </span>
+                            </td>
+                            <td>{{ detalle.detalle }}</td>
+                            <td class="debe-column">
+                                {% if detalle.debe > 0 %}
+                                    ${{ detalle.debe|floatformat:2 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="haber-column">
+                                {% if detalle.haber > 0 %}
+                                    ${{ detalle.haber|floatformat:2 }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            
+                            {% if forloop.first %}
+                            <td rowspan="{{ item.detalles|length }}">
+                                {{ item.asiento.empresa.siglas|default:"N/A" }}
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">
+                            <i class="fas fa-info-circle"></i> No hay asientos contables registrados
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="total-row">
+                    <tr>
+                        <th colspan="5" class="text-right">TOTALES:</th>
+                        <th class="debe-column">${{ total_debe|floatformat:2 }}</th>
+                        <th class="haber-column">${{ total_haber|floatformat:2 }}</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $('#tb_asientos').DataTable({
+        language: {
+            "lengthMenu": "Mostrar _MENU_ registros",
+            "zeroRecords": "No se encontraron resultados",
+            "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sSearch": "Buscar:",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "sProcessing": "Procesando...",
+        },
+        autoWidth: false,
+        destroy: true,
+        order: [[0, 'desc']], // Ordenar por fecha descendente
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: '<i class="fas fa-file-excel"></i> Excel',
+                titleAttr: 'Exportar a Excel',
+                className: 'btn btn-success btn-sm',
+                title: 'Asientos Contables - {{ nombre }}',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                }
+            },
+            {
+                extend: 'pdfHtml5',
+                text: '<i class="fas fa-file-pdf"></i> PDF',
+                titleAttr: 'Exportar a PDF',
+                className: 'btn btn-danger btn-sm',
+                title: 'Asientos Contables',
+                orientation: 'landscape',
+                pageSize: 'LEGAL',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                },
+                customize: function(doc) {
+                    doc.content[1].table.widths = ['10%', '12%', '20%', '10%', '20%', '10%', '10%', '8%'];
+                    doc.styles.tableHeader.fillColor = '#343a40';
+                    doc.styles.tableHeader.color = 'white';
+                }
+            },
+            {
+                extend: 'print',
+                text: '<i class="fa fa-print"></i> Imprimir',
+                titleAttr: 'Imprimir',
+                className: 'btn btn-info btn-sm',
+                title: 'Asientos Contables de Consumo',
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7]
+                },
+                customize: function(win) {
+                    $(win.document.body).css('font-size', '10pt');
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                }
+            },
+            {
+                extend: 'copyHtml5',
+                text: '<i class="fas fa-copy"></i> Copiar',
+                titleAttr: 'Copiar Datos',
+                className: 'btn btn-secondary btn-sm'
+            },
+            {
+                extend: 'csvHtml5',
+                text: '<i class="fas fa-file-csv"></i> CSV',
+                titleAttr: 'Exportar a CSV',
+                className: 'btn btn-success btn-sm'
+            },
+        ]
+    });
+});
+</script>
+{% endblock %}

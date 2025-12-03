@@ -1932,6 +1932,48 @@
                                 </li>
                             </ul>
                         </li>
+                        <!-- Asientos Contables -->
+                        <li class="nav-item has-treeview">
+                            <a class="nav-link" href="#">
+                                <i class="fa fa-book-open nav-icon">
+                                </i>
+                                <p>
+                                    Asientos Contables
+                                    <i class="right fas fa-angle-left">
+                                    </i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <!-- Reporte de Costo-Utilidad -->
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_stock:listar_asientos_contables' %}">
+                                        <i class="fa fa-chart-bar nav-icon">
+                                        </i>
+                                        <p>
+                                            Ver Asiento Contable
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_stock:reporte_asientos_contables' %}">
+                                        <i class="fa fa-chart-bar nav-icon">
+                                        </i>
+                                        <p>
+                                            Reporte Asiento Contable
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_stock:diagnostico_contable' %}">
+                                        <i class="fa fa-chart-bar nav-icon">
+                                        </i>
+                                        <p>
+                                            Diagnostico Contable
+                                        </p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <!-- Procesos ATS -->
                         <li class="nav-item has-treeview">
                             <a class="nav-link" href="#">

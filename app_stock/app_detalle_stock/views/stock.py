@@ -6,12 +6,12 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, CreateView, UpdateView
+from django.views.generic import ListView, CreateView, UpdateView, TemplateView
 from django.utils import timezone
 from datetime import datetime
 from app_contabilidad_planCuentas.models import PlanCuenta, DetalleCuentasPlanCuenta, EncabezadoCuentasPlanCuenta
 from app_dieta.app_dieta_reg.models import DetalleDiaDieta
-from app_empresa.app_reg_empresa.models import Empresa
+from app_empresa.app_reg_empresa.models import Empresa, Piscinas
 from app_inventario.app_categoria.models import Producto
 from app_reportes.utils import render_to_pdf
 from app_stock.app_detalle_stock.forms import ProdStockForm, ProdStockTotalForm, StockAccountingForm
@@ -23,6 +23,8 @@ from django.utils import timezone
 from django.db.models import F
 from datetime import datetime
 import re
+from django.db.models import Sum, Q
+from datetime import datetime, date
 
 
 # EMPRESA PRESQUERA SAN MIGUEL
@@ -905,7 +907,7 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
         print(f"[CONTABILIDAD] Creando encabezado...")
         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
             codigo=int(datetime.now().timestamp()),
-            tip_cuenta='EGRESO DE INVENTARIO',
+            tip_cuenta='5',
             tip_transa='EGRESO',
             fecha=instance.fecha_ingreso or timezone.now().date(),
             comprobante=f"EGR-{instance.id}-P{piscina_numero}",
@@ -958,4 +960,207 @@ def connect_signals():
     pass
 
 
+class ListarAsientosContablesView(ListView):
+    model = EncabezadoCuentasPlanCuenta
+    template_name = 'app_contabilidad_planCuentas/asientos_contables/asientos_contables_listar.html'
 
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action', '')
+
+            if action == 'get_asiento_detalle':
+                # Obtener detalles de un asiento específico
+                asiento_id = request.POST.get('id')
+                asiento = EncabezadoCuentasPlanCuenta.objects.get(pk=asiento_id)
+                detalles = DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=asiento).select_related('cuenta')
+
+                data = {
+                    'encabezado': {
+                        'codigo': asiento.codigo,
+                        'fecha': asiento.fecha.strftime('%Y-%m-%d') if asiento.fecha else '',
+                        'descripcion': asiento.descripcion,
+                        'comprobante': asiento.comprobante,
+                    },
+                    'detalles': [
+                        {
+                            'cuenta': d.cuenta.codigo if d.cuenta else '',
+                            'nombre_cuenta': d.cuenta.nombre if d.cuenta else '',
+                            'detalle': d.detalle,
+                            'debe': float(d.debe) if d.debe else 0,
+                            'haber': float(d.haber) if d.haber else 0,
+                        } for d in detalles
+                    ]
+                }
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Filtros de fecha
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+        empresa_id = self.request.GET.get('empresa')
+
+        # Query base - solo asientos de stock
+        query = Q(tip_transa='EGRESO') | Q(descripcion__icontains='Consumo')
+
+        if fecha_desde:
+            query &= Q(fecha__gte=fecha_desde)
+        if fecha_hasta:
+            query &= Q(fecha__lte=fecha_hasta)
+        if empresa_id:
+            query &= Q(empresa_id=empresa_id)
+
+        # Asientos con sus detalles
+        asientos = EncabezadoCuentasPlanCuenta.objects.filter(query).select_related('empresa'
+        ).prefetch_related('detallecuentasplancuenta_set__cuenta').order_by('-fecha', '-codigo')
+
+        # Calcular totales
+        total_debe = 0
+        total_haber = 0
+        asientos_data = []
+
+        for asiento in asientos:
+            detalles = asiento.detallecuentasplancuenta_set.all()
+            debe_asiento = sum(d.debe or 0 for d in detalles)
+            haber_asiento = sum(d.haber or 0 for d in detalles)
+
+            total_debe += debe_asiento
+            total_haber += haber_asiento
+
+            asientos_data.append({
+                'asiento': asiento,
+                'detalles': detalles,
+                'debe': debe_asiento,
+                'haber': haber_asiento,
+            })
+
+        context['nombre'] = 'Asientos Contables de Consumo'
+        context['asientos_data'] = asientos_data
+        context['total_debe'] = total_debe
+        context['total_haber'] = total_haber
+        context['fecha_desde'] = fecha_desde
+        context['fecha_hasta'] = fecha_hasta
+        return context
+
+
+class ReporteAsientosContablesView(ListView):
+    model = DetalleCuentasPlanCuenta
+    template_name = 'app_contabilidad_planCuentas/asientos_contables/reporte_asientos_contables.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Detalle Asientos Contables por Consumo de Inventario'
+
+        # Obtener parámetros de filtro
+        fecha_desde = self.request.GET.get('fecha_desde', date.today().replace(day=1).strftime('%Y-%m-%d'))
+        fecha_hasta = self.request.GET.get('fecha_hasta', date.today().strftime('%Y-%m-%d'))
+        empresa_id = self.request.GET.get('empresa', '')
+
+        context['fecha_desde'] = fecha_desde
+        context['fecha_hasta'] = fecha_hasta
+        context['empresa_seleccionada'] = empresa_id
+        context['empresas'] = Empresa.objects.all()
+
+        # Filtrar encabezados por fecha y tipo
+        query = Q(tip_cuenta='EGRESO DE INVENTARIO')
+        query &= Q(fecha__gte=fecha_desde)
+        query &= Q(fecha__lte=fecha_hasta)
+
+        if empresa_id:
+            query &= Q(empresa_id=empresa_id)
+
+        # Obtener encabezados de asientos contables
+        encabezados = EncabezadoCuentasPlanCuenta.objects.filter(query).order_by('fecha', 'codigo')
+
+        # Agrupar por piscina
+        asientos_agrupados = {}
+        total_general = 0
+
+        for encabezado in encabezados:
+            # Obtener detalles del asiento
+            detalles = DetalleCuentasPlanCuenta.objects.filter(
+                encabezado_cuenta=encabezado
+            ).select_related('cuenta')
+
+            # Extraer número de piscina del comprobante (formato: EGR-123-P21)
+            piscina = 'N/A'
+            if encabezado.comprobante:
+                partes = encabezado.comprobante.split('-')
+                if len(partes) >= 3:
+                    piscina = partes[2]  # P21, P22, etc.
+
+            if piscina not in asientos_agrupados:
+                asientos_agrupados[piscina] = {
+                    'numero': piscina,
+                    'asientos': [],
+                    'subtotal': 0
+                }
+
+            # Calcular total del asiento (suma de débitos)
+            total_asiento = detalles.filter(debe__gt=0).aggregate(Sum('debe'))['debe__sum'] or 0
+
+            asientos_agrupados[piscina]['asientos'].append({
+                'encabezado': encabezado,
+                'detalles': detalles,
+                'total': total_asiento
+            })
+
+            asientos_agrupados[piscina]['subtotal'] += total_asiento
+            total_general += total_asiento
+
+        # Convertir a lista ordenada
+        piscinas_ordenadas = sorted(asientos_agrupados.values(), key=lambda x: x['numero'])
+
+        context['piscinas'] = piscinas_ordenadas
+        context['total_general'] = total_general
+        context['fecha_actual'] = datetime.now()
+
+        return context
+
+
+class DiagnosticoContableView(TemplateView):
+    template_name = 'app_contabilidad_planCuentas/asientos_contables/diagnostico_contable.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Contar registros
+        context['total_asientos'] = EncabezadoCuentasPlanCuenta.objects.count()
+        context['total_detalles'] = DetalleCuentasPlanCuenta.objects.count()
+        context['total_egresos'] = Producto_Stock.objects.filter(tipo='EGRESO').count()
+        context['productos_con_cuenta'] = Total_Stock.objects.exclude(plan_cuenta__isnull=True).count()
+        context['total_productos'] = Total_Stock.objects.count()
+        context['piscinas_con_cuenta'] = Piscinas.objects.exclude(plan_cuenta__isnull=True).count()
+        context['total_piscinas'] = Piscinas.objects.count()
+
+        # Últimos asientos
+        context['ultimos_asientos'] = EncabezadoCuentasPlanCuenta.objects.select_related('empresa').order_by('-id')[:5]
+
+        # Últimos egresos
+        context['ultimos_egresos'] = Producto_Stock.objects.filter(tipo='EGRESO').select_related(
+            'producto_empresa__nombre_prod'
+        ).order_by('-id')[:10]
+
+        # Productos sin cuenta
+        context['productos_sin_cuenta'] = Total_Stock.objects.filter(plan_cuenta__isnull=True).select_related(
+            'nombre_prod', 'nombre_empresa')[:10]
+
+        # Piscinas sin cuenta
+        context['piscinas_sin_cuenta'] = Piscinas.objects.filter(plan_cuenta__isnull=True)[:10]
+
+        return context

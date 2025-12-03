@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fa fa-stethoscope"></i> Diagnóstico del Sistema Contable</h4>
+        </div>
+        <div class="card-body">
+            
+            <!-- Resumen General -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <h2 class="text-info">{{ total_asientos }}</h2>
+                            <p class="mb-0">Asientos Contables</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <h2 class="text-success">{{ total_detalles }}</h2>
+                            <p class="mb-0">Detalles Contables</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <h2 class="text-warning">{{ total_egresos }}</h2>
+                            <p class="mb-0">Egresos de Dieta</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-secondary">
+                        <div class="card-body text-center">
+                            <h2 class="text-secondary">{{ productos_con_cuenta }}/{{ total_productos }}</h2>
+                            <p class="mb-0">Productos con Cuenta</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estado de Configuración -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5>Estado de Configuración</h5>
+                    <div class="alert {% if productos_con_cuenta == 0 %}alert-danger{% elif productos_con_cuenta < total_productos %}alert-warning{% else %}alert-success{% endif %}">
+                        <strong>Productos:</strong> {{ productos_con_cuenta }} de {{ total_productos }} productos tienen plan de cuentas asignado
+                        {% if productos_con_cuenta < total_productos %}
+                        <br><small>Debes asignar plan de cuentas a los productos faltantes desde el listado de stock</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="alert {% if piscinas_con_cuenta == 0 %}alert-danger{% elif piscinas_con_cuenta < total_piscinas %}alert-warning{% else %}alert-success{% endif %}">
+                        <strong>Piscinas:</strong> {{ piscinas_con_cuenta }} de {{ total_piscinas }} piscinas tienen cuentas asignadas
+                        {% if piscinas_con_cuenta < total_piscinas %}
+                        <br><small>Debes asignar cuentas contables a las piscinas faltantes</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Últimos Asientos Generados -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5>Últimos 5 Asientos Contables Generados</h5>
+                    {% if ultimos_asientos %}
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Código</th>
+                                <th>Fecha</th>
+                                <th>Empresa</th>
+                                <th>Descripción</th>
+                                <th>Comprobante</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asiento in ultimos_asientos %}
+                            <tr>
+                                <td>{{ asiento.id }}</td>
+                                <td>{{ asiento.codigo }}</td>
+                                <td>{{ asiento.fecha }}</td>
+                                <td>{{ asiento.empresa.nombre }}</td>
+                                <td>{{ asiento.descripcion }}</td>
+                                <td>{{ asiento.comprobante }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <strong>No hay asientos contables generados.</strong><br>
+                        Esto significa que el signal no ha generado ningún asiento automáticamente.
+                        Verifica que:
+                        <ul>
+                            <li>Los productos tengan plan de cuentas asignado</li>
+                            <li>Las piscinas tengan cuentas asignadas</li>
+                            <li>El signal esté activo y funcionando correctamente</li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Últimos Egresos -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5>Últimos 10 Egresos de Dieta</h5>
+                    {% if ultimos_egresos %}
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Piscina</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for egreso in ultimos_egresos %}
+                            <tr>
+                                <td>{{ egreso.id }}</td>
+                                <td>{{ egreso.fecha }}</td>
+                                <td>{{ egreso.piscina.numero }}</td>
+                                <td>{{ egreso.producto_empresa.nombre_prod.nombre }}</td>
+                                <td>{{ egreso.cantidad }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="alert alert-info">No hay egresos de dieta registrados.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Productos sin Cuenta -->
+            {% if productos_sin_cuenta %}
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5>Productos sin Plan de Cuentas (Primeros 10)</h5>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Producto</th>
+                                <th>Empresa</th>
+                                <th>Stock</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos_sin_cuenta %}
+                            <tr>
+                                <td>{{ producto.id }}</td>
+                                <td>{{ producto.nombre_prod.nombre }}</td>
+                                <td>{{ producto.nombre_empresa.nombre }}</td>
+                                <td>{{ producto.stock }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Piscinas sin Cuenta -->
+            {% if piscinas_sin_cuenta %}
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <h5>Piscinas sin Cuentas Asignadas (Primeros 10)</h5>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Número</th>
+                                <th>Hectáreas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for piscina in piscinas_sin_cuenta %}
+                            <tr>
+                                <td>{{ piscina.id }}</td>
+                                <td>{{ piscina.numero }}</td>
+                                <td>{{ piscina.hectarea }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Botones de Acción -->
+            <div class="row">
+                <div class="col-md-12">
+                    <a href="{% url 'app_stock:listar_stock_bio' %}" class="btn btn-primary">
+                        <i class="fa fa-list"></i> Asignar Cuentas a Productos
+                    </a>
+                    <a href="{% url 'app_stock:reporte_asientos_contables' %}" class="btn btn-success">
+                        <i class="fa fa-file-text"></i> Ver Reporte de Asientos
+                    </a>
+                    <button onclick="window.location.reload()" class="btn btn-secondary">
+                        <i class="fa fa-refresh"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

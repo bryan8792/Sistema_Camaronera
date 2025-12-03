@@ -54,15 +54,15 @@ $(function () {
                     console.log(data)
                     console.log('row')
                     console.log(row)
-                    if (row.tip_cuenta == 1) {
+                    if (row.tip_cuenta === 1) {
                         return 'DIARIO CONTABLE';
-                    } else if (row.tip_cuenta == 2) {
+                    } else if (row.tip_cuenta === 2) {
                         return 'COMPROBANTE PAGO';
-                    } else if (row.tip_cuenta == 3) {
+                    } else if (row.tip_cuenta === 3) {
                         return 'INGRESO A CAJA';
-                    } else if (row.tip_cuenta == 4) {
+                    } else if (row.tip_cuenta === 4) {
                         return 'EGRESO DE CAJA';
-                    } else if (row.tip_cuenta == 5) {
+                    } else if (row.tip_cuenta === 5) {
                         return 'COMPROBANTE SISTEMA';
                     } else {
                         return 'SIN REGISTRO';
@@ -105,9 +105,9 @@ $(function () {
                     console.log(type)
                     var buttons = '';
                     buttons += '<a href="/planCuentas/transaccion/editar/'+ row.id + '/" class="btn btn-warning btn-xs btn-flat"><i class="fas fa-edit"></i></a> ';
-                    /*buttons += '&nbsp';
-                    buttons += '<a href="#" target="_blank" class="btn btn-info btn-xs"><i class="fas fa-file-pdf"></i></a>';
                     buttons += '&nbsp';
+                    buttons += '<a href="/planCuentas/reporte/pdf/' + row.id + '/" target="_blank" class="btn btn-info btn-xs"><i class="fas fa-file-pdf"></i></a>';
+                    /*buttons += '&nbsp';
                     buttons += '<a href="#" class="btn btn-danger btn-xs"><i class="fas fa-trash"></i></a>';*/
                     return buttons;
                 }

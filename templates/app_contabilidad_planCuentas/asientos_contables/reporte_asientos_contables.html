@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <!-- Bootstrap CSS local -->
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+            body {
+                font-size: 10pt;
+            }
+        }
+        
+        .reporte-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        
+        .reporte-header h4 {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .reporte-header p {
+            margin: 2px 0;
+            font-size: 12px;
+        }
+        
+        .tabla-reporte {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        
+        .tabla-reporte thead th {
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #000;
+            padding: 8px 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .tabla-reporte tbody td {
+            border: 1px solid #666;
+            padding: 5px;
+        }
+        
+        .tabla-reporte .piscina-header {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            text-align: left;
+            border-top: 2px solid #000;
+        }
+        
+        .tabla-reporte .producto-row td {
+            border-bottom: none;
+        }
+        
+        .tabla-reporte .detalle-row td {
+            border-top: none;
+            padding-left: 40px;
+        }
+        
+        .tabla-reporte .subtotal-row {
+            background-color: #f8f8f8;
+            font-weight: bold;
+            border-top: 2px solid #000;
+        }
+        
+        .tabla-reporte .total-row {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            border-top: 3px solid #000;
+            border-bottom: 3px solid #000;
+        }
+        
+        .text-right {
+            text-align: right !important;
+        }
+        
+        .text-center {
+            text-align: center !important;
+        }
+        
+        .btn-group-export {
+            margin-bottom: 15px;
+        }
+        
+        .fecha-hora {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 11px;
+        }
+        
+        .pagina {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 11px;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+    <div class="content-header no-print">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Reporte de Asientos Contables</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header no-print">
+                            <h3 class="card-title">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                &nbsp; {{ nombre }}
+                            </h3>
+                        </div>
+                        
+                        <div class="card-body no-print">
+                            <!-- Filtros -->
+                            <form method="GET" class="row">
+                                <div class="col-md-3">
+                                    <label>Fecha Desde:</label>
+                                    <input type="date" name="fecha_desde" class="form-control" 
+                                           value="{{ fecha_desde }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Fecha Hasta:</label>
+                                    <input type="date" name="fecha_hasta" class="form-control" 
+                                           value="{{ fecha_hasta }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Empresa:</label>
+                                    <select name="empresa" class="form-control">
+                                        <option value="">Todas</option>
+                                        {% for emp in empresas %}
+                                            <option value="{{ emp.id }}" 
+                                                {% if empresa_seleccionada == emp.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ emp.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-search"></i> Filtrar
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <hr>
+                            
+                            <!-- Botones de exportación -->
+                            <div class="btn-group-export">
+                                <button onclick="exportarExcel()" class="btn btn-success btn-sm">
+                                    <i class="fas fa-file-excel"></i> Exportar Excel
+                                </button>
+                                <button onclick="exportarPDF()" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                                </button>
+                                <button onclick="exportarCSV()" class="btn btn-info btn-sm">
+                                    <i class="fas fa-file-csv"></i> Exportar CSV
+                                </button>
+                                <button onclick="imprimirReporte()" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <!-- Reporte -->
+                            <div id="reporte-contenido">
+                                <!-- Header del reporte -->
+                                <div class="reporte-header">
+                                    <div class="fecha-hora">
+                                        <strong>Fecha:</strong> {{ fecha_actual|date:"Y-N-d" }}<br>
+                                        <strong>Hora:</strong> {{ fecha_actual|time:"H:i:s" }}
+                                    </div>
+                                    <div class="pagina">
+                                        <strong>Pág.</strong> 1
+                                    </div>
+                                    <h4>BIOCASCAJAL CIA. LTDA.</h4>
+                                    <h5>DETALLE DE ASIENTOS CONTABLES - CONSUMO DE INVENTARIO</h5>
+                                    <p><strong>DESDE:</strong> {{ fecha_desde|date:"d \d\e M \d\e\l Y" }} 
+                                       <strong>HASTA:</strong> {{ fecha_hasta|date:"d \d\e M \d\e\l Y" }}</p>
+                                </div>
+                                
+                                <!-- Tabla del reporte -->
+                                <table class="tabla-reporte" id="tabla-reporte">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%;">PISCINA</th>
+                                            <th style="width: 25%;">CUENTA</th>
+                                            <th style="width: 15%;">COMPROBANTE</th>
+                                            <th style="width: 10%;">FECHA</th>
+                                            <th style="width: 10%;" class="text-right">DEBE</th>
+                                            <th style="width: 10%;" class="text-right">HABER</th>
+                                            <th style="width: 10%;" class="text-right">TOTAL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for piscina in piscinas %}
+                                            {% for asiento in piscina.asientos %}
+                                                {% for detalle in asiento.detalles %}
+                                                    {% if forloop.first %}
+                                                        <!-- Primera fila del asiento -->
+                                                        <tr class="producto-row">
+                                                            <td rowspan="{{ asiento.detalles|length }}">
+                                                                {{ piscina.numero }}
+                                                            </td>
+                                                            <td>
+                                                                {{ detalle.cuenta.codigo }} - {{ detalle.cuenta.nombre }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ asiento.encabezado.comprobante }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                {{ asiento.encabezado.fecha|date:"d/m/Y" }}
+                                                            </td>
+                                                            <td class="text-right">
+                                                                {% if detalle.debe > 0 %}
+                                                                    {{ detalle.debe|floatformat:2 }}
+                                                                {% else %}
+                                                                    -
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="text-right">
+                                                                {% if detalle.haber > 0 %}
+                                                                    {{ detalle.haber|floatformat:2 }}
+                                                                {% else %}
+                                                                    -
+                                                                {% endif %}
+                                                            </td>
+                                                            <td rowspan="{{ asiento.detalles|length }}" class="text-right">
+                                                                {{ asiento.total|floatformat:2 }}
+                                                            </td>
+                                                        </tr>
+                                                    {% else %}
+                                                        <!-- Filas siguientes del asiento -->
+                                                        <tr class="detalle-row">
+                                                            <td>
+                                                                {{ detalle.cuenta.codigo }} - {{ detalle.cuenta.nombre }}
+                                                            </td>
+                                                            <td colspan="2" style="text-align: left; padding-left: 20px;">
+                                                                {{ detalle.detalle }}
+                                                            </td>
+                                                            <td class="text-right">
+                                                                {% if detalle.debe > 0 %}
+                                                                    {{ detalle.debe|floatformat:2 }}
+                                                                {% else %}
+                                                                    -
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="text-right">
+                                                                {% if detalle.haber > 0 %}
+                                                                    {{ detalle.haber|floatformat:2 }}
+                                                                {% else %}
+                                                                    -
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                            
+                                            <!-- Subtotal por piscina -->
+                                            <tr class="subtotal-row">
+                                                <td colspan="6" class="text-right">
+                                                    <strong>PISCINA........</strong>
+                                                </td>
+                                                <td class="text-right">
+                                                    <strong>{{ piscina.subtotal|floatformat:2 }}</strong>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="7" class="text-center">
+                                                    No hay asientos contables registrados en el período seleccionado
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        
+                                        {% if piscinas %}
+                                            <!-- Total general -->
+                                            <tr class="total-row">
+                                                <td colspan="6" class="text-right">
+                                                    <strong>TOTAL.......</strong>
+                                                </td>
+                                                <td class="text-right">
+                                                    <strong>{{ total_general|floatformat:2 }}</strong>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts para exportación -->
+    <script src="{% static 'acciones/app_datatable/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/popper/popper.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/bootstrap/js/bootstrap.min.js' %}"></script>
+    
+    <script>
+        function imprimirReporte() {
+            window.print();
+        }
+        
+        function exportarExcel() {
+            const tabla = document.getElementById('tabla-reporte');
+            let html = '<table>';
+            
+            // Agregar encabezado
+            html += '<tr><td colspan="7" style="text-align:center;font-weight:bold;">BIOCASCAJAL CIA. LTDA.</td></tr>';
+            html += '<tr><td colspan="7" style="text-align:center;font-weight:bold;">DETALLE DE ASIENTOS CONTABLES - CONSUMO DE INVENTARIO</td></tr>';
+            html += '<tr><td colspan="7" style="text-align:center;">DESDE: {{ fecha_desde }} HASTA: {{ fecha_hasta }}</td></tr>';
+            html += '<tr><td colspan="7"></td></tr>';
+            
+            // Agregar tabla
+            html += tabla.outerHTML;
+            html += '</table>';
+            
+            // Crear blob y descargar
+            const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Asientos_Contables_' + new Date().getTime() + '.xls';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function exportarCSV() {
+            const tabla = document.getElementById('tabla-reporte');
+            let csv = [];
+            
+            // Encabezado
+            csv.push('BIOCASCAJAL CIA. LTDA.');
+            csv.push('DETALLE DE ASIENTOS CONTABLES - CONSUMO DE INVENTARIO');
+            csv.push('DESDE: {{ fecha_desde }} HASTA: {{ fecha_hasta }}');
+            csv.push('');
+            
+            // Cabeceras de tabla
+            const headers = [];
+            tabla.querySelectorAll('thead th').forEach(th => {
+                headers.push(th.textContent.trim());
+            });
+            csv.push(headers.join(','));
+            
+            // Filas de datos
+            tabla.querySelectorAll('tbody tr').forEach(tr => {
+                const row = [];
+                tr.querySelectorAll('td').forEach(td => {
+                    let text = td.textContent.trim().replace(/,/g, '');
+                    row.push('"' + text + '"');
+                });
+                if (row.length > 0) {
+                    csv.push(row.join(','));
+                }
+            });
+            
+            // Descargar
+            const csvContent = csv.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Asientos_Contables_' + new Date().getTime() + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        function exportarPDF() {
+            alert('Para exportar a PDF, utilice la función de "Imprimir" y seleccione "Guardar como PDF"');
+            imprimirReporte();
+        }
+    </script>
+{% endblock %}
