@@ -13,9 +13,8 @@ urlpatterns = [
 
     path('asientos-contables/', ListarAsientosContablesView.as_view(), name='listar_asientos_contables'),
     path('reporte_asientos_contables/', ReporteAsientosContablesView.as_view(), name='reporte_asientos_contables'),
-    path('diagnostico_contable/',
-         DiagnosticoContableView.as_view(),
-         name='diagnostico_contable'),
+    path('diagnostico_contable/', DiagnosticoContableView.as_view(), name='diagnostico_contable'),
+    path('reporte_piscina_insumos/', ReportePiscinaInsumosView.as_view(), name='reporte_piscina_insumos'),
 
     path('listarpsmunico/<int:pk>/', listarStockUnicoPSMView.as_view(), name='listar_stock_unico_psm'),
     path('listarbiounico/<int:pk>/', listarStockUnicoBIOView.as_view(), name='listar_stock_unico_bio'),
