@@ -317,6 +317,11 @@
     <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
     <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
 
+    <!-- Agregando librerías para exportar a Excel y PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
 <script>
 
 $(document).ready(function () {
@@ -359,17 +364,91 @@ $(document).ready(function () {
     });
 
     $('#btn_excel').click(function() {
-        alert('Funcionalidad de exportar a Excel en desarrollo');
+        exportarAExcel();
     });
 
     $('#btn_pdf').click(function() {
-        alert('Funcionalidad de exportar a PDF en desarrollo');
+        exportarAPDF();
     });
 
     $('#btn_imprimir').click(function() {
         window.print();
     });
 });
+
+function exportarAExcel() {
+    const tabActiva = $('.nav-link.active').text().trim();
+    let tablaId = '';
+
+    if (tabActiva.includes('CONSUMO BALANCEADOS')) {
+        tablaId = '#tb_consumo_balanceados';
+    } else if (tabActiva.includes('INSUMOS DE BALANCEADO')) {
+        tablaId = '#tb_kardex_balanceados';
+    } else {
+        tablaId = '#tb_kardex_campo';
+    }
+
+    const tabla = $(tablaId)[0];
+    const wb = XLSX.utils.table_to_book(tabla, {sheet: tabActiva});
+
+    const empresa = $('#empresa_select').val() || 'Empresa';
+    const piscina = $('#piscina_select').val() || 'Piscina';
+    const fecha = moment().format('YYYY-MM-DD');
+
+    XLSX.writeFile(wb, `Kardex_${tabActiva}_${empresa}_${piscina}_${fecha}.xlsx`);
+}
+
+function exportarAPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('landscape');
+
+    const tabActiva = $('.nav-link.active').text().trim();
+    let tablaId = '';
+
+    if (tabActiva.includes('CONSUMO BALANCEADOS')) {
+        tablaId = '#tb_consumo_balanceados';
+    } else if (tabActiva.includes('INSUMOS DE BALANCEADO')) {
+        tablaId = '#tb_kardex_balanceados';
+    } else {
+        tablaId = '#tb_kardex_campo';
+    }
+
+    const empresa = $('#empresa_select').val() || 'Empresa';
+    const piscina = $('#piscina_select').val() || 'Piscina';
+    const fechas = $('#daterange').val();
+
+    doc.setFontSize(16);
+    doc.text(`KARDEX BODEGA DE INSUMOS - ${tabActiva}`, 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Empresa: ${empresa} | Piscina: ${piscina} | Período: ${fechas}`, 14, 22);
+
+    doc.autoTable({
+        html: tablaId,
+        startY: 28,
+        theme: 'grid',
+        styles: { fontSize: 7, cellPadding: 2 },
+        headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
+        margin: { top: 28 }
+    });
+
+    const fecha = moment().format('YYYY-MM-DD');
+    doc.save(`Kardex_${tabActiva}_${empresa}_${piscina}_${fecha}.pdf`);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
 function buscarKardex() {
     const fechas = $('#daterange').data('daterangepicker');
@@ -477,21 +556,6 @@ function construirTablaHorizontal(productos, datos, tipo) {
     }
 
     $(tbodyId).html(bodyHTML);
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
 }
 
 </script>
