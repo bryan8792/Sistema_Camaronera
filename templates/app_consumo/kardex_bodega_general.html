@@ -17,93 +17,6 @@
         font-weight: bold;
     }
 
-    .table-kardex-horizontal {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 11px;
-    }
-
-    .table-kardex-horizontal td,
-    .table-kardex-horizontal th {
-        border: 1px solid #ccc;
-        padding: 6px 4px;
-        text-align: center;
-        vertical-align: middle;
-    }
-
-    /* Mejorando los estilos de las secciones de productos */
-    .seccion-balanceado {
-        background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
-        color: white;
-        font-weight: bold;
-        padding: 8px 4px;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        writing-mode: vertical-rl;
-        transform: rotate(180deg);
-        white-space: nowrap;
-        min-width: 120px;
-    }
-
-    .seccion-campo {
-        background: linear-gradient(135deg, #92d050 0%, #70ad47 100%);
-        color: white;
-        font-weight: bold;
-        padding: 8px 4px;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        writing-mode: vertical-rl;
-        transform: rotate(180deg);
-        white-space: nowrap;
-        min-width: 120px;
-    }
-
-    .seccion-camarones {
-        background: linear-gradient(135deg, #4fc3f7 0%, #03a9f4 100%);
-        color: white;
-        font-weight: bold;
-        padding: 8px 4px;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        writing-mode: vertical-rl;
-        transform: rotate(180deg);
-        white-space: nowrap;
-        min-width: 120px;
-    }
-
-    .dato-ingreso {
-        background-color: #d5f4e6;
-        font-weight: 500;
-    }
-
-    .dato-egreso {
-        background-color: #fadbd8;
-        font-weight: 500;
-    }
-
-    .dato-stock {
-        background-color: #fef9e7;
-        font-weight: 600;
-    }
-
-    .col-fecha {
-        background-color: #fff9c4;
-        font-weight: bold;
-        width: 120px;
-    }
-
-    .col-empresa {
-        background-color: #e3f2fd;
-        font-weight: bold;
-        width: 150px;
-    }
-
     .info-box {
         background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%);
         border: 2px solid #fbc02d;
@@ -113,18 +26,102 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-    /* Agregando estilos para los sub-headers */
-    .subheader-cell {
-        background-color: #37474f;
-        color: white;
-        font-weight: bold;
-        font-size: 10px;
-        padding: 4px 2px;
+    /* Agregando estilos para las pestañas */
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 0;
     }
 
-    .table-responsive-custom {
-        overflow-x: auto;
-        max-width: 100%;
+    .nav-tabs .nav-link {
+        border: 1px solid transparent;
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0.25rem;
+        background-color: #e9ecef;
+        color: #495057;
+        font-weight: 600;
+        padding: 12px 24px;
+        margin-right: 2px;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-color: #e9ecef #e9ecef #dee2e6;
+        background-color: #f8f9fa;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #495057;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+        font-weight: bold;
+    }
+
+    .tab-content {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        padding: 20px;
+    }
+
+    /* Estilos para tabla horizontal con productos como columnas */
+    .table-kardex {
+        width: 100%;
+        font-size: 11px;
+        border-collapse: collapse;
+    }
+
+    .table-kardex thead th {
+        background-color: #2c3e50;
+        color: white;
+        font-weight: bold;
+        padding: 10px 5px;
+        text-align: center;
+        border: 1px solid #34495e;
+        vertical-align: middle;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table-kardex thead th.producto-header {
+        background-color: #34495e;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        min-width: 60px;
+        max-width: 80px;
+        height: 150px;
+    }
+
+    .table-kardex tbody td {
+        padding: 6px 4px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .table-kardex tbody td.fecha-col {
+        background-color: #ecf0f1;
+        font-weight: bold;
+        text-align: left;
+        padding-left: 10px;
+        min-width: 120px;
+    }
+
+    .table-kardex tbody td.empresa-col {
+        background-color: #ecf0f1;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .table-kardex tbody tr:hover {
+        background-color: #e3f2fd;
+    }
+
+    .table-kardex tbody td.consumo-cell {
+        background-color: #fff;
+    }
+
+    .table-kardex tbody td.consumo-cell:not(:empty) {
+        background-color: #e8f5e9;
+        font-weight: 600;
     }
 
     @media print {
@@ -190,7 +187,7 @@
                     <input type="text" class="form-control" id="daterange">
                 </div>
 
-                <!-- Botón de búsqueda en línea con los filtros -->
+                <!-- Botón de búsqueda -->
                 <div class="col-md-3">
                     <label>&nbsp;</label>
                     <button class="btn btn-primary btn-block btn-export" id="btn_buscar">
@@ -217,30 +214,90 @@
             </div>
         </div>
 
-        <!-- TABLA -->
-        <div class="table-responsive-custom" id="kardex_container">
-            <table class="table-kardex-horizontal" id="tb_kardex_horizontal">
-                <!-- thead con id para reconstruirlo completamente -->
-                <thead id="thead_kardex">
-                    <tr class="thead-dark">
-                        <th colspan="2">INFORMACIÓN GENERAL</th>
-                        <th colspan="100">PRODUCTOS Y CONSUMO</th>
-                    </tr>
+        <!-- Agregando pestañas para CONSUMO BALANCEADOS, INSUMOS DE BALANCEADO y INSUMOS DE CAMPOS -->
+        <ul class="nav nav-tabs" id="kardexTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="consumo-tab" data-toggle="tab" href="#consumo-balanceados" role="tab">
+                    CONSUMO BALANCEADOS
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="insumos-balanceado-tab" data-toggle="tab" href="#insumos-balanceado" role="tab">
+                    INSUMOS DE BALANCEADO
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="insumos-campo-tab" data-toggle="tab" href="#insumos-campo" role="tab">
+                    INSUMOS DE CAMPOS
+                </a>
+            </li>
+        </ul>
 
-                    <tr id="header_productos" class="thead-dark">
-                        <th class="col-fecha">FECHA</th>
-                        <th class="col-empresa">EMPRESA</th>
-                    </tr>
-                </thead>
+        <div class="tab-content" id="kardexTabContent">
 
-                <tbody id="tbody_kardex">
-                    <tr>
-                        <td colspan="100" class="text-center text-muted">
-                            Seleccione filtros y presione "Buscar".
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- PESTAÑA: CONSUMO BALANCEADOS -->
+            <div class="tab-pane fade show active" id="consumo-balanceados" role="tabpanel">
+                <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+                    <table class="table table-kardex table-bordered" id="tb_consumo_balanceados">
+                        <thead id="thead_consumo_balanceados">
+                            <tr>
+                                <th style="min-width: 120px;">FECHA</th>
+                                <th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_consumo_balanceados">
+                            <tr>
+                                <td colspan="100" class="text-center text-muted">
+                                    Esperando datos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA: INSUMOS DE BALANCEADO -->
+            <div class="tab-pane fade" id="insumos-balanceado" role="tabpanel">
+                <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+                    <table class="table table-kardex table-bordered" id="tb_kardex_balanceados">
+                        <thead id="thead_kardex_balanceados">
+                            <tr>
+                                <th style="min-width: 120px;">FECHA</th>
+                                <th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_kardex_balanceados">
+                            <tr>
+                                <td colspan="100" class="text-center text-muted">
+                                    Esperando datos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PESTAÑA: INSUMOS DE CAMPOS -->
+            <div class="tab-pane fade" id="insumos-campo" role="tabpanel">
+                <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+                    <table class="table table-kardex table-bordered" id="tb_kardex_campo">
+                        <thead id="thead_kardex_campo">
+                            <tr>
+                                <th style="min-width: 120px;">FECHA</th>
+                                <th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_kardex_campo">
+                            <tr>
+                                <td colspan="100" class="text-center text-muted">
+                                    Esperando datos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -254,18 +311,13 @@
 
 {% block scripts %}
 
-    <!-- Usando las rutas correctas del HTML funcional original -->
     <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
     <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
     <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
     <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
     <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
-    <script src="{% static 'acciones/app_consumo/js/kardex_bodega_general.js' %}"></script>
-
 
 <script>
-
-let datosKardex = [];
 
 $(document).ready(function () {
 
@@ -279,7 +331,6 @@ $(document).ready(function () {
 
     // PISCINAS SEGÚN EMPRESA SELECCIONADA
     $('#empresa_select').change(function () {
-
         let empresa = $(this).val();
         let piscinaSelect = $('#piscina_select');
 
@@ -288,7 +339,6 @@ $(document).ready(function () {
         let inicio = 1;
         let fin = 1;
 
-        // Rangos reales
         if (empresa === "PSM") {
             inicio = 1;
             fin = 20;
@@ -322,18 +372,15 @@ $(document).ready(function () {
 });
 
 function buscarKardex() {
-    console.log('[v0] Iniciando buscarKardex...');
-
     const fechas = $('#daterange').data('daterangepicker');
     const start_date = fechas.startDate.format('YYYY-MM-DD');
     const end_date = fechas.endDate.format('YYYY-MM-DD');
     const empresa = $('#empresa_select').val();
     const piscina = $('#piscina_select').val();
 
-    console.log('[v0] Parámetros:', { empresa, piscina, start_date, end_date });
-
     const csrftoken = getCookie('csrftoken');
-    console.log('[v0] CSRF Token:', csrftoken);
+
+    console.log('[v0] Enviando búsqueda:', { empresa, piscina, start_date, end_date });
 
     $.ajax({
         url: '',
@@ -349,140 +396,88 @@ function buscarKardex() {
             end_date: end_date
         },
         success: function (response) {
-            console.log('[v0] Respuesta COMPLETA recibida:', response);
-            console.log('[v0] Tipo de respuesta:', typeof response);
-            console.log('[v0] JSON stringified:', JSON.stringify(response));
+            console.log('[v0] Response recibido:', response);
 
-            // Validaciones detalladas
-            if (!response) {
-                console.error('[v0] ERROR: Respuesta es null o undefined');
-                alert('Error: No se recibió respuesta del servidor');
+            if (!response || response.error) {
+                alert('Error al cargar datos: ' + (response.error || 'Sin respuesta'));
                 return;
             }
 
-            if (response.error) {
-                console.error('[v0] ERROR en respuesta:', response.error);
-                alert('Error al cargar datos: ' + response.error);
-                return;
-            }
-
-            if (!response.datos) {
-                console.error('[v0] ERROR: response.datos no existe. Respuesta completa:', response);
-                alert('Error: La respuesta no contiene el campo "datos"');
-                return;
-            }
-
-            if (!response.productos) {
-                console.error('[v0] ERROR: response.productos no existe');
-                alert('Error: La respuesta no contiene el campo "productos"');
-                return;
-            }
-
-            console.log('[v0] Datos validados correctamente');
-            console.log('[v0] Número de productos:', response.productos.length);
-            console.log('[v0] Productos:', response.productos);
-            console.log('[v0] Estructura de datos:', Object.keys(response.datos));
-
-            construirTablaHorizontal(response.datos, response.productos, response.categorias);
+            construirTablaHorizontal(response.productos_balanceados || [], response.datos_balanceados || [], 'consumo');
+            construirTablaHorizontal(response.productos_insumos || [], response.datos_insumos || [], 'balanceados');
+            construirTablaHorizontal(response.productos_campo || [], response.datos_campo || [], 'campo');
         },
         error: function(xhr, status, error) {
-            console.error('[v0] Error AJAX completo:', {
-                xhr: xhr,
-                status: status,
-                error: error,
-                responseText: xhr.responseText,
-                statusCode: xhr.status
-            });
-            alert('Error al realizar la búsqueda: ' + error + '\nStatus: ' + status + '\nCódigo: ' + xhr.status);
+            console.error('[v0] Error AJAX:', error);
+            alert('Error al realizar la búsqueda: ' + error);
         }
     });
 }
 
+function construirTablaHorizontal(productos, datos, tipo) {
+    console.log(`[v0] Construyendo tabla horizontal tipo ${tipo} con productos:`, productos);
+    console.log(`[v0] Datos:`, datos);
 
-function construirTablaHorizontal(datos, productos, categoriasMap) {
-    console.log('[v0] === INICIANDO CONSTRUCCIÓN DE TABLA ===');
-    console.log('[v0] Datos recibidos:', datos);
-    console.log('[v0] Productos recibidos:', productos);
-    console.log('[v0] Categorías recibidas:', categoriasMap);
+    let theadId, tbodyId;
+
+    if (tipo === 'consumo') {
+        // CONSUMO BALANCEADOS
+        theadId = '#thead_consumo_balanceados';
+        tbodyId = '#tbody_consumo_balanceados';
+    } else if (tipo === 'balanceados') {
+        // INSUMOS DE BALANCEADO
+        theadId = '#thead_kardex_balanceados';
+        tbodyId = '#tbody_kardex_balanceados';
+    } else {
+        // INSUMOS DE CAMPOS
+        theadId = '#thead_kardex_campo';
+        tbodyId = '#tbody_kardex_campo';
+    }
 
     if (!productos || productos.length === 0) {
-        console.warn('[v0] No hay productos para mostrar');
-        $('#tbody_kardex').html('<tr><td colspan="100" class="text-center text-muted">No hay productos para mostrar</td></tr>');
+        $(theadId).html('<tr><th>FECHA</th><th>NO HAY PRODUCTOS</th></tr>');
+        $(tbodyId).html('<tr><td colspan="2" class="text-center text-muted">No hay datos</td></tr>');
         return;
     }
 
-    console.log('[v0] Número de productos:', productos.length);
+    // Construir header con productos como columnas
+    let headerHTML = '<tr><th style="min-width: 120px; background-color: #2c3e50;">FECHA</th>';
 
-    let theadHTML = `
-        <tr class="thead-dark">
-            <th colspan="2">INFORMACIÓN GENERAL</th>
-            <th colspan="${productos.length}">PRODUCTOS Y CONSUMO</th>
-        </tr>
-        <tr id="header_productos">
-            <th class="col-fecha">FECHA</th>
-            <th class="col-empresa">EMPRESA</th>`;
-
-    // Agregar columnas de productos - solo una columna por producto
-    productos.forEach((nombreProducto, idx) => {
-        const claseColor = obtenerClaseCategoria(nombreProducto, categoriasMap);
-        console.log(`[v0] Producto ${idx + 1}: "${nombreProducto}" -> clase: ${claseColor}`);
-        theadHTML += `<th class="${claseColor}">${nombreProducto}</th>`;
+    productos.forEach(prod => {
+        headerHTML += `<th class="producto-header">${prod}</th>`;
     });
 
-    theadHTML += `</tr>`;
+    headerHTML += '</tr>';
+    $(theadId).html(headerHTML);
 
-    $('#thead_kardex').html(theadHTML);
-    console.log('[v0] Header completo reconstruido');
+    const filasFiltradas = datos.filter(fila => {
+        return productos.some(prod => {
+            const valor = fila.productos[prod] || 0;
+            return valor > 0;
+        });
+    });
 
-    // Construir el cuerpo de la tabla
-    let bodyHTML = "";
-    let rowCount = 0;
+    // Construir filas con datos (solo filas con consumo)
+    let bodyHTML = '';
 
-    console.log('[v0] Iterando sobre empresas...');
+    if (!filasFiltradas || filasFiltradas.length === 0) {
+        bodyHTML = `<tr><td colspan="${productos.length + 1}" class="text-center text-muted">No hay datos para el rango seleccionado</td></tr>`;
+    } else {
+        filasFiltradas.forEach(fila => {
+            bodyHTML += `<tr><td class="fecha-col">${fila.fecha}</td>`;
 
-    // Iterar por empresas
-    for (let empresa in datos) {
-        console.log(`[v0] Procesando empresa: ${empresa}`);
-        const empresaData = datos[empresa];
+            productos.forEach(prod => {
+                const valor = fila.productos[prod] || 0;
+                const displayValor = valor > 0 ? valor.toFixed(2) : '';
+                bodyHTML += `<td class="consumo-cell">${displayValor}</td>`;
+            });
 
-        // Iterar por piscinas dentro de cada empresa
-        for (let piscina in empresaData) {
-            console.log(`[v0]   Procesando piscina: ${piscina}`);
-            const piscinaData = empresaData[piscina];
-
-            // Iterar por fechas dentro de cada piscina
-            for (let fecha in piscinaData) {
-                console.log(`[v0]     Procesando fecha: ${fecha}`);
-                const productosData = piscinaData[fecha];
-
-                rowCount++;
-                bodyHTML += `
-                <tr>
-                    <td class="col-fecha">${fecha}</td>
-                    <td class="col-empresa">${empresa} - ${piscina}</td>`;
-
-                productos.forEach(nombreProducto => {
-                    const productoInfo = productosData[nombreProducto] || { ingreso: 0, egreso: 0, stock: 0 };
-                    // Solo mostrar el stock
-                    bodyHTML += `<td class="dato-stock">${productoInfo.stock || 0}</td>`;
-                });
-
-                bodyHTML += `</tr>`;
-            }
-        }
+            bodyHTML += '</tr>';
+        });
     }
 
-    console.log(`[v0] Total de filas creadas: ${rowCount}`);
-
-    if (bodyHTML === "") {
-        console.warn('[v0] No se generaron filas, mostrando mensaje de sin datos');
-        bodyHTML = `<tr><td colspan="${2 + productos.length}" class="text-center text-muted">No hay datos para mostrar con los filtros seleccionados</td></tr>`;
-    }
-
-    $("#tbody_kardex").html(bodyHTML);
-    console.log('[v0] === TABLA CONSTRUIDA EXITOSAMENTE ===');
+    $(tbodyId).html(bodyHTML);
 }
-
 
 function getCookie(name) {
     let cookieValue = null;
@@ -497,35 +492,6 @@ function getCookie(name) {
         }
     }
     return cookieValue;
-}
-
-function obtenerClaseCategoria(nombreProducto, categoriasMap) {
-    if (!nombreProducto) return 'seccion-camarones';
-
-    if (categoriasMap && categoriasMap[nombreProducto]) {
-        const cat = categoriasMap[nombreProducto].toLowerCase();
-        if (cat.includes('balanc')) return 'seccion-balanceado';
-        if (cat.includes('campo')) return 'seccion-campo';
-        if (cat.includes('camaron')) return 'seccion-camarones';
-    }
-
-    const nombre = nombreProducto.toUpperCase();
-
-    // Balanceado keywords (naranja)
-    if (nombre.includes('BALANC') || nombre.includes('FOCUS') || nombre.includes('EXIA') ||
-        nombre.includes('PERFORM') || nombre.includes('LIBRA') || nombre.includes('ALIMENTO')) {
-        return 'seccion-balanceado';
-    }
-
-    // Campo keywords (verde)
-    if (nombre.includes('CAMPO') || nombre.includes('ECO') || nombre.includes('BIO') ||
-        nombre.includes('FERTIL') || nombre.includes('PROBIOTE') || nombre.includes('MELAZA') ||
-        nombre.includes('VITAMINA') || nombre.includes('AQUAJES')) {
-        return 'seccion-campo';
-    }
-
-    // Por defecto camarones (azul)
-    return 'seccion-camarones';
 }
 
 </script>
