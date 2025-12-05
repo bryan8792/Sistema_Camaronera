@@ -28,40 +28,53 @@
         border: 1px solid #ccc;
         padding: 6px 4px;
         text-align: center;
+        vertical-align: middle;
     }
 
-    /* Agregando gradientes de colores como en las imágenes de referencia */
+    /* Mejorando los estilos de las secciones de productos */
     .seccion-balanceado {
         background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
         color: white;
         font-weight: bold;
-        padding: 12px 8px;
-        font-size: 13px;
+        padding: 8px 4px;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        min-width: 120px;
     }
 
     .seccion-campo {
         background: linear-gradient(135deg, #92d050 0%, #70ad47 100%);
         color: white;
         font-weight: bold;
-        padding: 12px 8px;
-        font-size: 13px;
+        padding: 8px 4px;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        min-width: 120px;
     }
 
     .seccion-camarones {
         background: linear-gradient(135deg, #4fc3f7 0%, #03a9f4 100%);
         color: white;
         font-weight: bold;
-        padding: 12px 8px;
-        font-size: 13px;
+        padding: 8px 4px;
+        font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        min-width: 120px;
     }
 
     .dato-ingreso {
@@ -88,10 +101,9 @@
     .col-empresa {
         background-color: #e3f2fd;
         font-weight: bold;
-        width: 100px;
+        width: 150px;
     }
 
-    /* Info box con gradiente amarillo como en la imagen de referencia */
     .info-box {
         background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%);
         border: 2px solid #fbc02d;
@@ -99,6 +111,20 @@
         margin-bottom: 20px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Agregando estilos para los sub-headers */
+    .subheader-cell {
+        background-color: #37474f;
+        color: white;
+        font-weight: bold;
+        font-size: 10px;
+        padding: 4px 2px;
+    }
+
+    .table-responsive-custom {
+        overflow-x: auto;
+        max-width: 100%;
     }
 
     @media print {
@@ -141,7 +167,7 @@
             <div class="row">
 
                 <!-- Empresa -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label><strong>Empresa:</strong></label>
                     <select id="empresa_select" class="form-control">
                         <option value="">Seleccione...</option>
@@ -151,7 +177,7 @@
                 </div>
 
                 <!-- Piscina -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label><strong>Piscina:</strong></label>
                     <select id="piscina_select" class="form-control">
                         <option value="">Seleccione empresa primero...</option>
@@ -159,19 +185,23 @@
                 </div>
 
                 <!-- Fecha -->
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label><strong>Rango de Fechas:</strong></label>
                     <input type="text" class="form-control" id="daterange">
                 </div>
 
-            </div>
-
-            <div class="row mt-3">
-                <div class="col-md-12 text-right">
-                    <button class="btn btn-primary btn-export" id="btn_buscar">
+                <!-- Botón de búsqueda en línea con los filtros -->
+                <div class="col-md-3">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary btn-block btn-export" id="btn_buscar">
                         <i class="fas fa-search"></i> Buscar
                     </button>
+                </div>
 
+            </div>
+
+            <div class="row mt-2">
+                <div class="col-md-12 text-right">
                     <button class="btn btn-success btn-export" id="btn_excel">
                         <i class="fas fa-file-excel"></i> Excel
                     </button>
@@ -190,7 +220,8 @@
         <!-- TABLA -->
         <div class="table-responsive-custom" id="kardex_container">
             <table class="table-kardex-horizontal" id="tb_kardex_horizontal">
-                <thead>
+                <!-- thead con id para reconstruirlo completamente -->
+                <thead id="thead_kardex">
                     <tr class="thead-dark">
                         <th colspan="2">INFORMACIÓN GENERAL</th>
                         <th colspan="100">PRODUCTOS Y CONSUMO</th>
@@ -215,7 +246,6 @@
     </div>
 </div>
 
-</div>
 </div>
 </div>
 </div>
@@ -383,31 +413,28 @@ function construirTablaHorizontal(datos, productos, categoriasMap) {
 
     console.log('[v0] Número de productos:', productos.length);
 
-    // 1. Construir el header con productos y sus colores
-    let headerHTML =
-        `<th class="col-fecha">FECHA</th>
-         <th class="col-empresa">EMPRESA</th>`;
+    let theadHTML = `
+        <tr class="thead-dark">
+            <th colspan="2">INFORMACIÓN GENERAL</th>
+            <th colspan="${productos.length}">PRODUCTOS Y CONSUMO</th>
+        </tr>
+        <tr id="header_productos">
+            <th class="col-fecha">FECHA</th>
+            <th class="col-empresa">EMPRESA</th>`;
 
+    // Agregar columnas de productos - solo una columna por producto
     productos.forEach((nombreProducto, idx) => {
         const claseColor = obtenerClaseCategoria(nombreProducto, categoriasMap);
         console.log(`[v0] Producto ${idx + 1}: "${nombreProducto}" -> clase: ${claseColor}`);
-        headerHTML += `<th colspan="3" class="${claseColor}" style="writing-mode: vertical-rl; transform: rotate(180deg);">${nombreProducto}</th>`;
+        theadHTML += `<th class="${claseColor}">${nombreProducto}</th>`;
     });
 
-    $('#header_productos').html(headerHTML);
-    console.log('[v0] Header de productos construido');
+    theadHTML += `</tr>`;
 
-    // 2. Sub-encabezado ING/EGR/STOCK
-    let subHeader = `<tr class="thead-dark"><th></th><th></th>`;
-    productos.forEach(() => {
-        subHeader += `<th>ING</th><th>EGR</th><th>STOCK</th>`;
-    });
-    subHeader += `</tr>`;
+    $('#thead_kardex').html(theadHTML);
+    console.log('[v0] Header completo reconstruido');
 
-    $('#header_productos').after(subHeader);
-    console.log('[v0] Sub-header ING/EGR/STOCK construido');
-
-    // 3. Construir el cuerpo de la tabla
+    // Construir el cuerpo de la tabla
     let bodyHTML = "";
     let rowCount = 0;
 
@@ -434,14 +461,10 @@ function construirTablaHorizontal(datos, productos, categoriasMap) {
                     <td class="col-fecha">${fecha}</td>
                     <td class="col-empresa">${empresa} - ${piscina}</td>`;
 
-                // Para cada producto en la lista de columnas
                 productos.forEach(nombreProducto => {
                     const productoInfo = productosData[nombreProducto] || { ingreso: 0, egreso: 0, stock: 0 };
-
-                    bodyHTML += `
-                        <td class="dato-ingreso">${productoInfo.ingreso || 0}</td>
-                        <td class="dato-egreso">${productoInfo.egreso || 0}</td>
-                        <td class="dato-stock">${productoInfo.stock || 0}</td>`;
+                    // Solo mostrar el stock
+                    bodyHTML += `<td class="dato-stock">${productoInfo.stock || 0}</td>`;
                 });
 
                 bodyHTML += `</tr>`;
@@ -453,12 +476,13 @@ function construirTablaHorizontal(datos, productos, categoriasMap) {
 
     if (bodyHTML === "") {
         console.warn('[v0] No se generaron filas, mostrando mensaje de sin datos');
-        bodyHTML = '<tr><td colspan="100" class="text-center text-muted">No hay datos para mostrar con los filtros seleccionados</td></tr>';
+        bodyHTML = `<tr><td colspan="${2 + productos.length}" class="text-center text-muted">No hay datos para mostrar con los filtros seleccionados</td></tr>`;
     }
 
     $("#tbody_kardex").html(bodyHTML);
     console.log('[v0] === TABLA CONSTRUIDA EXITOSAMENTE ===');
 }
+
 
 function getCookie(name) {
     let cookieValue = null;
