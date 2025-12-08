@@ -18,6 +18,26 @@
         }
     }
 
+    /* --- FULL WIDTH FIX --- */
+    .content-wrapper {
+        padding: 0 !important;
+    }
+    .content, .container-fluid {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .card {
+        width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+    table {
+        width: 100% !important;
+        font-size: 11px;
+        border-collapse: collapse;
+    }
+
+    /* --- ESTILOS DE REPORTE --- */
     .reporte-header {
         text-align: center;
         margin-bottom: 20px;
@@ -33,12 +53,6 @@
     .reporte-header p {
         margin: 2px 0;
         font-size: 12px;
-    }
-
-    table {
-        width: 100%;
-        font-size: 11px;
-        border-collapse: collapse;
     }
 
     table thead th {
@@ -91,12 +105,12 @@
     .text-center { text-align: center !important; }
 
     .btn-group-export { margin-bottom: 15px; }
+
 </style>
 {% endblock %}
 
 {% block contenido %}
 
-<!-- MIGAS DE PAN -->
 <div class="content-header no-print">
     <div class="container-fluid">
         <ol class="breadcrumb float-sm-left">
@@ -106,18 +120,22 @@
     </div>
 </div>
 
-<div class="content">
-    <div class="container-fluid">
-        <div class="card">
+<!-- CONTENIDO FULL WIDTH -->
+<div class="content" style="padding: 0 !important;">
+    <div class="container-fluid" style="max-width: 100% !important; padding: 0 !important;">
+        <div class="card" style="margin: 0 !important; width: 100% !important;">
 
             <!-- TITULO CARD -->
             <div class="card-header no-print">
-                <h3 class="card-title"><i class="fas fa-chart-pie"></i> {{ nombre }}</h3>
+                <h3 class="card-title">
+                    <i class="fas fa-chart-pie"></i> {{ nombre }}
+                </h3>
             </div>
 
             <!-- FILTROS -->
             <div class="card-body no-print">
                 <form method="GET" class="row">
+
                     <div class="col-md-3">
                         <label>Fecha Desde:</label>
                         <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde }}">
@@ -187,8 +205,7 @@
                     <h5>{{ nombre }}</h5>
 
                     <p>
-                        DESDE: {{ fecha_desde|default:"Inicio" }}
-                        &nbsp; | &nbsp;
+                        DESDE: {{ fecha_desde|default:"Inicio" }} |
                         HASTA: {{ fecha_hasta|default:"Hoy" }}
                     </p>
                 </div>
@@ -205,19 +222,15 @@
                             <th class="text-right">TOTAL</th>
                         </tr>
                     </thead>
+
                     <tbody>
-
                         {% for piscina in piscinas %}
-
-                            <!-- PISCINA -->
                             <tr class="piscina-row">
                                 <td>{{ piscina.numero }}</td>
                                 <td colspan="5"></td>
                             </tr>
 
                             {% for producto in piscina.productos %}
-
-                                <!-- PRODUCTO -->
                                 <tr class="producto-row">
                                     <td></td>
                                     <td>{{ producto.nombre }}</td>
@@ -225,17 +238,16 @@
                                 </tr>
 
                                 {% for egreso in producto.egresos %}
-                                <tr class="egreso-row">
-                                    <td></td>
-                                    <td></td>
-                                    <td class="text-center">{{ egreso.tipo }} - {{ egreso.documento }}</td>
-                                    <td class="text-right">{{ egreso.cantidad|floatformat:2 }}</td>
-                                    <td class="text-right">{{ egreso.precio|floatformat:4 }}</td>
-                                    <td class="text-right">{{ egreso.total|floatformat:2 }}</td>
-                                </tr>
+                                    <tr class="egreso-row">
+                                        <td></td>
+                                        <td></td>
+                                        <td class="text-center">{{ egreso.tipo }} - {{ egreso.documento }}</td>
+                                        <td class="text-right">{{ egreso.cantidad|floatformat:2 }}</td>
+                                        <td class="text-right">{{ egreso.precio|floatformat:4 }}</td>
+                                        <td class="text-right">{{ egreso.total|floatformat:2 }}</td>
+                                    </tr>
                                 {% endfor %}
 
-                                <!-- SUBTOTAL PRODUCTO -->
                                 <tr class="subtotal-producto">
                                     <td></td>
                                     <td></td>
@@ -247,7 +259,6 @@
 
                             {% endfor %}
 
-                            <!-- SUBTOTAL PISCINA -->
                             <tr class="subtotal-piscina">
                                 <td></td>
                                 <td></td>
@@ -261,7 +272,6 @@
 
                         {% endfor %}
 
-                        <!-- TOTAL GENERAL -->
                         <tr class="total-general">
                             <td></td>
                             <td></td>
@@ -270,7 +280,6 @@
                             <td></td>
                             <td class="text-right">{{ total_general_monto|floatformat:2 }}</td>
                         </tr>
-
                     </tbody>
                 </table>
             </div>
@@ -278,7 +287,10 @@
     </div>
 </div>
 
-<!-- JS EXPORTACIONES (exacto al tuyo original) -->
+{% endblock %}
+
+{% block scripts %}
+<!-- JS EXPORTACIONES -->
 <script>
     function exportarExcel() {
         const tabla = document.getElementById('tabla-reporte');
@@ -308,7 +320,7 @@
             r.querySelectorAll('th,td').forEach(c => cols.push('"'+c.textContent.trim()+'"'));
             csv.push(cols.join(','));
         });
-        const blob = new Blob(['\ufeff' + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob(['\ufeff' + csv.join('\n')], { type:'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = 'detalle_insumos_' + new Date().getTime() + '.csv';
