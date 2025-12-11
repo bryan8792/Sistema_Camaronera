@@ -69,6 +69,8 @@ LOCAL_APPS = [
     'app_compra',
     'app_cuentasCobrar',
     'app_filemanager',
+    'app_anticipo',
+
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

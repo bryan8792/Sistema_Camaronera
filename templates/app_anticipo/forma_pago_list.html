@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-money-bill-wave"></i> {{ titulo }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <button type="button" class="btn btn-success mb-3" onclick="nuevaFormaPago()">
+                        <i class="fas fa-plus"></i> Nueva Forma de Pago
+                    </button>
+
+                    <div class="table-responsive">
+                        <table id="tabla_formas_pago" class="table table-bordered table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Código</th>
+                                    <th>Descripción</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Forma Pago -->
+<div class="modal fade" id="modalFormaPagoOpcion" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Forma de Pago</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formFormaPagoOpcion">
+                    <input type="hidden" id="forma_pago_id">
+                    <div class="form-group">
+                        <label>Nombre: <span class="text-danger">*</span></label>
+                        <input type="text" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Código:</label>
+                        <input type="text" id="codigo" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción:</label>
+                        <textarea id="descripcion" class="form-control" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarFormaPagoOpcion()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $(document).ready(function() {
+        listarFormasPago();
+    });
+
+    function listarFormasPago() {
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'list',
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                let tbody = $('#tabla_formas_pago tbody');
+                tbody.empty();
+
+                response.forEach(function(forma) {
+                    let estado_badge = forma.estado ? 
+                        '<span class="badge badge-success">Activo</span>' : 
+                        '<span class="badge badge-danger">Inactivo</span>';
+
+                    let row = `
+                        <tr>
+                            <td>${forma.id}</td>
+                            <td>${forma.nombre}</td>
+                            <td>${forma.codigo || ''}</td>
+                            <td>${forma.descripcion || ''}</td>
+                            <td>${estado_badge}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="editarFormaPago(${forma.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="eliminarFormaPago(${forma.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            }
+        });
+    }
+
+    function nuevaFormaPago() {
+        $('#formFormaPagoOpcion')[0].reset();
+        $('#forma_pago_id').val('');
+        $('#modalFormaPagoOpcion').modal('show');
+    }
+
+    function guardarFormaPagoOpcion() {
+        if (!$('#formFormaPagoOpcion')[0].checkValidity()) {
+            $('#formFormaPagoOpcion')[0].reportValidity();
+            return;
+        }
+
+        let id = $('#forma_pago_id').val();
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': id ? 'update' : 'create',
+                'id': id,
+                'nombre': $('#nombre').val(),
+                'codigo': $('#codigo').val(),
+                'descripcion': $('#descripcion').val(),
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.error) {
+                    alert('Error: ' + response.error);
+                } else {
+                    alert(response.message);
+                    $('#modalFormaPagoOpcion').modal('hide');
+                    listarFormasPago();
+                }
+            }
+        });
+    }
+
+    function eliminarFormaPago(id) {
+        if (!confirm('¿Está seguro de eliminar esta forma de pago?')) return;
+
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'delete',
+                'id': id,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                alert(response.message || response.error);
+                listarFormasPago();
+            }
+        });
+    }
+</script>
+{% endblock %}

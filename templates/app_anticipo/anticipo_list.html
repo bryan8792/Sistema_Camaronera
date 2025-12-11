@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-hand-holding-usd"></i> {{ titulo }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label>Empresa:</label>
+                            <select id="filtro_empresa" class="form-control">
+                                <option value="">Todas</option>
+                                {% for empresa in empresas %}
+                                <option value="{{ empresa.id }}">{{ empresa.siglas }} - {{ empresa.razon_social }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Fecha Inicio:</label>
+                            <input type="date" id="filtro_fecha_inicio" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label>Fecha Fin:</label>
+                            <input type="date" id="filtro_fecha_fin" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label>&nbsp;</label><br>
+                            <button type="button" class="btn btn-info" onclick="listarAnticipos()">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                            <a href="{% url 'app_anticipos:anticipo_form' %}" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Nuevo
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de anticipos -->
+                    <div class="table-responsive">
+                        <table id="tabla_anticipos" class="table table-bordered table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Cliente</th>
+                                    <th>Identificación</th>
+                                    <th>Centro de Costo</th>
+                                    <th>Monto</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $(document).ready(function() {
+        listarAnticipos();
+    });
+
+    function listarAnticipos() {
+        let empresa_id = $('#filtro_empresa').val();
+        let fecha_inicio = $('#filtro_fecha_inicio').val();
+        let fecha_fin = $('#filtro_fecha_fin').val();
+
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'list',
+                'empresa_id': empresa_id,
+                'fecha_inicio': fecha_inicio,
+                'fecha_fin': fecha_fin,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                let tbody = $('#tabla_anticipos tbody');
+                tbody.empty();
+
+                response.forEach(function(anticipo) {
+                    let estado_badge = anticipo.estado ?
+                        '<span class="badge badge-success">Activo</span>' :
+                        '<span class="badge badge-danger">Inactivo</span>';
+
+                    let row = `
+                        <tr>
+                            <td>${anticipo.id}</td>
+                            <td>${anticipo.fecha}</td>
+                            <td>${anticipo.razon_social}</td>
+                            <td>${anticipo.identificacion}</td>
+                            <td>${anticipo.centro_costo ? anticipo.centro_costo.siglas : ''}</td>
+                            <td class="text-right">$${parseFloat(anticipo.monto).toFixed(2)}</td>
+                            <td>${estado_badge}</td>
+                            <td>
+                                <a href="{% url 'app_anticipos:anticipo_form' %}?id=${anticipo.id}" class="btn btn-sm btn-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-danger" onclick="eliminarAnticipo(${anticipo.id})" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="btn btn-sm btn-info" onclick="verDetalleAnticipo(${anticipo.id})" title="Ver detalle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al listar anticipos:', error);
+                alert('Error al cargar los anticipos');
+            }
+        });
+    }
+
+    function eliminarAnticipo(id) {
+        if (!confirm('¿Está seguro de eliminar este anticipo?')) {
+            return;
+        }
+
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'delete',
+                'id': id,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.error) {
+                    alert('Error: ' + response.error);
+                } else {
+                    alert(response.message);
+                    listarAnticipos();
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al eliminar:', error);
+                alert('Error al eliminar el anticipo');
+            }
+        });
+    }
+</script>
+{% endblock %}

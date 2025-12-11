@@ -1882,6 +1882,48 @@
                                 </li>
                             </ul>
                         </li>
+                        <!-- Modulo Tesoreria -->
+                        <li class="nav-item has-treeview">
+                            <a class="nav-link" href="#">
+                                <i class="fa fa-book-open nav-icon">
+                                </i>
+                                <p>
+                                    Tesorería
+                                    <i class="right fas fa-angle-left">
+                                    </i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <!-- Reporte de Costo-Utilidad -->
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_anticipos:forma_pago_list' %}">
+                                        <i class="fa fa-chart-bar nav-icon">
+                                        </i>
+                                        <p>
+                                            Forma de Pago
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_anticipos:anticipo_list' %}">
+                                        <i class="fa fa-chart-bar nav-icon">
+                                        </i>
+                                        <p>
+                                            Anticipos
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'app_anticipos:tipo_pago_list' %}">
+                                        <i class="fa fa-chart-bar nav-icon">
+                                        </i>
+                                        <p>
+                                            Tipo de Pago
+                                        </p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <!-- Modulo Facturas Compra -->
                         <li class="nav-item has-treeview">
                             <a class="nav-link" href="#">

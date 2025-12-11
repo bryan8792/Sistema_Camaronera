@@ -21,7 +21,7 @@
                     "empty", "url", "static", "trans", "blocktrans", "endblocktrans", "now",
                     "regroup", "lorem", "ifchanged", "endifchanged", "firstof", "debug", "cycle",
                     "csrf_token", "autoescape", "endautoescape", "spaceless", "endspaceless",
-                    "ssi", "templatetag", "verbatim", "endverbatim", "widthratio"],
+                    "ssi", "templatetags", "verbatim", "endverbatim", "widthratio"],
         filters = ["add", "addslashes", "capfirst", "center", "cut", "date",
                    "default", "default_if_none", "dictsort",
                    "dictsortreversed", "divisibleby", "escape", "escapejs",
