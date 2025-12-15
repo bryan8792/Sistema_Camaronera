@@ -75,7 +75,7 @@
 </div>
 {% endblock %}
 
-{% block javascript %}
+{% block scripts %}
 <script>
     $(document).ready(function() {
         listarFormasPago();
@@ -95,8 +95,8 @@
                 tbody.empty();
 
                 response.forEach(function(forma) {
-                    let estado_badge = forma.estado ? 
-                        '<span class="badge badge-success">Activo</span>' : 
+                    let estado_badge = forma.estado ?
+                        '<span class="badge badge-success">Activo</span>' :
                         '<span class="badge badge-danger">Inactivo</span>';
 
                     let row = `
@@ -126,6 +126,26 @@
         $('#formFormaPagoOpcion')[0].reset();
         $('#forma_pago_id').val('');
         $('#modalFormaPagoOpcion').modal('show');
+    }
+
+    function editarFormaPago(id) {
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'get',
+                'id': id,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                $('#forma_pago_id').val(response.id);
+                $('#nombre').val(response.nombre);
+                $('#codigo').val(response.codigo);
+                $('#descripcion').val(response.descripcion);
+                $('#modalFormaPagoOpcion').modal('show');
+            }
+        });
     }
 
     function guardarFormaPagoOpcion() {

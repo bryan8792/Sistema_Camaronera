@@ -84,9 +84,9 @@ class Migration(migrations.Migration):
                 ('referencia', models.CharField(blank=True, help_text='Número de cheque, transferencia, etc.', max_length=100, null=True, verbose_name='Referencia')),
                 ('banco', models.CharField(blank=True, max_length=100, null=True, verbose_name='Banco')),
                 ('observacion', models.TextField(blank=True, null=True, verbose_name='Observación')),
-                ('anticipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='formas_pago', to='app_anticipo.anticipo', verbose_name='Anticipo')),
-                ('forma', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='app_anticipo.formapagoopcion', verbose_name='Forma')),
-                ('tipo', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='app_anticipo.tipopago', verbose_name='Tipo')),
+                ('anticipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='formas_pago', to='app_anticipos.anticipo', verbose_name='Anticipo')),
+                ('forma', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='app_anticipos.formapagoopcion', verbose_name='Forma')),
+                ('tipo', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='app_anticipos.tipopago', verbose_name='Tipo')),
             ],
             options={
                 'verbose_name': 'Forma de Pago',

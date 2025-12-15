@@ -70,7 +70,7 @@
 </div>
 {% endblock %}
 
-{% block javascript %}
+{% block scripts %}
 <script>
     $(document).ready(function() {
         listarTiposPago();
@@ -90,8 +90,8 @@
                 tbody.empty();
 
                 response.forEach(function(tipo) {
-                    let estado_badge = tipo.estado ? 
-                        '<span class="badge badge-success">Activo</span>' : 
+                    let estado_badge = tipo.estado ?
+                        '<span class="badge badge-success">Activo</span>' :
                         '<span class="badge badge-danger">Inactivo</span>';
 
                     let row = `
@@ -120,6 +120,25 @@
         $('#formTipoPago')[0].reset();
         $('#tipo_pago_id').val('');
         $('#modalTipoPago').modal('show');
+    }
+
+    function editarTipoPago(id) {
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'get',
+                'id': id,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                $('#tipo_pago_id').val(response.id);
+                $('#nombre').val(response.nombre);
+                $('#descripcion').val(response.descripcion);
+                $('#modalTipoPago').modal('show');
+            }
+        });
     }
 
     function guardarTipoPago() {

@@ -113,7 +113,13 @@ class Anticipo(models.Model):
         item = model_to_dict(self)
         item['centro_costo'] = self.centro_costo.toJSON() if self.centro_costo else None
         item['categoria_contable'] = self.categoria_contable.toJSON() if self.categoria_contable else None
-        item['fecha'] = self.fecha.strftime('%Y-%m-%d') if self.fecha else None
+        if self.fecha:
+            if isinstance(self.fecha, str):
+                item['fecha'] = self.fecha  # Ya es string
+            else:
+                item['fecha'] = self.fecha.strftime('%Y-%m-%d')  # Convertir datetime a string
+        else:
+            item['fecha'] = None
         item['monto'] = float(self.monto)
         item['formas_pago'] = [fp.toJSON() for fp in self.formas_pago.all()]
         return item

@@ -1,0 +1,566 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}">
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+
+    <script src="{% static 'lib/moment-2.25.3/moment-with-locales.js' %}"></script>
+    <script src="{% static 'lib/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <link href="{% static 'lib/tempusdominus-bootstrap-4/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet"/>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h5 class="m-0 text-dark">
+                        <i class="fas fa-hand-holding-usd"></i> <b>ANTICIPO</b>
+                    </h5>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'app_anticipos:anticipo_list' %}">Anticipos</a></li>
+                        <li class="breadcrumb-item active">Formulario</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <form id="frmAnticipo" method="post">
+            {% csrf_token %}
+            <div class="card">
+                <div class="card-header" style="background-color:#3498DB">
+                    <h3 class="card-title">Datos del <strong>Anticipo</strong></h3>
+                </div>
+
+                <div class="card-body">
+                    <input type="hidden" name="action" value="create">
+
+                    <!-- Fila 1: Caja, Tipo, Empresa, TipoIdent, Identificación -->
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label for="caja">Caja: *</label>
+                            <select name="caja" id="caja" class="form-control" required>
+                                <option value="PRINCIPAL">PRINCIPAL</option>
+                                <option value="SECUNDARIA">SECUNDARIA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="tipo_cliente">Tipo: *</label>
+                            <select name="tipo_cliente" id="tipo_cliente" class="form-control" required>
+                                <option value="CLIENTE">CLIENTE</option>
+                                <option value="PROVEEDOR">PROVEEDOR</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="centro_costo_id">Centro de Costo: *</label>
+                            <select name="centro_costo_id" id="centro_costo_id" class="form-control" required onchange="cargarPlanCuentas()">
+                                <option value="">Seleccione empresa</option>
+                                {% for empresa in empresas %}
+                                <option value="{{ empresa.id }}">{{ empresa.siglas }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="tipo_identificacion">Tipo ident.: *</label>
+                            <select name="tipo_identificacion" id="tipo_identificacion" class="form-control" required>
+                                <option value="CEDULA">CEDULA</option>
+                                <option value="RUC">RUC</option>
+                                <option value="PASAPORTE">PASAPORTE</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="identificacion">Identificación: *</label>
+                            <div class="input-group">
+                                <input type="text" name="identificacion" id="identificacion" class="form-control" required>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" style="background-color: #3498DB;">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 2: Razón social, Nombre comercial, Teléfono, Celular -->
+                    <div class="form-group row">
+                        <div class="col-md-4">
+                            <label for="razon_social">Razón social: *</label>
+                            <div class="input-group">
+                                <input type="text" name="razon_social" id="razon_social" class="form-control" required>
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" style="background-color: #3498DB;">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="nombre_comercial">Nombre comercial:</label>
+                            <input type="text" name="nombre_comercial" id="nombre_comercial" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="telefono">Teléfono:</label>
+                            <input type="text" name="telefono" id="telefono" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="celular">Celular:</label>
+                            <input type="text" name="celular" id="celular" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Fila 3: Email, Ciudad, Dirección -->
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label for="email">Email:</label>
+                            <input type="email" name="email" id="email" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ciudad">Ciudad:</label>
+                            <input type="text" name="ciudad" id="ciudad" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="direccion">Dirección:</label>
+                            <div class="input-group">
+                                <input type="text" name="direccion" id="direccion" class="form-control">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-info">
+                                        <i class="fas fa-list"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-success">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Fila 4: Fecha, Monto, Concepto -->
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <label for="fecha">Fecha: *</label>
+                            <input type="date" name="fecha" id="fecha" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="monto">Monto: *</label>
+                            <input type="number" step="0.01" name="monto" id="monto" class="form-control" required readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="concepto">Concepto: *</label>
+                            <input type="text" name="concepto" id="concepto" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <!-- Categoría contable -->
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <label for="categoria_contable_id">Categoría contable:</label>
+                            <select name="categoria_contable_id" id="categoria_contable_id" class="form-control">
+                                <option value="">Seleccione cuenta</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMAS DE PAGO -->
+            <div class="card">
+                <div class="card-header" style="background-color:#3498DB">
+                    <h3 class="card-title">Formas de Pago
+                        <button type="button" class="btn btn-success btn-sm float-right" onclick="abrirModalFormaPago()">
+                            <i class="fas fa-plus-circle"></i>
+                        </button>
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <table class="table table-bordered table-striped table-hover" id="tblFormasPago" style="width:100%">
+                        <thead style="background-color:#3498DB">
+                        <tr>
+                            <th scope="col" style="width: 5%;">Acción</th>
+                            <th scope="col" style="width: 15%;">Tipo</th>
+                            <th scope="col" style="width: 20%;">Forma</th>
+                            <th scope="col" style="width: 12%;">Valor</th>
+                            <th scope="col" style="width: 15%;">Referencia</th>
+                            <th scope="col" style="width: 15%;">Banco</th>
+                            <th scope="col" style="width: 18%;">Observación</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color:#ecf0f1">
+                                <td colspan="3" align="right"><strong>TOTAL:</strong></td>
+                                <td><strong>$<span id="total_formas_pago">0.00</span></strong></td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="card-footer navbar-primary">
+                <button type="button" class="btn btn-success btn-flat btnSave">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <a href="{% url 'app_anticipos:anticipo_list' %}" type="button" class="btn btn-secondary">
+                    <i class="fas fa-reply"></i> Regresar
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <!-- Modal Forma de Pago -->
+    <div class="modal fade" id="modalFormaPago" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color:#3498DB; color:white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-money-bill"></i> FORMA DE PAGO
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Valor: *</label>
+                        <input type="number" step="0.01" id="fp_valor" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo: *</label>
+                        <div class="input-group">
+                            <select id="fp_tipo" class="form-control" required>
+                                <option value="">Seleccione...</option>
+                                {% for tipo in tipos_pago %}
+                                <option value="{{ tipo.id }}">{{ tipo.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-success" onclick="abrirNuevoTipoPago();" title="Crear tipo">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Forma: *</label>
+                        <div class="input-group">
+                            <select id="fp_forma" class="form-control" required>
+                                <option value="">Seleccione...</option>
+                                {% for forma in formas_pago %}
+                                <option value="{{ forma.id }}">{{ forma.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-success" onclick="abrirNuevaFormaPago();" title="Crear forma">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Referencia:</label>
+                        <input type="text" id="fp_referencia" class="form-control" placeholder="Número de cheque, etc">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Banco:</label>
+                        <input type="text" id="fp_banco" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observación:</label>
+                        <textarea id="fp_observacion" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="agregarFormaPago()">
+                        <i class="fas fa-check"></i> Agregar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'acciones/app_anticipos/form_anticipo.js' %}"></script>
+
+<script>
+$(document).ready(function() {
+    console.log('[v0] Inicializando formulario de anticipo');
+
+    // Inicializar el módulo de anticipo
+    anticipo.init();
+
+    // Verificar si estamos en modo edición
+    const anticipoId = '{{ anticipo.id|default:"" }}';
+
+    console.log('[v0] Anticipo ID desde template:', anticipoId);
+
+    if (anticipoId) {
+        console.log('[v0] Modo edición detectado, cargando anticipo:', anticipoId);
+        setTimeout(function() {
+            cargarAnticipoParaEditar(anticipoId);
+        }, 500);
+    }
+});
+
+function cargarAnticipoParaEditar(anticipoId) {
+    console.log('[v0] Cargando anticipo para editar:', anticipoId);
+
+    $.ajax({
+        url: window.location.pathname,
+        type: 'POST',
+        data: {
+            'action': 'get',
+            'id': anticipoId,
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        },
+        dataType: 'json',
+        success: function(anticipo_data) {
+            console.log('[v0] Datos del anticipo cargados:', anticipo_data);
+
+            if (anticipo_data.error) {
+                alert('Error: ' + anticipo_data.error);
+                return;
+            }
+
+            // Llenar campos básicos
+            $('select[name="caja"]').val(anticipo_data.caja || 'PRINCIPAL');
+            $('select[name="tipo_cliente"]').val(anticipo_data.tipo_cliente || 'CLIENTE');
+            $('select[name="tipo_identificacion"]').val(anticipo_data.tipo_identificacion || 'CEDULA');
+            $('input[name="identificacion"]').val(anticipo_data.identificacion || '');
+            $('input[name="razon_social"]').val(anticipo_data.razon_social || '');
+            $('input[name="nombre_comercial"]').val(anticipo_data.nombre_comercial || '');
+            $('input[name="telefono"]').val(anticipo_data.telefono || '');
+            $('input[name="celular"]').val(anticipo_data.celular || '');
+            $('input[name="email"]').val(anticipo_data.email || '');
+            $('input[name="ciudad"]').val(anticipo_data.ciudad || '');
+            $('input[name="direccion"]').val(anticipo_data.direccion || '');
+            $('input[name="fecha"]').val(anticipo_data.fecha || '');
+            $('input[name="monto"]').val(anticipo_data.monto || '');
+
+            // Cargar el concepto
+            const conceptoField = $('textarea[name="concepto"]');
+            if (conceptoField.length > 0) {
+                conceptoField.val(anticipo_data.concepto || '');
+            } else {
+                $('input[name="concepto"]').val(anticipo_data.concepto || '');
+            }
+
+            console.log('[v0] Centro de costo ID:', anticipo_data.centro_costo_id);
+            console.log('[v0] Concepto:', anticipo_data.concepto);
+            console.log('[v0] Categoria contable ID:', anticipo_data.categoria_contable_id);
+
+            // CRÍTICO: Cargar centro de costo y luego el plan de cuentas
+            if (anticipo_data.centro_costo_id) {
+                const selectCentroCosto = $('select[name="centro_costo_id"]');
+                selectCentroCosto.val(anticipo_data.centro_costo_id);
+
+                console.log('[v0] Centro de costo seleccionado:', selectCentroCosto.val());
+
+                // Cargar el plan de cuentas
+                cargarPlanCuentasYSeleccionar(anticipo_data.centro_costo_id, anticipo_data.categoria_contable_id);
+            }
+
+            // <CHANGE> Cargar formas de pago usando la estructura existente de anticipo.items.formas_pago
+            if (anticipo_data.formas_pago && anticipo_data.formas_pago.length > 0) {
+                console.log('[v0] Cargando', anticipo_data.formas_pago.length, 'formas de pago');
+
+                // Limpiar el array de formas de pago
+                anticipo.items.formas_pago = [];
+
+                // Agregar cada forma de pago al array
+                anticipo_data.formas_pago.forEach(function(fp) {
+                    anticipo.items.formas_pago.push({
+                        tipo_id: fp.tipo_id,
+                        tipo_text: fp.tipo_nombre,
+                        forma_id: fp.forma_id,
+                        forma_text: fp.forma_nombre,
+                        valor: parseFloat(fp.valor),
+                        referencia: fp.referencia || '',
+                        banco: fp.banco || '',
+                        observacion: fp.observacion || ''
+                    });
+                    console.log('[v0] Forma de pago agregada:', fp.forma_nombre, '$' + fp.valor);
+                });
+
+                // Actualizar la tabla usando la función existente
+                actualizarTablaFormasPago();
+                actualizarMonto();
+
+                console.log('[v0] Total formas de pago cargadas:', anticipo.items.formas_pago.length);
+                console.log('[v0] Total monto:', anticipo.calcularTotal());
+            }
+
+            // Cambiar el botón a modo actualización
+            $('#btn_guardar_anticipo').html('<i class="fas fa-save"></i> Actualizar');
+            $('#btn_guardar_anticipo').attr('data-anticipo-id', anticipoId);
+
+            // Cambiar la acción del formulario a update
+            $('.btnSave').off('click').on('click', function(event) {
+                event.preventDefault();
+                actualizarAnticipo(anticipoId);
+            });
+
+            console.log('[v0] Anticipo cargado completamente');
+        },
+        error: function(xhr, status, error) {
+            console.error('[v0] Error al cargar anticipo:', error);
+            console.error('[v0] Response:', xhr.responseText);
+            alert('Error al cargar los datos del anticipo');
+        }
+    });
+}
+
+function cargarPlanCuentasYSeleccionar(empresaId, cuentaId) {
+    console.log('[v0] Cargando plan de cuentas para empresa:', empresaId);
+
+    $.ajax({
+        url: window.location.pathname,
+        type: 'POST',
+        data: {
+            'action': 'get_plan_cuentas',
+            'empresa_id': empresaId,
+            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+        },
+        dataType: 'json',
+        success: function(cuentas) {
+            console.log('[v0] Plan de cuentas recibido:', cuentas.length, 'cuentas');
+
+            const selectCuenta = $('select[name="categoria_contable_id"]');
+            selectCuenta.empty();
+            selectCuenta.append('<option value="">Seleccione cuenta</option>');
+
+            if (cuentas && cuentas.length > 0) {
+                cuentas.forEach(function(cuenta) {
+                    selectCuenta.append(
+                        `<option value="${cuenta.id}">${cuenta.descripcion}</option>`
+                    );
+                });
+
+                // Seleccionar la cuenta si existe
+                if (cuentaId) {
+                    selectCuenta.val(cuentaId);
+                    console.log('[v0] Cuenta seleccionada:', cuentaId);
+                }
+            } else {
+                console.log('[v0] No se encontraron cuentas');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('[v0] Error al cargar plan de cuentas:', error);
+        }
+    });
+}
+
+function actualizarAnticipo(anticipoId) {
+    console.log('[v0] Actualizando anticipo ID:', anticipoId);
+
+    // Validar que haya al menos una forma de pago
+    if (anticipo.items.formas_pago.length === 0) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Debe agregar al menos una forma de pago'
+        });
+        return false;
+    }
+
+    // Validar que el monto coincida
+    const monto = parseFloat($('#monto').val()) || 0;
+    const total_formas = anticipo.calcularTotal();
+
+    if (Math.abs(monto - total_formas) > 0.01) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: `El monto ($${monto.toFixed(2)}) no coincide con el total de formas de pago ($${total_formas.toFixed(2)})`
+        });
+        return false;
+    }
+
+    const csrftoken = $('input[name="csrfmiddlewaretoken"]').val();
+
+    $.ajax({
+        url: window.location.pathname,
+        data: {
+            action: 'update',
+            id: anticipoId,
+            caja: $('#caja').val(),
+            tipo_cliente: $('#tipo_cliente').val(),
+            centro_costo_id: $('#centro_costo_id').val(),
+            tipo_identificacion: $('#tipo_identificacion').val(),
+            identificacion: $('#identificacion').val(),
+            razon_social: $('#razon_social').val(),
+            nombre_comercial: $('#nombre_comercial').val(),
+            telefono: $('#telefono').val(),
+            celular: $('#celular').val(),
+            email: $('#email').val(),
+            ciudad: $('#ciudad').val(),
+            direccion: $('#direccion').val(),
+            fecha: $('#fecha').val(),
+            monto: $('#monto').val(),
+            concepto: $('#concepto').val(),
+            categoria_contable_id: $('#categoria_contable_id').val(),
+            formas_pago: JSON.stringify(anticipo.items.formas_pago),
+            csrfmiddlewaretoken: csrftoken
+        },
+        type: 'POST',
+        dataType: 'json',
+        success: function(response) {
+            console.log('[v0] Respuesta del servidor:', response);
+
+            if (response.success) {
+                Swal.fire({
+                    position: 'top-center',
+                    icon: 'success',
+                    title: response.message || 'Anticipo actualizado correctamente',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                setTimeout(() => {
+                    window.location.href = '/anticipo/listar_anticipo';
+                }, 1600);
+            } else if (response.error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.error
+                });
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error('[v0] Error:', textStatus, errorThrown);
+            console.error('[v0] Response:', jqXHR.responseText);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al actualizar el anticipo: ' + errorThrown
+            });
+        }
+    });
+}
+</script>
+{% endblock %}

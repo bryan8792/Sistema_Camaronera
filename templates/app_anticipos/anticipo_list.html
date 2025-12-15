@@ -38,7 +38,7 @@
                             <button type="button" class="btn btn-info" onclick="listarAnticipos()">
                                 <i class="fas fa-search"></i> Buscar
                             </button>
-                            <a href="{% url 'app_anticipos:anticipo_form' %}" class="btn btn-success">
+                            <a href="{% url 'app_anticipos:anticipo_create' %}" class="btn btn-success">
                                 <i class="fas fa-plus"></i> Nuevo
                             </a>
                         </div>
@@ -70,7 +70,7 @@
 </div>
 {% endblock %}
 
-{% block javascript %}
+{% block scripts %}
 <script>
     $(document).ready(function() {
         listarAnticipos();
@@ -111,7 +111,7 @@
                             <td class="text-right">$${parseFloat(anticipo.monto).toFixed(2)}</td>
                             <td>${estado_badge}</td>
                             <td>
-                                <a href="{% url 'app_anticipos:anticipo_form' %}?id=${anticipo.id}" class="btn btn-sm btn-warning" title="Editar">
+                                <a href="/anticipo/editar_anticipo/${anticipo.id}/" class="btn btn-sm btn-warning" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button class="btn btn-sm btn-danger" onclick="eliminarAnticipo(${anticipo.id})" title="Eliminar">
@@ -160,6 +160,11 @@
                 alert('Error al eliminar el anticipo');
             }
         });
+    }
+
+    function verDetalleAnticipo(id) {
+        // Implementar vista de detalle si es necesario
+        alert('Ver detalle del anticipo #' + id);
     }
 </script>
 {% endblock %}
