@@ -86,51 +86,123 @@ class DetalleDiaDieta(models.Model):
     def __str__(self):
         return self.dieta
 
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     try:
+    #         nuevo_detalle = super(DetalleDiaDieta, self).save()
+    #         usuario_actual = '-'
+    #         user = get_current_user()
+    #
+    #         if user is not None:
+    #             usuario_actual = user
+    #         # Actualizar stock para producto
+    #         ps = Total_Stock.objects.get(nombre_empresa_id=self.piscinas.empresa.pk, nombre_prod_id=self.balanceado.pk)
+    #         print(ps)
+    #         if ps:
+    #             # Registrar egreso #
+    #             producto = Producto_Stock()
+    #             producto.producto_empresa_id = ps.pk
+    #             producto.tipo = 'EGRESO'
+    #             producto.piscinas = self.piscinas
+    #             producto.cantidad_egreso = float(self.cantidad)
+    #             producto.fecha_ingreso = self.dieta.fecha
+    #             producto.numero_guia = 'CONSUMO DE DIETA'
+    #             producto.responsable_ingreso = usuario_actual
+    #             producto.detalle_dieta_id = self.pk
+    #             producto.save()
+    #
+    #         # Actualizar stock para insumo
+    #         datos = [(self.insumo1, self.gramaje1), (self.insumo2, self.gramaje2), (self.insumo3, self.gramaje3), (self.insumo4, self.gramaje4)]
+    #         print(datos)
+    #         for d in datos:
+    #             if d[0]:
+    #                 ps = Total_Stock.objects.get(nombre_empresa_id=self.piscinas.empresa.pk, nombre_prod_id=int(d[0]))
+    #                 if ps:
+    #                     # Registrar egreso
+    #                     producto = Producto_Stock()
+    #                     producto.producto_empresa_id = ps.pk
+    #                     producto.tipo = 'EGRESO'
+    #                     producto.piscinas = self.piscinas
+    #                     producto.cantidad_egreso = float(d[1])
+    #                     producto.fecha_ingreso = self.dieta.fecha
+    #                     producto.numero_guia = 'CONSUMO DE DIETA'
+    #                     producto.responsable_ingreso = usuario_actual
+    #                     producto.detalle_dieta_id = self.pk
+    #                     producto.save()
+    #         return nuevo_detalle
+    #     except Exception as exc:
+    #         pass
+
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        try:
-            nuevo_detalle = super(DetalleDiaDieta, self).save()
-            usuario_actual = '-'
-            user = get_current_user()
+        # Guardar primero el detalle
+        nuevo_detalle = super(DetalleDiaDieta, self).save(force_insert, force_update, using, update_fields)
 
-            if user is not None:
-                usuario_actual = user
-            # Actualizar stock para producto
-            ps = Total_Stock.objects.get(nombre_empresa_id=self.piscinas.empresa.pk, nombre_prod_id=self.balanceado.pk)
-            print(ps)
-            if ps:
-                # Registrar egreso #
-                producto = Producto_Stock()
-                producto.producto_empresa_id = ps.pk
-                producto.tipo = 'EGRESO'
-                producto.piscinas = self.piscinas
-                producto.cantidad_egreso = float(self.cantidad)
-                producto.fecha_ingreso = self.dieta.fecha
-                producto.numero_guia = 'CONSUMO DE DIETA'
-                producto.responsable_ingreso = usuario_actual
-                producto.detalle_dieta_id = self.pk
-                producto.save()
+        usuario_actual = '-'
+        user = get_current_user()
+        if user is not None:
+            usuario_actual = user
 
-            # Actualizar stock para insumo
-            datos = [(self.insumo1, self.gramaje1), (self.insumo2, self.gramaje2), (self.insumo3, self.gramaje3), (self.insumo4, self.gramaje4)]
-            print(datos)
-            for d in datos:
-                if d[0]:
-                    ps = Total_Stock.objects.get(nombre_empresa_id=self.piscinas.empresa.pk, nombre_prod_id=int(d[0]))
-                    if ps:
-                        # Registrar egreso
-                        producto = Producto_Stock()
-                        producto.producto_empresa_id = ps.pk
-                        producto.tipo = 'EGRESO'
-                        producto.piscinas = self.piscinas
-                        producto.cantidad_egreso = float(d[1])
-                        producto.fecha_ingreso = self.dieta.fecha
-                        producto.numero_guia = 'CONSUMO DE DIETA'
-                        producto.responsable_ingreso = usuario_actual
-                        producto.detalle_dieta_id = self.pk
-                        producto.save()
+        # ===============================
+        # VALIDACIONES OBLIGATORIAS
+        # ===============================
+        if not self.piscinas or not self.balanceado:
             return nuevo_detalle
-        except Exception as exc:
+
+        # ===============================
+        # EGRESO DE BALANCEADO
+        # ===============================
+        try:
+            ps = Total_Stock.objects.get(
+                nombre_empresa_id=self.piscinas.empresa.pk,
+                nombre_prod_id=self.balanceado.pk
+            )
+
+            producto = Producto_Stock()
+            producto.producto_empresa_id = ps.pk
+            producto.tipo = 'EGRESO'
+            producto.piscinas = self.piscinas
+            producto.cantidad_egreso = float(self.cantidad)
+            producto.fecha_ingreso = self.dieta.fecha
+            producto.numero_guia = 'CONSUMO DE DIETA'
+            producto.responsable_ingreso = usuario_actual
+            producto.detalle_dieta_id = self.pk
+            producto.save()
+
+        except Total_Stock.DoesNotExist:
             pass
+
+        # ===============================
+        # EGRESO DE INSUMOS
+        # ===============================
+        datos = [
+            (self.insumo1, self.gramaje1),
+            (self.insumo2, self.gramaje2),
+            (self.insumo3, self.gramaje3),
+            (self.insumo4, self.gramaje4),
+        ]
+
+        for insumo_id, gramaje in datos:
+            if insumo_id:
+                try:
+                    ps = Total_Stock.objects.get(
+                        nombre_empresa_id=self.piscinas.empresa.pk,
+                        nombre_prod_id=int(insumo_id)
+                    )
+
+                    producto = Producto_Stock()
+                    producto.producto_empresa_id = ps.pk
+                    producto.tipo = 'EGRESO'
+                    producto.piscinas = self.piscinas
+                    producto.cantidad_egreso = float(gramaje)
+                    producto.fecha_ingreso = self.dieta.fecha
+                    producto.numero_guia = 'CONSUMO DE DIETA'
+                    producto.responsable_ingreso = usuario_actual
+                    producto.detalle_dieta_id = self.pk
+                    producto.save()
+
+                except Total_Stock.DoesNotExist:
+                    pass
+
+        return nuevo_detalle
 
     def delete(self, using=None, keep_parents=False):
         cursor = connection.cursor()
@@ -140,17 +212,17 @@ class DetalleDiaDieta(models.Model):
 
     def toJSON(self):
         item = model_to_dict(self)
-        item['piscinas'] = self.piscinas.toJSON()
-        item['balanceado'] = self.balanceado.toJSON()
+        item['piscinas'] = self.piscinas.toJSON() if self.piscinas else None
+        item['balanceado'] = self.balanceado.toJSON() if self.balanceado else None
         item['cantidad'] = format(self.cantidad, '.0f')
         item['insumo1'] = format(self.insumo1, '.0f')
-        item['gramaje1'] = format(self.gramaje1, '.0f')
+        item['gramaje1'] = format(self.gramaje1, '.2f')
         item['insumo2'] = format(self.insumo2, '.0f')
-        item['gramaje2'] = format(self.gramaje2, '.0f')
+        item['gramaje2'] = format(self.gramaje2, '.2f')
         item['insumo3'] = format(self.insumo3, '.0f')
-        item['gramaje3'] = format(self.gramaje3, '.0f')
+        item['gramaje3'] = format(self.gramaje3, '.2f')
         item['insumo4'] = format(self.insumo4, '.0f')
-        item['gramaje4'] = format(self.gramaje4, '.0f')
+        item['gramaje4'] = format(self.gramaje4, '.2f')
         return item
 
     class Meta:

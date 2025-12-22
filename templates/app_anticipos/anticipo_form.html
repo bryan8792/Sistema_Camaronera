@@ -178,7 +178,8 @@
             <div class="card">
                 <div class="card-header" style="background-color:#3498DB">
                     <h3 class="card-title">Formas de Pago
-                        <button type="button" class="btn btn-success btn-sm float-right" onclick="abrirModalFormaPago()">
+                        <button type="button" class="btn btn-success btn-sm float-right"
+                                onclick="abrirModalFormaPago()">
                             <i class="fas fa-plus-circle"></i>
                         </button>
                     </h3>
@@ -200,24 +201,23 @@
                         <tbody>
                         </tbody>
                         <tfoot>
-                            <tr style="background-color:#ecf0f1">
-                                <td colspan="3" align="right"><strong>TOTAL:</strong></td>
-                                <td><strong>$<span id="total_formas_pago">0.00</span></strong></td>
-                                <td colspan="3"></td>
-                            </tr>
+                        <tr style="background-color:#ecf0f1">
+                            <td colspan="3" align="right"><strong>TOTAL:</strong></td>
+                            <td><strong>$<span id="total_formas_pago">0.00</span></strong></td>
+                            <td colspan="3"></td>
+                        </tr>
                         </tfoot>
                     </table>
                 </div>
-            </div>
 
-            <!-- Botones -->
-            <div class="card-footer navbar-primary">
-                <button type="button" class="btn btn-success btn-flat btnSave">
-                    <i class="fas fa-save"></i> Guardar
-                </button>
-                <a href="{% url 'app_anticipos:anticipo_list' %}" type="button" class="btn btn-secondary">
-                    <i class="fas fa-reply"></i> Regresar
-                </a>
+                <div class="card-footer navbar-white">
+                    <button type="button" class="btn btn-success btn-flat btnSave">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                    <a href="{% url 'app_anticipos:anticipo_list' %}" type="button" class="btn btn-secondary">
+                        <i class="fas fa-reply"></i> Regresar
+                    </a>
+                </div>
             </div>
         </form>
     </section>
@@ -308,7 +308,7 @@
 
 <script>
 $(document).ready(function() {
-    console.log('[v0] Inicializando formulario de anticipo');
+    console.log('Inicializando formulario de anticipo');
 
     // Inicializar el módulo de anticipo
     anticipo.init();
@@ -316,10 +316,10 @@ $(document).ready(function() {
     // Verificar si estamos en modo edición
     const anticipoId = '{{ anticipo.id|default:"" }}';
 
-    console.log('[v0] Anticipo ID desde template:', anticipoId);
+    console.log('Anticipo ID desde template:', anticipoId);
 
     if (anticipoId) {
-        console.log('[v0] Modo edición detectado, cargando anticipo:', anticipoId);
+        console.log('Modo edición detectado, cargando anticipo:', anticipoId);
         setTimeout(function() {
             cargarAnticipoParaEditar(anticipoId);
         }, 500);
@@ -327,7 +327,7 @@ $(document).ready(function() {
 });
 
 function cargarAnticipoParaEditar(anticipoId) {
-    console.log('[v0] Cargando anticipo para editar:', anticipoId);
+    console.log('Cargando anticipo para editar:', anticipoId);
 
     $.ajax({
         url: window.location.pathname,
@@ -339,7 +339,7 @@ function cargarAnticipoParaEditar(anticipoId) {
         },
         dataType: 'json',
         success: function(anticipo_data) {
-            console.log('[v0] Datos del anticipo cargados:', anticipo_data);
+            console.log('Datos del anticipo cargados:', anticipo_data);
 
             if (anticipo_data.error) {
                 alert('Error: ' + anticipo_data.error);
@@ -369,16 +369,16 @@ function cargarAnticipoParaEditar(anticipoId) {
                 $('input[name="concepto"]').val(anticipo_data.concepto || '');
             }
 
-            console.log('[v0] Centro de costo ID:', anticipo_data.centro_costo_id);
-            console.log('[v0] Concepto:', anticipo_data.concepto);
-            console.log('[v0] Categoria contable ID:', anticipo_data.categoria_contable_id);
+            console.log('Centro de costo ID:', anticipo_data.centro_costo_id);
+            console.log('Concepto:', anticipo_data.concepto);
+            console.log('Categoria contable ID:', anticipo_data.categoria_contable_id);
 
             // CRÍTICO: Cargar centro de costo y luego el plan de cuentas
             if (anticipo_data.centro_costo_id) {
                 const selectCentroCosto = $('select[name="centro_costo_id"]');
                 selectCentroCosto.val(anticipo_data.centro_costo_id);
 
-                console.log('[v0] Centro de costo seleccionado:', selectCentroCosto.val());
+                console.log('Centro de costo seleccionado:', selectCentroCosto.val());
 
                 // Cargar el plan de cuentas
                 cargarPlanCuentasYSeleccionar(anticipo_data.centro_costo_id, anticipo_data.categoria_contable_id);
@@ -386,7 +386,7 @@ function cargarAnticipoParaEditar(anticipoId) {
 
             // <CHANGE> Cargar formas de pago usando la estructura existente de anticipo.items.formas_pago
             if (anticipo_data.formas_pago && anticipo_data.formas_pago.length > 0) {
-                console.log('[v0] Cargando', anticipo_data.formas_pago.length, 'formas de pago');
+                console.log('Cargando', anticipo_data.formas_pago.length, 'formas de pago');
 
                 // Limpiar el array de formas de pago
                 anticipo.items.formas_pago = [];
@@ -403,15 +403,15 @@ function cargarAnticipoParaEditar(anticipoId) {
                         banco: fp.banco || '',
                         observacion: fp.observacion || ''
                     });
-                    console.log('[v0] Forma de pago agregada:', fp.forma_nombre, '$' + fp.valor);
+                    console.log('Forma de pago agregada:', fp.forma_nombre, '$' + fp.valor);
                 });
 
                 // Actualizar la tabla usando la función existente
                 actualizarTablaFormasPago();
                 actualizarMonto();
 
-                console.log('[v0] Total formas de pago cargadas:', anticipo.items.formas_pago.length);
-                console.log('[v0] Total monto:', anticipo.calcularTotal());
+                console.log('Total formas de pago cargadas:', anticipo.items.formas_pago.length);
+                console.log('Total monto:', anticipo.calcularTotal());
             }
 
             // Cambiar el botón a modo actualización
@@ -424,18 +424,18 @@ function cargarAnticipoParaEditar(anticipoId) {
                 actualizarAnticipo(anticipoId);
             });
 
-            console.log('[v0] Anticipo cargado completamente');
+            console.log('Anticipo cargado completamente');
         },
         error: function(xhr, status, error) {
-            console.error('[v0] Error al cargar anticipo:', error);
-            console.error('[v0] Response:', xhr.responseText);
+            console.error('Error al cargar anticipo:', error);
+            console.error('Response:', xhr.responseText);
             alert('Error al cargar los datos del anticipo');
         }
     });
 }
 
 function cargarPlanCuentasYSeleccionar(empresaId, cuentaId) {
-    console.log('[v0] Cargando plan de cuentas para empresa:', empresaId);
+    console.log('Cargando plan de cuentas para empresa:', empresaId);
 
     $.ajax({
         url: window.location.pathname,
@@ -463,20 +463,20 @@ function cargarPlanCuentasYSeleccionar(empresaId, cuentaId) {
                 // Seleccionar la cuenta si existe
                 if (cuentaId) {
                     selectCuenta.val(cuentaId);
-                    console.log('[v0] Cuenta seleccionada:', cuentaId);
+                    console.log('Cuenta seleccionada:', cuentaId);
                 }
             } else {
-                console.log('[v0] No se encontraron cuentas');
+                console.log('No se encontraron cuentas');
             }
         },
         error: function(xhr, status, error) {
-            console.error('[v0] Error al cargar plan de cuentas:', error);
+            console.error('Error al cargar plan de cuentas:', error);
         }
     });
 }
 
 function actualizarAnticipo(anticipoId) {
-    console.log('[v0] Actualizando anticipo ID:', anticipoId);
+    console.log('Actualizando anticipo ID:', anticipoId);
 
     // Validar que haya al menos una forma de pago
     if (anticipo.items.formas_pago.length === 0) {
@@ -530,7 +530,7 @@ function actualizarAnticipo(anticipoId) {
         type: 'POST',
         dataType: 'json',
         success: function(response) {
-            console.log('[v0] Respuesta del servidor:', response);
+            console.log('Respuesta del servidor:', response);
 
             if (response.success) {
                 Swal.fire({
@@ -552,8 +552,8 @@ function actualizarAnticipo(anticipoId) {
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            console.error('[v0] Error:', textStatus, errorThrown);
-            console.error('[v0] Response:', jqXHR.responseText);
+            console.error('Error:', textStatus, errorThrown);
+            console.error('Response:', jqXHR.responseText);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
