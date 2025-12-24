@@ -204,76 +204,6 @@
             </tr>
             </thead>
         </table>
-        {% comment %}<table style="margin-top: 15px;">
-            <thead>
-            <tr>
-                <th style="width: 20%;" class="text-center">INSUMO</th>
-                <th style="width: 20%;" class="text-center">BALANCEADO</th>
-                <th style="width: 10%;" class="text-center">TOTAL PSM</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for key, values in resumen_totales.items %}
-                {% if key == 'psm' %}
-                    {% for key_2, values_2 in values.items %}
-                        {% if key_2 == 'insumo' %}
-                            {% for key_3, values_3 in values_2.items %}
-                                <tr>
-                                    <td class="text-center">{{ key_3 }}</td>
-                                    <td class="text-center">-</td>
-                                    <td class="text-center">{{ values_3 }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                        {% if key_2 == 'balanceado' %}
-                            {% for key_3, values_3 in values_2.items %}
-                                <tr>
-                                    <td class="text-center">-</td>
-                                    <td class="text-center">{{ key_3 }}</td>
-                                    <td class="text-center">{{ values_3 }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>
-        <table style="margin-top: 15px;">
-            <thead>
-            <tr>
-                <th style="width: 20%;" class="text-center">INSUMO</th>
-                <th style="width: 20%;" class="text-center">BALANCEADO</th>
-                <th style="width: 10%;" class="text-center">TOTAL BIO</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for key, values in resumen_totales.items %}
-                {% if key == 'bio' %}
-                    {% for key_2, values_2 in values.items %}
-                        {% if key_2 == 'insumo' %}
-                            {% for key_3, values_3 in values_2.items %}
-                                <tr>
-                                    <td class="text-center">{{ key_3 }}</td>
-                                    <td class="text-center">-</td>
-                                    <td class="text-center">{{ values_3 }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                        {% if key_2 == 'balanceado' %}
-                            {% for key_3, values_3 in values_2.items %}
-                                <tr>
-                                    <td class="text-center">-</td>
-                                    <td class="text-center">{{ key_3 }}</td>
-                                    <td class="text-center">{{ values_3 }}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
-            </tbody>
-        </table>{% endcomment %}
     </div>
 </div>
 
@@ -286,7 +216,7 @@
     </tr>
     <tr>
         <th>DIGITADOR DIETA</th>
-        <th>ING. STALYN AGUIRRE</th>
+        <th>ING. CESAR CARPIO</th>
     </tr>
     </thead>
 </table>

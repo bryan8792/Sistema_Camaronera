@@ -779,99 +779,238 @@ def get_empresa_from_piscina(numero_piscina):
         return None
 
 
+# @receiver(post_save, sender=Producto_Stock)
+# def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
+#     """
+#     Signal que crea automáticamente asientos contables cuando hay un EGRESO de stock
+#     """
+#
+#     if not created or instance.tipo != 'EGRESO':
+#         return
+#
+#     print(f"\n{'=' * 60}")
+#     print(f"[CONTABILIDAD] INICIANDO PROCESO DE ASIENTO CONTABLE")
+#     print(f"{'=' * 60}")
+#
+#     try:
+#         print(f"[CONTABILIDAD] ID Producto_Stock: {instance.id}")
+#         print(f"[CONTABILIDAD] Tipo: {instance.tipo}")
+#         print(f"[CONTABILIDAD] Cantidad egreso: {instance.cantidad_egreso}")
+#
+#         piscina_obj = instance.piscinas
+#         if not piscina_obj:
+#             print(f"[CONTABILIDAD] ERROR: No hay piscina asignada")
+#             return
+#
+#         piscina_nombre = str(piscina_obj)
+#         print(f"[CONTABILIDAD] Piscina: {piscina_nombre}")
+#
+#         match = re.search(r'\d+', piscina_nombre)
+#         if not match:
+#             print(f"[CONTABILIDAD] ERROR: No se pudo extraer número de piscina")
+#             return
+#
+#         piscina_numero = int(match.group())
+#         print(f"[CONTABILIDAD] Piscina número: {piscina_numero}")
+#
+#         empresa_siglas = 'PSM' if 1 <= piscina_numero <= 20 else 'BIO' if 21 <= piscina_numero <= 45 else None
+#         if not empresa_siglas:
+#             print(f"[CONTABILIDAD] ERROR: Piscina fuera de rango")
+#             return
+#
+#         print(f"[CONTABILIDAD] Empresa: {empresa_siglas}")
+#
+#         print(f"[CONTABILIDAD] Buscando empresa...")
+#         try:
+#             empresa_obj = Empresa.objects.filter(siglas=empresa_siglas).first()
+#             print(f"[CONTABILIDAD] Empresa query ejecutada: {empresa_obj}")
+#         except Exception as e:
+#             print(f"[CONTABILIDAD] ERROR en query Empresa: {e}")
+#             return
+#
+#         if not empresa_obj:
+#             print(f"[CONTABILIDAD] ERROR: Empresa no encontrada")
+#             return
+#
+#         print(f"[CONTABILIDAD] Empresa OK: {empresa_obj.nombre}")
+#
+#         print(f"[CONTABILIDAD] Buscando producto...")
+#         try:
+#             producto_id = instance.producto_empresa.nombre_prod.id
+#             print(f"[CONTABILIDAD] Producto ID: {producto_id}")
+#         except Exception as e:
+#             print(f"[CONTABILIDAD] ERROR accediendo a producto: {e}")
+#             import traceback
+#             traceback.print_exc()
+#             return
+#
+#         print(f"[CONTABILIDAD] Buscando Total_Stock...")
+#         try:
+#             stock_total = Total_Stock.objects.filter(
+#                 nombre_prod__id=producto_id,
+#                 nombre_empresa__id=empresa_obj.id
+#             ).first()
+#             print(f"[CONTABILIDAD] Total_Stock: {stock_total}")
+#         except Exception as e:
+#             print(f"[CONTABILIDAD] ERROR en query Total_Stock: {e}")
+#             import traceback
+#             traceback.print_exc()
+#             return
+#
+#         if not stock_total or not stock_total.plan_cuenta:
+#             print(f"[CONTABILIDAD] ERROR: Producto sin plan de cuentas")
+#             return
+#
+#         cuenta_producto = stock_total.plan_cuenta
+#         print(f"[CONTABILIDAD] Cuenta producto: {cuenta_producto.codigo}")
+#
+#         print(f"[CONTABILIDAD] Buscando cuenta SUMINISTROS...")
+#         cuenta_suministros = None
+#
+#         if hasattr(piscina_obj, 'cuenta_suministros') and piscina_obj.cuenta_suministros:
+#             cuenta_suministros = piscina_obj.cuenta_suministros
+#             print(f"[CONTABILIDAD] Cuenta SUMINISTROS (FK): {cuenta_suministros.codigo}")
+#         else:
+#             # Buscar por nombre
+#             cuenta_piscina = None
+#             for formato in [f'PISCINA#{piscina_numero}', f'PISCINA# {piscina_numero}']:
+#                 cuenta_piscina = PlanCuenta.objects.filter(
+#                     empresa=empresa_obj,
+#                     nombre__icontains=formato,
+#                     estado=True
+#                 ).first()
+#                 if cuenta_piscina:
+#                     break
+#
+#             if not cuenta_piscina:
+#                 print(f"[CONTABILIDAD] ERROR: No existe cuenta piscina")
+#                 return
+#
+#             cuenta_suministros = PlanCuenta.objects.filter(
+#                 empresa=empresa_obj,
+#                 parentId=cuenta_piscina,
+#                 nombre__iexact='SUMINISTROS',
+#                 estado=True
+#             ).first()
+#
+#             if not cuenta_suministros:
+#                 print(f"[CONTABILIDAD] ERROR: No existe subcuenta SUMINISTROS")
+#                 return
+#
+#         print(f"[CONTABILIDAD] Cuenta SUMINISTROS: {cuenta_suministros.codigo}")
+#
+#         monto = float(instance.cantidad_egreso or 0)
+#         if monto <= 0:
+#             print(f"[CONTABILIDAD] ERROR: Monto inválido")
+#             return
+#
+#         print(f"[CONTABILIDAD] Monto: ${monto:.2f}")
+#
+#         print(f"[CONTABILIDAD] Creando encabezado...")
+#         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
+#             codigo=int(datetime.now().timestamp()),
+#             tip_cuenta='5',
+#             tip_transa='EGRESO',
+#             fecha=instance.fecha_ingreso or timezone.now().date(),
+#             comprobante=f"EGR-{instance.id}-P{piscina_numero}",
+#             descripcion=f"Consumo en Piscina {piscina_numero}",
+#             empresa=empresa_obj,
+#             reg_control='RT'
+#         )
+#         print(f"[CONTABILIDAD] Encabezado creado ID: {encabezado.id}")
+#
+#         detalle_debe = DetalleCuentasPlanCuenta.objects.create(
+#             encabezadocuentaplan=encabezado,
+#             orden=1,
+#             cuenta=cuenta_suministros,
+#             detalle=f"Consumo P#{piscina_numero}",
+#             debe=monto,
+#             haber=0.00,
+#             origen='STOCK'
+#         )
+#         print(f"[CONTABILIDAD] DEBE creado ID: {detalle_debe.id} - ${monto} - ${detalle_debe.orden}")
+#
+#         detalle_haber = DetalleCuentasPlanCuenta.objects.create(
+#             encabezadocuentaplan=encabezado,
+#             orden=2,
+#             cuenta=cuenta_producto,
+#             detalle=f"Egreso inventario",
+#             debe=0.00,
+#             haber=monto,
+#             origen='STOCK'
+#         )
+#         print(f"[CONTABILIDAD] HABER creado ID: {detalle_haber.id} - ${monto}")
+#
+#         print(f"{'=' * 60}")
+#         print(f"[CONTABILIDAD] ASIENTO CONTABLE CREADO EXITOSAMENTE")
+#         print(f"[CONTABILIDAD] Comprobante: {encabezado.comprobante}")
+#         print(f"{'=' * 60}\n")
+#
+#     except Exception as e:
+#         print(f"{'=' * 60}")
+#         print(f"[CONTABILIDAD] ERROR CRITICO EN SIGNAL")
+#         print(f"[CONTABILIDAD] Error: {type(e).__name__}: {str(e)}")
+#         import traceback
+#         traceback.print_exc()
+#         print(f"{'=' * 60}\n")
+
+
 @receiver(post_save, sender=Producto_Stock)
 def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
     """
     Signal que crea automáticamente asientos contables cuando hay un EGRESO de stock
+    AJUSTADO PARA EDICIÓN DE DIETA (elimina asientos previos)
     """
 
+    # 🔴 VALIDACIONES BASE (NO SE TOCAN)
     if not created or instance.tipo != 'EGRESO':
         return
 
+    # 🔴 SOLO PARA DIETAS (CLAVE)
+    if not instance.detalle_dieta_id:
+        return
+
     print(f"\n{'=' * 60}")
-    print(f"[CONTABILIDAD] INICIANDO PROCESO DE ASIENTO CONTABLE")
+    print(f"[CONTABILIDAD] INICIANDO PROCESO DE ASIENTO CONTABLE (DIETA)")
     print(f"{'=' * 60}")
 
     try:
-        print(f"[CONTABILIDAD] ID Producto_Stock: {instance.id}")
-        print(f"[CONTABILIDAD] Tipo: {instance.tipo}")
-        print(f"[CONTABILIDAD] Cantidad egreso: {instance.cantidad_egreso}")
-
         piscina_obj = instance.piscinas
         if not piscina_obj:
-            print(f"[CONTABILIDAD] ERROR: No hay piscina asignada")
             return
 
         piscina_nombre = str(piscina_obj)
-        print(f"[CONTABILIDAD] Piscina: {piscina_nombre}")
-
         match = re.search(r'\d+', piscina_nombre)
         if not match:
-            print(f"[CONTABILIDAD] ERROR: No se pudo extraer número de piscina")
             return
 
         piscina_numero = int(match.group())
-        print(f"[CONTABILIDAD] Piscina número: {piscina_numero}")
 
         empresa_siglas = 'PSM' if 1 <= piscina_numero <= 20 else 'BIO' if 21 <= piscina_numero <= 45 else None
         if not empresa_siglas:
-            print(f"[CONTABILIDAD] ERROR: Piscina fuera de rango")
             return
 
-        print(f"[CONTABILIDAD] Empresa: {empresa_siglas}")
-
-        print(f"[CONTABILIDAD] Buscando empresa...")
-        try:
-            empresa_obj = Empresa.objects.filter(siglas=empresa_siglas).first()
-            print(f"[CONTABILIDAD] Empresa query ejecutada: {empresa_obj}")
-        except Exception as e:
-            print(f"[CONTABILIDAD] ERROR en query Empresa: {e}")
-            return
-
+        empresa_obj = Empresa.objects.filter(siglas=empresa_siglas).first()
         if not empresa_obj:
-            print(f"[CONTABILIDAD] ERROR: Empresa no encontrada")
             return
 
-        print(f"[CONTABILIDAD] Empresa OK: {empresa_obj.nombre}")
+        producto_id = instance.producto_empresa.nombre_prod.id
 
-        print(f"[CONTABILIDAD] Buscando producto...")
-        try:
-            producto_id = instance.producto_empresa.nombre_prod.id
-            print(f"[CONTABILIDAD] Producto ID: {producto_id}")
-        except Exception as e:
-            print(f"[CONTABILIDAD] ERROR accediendo a producto: {e}")
-            import traceback
-            traceback.print_exc()
-            return
-
-        print(f"[CONTABILIDAD] Buscando Total_Stock...")
-        try:
-            stock_total = Total_Stock.objects.filter(
-                nombre_prod__id=producto_id,
-                nombre_empresa__id=empresa_obj.id
-            ).first()
-            print(f"[CONTABILIDAD] Total_Stock: {stock_total}")
-        except Exception as e:
-            print(f"[CONTABILIDAD] ERROR en query Total_Stock: {e}")
-            import traceback
-            traceback.print_exc()
-            return
+        stock_total = Total_Stock.objects.filter(
+            nombre_prod__id=producto_id,
+            nombre_empresa__id=empresa_obj.id
+        ).first()
 
         if not stock_total or not stock_total.plan_cuenta:
-            print(f"[CONTABILIDAD] ERROR: Producto sin plan de cuentas")
             return
 
         cuenta_producto = stock_total.plan_cuenta
-        print(f"[CONTABILIDAD] Cuenta producto: {cuenta_producto.codigo}")
 
-        print(f"[CONTABILIDAD] Buscando cuenta SUMINISTROS...")
+        # CUENTA SUMINISTROS
         cuenta_suministros = None
-
         if hasattr(piscina_obj, 'cuenta_suministros') and piscina_obj.cuenta_suministros:
             cuenta_suministros = piscina_obj.cuenta_suministros
-            print(f"[CONTABILIDAD] Cuenta SUMINISTROS (FK): {cuenta_suministros.codigo}")
         else:
-            # Buscar por nombre
             cuenta_piscina = None
             for formato in [f'PISCINA#{piscina_numero}', f'PISCINA# {piscina_numero}']:
                 cuenta_piscina = PlanCuenta.objects.filter(
@@ -883,7 +1022,6 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
                     break
 
             if not cuenta_piscina:
-                print(f"[CONTABILIDAD] ERROR: No existe cuenta piscina")
                 return
 
             cuenta_suministros = PlanCuenta.objects.filter(
@@ -894,65 +1032,65 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
             ).first()
 
             if not cuenta_suministros:
-                print(f"[CONTABILIDAD] ERROR: No existe subcuenta SUMINISTROS")
                 return
-
-        print(f"[CONTABILIDAD] Cuenta SUMINISTROS: {cuenta_suministros.codigo}")
 
         monto = float(instance.cantidad_egreso or 0)
         if monto <= 0:
-            print(f"[CONTABILIDAD] ERROR: Monto inválido")
             return
 
-        print(f"[CONTABILIDAD] Monto: ${monto:.2f}")
+        # 🔴 🔴 🔴 MEJORA CLAVE 🔴 🔴 🔴
+        # BORRAR ASIENTOS CONTABLES ANTERIORES DE ESTA DIETA
+        comprobante_ref = f"EGR-DET-{instance.detalle_dieta_id}"
 
-        print(f"[CONTABILIDAD] Creando encabezado...")
+        encabezados_previos = EncabezadoCuentasPlanCuenta.objects.filter(
+            comprobante=comprobante_ref,
+            empresa=empresa_obj
+        )
+
+        if encabezados_previos.exists():
+            print(f"[CONTABILIDAD] Eliminando asientos anteriores de dieta {instance.detalle_dieta_id}")
+            encabezados_previos.delete()
+
+        # 🔴 CREAR NUEVO ENCABEZADO
         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
             codigo=int(datetime.now().timestamp()),
             tip_cuenta='5',
             tip_transa='EGRESO',
             fecha=instance.fecha_ingreso or timezone.now().date(),
-            comprobante=f"EGR-{instance.id}-P{piscina_numero}",
-            descripcion=f"Consumo en Piscina {piscina_numero}",
+            comprobante=comprobante_ref,
+            descripcion=f"Consumo Dieta Piscina {piscina_numero}",
             empresa=empresa_obj,
             reg_control='RT'
         )
-        print(f"[CONTABILIDAD] Encabezado creado ID: {encabezado.id}")
 
-        detalle_debe = DetalleCuentasPlanCuenta.objects.create(
+        # DEBE
+        DetalleCuentasPlanCuenta.objects.create(
             encabezadocuentaplan=encabezado,
             orden=1,
             cuenta=cuenta_suministros,
-            detalle=f"Consumo P#{piscina_numero}",
+            detalle=f"Consumo Piscina {piscina_numero}",
             debe=monto,
             haber=0.00,
             origen='STOCK'
         )
-        print(f"[CONTABILIDAD] DEBE creado ID: {detalle_debe.id} - ${monto} - ${detalle_debe.orden}")
 
-        detalle_haber = DetalleCuentasPlanCuenta.objects.create(
+        # HABER
+        DetalleCuentasPlanCuenta.objects.create(
             encabezadocuentaplan=encabezado,
             orden=2,
             cuenta=cuenta_producto,
-            detalle=f"Egreso inventario",
+            detalle="Egreso inventario",
             debe=0.00,
             haber=monto,
             origen='STOCK'
         )
-        print(f"[CONTABILIDAD] HABER creado ID: {detalle_haber.id} - ${monto}")
 
-        print(f"{'=' * 60}")
-        print(f"[CONTABILIDAD] ASIENTO CONTABLE CREADO EXITOSAMENTE")
-        print(f"[CONTABILIDAD] Comprobante: {encabezado.comprobante}")
-        print(f"{'=' * 60}\n")
+        print(f"[CONTABILIDAD] Asiento recreado correctamente ({comprobante_ref})")
 
     except Exception as e:
-        print(f"{'=' * 60}")
-        print(f"[CONTABILIDAD] ERROR CRITICO EN SIGNAL")
-        print(f"[CONTABILIDAD] Error: {type(e).__name__}: {str(e)}")
+        print(f"[CONTABILIDAD] ERROR CRÍTICO")
         import traceback
         traceback.print_exc()
-        print(f"{'=' * 60}\n")
 
 
 def connect_signals():
@@ -960,6 +1098,16 @@ def connect_signals():
     Connect all signals - call this in apps.py ready() method
     """
     pass
+
+
+def eliminar_asientos_por_detalle(detalle_id):
+    encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+        comprobante__icontains=f"EGR-DET-{detalle_id}"
+    )
+
+    for e in encabezados:
+        DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=e).delete()
+        e.delete()
 
 
 class ListarAsientosContablesView(ListView):
@@ -1168,10 +1316,164 @@ class DiagnosticoContableView(TemplateView):
         return context
 
 
+# class ReportePiscinaInsumosView(TemplateView):
+#     template_name = 'app_contabilidad_planCuentas/asientos_contables/reporte_piscina_insumos.html'
+#
+#     @method_decorator(csrf_exempt)
+#     @method_decorator(login_required)
+#     def dispatch(self, request, *args, **kwargs):
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#
+#         # Importar modelos
+#         from app_contabilidad_planCuentas.models import EncabezadoCuentasPlanCuenta, DetalleCuentasPlanCuenta
+#         from app_empresa.app_reg_empresa.models import Empresa
+#
+#         # Filtros de fecha y empresa
+#         fecha_desde = self.request.GET.get('fecha_desde')
+#         fecha_hasta = self.request.GET.get('fecha_hasta')
+#         empresa_id = self.request.GET.get('empresa')
+#
+#         # Query base - solo asientos de stock/consumo
+#         query = Q(tip_transa='EGRESO') | Q(descripcion__icontains='Consumo')
+#
+#         if fecha_desde:
+#             query &= Q(fecha__gte=fecha_desde)
+#         if fecha_hasta:
+#             query &= Q(fecha__lte=fecha_hasta)
+#         if empresa_id:
+#             query &= Q(empresa_id=empresa_id)
+#
+#         # Obtener asientos con detalles
+#         asientos = EncabezadoCuentasPlanCuenta.objects.filter(query).select_related('empresa').prefetch_related(
+#             'detallecuentasplancuenta_set__cuenta'
+#         ).order_by('fecha', 'codigo')
+#
+#         # Estructurar datos por piscina y producto
+#         piscinas_data = defaultdict(lambda: {'productos': defaultdict(list), 'total': Decimal('0')})
+#
+#         for asiento in asientos:
+#             # Extraer número de piscina de la descripción
+#             piscina_num = self._extraer_numero_piscina(asiento.descripcion)
+#             if not piscina_num:
+#                 continue
+#
+#             # Obtener producto de la descripción
+#             producto_nombre = self._extraer_producto(asiento.descripcion)
+#
+#             # Obtener detalles del asiento
+#             detalles = asiento.detallecuentasplancuenta_set.all()
+#
+#             # Buscar el monto del DEBE (consumo en piscina)
+#             monto_debe = Decimal('0')
+#             for detalle in detalles:
+#                 if detalle.debe and detalle.debe > 0:
+#                     monto_debe = detalle.debe
+#                     break
+#
+#             if monto_debe > 0:
+#                 # Agregar egreso al producto en la piscina
+#                 piscinas_data[piscina_num]['productos'][producto_nombre].append({
+#                     'tipo': 'OE',
+#                     'documento': asiento.comprobante or asiento.codigo,
+#                     'fecha': asiento.fecha.strftime('%d/%m/%Y') if asiento.fecha else '',
+#                     'cantidad': monto_debe,
+#                     'precio': Decimal('0'),  # Se calculará si hay precio unitario
+#                     'total': monto_debe,
+#                 })
+#                 piscinas_data[piscina_num]['total'] += monto_debe
+#
+#         # Convertir a lista ordenada
+#         piscinas_list = []
+#         total_general_cantidad = Decimal('0')
+#         total_general_monto = Decimal('0')
+#
+#         for piscina_num in sorted(piscinas_data.keys()):
+#             productos_list = []
+#             total_piscina_cantidad = Decimal('0')
+#             total_piscina_monto = Decimal('0')
+#
+#             for producto_nombre in sorted(piscinas_data[piscina_num]['productos'].keys()):
+#                 egresos = piscinas_data[piscina_num]['productos'][producto_nombre]
+#                 total_producto_cantidad = sum(e['cantidad'] for e in egresos)
+#                 total_producto_monto = sum(e['total'] for e in egresos)
+#
+#                 # Calcular precio promedio si hay cantidad
+#                 precio_promedio = total_producto_monto / total_producto_cantidad if total_producto_cantidad > 0 else Decimal(
+#                     '0')
+#
+#                 # Actualizar precio en cada egreso
+#                 for egreso in egresos:
+#                     egreso['precio'] = precio_promedio
+#
+#                 productos_list.append({
+#                     'nombre': producto_nombre,
+#                     'egresos': egresos,
+#                     'total_cantidad': total_producto_cantidad,
+#                     'total_monto': total_producto_monto,
+#                 })
+#
+#                 total_piscina_cantidad += total_producto_cantidad
+#                 total_piscina_monto += total_producto_monto
+#
+#             piscinas_list.append({
+#                 'numero': piscina_num,
+#                 'productos': productos_list,
+#                 'total_cantidad': total_piscina_cantidad,
+#                 'total_monto': total_piscina_monto,
+#             })
+#
+#             total_general_cantidad += total_piscina_cantidad
+#             total_general_monto += total_piscina_monto
+#
+#         # Obtener empresa para el encabezado
+#         empresa = None
+#         if empresa_id:
+#             try:
+#                 empresa = Empresa.objects.get(pk=empresa_id)
+#             except Empresa.DoesNotExist:
+#                 pass
+#
+#         context['nombre'] = 'DETALLE PISCINA POR INSUMOS'
+#         context['empresa'] = empresa
+#         context['piscinas'] = piscinas_list
+#         context['total_general_cantidad'] = total_general_cantidad
+#         context['total_general_monto'] = total_general_monto
+#         context['fecha_desde'] = fecha_desde
+#         context['fecha_hasta'] = fecha_hasta
+#         context['empresas'] = Empresa.objects.all()
+#
+#         return context
+#
+#     def _extraer_numero_piscina(self, descripcion):
+#         """Extrae el número de piscina de la descripción"""
+#         import re
+#         if not descripcion:
+#             return None
+#         match = re.search(r'Piscina\s*(\d+)', descripcion, re.IGNORECASE)
+#         if match:
+#             return int(match.group(1))
+#         return None
+#
+#     def _extraer_producto(self, descripcion):
+#         """Extrae el nombre del producto de la descripción"""
+#         if not descripcion:
+#             return "Producto desconocido"
+#         # La descripción típica es: "Consumo de PRODUCTO en Piscina X"
+#         import re
+#         match = re.search(r'Consumo de (.+?) en Piscina', descripcion, re.IGNORECASE)
+#         if match:
+#             return match.group(1).strip()
+#         return descripcion[:50]  # Usar los primeros 50 caracteres
+
+
+
+
 class ReportePiscinaInsumosView(TemplateView):
     template_name = 'app_contabilidad_planCuentas/asientos_contables/reporte_piscina_insumos.html'
 
-    @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
@@ -1179,143 +1481,87 @@ class ReportePiscinaInsumosView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Importar modelos
-        from app_contabilidad_planCuentas.models import EncabezadoCuentasPlanCuenta, DetalleCuentasPlanCuenta
-        from app_empresa.app_reg_empresa.models import Empresa
 
-        # Filtros de fecha y empresa
         fecha_desde = self.request.GET.get('fecha_desde')
         fecha_hasta = self.request.GET.get('fecha_hasta')
         empresa_id = self.request.GET.get('empresa')
 
-        # Query base - solo asientos de stock/consumo
-        query = Q(tip_transa='EGRESO') | Q(descripcion__icontains='Consumo')
+        filtros = Q(tipo='EGRESO', activo=True)
 
         if fecha_desde:
-            query &= Q(fecha__gte=fecha_desde)
+            filtros &= Q(fecha_ingreso__gte=fecha_desde)
         if fecha_hasta:
-            query &= Q(fecha__lte=fecha_hasta)
+            filtros &= Q(fecha_ingreso__lte=fecha_hasta)
         if empresa_id:
-            query &= Q(empresa_id=empresa_id)
+            filtros &= Q(producto_empresa__nombre_empresa_id=empresa_id)
 
-        # Obtener asientos con detalles
-        asientos = EncabezadoCuentasPlanCuenta.objects.filter(query).select_related('empresa').prefetch_related(
-            'detallecuentasplancuenta_set__cuenta'
-        ).order_by('fecha', 'codigo')
+        movimientos = (
+            Producto_Stock.objects
+            .filter(filtros)
+            .select_related('producto_empresa__nombre_prod')
+            .order_by('fecha_ingreso')
+        )
 
-        # Estructurar datos por piscina y producto
-        piscinas_data = defaultdict(lambda: {'productos': defaultdict(list), 'total': Decimal('0')})
+        piscinas_data = defaultdict(lambda: {'productos': defaultdict(list)})
 
-        for asiento in asientos:
-            # Extraer número de piscina de la descripción
-            piscina_num = self._extraer_numero_piscina(asiento.descripcion)
-            if not piscina_num:
+        for mov in movimientos:
+            if not mov.piscinas:
                 continue
 
-            # Obtener producto de la descripción
-            producto_nombre = self._extraer_producto(asiento.descripcion)
+            piscina = mov.piscinas
+            producto = mov.producto_empresa.nombre_prod
 
-            # Obtener detalles del asiento
-            detalles = asiento.detallecuentasplancuenta_set.all()
+            cantidad = Decimal(mov.cantidad_egreso or 0)
+            precio = Decimal(getattr(producto, 'costo_aplicacion', 0) or 0)
+            total = cantidad * precio
 
-            # Buscar el monto del DEBE (consumo en piscina)
-            monto_debe = Decimal('0')
-            for detalle in detalles:
-                if detalle.debe and detalle.debe > 0:
-                    monto_debe = detalle.debe
-                    break
+            piscinas_data[piscina]['productos'][producto.nombre].append({
+                'tipo': 'OE',
+                'documento': mov.numero_guia,
+                'fecha': mov.fecha_ingreso.strftime('%d/%m/%Y'),
+                'cantidad': cantidad,
+                'precio': precio,
+                'total': total,
+            })
 
-            if monto_debe > 0:
-                # Agregar egreso al producto en la piscina
-                piscinas_data[piscina_num]['productos'][producto_nombre].append({
-                    'tipo': 'OE',
-                    'documento': asiento.comprobante or asiento.codigo,
-                    'fecha': asiento.fecha.strftime('%d/%m/%Y') if asiento.fecha else '',
-                    'cantidad': monto_debe,
-                    'precio': Decimal('0'),  # Se calculará si hay precio unitario
-                    'total': monto_debe,
-                })
-                piscinas_data[piscina_num]['total'] += monto_debe
-
-        # Convertir a lista ordenada
         piscinas_list = []
-        total_general_cantidad = Decimal('0')
-        total_general_monto = Decimal('0')
+        total_general = Decimal('0')
 
-        for piscina_num in sorted(piscinas_data.keys()):
+        for piscina, data in piscinas_data.items():
             productos_list = []
-            total_piscina_cantidad = Decimal('0')
-            total_piscina_monto = Decimal('0')
+            total_piscina = Decimal('0')
 
-            for producto_nombre in sorted(piscinas_data[piscina_num]['productos'].keys()):
-                egresos = piscinas_data[piscina_num]['productos'][producto_nombre]
-                total_producto_cantidad = sum(e['cantidad'] for e in egresos)
-                total_producto_monto = sum(e['total'] for e in egresos)
-
-                # Calcular precio promedio si hay cantidad
-                precio_promedio = total_producto_monto / total_producto_cantidad if total_producto_cantidad > 0 else Decimal(
-                    '0')
-
-                # Actualizar precio en cada egreso
-                for egreso in egresos:
-                    egreso['precio'] = precio_promedio
+            for producto_nombre, egresos in data['productos'].items():
+                total_cantidad = sum(e['cantidad'] for e in egresos)
+                total_monto = sum(e['total'] for e in egresos)
 
                 productos_list.append({
                     'nombre': producto_nombre,
                     'egresos': egresos,
-                    'total_cantidad': total_producto_cantidad,
-                    'total_monto': total_producto_monto,
+                    'total_cantidad': total_cantidad,
+                    'total_monto': total_monto,
                 })
 
-                total_piscina_cantidad += total_producto_cantidad
-                total_piscina_monto += total_producto_monto
+                total_piscina += total_monto
 
             piscinas_list.append({
-                'numero': piscina_num,
+                'numero': piscina,
                 'productos': productos_list,
-                'total_cantidad': total_piscina_cantidad,
-                'total_monto': total_piscina_monto,
+                'total_monto': total_piscina,
             })
 
-            total_general_cantidad += total_piscina_cantidad
-            total_general_monto += total_piscina_monto
+            total_general += total_piscina
 
-        # Obtener empresa para el encabezado
-        empresa = None
-        if empresa_id:
-            try:
-                empresa = Empresa.objects.get(pk=empresa_id)
-            except Empresa.DoesNotExist:
-                pass
+        empresa = Empresa.objects.filter(pk=empresa_id).first() if empresa_id else None
 
-        context['nombre'] = 'DETALLE PISCINA POR INSUMOS'
-        context['empresa'] = empresa
-        context['piscinas'] = piscinas_list
-        context['total_general_cantidad'] = total_general_cantidad
-        context['total_general_monto'] = total_general_monto
-        context['fecha_desde'] = fecha_desde
-        context['fecha_hasta'] = fecha_hasta
-        context['empresas'] = Empresa.objects.all()
+        context.update({
+            'nombre': 'DETALLE PISCINA POR INSUMOS',
+            'empresa': empresa,
+            'piscinas': piscinas_list,
+            'total_general_monto': total_general,
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+            'empresas': Empresa.objects.all(),
+        })
 
         return context
-
-    def _extraer_numero_piscina(self, descripcion):
-        """Extrae el número de piscina de la descripción"""
-        import re
-        if not descripcion:
-            return None
-        match = re.search(r'Piscina\s*(\d+)', descripcion, re.IGNORECASE)
-        if match:
-            return int(match.group(1))
-        return None
-
-    def _extraer_producto(self, descripcion):
-        """Extrae el nombre del producto de la descripción"""
-        if not descripcion:
-            return "Producto desconocido"
-        # La descripción típica es: "Consumo de PRODUCTO en Piscina X"
-        import re
-        match = re.search(r'Consumo de (.+?) en Piscina', descripcion, re.IGNORECASE)
-        if match:
-            return match.group(1).strip()
-        return descripcion[:50]  # Usar los primeros 50 caracteres
