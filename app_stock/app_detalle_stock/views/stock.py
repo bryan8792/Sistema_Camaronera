@@ -1316,163 +1316,161 @@ class DiagnosticoContableView(TemplateView):
         return context
 
 
-# class ReportePiscinaInsumosView(TemplateView):
-#     template_name = 'app_contabilidad_planCuentas/asientos_contables/reporte_piscina_insumos.html'
-#
-#     @method_decorator(csrf_exempt)
-#     @method_decorator(login_required)
-#     def dispatch(self, request, *args, **kwargs):
-#         return super().dispatch(request, *args, **kwargs)
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#
-#         # Importar modelos
-#         from app_contabilidad_planCuentas.models import EncabezadoCuentasPlanCuenta, DetalleCuentasPlanCuenta
-#         from app_empresa.app_reg_empresa.models import Empresa
-#
-#         # Filtros de fecha y empresa
-#         fecha_desde = self.request.GET.get('fecha_desde')
-#         fecha_hasta = self.request.GET.get('fecha_hasta')
-#         empresa_id = self.request.GET.get('empresa')
-#
-#         # Query base - solo asientos de stock/consumo
-#         query = Q(tip_transa='EGRESO') | Q(descripcion__icontains='Consumo')
-#
-#         if fecha_desde:
-#             query &= Q(fecha__gte=fecha_desde)
-#         if fecha_hasta:
-#             query &= Q(fecha__lte=fecha_hasta)
-#         if empresa_id:
-#             query &= Q(empresa_id=empresa_id)
-#
-#         # Obtener asientos con detalles
-#         asientos = EncabezadoCuentasPlanCuenta.objects.filter(query).select_related('empresa').prefetch_related(
-#             'detallecuentasplancuenta_set__cuenta'
-#         ).order_by('fecha', 'codigo')
-#
-#         # Estructurar datos por piscina y producto
-#         piscinas_data = defaultdict(lambda: {'productos': defaultdict(list), 'total': Decimal('0')})
-#
-#         for asiento in asientos:
-#             # Extraer número de piscina de la descripción
-#             piscina_num = self._extraer_numero_piscina(asiento.descripcion)
-#             if not piscina_num:
-#                 continue
-#
-#             # Obtener producto de la descripción
-#             producto_nombre = self._extraer_producto(asiento.descripcion)
-#
-#             # Obtener detalles del asiento
-#             detalles = asiento.detallecuentasplancuenta_set.all()
-#
-#             # Buscar el monto del DEBE (consumo en piscina)
-#             monto_debe = Decimal('0')
-#             for detalle in detalles:
-#                 if detalle.debe and detalle.debe > 0:
-#                     monto_debe = detalle.debe
-#                     break
-#
-#             if monto_debe > 0:
-#                 # Agregar egreso al producto en la piscina
-#                 piscinas_data[piscina_num]['productos'][producto_nombre].append({
-#                     'tipo': 'OE',
-#                     'documento': asiento.comprobante or asiento.codigo,
-#                     'fecha': asiento.fecha.strftime('%d/%m/%Y') if asiento.fecha else '',
-#                     'cantidad': monto_debe,
-#                     'precio': Decimal('0'),  # Se calculará si hay precio unitario
-#                     'total': monto_debe,
-#                 })
-#                 piscinas_data[piscina_num]['total'] += monto_debe
-#
-#         # Convertir a lista ordenada
-#         piscinas_list = []
-#         total_general_cantidad = Decimal('0')
-#         total_general_monto = Decimal('0')
-#
-#         for piscina_num in sorted(piscinas_data.keys()):
-#             productos_list = []
-#             total_piscina_cantidad = Decimal('0')
-#             total_piscina_monto = Decimal('0')
-#
-#             for producto_nombre in sorted(piscinas_data[piscina_num]['productos'].keys()):
-#                 egresos = piscinas_data[piscina_num]['productos'][producto_nombre]
-#                 total_producto_cantidad = sum(e['cantidad'] for e in egresos)
-#                 total_producto_monto = sum(e['total'] for e in egresos)
-#
-#                 # Calcular precio promedio si hay cantidad
-#                 precio_promedio = total_producto_monto / total_producto_cantidad if total_producto_cantidad > 0 else Decimal(
-#                     '0')
-#
-#                 # Actualizar precio en cada egreso
-#                 for egreso in egresos:
-#                     egreso['precio'] = precio_promedio
-#
-#                 productos_list.append({
-#                     'nombre': producto_nombre,
-#                     'egresos': egresos,
-#                     'total_cantidad': total_producto_cantidad,
-#                     'total_monto': total_producto_monto,
-#                 })
-#
-#                 total_piscina_cantidad += total_producto_cantidad
-#                 total_piscina_monto += total_producto_monto
-#
-#             piscinas_list.append({
-#                 'numero': piscina_num,
-#                 'productos': productos_list,
-#                 'total_cantidad': total_piscina_cantidad,
-#                 'total_monto': total_piscina_monto,
-#             })
-#
-#             total_general_cantidad += total_piscina_cantidad
-#             total_general_monto += total_piscina_monto
-#
-#         # Obtener empresa para el encabezado
-#         empresa = None
-#         if empresa_id:
-#             try:
-#                 empresa = Empresa.objects.get(pk=empresa_id)
-#             except Empresa.DoesNotExist:
-#                 pass
-#
-#         context['nombre'] = 'DETALLE PISCINA POR INSUMOS'
-#         context['empresa'] = empresa
-#         context['piscinas'] = piscinas_list
-#         context['total_general_cantidad'] = total_general_cantidad
-#         context['total_general_monto'] = total_general_monto
-#         context['fecha_desde'] = fecha_desde
-#         context['fecha_hasta'] = fecha_hasta
-#         context['empresas'] = Empresa.objects.all()
-#
-#         return context
-#
-#     def _extraer_numero_piscina(self, descripcion):
-#         """Extrae el número de piscina de la descripción"""
-#         import re
-#         if not descripcion:
-#             return None
-#         match = re.search(r'Piscina\s*(\d+)', descripcion, re.IGNORECASE)
-#         if match:
-#             return int(match.group(1))
-#         return None
-#
-#     def _extraer_producto(self, descripcion):
-#         """Extrae el nombre del producto de la descripción"""
-#         if not descripcion:
-#             return "Producto desconocido"
-#         # La descripción típica es: "Consumo de PRODUCTO en Piscina X"
-#         import re
-#         match = re.search(r'Consumo de (.+?) en Piscina', descripcion, re.IGNORECASE)
-#         if match:
-#             return match.group(1).strip()
-#         return descripcion[:50]  # Usar los primeros 50 caracteres
-
-
-
-
 class ReportePiscinaInsumosView(TemplateView):
     template_name = 'app_contabilidad_planCuentas/asientos_contables/reporte_piscina_insumos.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Importar modelos
+        from app_contabilidad_planCuentas.models import EncabezadoCuentasPlanCuenta, DetalleCuentasPlanCuenta
+        from app_empresa.app_reg_empresa.models import Empresa
+
+        # Filtros de fecha y empresa
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+        empresa_id = self.request.GET.get('empresa')
+
+        # Query base - solo asientos de stock/consumo
+        query = Q(tip_transa='EGRESO') | Q(descripcion__icontains='Consumo')
+
+        if fecha_desde:
+            query &= Q(fecha__gte=fecha_desde)
+        if fecha_hasta:
+            query &= Q(fecha__lte=fecha_hasta)
+        if empresa_id:
+            query &= Q(empresa_id=empresa_id)
+
+        # Obtener asientos con detalles
+        asientos = EncabezadoCuentasPlanCuenta.objects.filter(query).select_related('empresa').prefetch_related(
+            'detallecuentasplancuenta_set__cuenta'
+        ).order_by('fecha', 'codigo')
+
+        # Estructurar datos por piscina y producto
+        piscinas_data = defaultdict(lambda: {'productos': defaultdict(list), 'total': Decimal('0')})
+
+        for asiento in asientos:
+            # Extraer número de piscina de la descripción
+            piscina_num = self._extraer_numero_piscina(asiento.descripcion)
+            if not piscina_num:
+                continue
+
+            # Obtener producto de la descripción
+            producto_nombre = self._extraer_producto(asiento.descripcion)
+
+            # Obtener detalles del asiento
+            detalles = asiento.detallecuentasplancuenta_set.all()
+
+            # Buscar el monto del DEBE (consumo en piscina)
+            monto_debe = Decimal('0')
+            for detalle in detalles:
+                if detalle.debe and detalle.debe > 0:
+                    monto_debe = detalle.debe
+                    break
+
+            if monto_debe > 0:
+                # Agregar egreso al producto en la piscina
+                piscinas_data[piscina_num]['productos'][producto_nombre].append({
+                    'tipo': 'OE',
+                    'documento': asiento.comprobante or asiento.codigo,
+                    'fecha': asiento.fecha.strftime('%d/%m/%Y') if asiento.fecha else '',
+                    'cantidad': monto_debe,
+                    'precio': Decimal('0'),  # Se calculará si hay precio unitario
+                    'total': monto_debe,
+                })
+                piscinas_data[piscina_num]['total'] += monto_debe
+
+        # Convertir a lista ordenada
+        piscinas_list = []
+        total_general_cantidad = Decimal('0')
+        total_general_monto = Decimal('0')
+
+        for piscina_num in sorted(piscinas_data.keys()):
+            productos_list = []
+            total_piscina_cantidad = Decimal('0')
+            total_piscina_monto = Decimal('0')
+
+            for producto_nombre in sorted(piscinas_data[piscina_num]['productos'].keys()):
+                egresos = piscinas_data[piscina_num]['productos'][producto_nombre]
+                total_producto_cantidad = sum(e['cantidad'] for e in egresos)
+                total_producto_monto = sum(e['total'] for e in egresos)
+
+                # Calcular precio promedio si hay cantidad
+                precio_promedio = total_producto_monto / total_producto_cantidad if total_producto_cantidad > 0 else Decimal(
+                    '0')
+
+                # Actualizar precio en cada egreso
+                for egreso in egresos:
+                    egreso['precio'] = precio_promedio
+
+                productos_list.append({
+                    'nombre': producto_nombre,
+                    'egresos': egresos,
+                    'total_cantidad': total_producto_cantidad,
+                    'total_monto': total_producto_monto,
+                })
+
+                total_piscina_cantidad += total_producto_cantidad
+                total_piscina_monto += total_producto_monto
+
+            piscinas_list.append({
+                'numero': piscina_num,
+                'productos': productos_list,
+                'total_cantidad': total_piscina_cantidad,
+                'total_monto': total_piscina_monto,
+            })
+
+            total_general_cantidad += total_piscina_cantidad
+            total_general_monto += total_piscina_monto
+
+        # Obtener empresa para el encabezado
+        empresa = None
+        if empresa_id:
+            try:
+                empresa = Empresa.objects.get(pk=empresa_id)
+            except Empresa.DoesNotExist:
+                pass
+
+        context['nombre'] = 'DETALLE PISCINA POR INSUMOS'
+        context['empresa'] = empresa
+        context['piscinas'] = piscinas_list
+        context['total_general_cantidad'] = total_general_cantidad
+        context['total_general_monto'] = total_general_monto
+        context['fecha_desde'] = fecha_desde
+        context['fecha_hasta'] = fecha_hasta
+        context['empresas'] = Empresa.objects.all()
+
+        return context
+
+    def _extraer_numero_piscina(self, descripcion):
+        """Extrae el número de piscina de la descripción"""
+        import re
+        if not descripcion:
+            return None
+        match = re.search(r'Piscina\s*(\d+)', descripcion, re.IGNORECASE)
+        if match:
+            return int(match.group(1))
+        return None
+
+    def _extraer_producto(self, descripcion):
+        """Extrae el nombre del producto de la descripción"""
+        if not descripcion:
+            return "Producto desconocido"
+        # La descripción típica es: "Consumo de PRODUCTO en Piscina X"
+        import re
+        match = re.search(r'Consumo de (.+?) en Piscina', descripcion, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        return descripcion[:50]  # Usar los primeros 50 caracteres
+
+
+class ConsumoPiscinaInsumosView(TemplateView):
+    template_name = 'app_consumo_piscinas/consumo_piscina_insumo/consumo_piscina_insumos.html'
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
