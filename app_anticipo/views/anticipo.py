@@ -402,10 +402,10 @@ class AnticipoFormView(TemplateView):
         empresa_id = request.POST.get('empresa_id')
 
         if not empresa_id:
-            print("[DEBUG] No se proporcionó empresa_id")
+            print("No se proporcionó empresa_id")
             return []
 
-        print(f"[DEBUG] Buscando plan de cuentas para empresa_id: {empresa_id}")
+        print(f"Buscando plan de cuentas para empresa_id: {empresa_id}")
 
         # Buscar cuentas con diferentes estrategias
         cuentas = PlanCuenta.objects.filter(

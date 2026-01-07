@@ -18,6 +18,9 @@ urlpatterns = [
     path('piscina/crear/', crearPiscinaView.as_view(), name='crear_piscinas'),
     path('piscina/actualizar/<int:pk>/', actualizarPiscinaView.as_view(), name='actualizar_piscinas'),
     path('piscina/eliminar/<int:pk>/', eliminarPiscinaView.as_view(), name='eliminar_piscinas'),
+    path('piscina/historial/<int:pk>/', HistorialPiscinaView.as_view(), name='historial_piscina'),
+    path('piscina/historial/pdf/<int:pk>/', historial_piscina_pdf, name='historial_piscina_pdf'),
+
 
     # Rutas para costo-utilidad por hectárea
     path('costo-utilidad-hectarea/', CostoUtilidadHectareaView.as_view(), name='costo_utilidad_hectarea'),

@@ -7,7 +7,7 @@ var anticipo = {
   },
 
   init: () => {
-    console.log("[v0] Inicializando módulo de anticipos")
+    console.log("Inicializando módulo de anticipos")
 
     $(".btnSave").on("click", (event) => {
       event.preventDefault()
@@ -16,7 +16,7 @@ var anticipo = {
   },
 
   guardar: () => {
-    console.log("[v0] Guardando anticipo...")
+    console.log("Guardando anticipo...")
 
     // Validar que haya al menos una forma de pago
     if (anticipo.items.formas_pago.length === 0) {
@@ -36,7 +36,7 @@ var anticipo = {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: `El monto ($${monto.toFixed(2)}) no coincide con el total de formas de pago ($${total_formas.toFixed(2)})`,
+        text: `El monto (${monto.toFixed(2)}) no coincide con el total de formas de pago (${total_formas.toFixed(2)})`,
       })
       return false
     }
@@ -63,7 +63,7 @@ var anticipo = {
     })
 
     const csrftoken = $('input[name="csrfmiddlewaretoken"]').val()
-    console.log("[v0] CSRF Token:", csrftoken)
+    console.log("CSRF Token:", csrftoken)
 
     $.ajax({
       url: window.location.pathname,
@@ -91,7 +91,7 @@ var anticipo = {
       type: "POST",
       dataType: "json",
       success: (response) => {
-        console.log("[v0] Respuesta del servidor:", response)
+        console.log("Respuesta del servidor:", response)
 
         if (response.success) {
           Swal.fire({
@@ -113,8 +113,8 @@ var anticipo = {
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        console.error("[v0] Error:", textStatus, errorThrown)
-        console.error("[v0] Response:", jqXHR.responseText)
+        console.error("Error:", textStatus, errorThrown)
+        console.error("Response:", jqXHR.responseText)
         Swal.fire({
           icon: "error",
           title: "Error",
@@ -127,7 +127,7 @@ var anticipo = {
   cargarPlanCuentas: () => {
     const empresa_id = $("#centro_costo_id").val()
 
-    console.log("[v0] Cargando plan de cuentas para empresa:", empresa_id)
+    console.log("Cargando plan de cuentas para empresa:", empresa_id)
 
     if (!empresa_id) {
       $("#categoria_contable_id").html('<option value="">Seleccione cuenta</option>')
@@ -135,7 +135,7 @@ var anticipo = {
     }
 
     const csrftoken = $('input[name="csrfmiddlewaretoken"]').val()
-    console.log("[v0] CSRF Token para get_plan_cuentas:", csrftoken)
+    console.log("CSRF Token para get_plan_cuentas:", csrftoken)
 
     $.ajax({
       url: window.location.pathname,
@@ -150,7 +150,7 @@ var anticipo = {
         "X-CSRFToken": csrftoken,
       },
       success: (response) => {
-        console.log("[v0] Plan de cuentas cargado:", response)
+        console.log("Plan de cuentas cargado:", response)
         const select = $("#categoria_contable_id")
         select.html('<option value="">Seleccione cuenta</option>')
 
@@ -164,9 +164,9 @@ var anticipo = {
         })
       },
       error: (xhr, status, error) => {
-        console.error("[v0] Error al cargar plan de cuentas:", error)
-        console.error("[v0] Status:", status)
-        console.error("[v0] Response:", xhr.responseText)
+        console.error("Error al cargar plan de cuentas:", error)
+        console.error("Status:", status)
+        console.error("Response:", xhr.responseText)
         Swal.fire("Error", "No se pudo cargar el plan de cuentas: " + error, "error")
       },
     })
@@ -218,7 +218,7 @@ function abrirNuevaFormaPago() {
 }
 
 function recargarSelectTipos() {
-  console.log("[v0] Recargando select de tipos...")
+  console.log("Recargando select de tipos...")
   const csrftoken = $('input[name="csrfmiddlewaretoken"]').val()
   $.ajax({
     url: "{% url 'app_anticipos:tipo_pago_list' %}",
@@ -244,7 +244,7 @@ function recargarSelectTipos() {
 }
 
 function recargarSelectFormas() {
-  console.log("[v0] Recargando select de formas...")
+  console.log("Recargando select de formas...")
   const csrftoken = $('input[name="csrfmiddlewaretoken"]').val()
   $.ajax({
     url: "{% url 'app_anticipos:forma_pago_list' %}",
@@ -305,7 +305,7 @@ function agregarFormaPago() {
     observacion: observacion,
   })
 
-  console.log("[v0] Forma de pago agregada:", anticipo.items.formas_pago)
+  console.log("Forma de pago agregada:", anticipo.items.formas_pago)
 
   // Actualizar tabla y monto
   actualizarTablaFormasPago()

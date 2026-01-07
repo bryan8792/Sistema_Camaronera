@@ -22,6 +22,8 @@ from django.db.models import FloatField
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from decimal import Decimal
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 class Empresa(models.Model):
@@ -127,6 +129,37 @@ class Piscinas(models.Model):
     def __str__(self):
         return self.numero
 
+    def clean(self):
+        if self.pis and self.prec:
+            raise ValidationError("No puede ser Piscina y Precría al mismo tiempo.")
+        if not self.pis and not self.prec:
+            raise ValidationError("Debe seleccionar Piscina o Precría.")
+
+    def save(self, *args, **kwargs):
+        if self.pk:
+            anterior = Piscinas.objects.get(pk=self.pk)
+
+            if anterior.pis != self.pis or anterior.prec != self.prec:
+                PiscinaHistorial.objects.filter(
+                    piscina=self,
+                    fecha_fin__isnull=True
+                ).update(fecha_fin=timezone.now())
+
+                PiscinaHistorial.objects.create(
+                    piscina=self,
+                    fue_piscina=self.pis,
+                    fue_precria=self.prec
+                )
+        else:
+            # primera vez que se crea la piscina
+            PiscinaHistorial.objects.create(
+                piscina=self,
+                fue_piscina=self.pis,
+                fue_precria=self.prec
+            )
+
+        super().save(*args, **kwargs)
+
     def get_area_hectareas(self):
         """
         Convierte el campo hect (texto) en número decimal
@@ -148,6 +181,29 @@ class Piscinas(models.Model):
         verbose_name = 'Piscina'
         verbose_name_plural = 'Piscinas'
         ordering = ['id']
+
+
+class PiscinaHistorial(models.Model):
+    piscina = models.ForeignKey(
+        'Piscinas',
+        on_delete=models.CASCADE,
+        related_name='historial'
+    )
+
+    fue_piscina = models.BooleanField(default=False)
+    fue_precria = models.BooleanField(default=False)
+
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_fin = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'tb_piscina_historial'
+        ordering = ['-fecha_inicio']
+
+    def __str__(self):
+        if self.fue_piscina:
+            return f'{self.piscina} - Piscina'
+        return f'{self.piscina} - Precría'
 
 
 class TipoCosto(models.Model):

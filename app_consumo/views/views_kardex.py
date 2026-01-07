@@ -271,48 +271,7 @@ class KardexBodegaGeneralView(TemplateView):
             traceback.print_exc()
             return JsonResponse({'error': str(e)}, safe=False)
 
-    def _guess_categoria(self, producto_obj):
-        """
-        Determina la categoría del producto basándose en su nombre o atributos.
-        Retorna: 'balanceado', 'campo', 'camarones', u 'otros'
-        """
-        try:
-            if hasattr(producto_obj, 'categoria') and producto_obj.categoria:
-                return str(producto_obj.categoria).lower()
-            if hasattr(producto_obj, 'tipo') and producto_obj.tipo:
-                return str(producto_obj.tipo).lower()
-        except Exception:
-            pass
-
-        nombre = ''
-        try:
-            nombre = (producto_obj.nombre or '') if hasattr(producto_obj, 'nombre') else ''
-        except Exception:
-            pass
-
-        nombre = nombre.lower()
-
-        if any(k in nombre for k in
-               ['balance', 'balanc', 'balanceado', 'exia', 'prime', 'perform', 'focus', 'starter', 'inicio', 'pellet']):
-            return 'balanceado'
-
-        if any(k in nombre for k in ['campo', 'bio', 'natur', 'eco', 'organico', 'carbono', 'siembra', 'hidro']):
-            return 'campo'
-
-        if any(k in nombre for k in ['camaron', 'camarón', 'shrimp', 'aqua', 'larvae', 'post']):
-            return 'camarones'
-
-        return 'otros'
-
     def _get_kardex_horizontal(self, request):
-        """
-        Obtiene los datos del kardex agrupados por fecha y producto
-        para mostrar una tabla horizontal donde:
-        - Cada fila es una fecha/día
-        - Cada columna es un producto
-        - El valor es el consumo diario de ese producto
-        Clasifica en 3 pestañas según tipo de producto
-        """
         print("[KARDEX DEBUG] Iniciando _get_kardex_horizontal")
 
         start_date = request.POST.get('start_date', '')
@@ -320,7 +279,7 @@ class KardexBodegaGeneralView(TemplateView):
         empresa_filter = request.POST.get('empresa', '')
         piscina_filter = request.POST.get('piscina', '')
 
-        print(f"[KARDEX DEBUG] Filtros recibidos:")
+        print("[KARDEX DEBUG] Filtros recibidos:")
         print(f"  - start_date: {start_date}")
         print(f"  - end_date: {end_date}")
         print(f"  - empresa: {empresa_filter}")
@@ -335,12 +294,10 @@ class KardexBodegaGeneralView(TemplateView):
 
         print(f"[KARDEX DEBUG] Query base count: {qs.count()}")
 
-        # Filtro por rango de fechas
         if start_date and end_date:
             qs = qs.filter(fecha_ingreso__range=[start_date, end_date])
             print(f"[KARDEX DEBUG] Después de filtro fecha count: {qs.count()}")
 
-        # Filtro por empresa
         if empresa_filter:
             try:
                 eid = int(empresa_filter)
@@ -350,31 +307,13 @@ class KardexBodegaGeneralView(TemplateView):
                 qs = qs.filter(producto_empresa__nombre_empresa__siglas__iexact=empresa_filter)
                 print(f"[KARDEX DEBUG] Filtrado por empresa siglas: {empresa_filter}, count: {qs.count()}")
 
-        # Filtro por piscina
         if piscina_filter:
             import re
             numero_match = re.search(r'(\d+)', piscina_filter)
-
             if numero_match:
                 numero = numero_match.group(1)
                 print(f"[KARDEX DEBUG] Número extraído de '{piscina_filter}': {numero}")
-                qs_filtered = qs.filter(piscinas__iregex=rf'piscina[\s\-_]*{numero}(\s|$)')
-
-                if qs_filtered.count() > 0:
-                    qs = qs_filtered
-                else:
-                    variaciones = [
-                        f'PISCINA {numero}',
-                        f'PISCINA-{numero}',
-                        f'Piscina {numero}',
-                        f'Piscina-{numero}',
-                    ]
-                    q_objects = Q()
-                    for var in variaciones:
-                        q_objects |= Q(piscinas__iexact=var)
-                    qs_variaciones = qs.filter(q_objects)
-                    if qs_variaciones.count() > 0:
-                        qs = qs_variaciones
+                qs = qs.filter(piscinas__iregex=rf'piscina[\s\-_]*{numero}(\s|$)')
 
             print(f"[KARDEX DEBUG] Después de filtro piscina '{piscina_filter}' count FINAL: {qs.count()}")
 
@@ -391,139 +330,72 @@ class KardexBodegaGeneralView(TemplateView):
 
         for item in qs:
             try:
-                fecha = item.fecha_ingreso.strftime('%Y-%m-%d') if item.fecha_ingreso else None
-                if not fecha:
-                    continue
-
-                producto_obj = getattr(item.producto_empresa, 'nombre_prod', None)
-                producto_nombre = ''
-
-                if producto_obj:
-                    producto_nombre = (getattr(producto_obj, 'nombre', None) or
-                                       getattr(producto_obj, 'descripcion', None) or
-                                       str(producto_obj))
-                else:
-                    producto_nombre = getattr(item.producto_empresa, 'nombre', None) or 'SIN PRODUCTO'
-
-                if not producto_nombre:
-                    continue
-
                 if item.tipo != 'EGRESO':
                     continue
 
+                fecha = item.fecha_ingreso.strftime('%Y-%m-%d')
                 consumo = float(item.cantidad_egreso or 0)
                 if consumo <= 0:
                     continue
 
-                categoria_id = None
-                aplicacion_directa = False
+                producto_obj = item.producto_empresa.nombre_prod
+                producto_nombre = str(producto_obj)
 
-                if producto_obj:
-                    # Obtener aplicación directa del producto
-                    aplicacion_directa = getattr(producto_obj, 'aplic_directa', False)
+                categoria_id = getattr(producto_obj.categoria, 'id', None)
+                aplicacion_directa = getattr(producto_obj, 'aplic_directa', False)
 
-                    # Obtener categoria_id del producto
-                    categoria_obj = getattr(producto_obj, 'categoria', None)
-                    if categoria_obj:
-                        categoria_id = getattr(categoria_obj, 'id', None)
-
-                print(
-                    f"[KARDEX DEBUG] Producto '{producto_nombre}': categoria_id={categoria_id}, aplicacion_directa={aplicacion_directa}")
-
-                # luego si es de aplicación directa (INSUMOS DE CAMPOS), y finalmente si es insumo de dieta
+                print(f"[KARDEX DEBUG] Producto '{producto_nombre}': categoria_id={categoria_id}, aplicacion_directa={aplicacion_directa}")
 
                 if categoria_id == 2:
-                    # Categoría BALANCEADOS (EXIA, PERFORM, FOCUS, etc.)
                     datos_balanceados[fecha][producto_nombre] += consumo
                     productos_balanceados.add(producto_nombre)
-                    print(f"[KARDEX DEBUG] → CONSUMO BALANCEADOS (categoria_id=2)")
+                    print("[KARDEX DEBUG] >>> CONSUMO BALANCEADOS")
 
                 elif aplicacion_directa:
-                    # Es de aplicación directa a piscina (INSUMOS DE CAMPOS)
-                    # Ejemplo: CAL, tratamiento suelo
                     datos_campo[fecha][producto_nombre] += consumo
                     productos_campo.add(producto_nombre)
-                    print(f"[KARDEX DEBUG] → INSUMOS DE CAMPOS (aplic_directa=True)")
+                    print("[KARDEX DEBUG] >>> INSUMOS DE CAMPOS")
 
                 elif categoria_id == 1:
-                    # Categoría INSUMOS que van en la dieta (INSUMOS DE BALANCEADO)
-                    # Ejemplo: SAL, AQUAPEGA, vitaminas, probióticos, medicamentos
                     datos_insumos_balanceado[fecha][producto_nombre] += consumo
                     productos_insumos_balanceado.add(producto_nombre)
-                    print(f"[KARDEX DEBUG] → INSUMOS DE BALANCEADO (categoria_id=1, aplic_directa=False)")
-
-                else:
-                    # Si no tiene categoría definida, no clasificar
-                    print(f"[KARDEX DEBUG] → SIN CLASIFICAR (categoria_id={categoria_id})")
-                    continue
+                    print("[KARDEX DEBUG] >>> INSUMOS DE BALANCEADO")
 
                 fechas_set.add(fecha)
 
             except Exception as e:
-                print(f"[KARDEX DEBUG] Error procesando item: {str(e)}")
-                import traceback
-                traceback.print_exc()
+                print(f"[KARDEX DEBUG] Error procesando item: {e}")
                 continue
 
-        # Convertir a formato lista
-        fechas_ordenadas = sorted(list(fechas_set))
-        productos_balanceados_ordenados = sorted(list(productos_balanceados))
-        productos_insumos_balanceado_ordenados = sorted(list(productos_insumos_balanceado))
-        productos_campo_ordenados = sorted(list(productos_campo))
+        fechas = sorted(fechas_set)
 
-        datos_balanceados_lista = []
-        for fecha in fechas_ordenadas:
-            fila = {
-                'fecha': fecha,
-                'productos': {}
-            }
-            for producto in productos_balanceados_ordenados:
-                fila['productos'][producto] = datos_balanceados[fecha].get(producto, 0)
-            datos_balanceados_lista.append(fila)
-
-        datos_insumos_balanceado_lista = []
-        for fecha in fechas_ordenadas:
-            fila = {
-                'fecha': fecha,
-                'productos': {}
-            }
-            for producto in productos_insumos_balanceado_ordenados:
-                fila['productos'][producto] = datos_insumos_balanceado[fecha].get(producto, 0)
-            datos_insumos_balanceado_lista.append(fila)
-
-        datos_campo_lista = []
-        for fecha in fechas_ordenadas:
-            fila = {
-                'fecha': fecha,
-                'productos': {}
-            }
-            for producto in productos_campo_ordenados:
-                fila['productos'][producto] = datos_campo[fecha].get(producto, 0)
-            datos_campo_lista.append(fila)
-
-        print(f"[KARDEX DEBUG] Total fechas: {len(fechas_ordenadas)}")
-        print(f"[KARDEX DEBUG] Total balanceados: {len(productos_balanceados_ordenados)}")
-        print(f"[KARDEX DEBUG] Total insumos de balanceado: {len(productos_insumos_balanceado_ordenados)}")
-        print(f"[KARDEX DEBUG] Total productos de campo: {len(productos_campo_ordenados)}")
+        def construir_lista(productos, datos):
+            lista = []
+            for f in fechas:
+                fila = {'fecha': f, 'productos': {}}
+                for p in productos:
+                    fila['productos'][p] = datos[f].get(p, 0)
+                lista.append(fila)
+            return lista
 
         response_data = {
             'status': 'ok',
-            'productos_balanceados': productos_balanceados_ordenados,
-            'datos_balanceados': datos_balanceados_lista,
-            'productos_insumos': productos_insumos_balanceado_ordenados,
-            'datos_insumos': datos_insumos_balanceado_lista,
-            'productos_campo': productos_campo_ordenados,
-            'datos_campo': datos_campo_lista
+            'productos_balanceados': sorted(productos_balanceados),
+            'datos_balanceados': construir_lista(sorted(productos_balanceados), datos_balanceados),
+            'productos_insumos': sorted(productos_insumos_balanceado),
+            'datos_insumos': construir_lista(sorted(productos_insumos_balanceado), datos_insumos_balanceado),
+            'productos_campo': sorted(productos_campo),
+            'datos_campo': construir_lista(sorted(productos_campo), datos_campo),
         }
 
         return JsonResponse(response_data, safe=False)
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'KARDEX BODEGA DE INSUMOS'
         context['empresas'] = Empresa.objects.all()
         return context
+
 
 # class KardexBodegaGeneralView(TemplateView):
 #     template_name = 'app_consumo/kardex_bodega_general.html'

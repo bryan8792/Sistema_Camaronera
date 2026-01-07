@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<!-- ===== HEADER ===== -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">Historial Piscina / Precría</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Piscinas</a></li>
+                    <li class="breadcrumb-item active">Historial</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CONTENIDO ===== -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+
+                <div class="card">
+                    <div class="card-header bg-primary">
+                        <h3 class="card-title">
+                            <i class="fas fa-history"></i>
+                            Historial Piscina / Precría
+                        </h3>
+                    </div>
+
+                    <!-- ===== CUERPO: LÍNEA DE TIEMPO ===== -->
+                    <div class="card-body">
+                        <ul class="timeline">
+
+                            {% for h in object_list %}
+                            <li>
+                                <i class="fas fa-water
+                                    {% if h.fue_piscina %}
+                                        bg-primary
+                                    {% else %}
+                                        bg-warning
+                                    {% endif %}
+                                "></i>
+
+                                <div class="timeline-item">
+                                    <span class="time">
+                                        <i class="far fa-clock"></i>
+                                        {{ h.fecha_inicio|date:"Y-m-d H:i" }}
+                                    </span>
+
+                                    <h3 class="timeline-header">
+                                        {% if h.fue_piscina %}
+                                            <span class="badge badge-primary">Piscina</span>
+                                        {% else %}
+                                            <span class="badge badge-warning">Precría</span>
+                                        {% endif %}
+                                    </h3>
+
+                                    <div class="timeline-body">
+                                        {% if h.fecha_fin %}
+                                            <strong>Hasta:</strong>
+                                            {{ h.fecha_fin|date:"Y-m-d H:i" }}
+                                        {% else %}
+                                            <strong class="text-success">
+                                                Estado actual
+                                            </strong>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </li>
+                            {% empty %}
+                            <li>
+                                <i class="fas fa-info-circle bg-secondary"></i>
+                                <div class="timeline-item">
+                                    <div class="timeline-body text-center">
+                                        No hay historial registrado
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+
+                            <!-- Línea final -->
+                            <li>
+                                <i class="far fa-clock bg-gray"></i>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <!-- ===== FOOTER ===== -->
+                    <div class="card-footer d-flex justify-content-between">
+
+                       <a href="{% url 'app_empresa:historial_piscina_pdf' view.kwargs.pk %}"
+                          target="_blank"
+                          class="btn btn-danger btn-sm">
+                           <i class="fas fa-file-pdf"></i> Descargar PDF
+                       </a>
+
+
+                        <a href="javascript:history.back()"
+                           class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

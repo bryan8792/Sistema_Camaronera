@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial Piscina / Precría</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .info {
+            margin-bottom: 20px;
+            padding: 8px;
+            border: 1px solid #444;
+        }
+
+        .info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info td {
+            padding: 4px;
+            border: none;
+            text-align: left;
+        }
+
+        table.historial {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table.historial th,
+        table.historial td {
+            border: 1px solid #444;
+            padding: 6px;
+            text-align: center;
+        }
+
+        table.historial th {
+            background-color: #f0f0f0;
+        }
+
+        .actual {
+            font-weight: bold;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Historial de Piscina / Precría</h2>
+
+<!-- ===== DATOS DE LA PISCINA ===== -->
+<div class="info">
+    <table>
+        <tr>
+            <td><strong>Piscina:</strong></td>
+            <td>{{ piscina.numero }}</td>
+
+            <td><strong>Empresa:</strong></td>
+            <td>{{ piscina.empresa.nombre }}</td>
+        </tr>
+        <tr>
+            <td><strong>Hectáreas:</strong></td>
+            <td>{{ piscina.hect }}</td>
+
+            <td><strong>Estado actual:</strong></td>
+            <td>
+                {% if piscina.pis %}
+                    Piscina
+                {% else %}
+                    Precría
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!-- ===== HISTORIAL ===== -->
+<table class="historial">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in historial %}
+        <tr>
+            <td>
+                {% if h.fue_piscina %}
+                    Piscina
+                {% else %}
+                    Precría
+                {% endif %}
+            </td>
+            <td>{{ h.fecha_inicio|date:"Y-m-d H:i" }}</td>
+            <td>
+                {% if h.fecha_fin %}
+                    {{ h.fecha_fin|date:"Y-m-d H:i" }}
+                {% else %}
+                    <span class="actual">ACTUAL</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No existe historial registrado</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
