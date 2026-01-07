@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.http import JsonResponse
@@ -8,7 +10,7 @@ from django.db.models import Q, Sum, DecimalField
 from django.db.models.functions import Coalesce
 from datetime import datetime
 import json
-from app_empresa.app_reg_empresa.models import Empresa
+from app_empresa.app_reg_empresa.models import Empresa, Piscinas
 from app_stock.app_detalle_stock.models import Producto_Stock
 
 
@@ -246,44 +248,22 @@ class KardexBodegaGeneralView(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        print("\n" + "=" * 80)
-        print("[KARDEX DEBUG] POST request recibido")
-        print(f"[KARDEX DEBUG] Method: {request.method}")
-        print(f"[KARDEX DEBUG] POST data: {request.POST}")
-        print(f"[KARDEX DEBUG] Content-Type: {request.content_type}")
-        print("=" * 80 + "\n")
-
         try:
             action = request.POST.get('action', '')
-            print(f"[KARDEX DEBUG] Action recibida: '{action}'")
-
             if action == 'get_kardex_horizontal':
-                print("[KARDEX DEBUG] Ejecutando _get_kardex_horizontal...")
-                result = self._get_kardex_horizontal(request)
-                print(f"[KARDEX DEBUG] Resultado type: {type(result)}")
-                return result
+                return self._get_kardex_horizontal(request)
             else:
-                print(f"[KARDEX DEBUG] ERROR: Action no válida: '{action}'")
                 return JsonResponse({'error': f'Action no válida: {action}'}, safe=False)
         except Exception as e:
-            print(f"[KARDEX DEBUG] ERROR CRÍTICO en kardex: {str(e)}")
             import traceback
             traceback.print_exc()
             return JsonResponse({'error': str(e)}, safe=False)
 
     def _get_kardex_horizontal(self, request):
-        print("[KARDEX DEBUG] Iniciando _get_kardex_horizontal")
-
         start_date = request.POST.get('start_date', '')
         end_date = request.POST.get('end_date', '')
         empresa_filter = request.POST.get('empresa', '')
         piscina_filter = request.POST.get('piscina', '')
-
-        print("[KARDEX DEBUG] Filtros recibidos:")
-        print(f"  - start_date: {start_date}")
-        print(f"  - end_date: {end_date}")
-        print(f"  - empresa: {empresa_filter}")
-        print(f"  - piscina: {piscina_filter}")
 
         qs = Producto_Stock.objects.filter(activo=True).select_related(
             'producto_empresa',
@@ -292,33 +272,33 @@ class KardexBodegaGeneralView(TemplateView):
             'producto_empresa__nombre_empresa'
         ).order_by('fecha_ingreso', 'producto_empresa__nombre_prod__nombre')
 
-        print(f"[KARDEX DEBUG] Query base count: {qs.count()}")
-
         if start_date and end_date:
             qs = qs.filter(fecha_ingreso__range=[start_date, end_date])
-            print(f"[KARDEX DEBUG] Después de filtro fecha count: {qs.count()}")
 
         if empresa_filter:
             try:
                 eid = int(empresa_filter)
                 qs = qs.filter(producto_empresa__nombre_empresa__id=eid)
-                print(f"[KARDEX DEBUG] Filtrado por empresa ID: {eid}, count: {qs.count()}")
             except Exception:
                 qs = qs.filter(producto_empresa__nombre_empresa__siglas__iexact=empresa_filter)
-                print(f"[KARDEX DEBUG] Filtrado por empresa siglas: {empresa_filter}, count: {qs.count()}")
 
+        # FILTRO DE PISCINA: por ID o por orden
         if piscina_filter:
-            import re
-            numero_match = re.search(r'(\d+)', piscina_filter)
-            if numero_match:
-                numero = numero_match.group(1)
-                print(f"[KARDEX DEBUG] Número extraído de '{piscina_filter}': {numero}")
-                qs = qs.filter(piscinas__iregex=rf'piscina[\s\-_]*{numero}(\s|$)')
+            try:
+                try:
+                    # Intentamos como ID
+                    pid = int(piscina_filter)
+                    piscina_obj = Piscinas.objects.get(id=pid)
+                except ValueError:
+                    # Si no es número, lo buscamos por orden
+                    piscina_obj = Piscinas.objects.get(orden__iexact=piscina_filter.strip())
 
-            print(f"[KARDEX DEBUG] Después de filtro piscina '{piscina_filter}' count FINAL: {qs.count()}")
+                qs = qs.filter(piscinas=piscina_obj)
+            except Piscinas.DoesNotExist:
+                print(f"[KARDEX DEBUG] Piscina no encontrada: {piscina_filter}")
+                qs = qs.none()
 
-        from collections import defaultdict
-
+        # Diccionarios para almacenar los consumos
         datos_balanceados = defaultdict(lambda: defaultdict(float))
         datos_insumos_balanceado = defaultdict(lambda: defaultdict(float))
         datos_campo = defaultdict(lambda: defaultdict(float))
@@ -329,53 +309,46 @@ class KardexBodegaGeneralView(TemplateView):
         fechas_set = set()
 
         for item in qs:
-            try:
-                if item.tipo != 'EGRESO':
-                    continue
-
-                fecha = item.fecha_ingreso.strftime('%Y-%m-%d')
-                consumo = float(item.cantidad_egreso or 0)
-                if consumo <= 0:
-                    continue
-
-                producto_obj = item.producto_empresa.nombre_prod
-                producto_nombre = str(producto_obj)
-
-                categoria_id = getattr(producto_obj.categoria, 'id', None)
-                aplicacion_directa = getattr(producto_obj, 'aplic_directa', False)
-
-                print(f"[KARDEX DEBUG] Producto '{producto_nombre}': categoria_id={categoria_id}, aplicacion_directa={aplicacion_directa}")
-
-                if categoria_id == 2:
-                    datos_balanceados[fecha][producto_nombre] += consumo
-                    productos_balanceados.add(producto_nombre)
-                    print("[KARDEX DEBUG] >>> CONSUMO BALANCEADOS")
-
-                elif aplicacion_directa:
-                    datos_campo[fecha][producto_nombre] += consumo
-                    productos_campo.add(producto_nombre)
-                    print("[KARDEX DEBUG] >>> INSUMOS DE CAMPOS")
-
-                elif categoria_id == 1:
-                    datos_insumos_balanceado[fecha][producto_nombre] += consumo
-                    productos_insumos_balanceado.add(producto_nombre)
-                    print("[KARDEX DEBUG] >>> INSUMOS DE BALANCEADO")
-
-                fechas_set.add(fecha)
-
-            except Exception as e:
-                print(f"[KARDEX DEBUG] Error procesando item: {e}")
+            if item.tipo != 'EGRESO':
                 continue
+
+            fecha = item.fecha_ingreso.strftime('%Y-%m-%d')
+            consumo = float(item.cantidad_egreso or 0)
+            if consumo <= 0:
+                continue
+
+            producto_obj = item.producto_empresa.nombre_prod
+            producto_nombre = str(producto_obj)
+
+            categoria_id = getattr(producto_obj.categoria, 'id', None)
+            aplicacion_directa = getattr(producto_obj, 'aplic_directa', False)
+
+            # Solo agregamos si tiene valor
+            if categoria_id == 2 and consumo > 0:
+                datos_balanceados[fecha][producto_nombre] += consumo
+                productos_balanceados.add(producto_nombre)
+            elif aplicacion_directa and consumo > 0:
+                datos_campo[fecha][producto_nombre] += consumo
+                productos_campo.add(producto_nombre)
+            elif categoria_id == 1 and consumo > 0:
+                datos_insumos_balanceado[fecha][producto_nombre] += consumo
+                productos_insumos_balanceado.add(producto_nombre)
+
+            fechas_set.add(fecha)
 
         fechas = sorted(fechas_set)
 
+        # Construye lista de filas solo con fecha y valores existentes
         def construir_lista(productos, datos):
             lista = []
             for f in fechas:
                 fila = {'fecha': f, 'productos': {}}
                 for p in productos:
-                    fila['productos'][p] = datos[f].get(p, 0)
-                lista.append(fila)
+                    valor = datos[f].get(p)
+                    if valor:  # Solo agrega si hay valor
+                        fila['productos'][p] = valor
+                if fila['productos']:  # Solo agrega fila si hay datos
+                    lista.append(fila)
             return lista
 
         response_data = {
@@ -394,6 +367,7 @@ class KardexBodegaGeneralView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'KARDEX BODEGA DE INSUMOS'
         context['empresas'] = Empresa.objects.all()
+        context['piscinas'] = Piscinas.objects.all().order_by('id')  # Listado de todas las piscinas
         return context
 
 

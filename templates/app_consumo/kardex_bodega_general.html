@@ -6,134 +6,27 @@
 <link rel="stylesheet" href="{% static 'lib/daterangepicker-3.1/daterangepicker.css' %}">
 
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f5f5f5;
-    }
-
-    .card-header {
-        background-color: #1a1a1a;
-        color: white;
-        font-weight: bold;
-    }
-
-    .info-box {
-        background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%);
-        border: 2px solid #fbc02d;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    /* Agregando estilos para las pestañas */
-    .nav-tabs {
-        border-bottom: 2px solid #dee2e6;
-        margin-bottom: 0;
-    }
-
-    .nav-tabs .nav-link {
-        border: 1px solid transparent;
-        border-top-left-radius: 0.25rem;
-        border-top-right-radius: 0.25rem;
-        background-color: #e9ecef;
-        color: #495057;
-        font-weight: 600;
-        padding: 12px 24px;
-        margin-right: 2px;
-    }
-
-    .nav-tabs .nav-link:hover {
-        border-color: #e9ecef #e9ecef #dee2e6;
-        background-color: #f8f9fa;
-    }
-
-    .nav-tabs .nav-link.active {
-        color: #495057;
-        background-color: #fff;
-        border-color: #dee2e6 #dee2e6 #fff;
-        font-weight: bold;
-    }
-
-    .tab-content {
-        background-color: #fff;
-        border: 1px solid #dee2e6;
-        border-top: none;
-        padding: 20px;
-    }
-
-    /* Estilos para tabla horizontal con productos como columnas */
-    .table-kardex {
-        width: 100%;
-        font-size: 11px;
-        border-collapse: collapse;
-    }
-
-    .table-kardex thead th {
-        background-color: #2c3e50;
-        color: white;
-        font-weight: bold;
-        padding: 10px 5px;
-        text-align: center;
-        border: 1px solid #34495e;
-        vertical-align: middle;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-
-    .table-kardex thead th.producto-header {
-        background-color: #34495e;
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
-        min-width: 60px;
-        max-width: 80px;
-        height: 150px;
-    }
-
-    .table-kardex tbody td {
-        padding: 6px 4px;
-        border: 1px solid #ddd;
-        text-align: center;
-    }
-
-    .table-kardex tbody td.fecha-col {
-        background-color: #ecf0f1;
-        font-weight: bold;
-        text-align: left;
-        padding-left: 10px;
-        min-width: 120px;
-    }
-
-    .table-kardex tbody td.empresa-col {
-        background-color: #ecf0f1;
-        font-weight: bold;
-        text-align: center;
-    }
-
-    .table-kardex tbody tr:hover {
-        background-color: #e3f2fd;
-    }
-
-    .table-kardex tbody td.consumo-cell {
-        background-color: #fff;
-    }
-
-    .table-kardex tbody td.consumo-cell:not(:empty) {
-        background-color: #e8f5e9;
-        font-weight: 600;
-    }
-
-    @media print {
-        .btn-export, .breadcrumb, .card-tools, .info-box {
-            display: none;
-        }
-    }
+body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+.card-header { background-color: #1a1a1a; color: white; font-weight: bold; }
+.info-box { background: linear-gradient(135deg, #fff9c4 0%, #fff176 100%); border: 2px solid #fbc02d; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.nav-tabs { border-bottom: 2px solid #dee2e6; margin-bottom: 0; }
+.nav-tabs .nav-link { border: 1px solid transparent; border-top-left-radius: 0.25rem; border-top-right-radius: 0.25rem; background-color: #e9ecef; color: #495057; font-weight: 600; padding: 12px 24px; margin-right: 2px; }
+.nav-tabs .nav-link:hover { border-color: #e9ecef #e9ecef #dee2e6; background-color: #f8f9fa; }
+.nav-tabs .nav-link.active { color: #495057; background-color: #fff; border-color: #dee2e6 #dee2e6 #fff; font-weight: bold; }
+.tab-content { background-color: #fff; border: 1px solid #dee2e6; border-top: none; padding: 20px; }
+.table-kardex { width: 100%; font-size: 12px; border-collapse: collapse; }
+.table-kardex thead th { background-color: #2c3e50; color: white; font-weight: bold; padding: 10px 5px; text-align: center; border: 1px solid #34495e; vertical-align: middle; position: sticky; top: 0; z-index: 10; }
+.table-kardex thead th.producto-header { background-color: #34495e; writing-mode: vertical-rl; text-orientation: mixed; min-width: 60px; max-width: 80px; height: 150px; }
+.table-kardex tbody td { padding: 6px 4px; border: 1px solid #ddd; text-align: center; }
+.table-kardex tbody td.fecha-col { background-color: #ecf0f1; font-weight: bold; text-align: left; padding-left: 10px; min-width: 120px; }
+.table-kardex tbody td.consumo-cell { background-color: #fff; }
+.table-kardex tbody td.consumo-cell:not(:empty) { background-color: #e8f5e9; font-weight: 600; }
+.table-kardex tbody tr:nth-child(even) td.consumo-cell:not(:empty) { background-color: #d0f0c0; }
+@media print { .btn-export, .breadcrumb, .card-tools, .info-box { display: none; } }
 </style>
 {% endblock %}
 
 {% block contenido %}
-
 <div class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
@@ -151,25 +44,23 @@
 <div class="container-fluid">
 <div class="row">
 <div class="col-12">
-
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">{{ titulo }} - REPORTE HORIZONTAL</h3>
     </div>
 
     <div class="card-body">
-
         <!-- FILTROS -->
         <div class="info-box">
             <div class="row">
-
                 <!-- Empresa -->
                 <div class="col-md-3">
                     <label><strong>Empresa:</strong></label>
                     <select id="empresa_select" class="form-control">
                         <option value="">Seleccione...</option>
-                        <option value="PSM">PSM</option>
-                        <option value="BIO">BIO</option>
+                        {% for empresa in empresas %}
+                        <option value="{{ empresa.siglas }}">{{ empresa.siglas }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -178,6 +69,9 @@
                     <label><strong>Piscina:</strong></label>
                     <select id="piscina_select" class="form-control">
                         <option value="">Seleccione empresa primero...</option>
+                        {% for piscina in piscinas %}
+                            <option value="{{ piscina.id }}" data-empresa="{{ piscina.empresa.siglas }}">{{ piscina.numero }}</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -194,106 +88,48 @@
                         <i class="fas fa-search"></i> Buscar
                     </button>
                 </div>
-
             </div>
 
             <div class="row mt-2">
                 <div class="col-md-12 text-right">
-                    <button class="btn btn-success btn-export" id="btn_excel">
-                        <i class="fas fa-file-excel"></i> Excel
-                    </button>
-
-                    <button class="btn btn-danger btn-export" id="btn_pdf">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
-
-                    <button class="btn btn-secondary btn-export" id="btn_imprimir">
-                        <i class="fas fa-print"></i> Imprimir
-                    </button>
+                    <button class="btn btn-success btn-export" id="btn_excel"><i class="fas fa-file-excel"></i> Excel</button>
+                    <button class="btn btn-danger btn-export" id="btn_pdf"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-secondary btn-export" id="btn_imprimir"><i class="fas fa-print"></i> Imprimir</button>
                 </div>
             </div>
         </div>
 
-        <!-- Agregando pestañas para CONSUMO BALANCEADOS, INSUMOS DE BALANCEADO y INSUMOS DE CAMPOS -->
+        <!-- TABS -->
         <ul class="nav nav-tabs" id="kardexTabs" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="consumo-tab" data-toggle="tab" href="#consumo-balanceados" role="tab">
-                    CONSUMO BALANCEADOS
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="insumos-balanceado-tab" data-toggle="tab" href="#insumos-balanceado" role="tab">
-                    INSUMOS DE BALANCEADO
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="insumos-campo-tab" data-toggle="tab" href="#insumos-campo" role="tab">
-                    INSUMOS DE CAMPOS
-                </a>
-            </li>
+            <li class="nav-item"><a class="nav-link active" id="consumo-tab" data-toggle="tab" href="#consumo-balanceados" role="tab">CONSUMO BALANCEADOS</a></li>
+            <li class="nav-item"><a class="nav-link" id="insumos-balanceado-tab" data-toggle="tab" href="#insumos-balanceado" role="tab">INSUMOS DE BALANCEADO</a></li>
+            <li class="nav-item"><a class="nav-link" id="insumos-campo-tab" data-toggle="tab" href="#insumos-campo" role="tab">INSUMOS DE CAMPOS</a></li>
         </ul>
 
         <div class="tab-content" id="kardexTabContent">
-
-            <!-- PESTAÑA: CONSUMO BALANCEADOS -->
             <div class="tab-pane fade show active" id="consumo-balanceados" role="tabpanel">
-                <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+                <div class="table-responsive" style="max-height:600px;overflow:auto;">
                     <table class="table table-kardex table-bordered" id="tb_consumo_balanceados">
-                        <thead id="thead_consumo_balanceados">
-                            <tr>
-                                <th style="min-width: 120px;">FECHA</th>
-                                <th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody_consumo_balanceados">
-                            <tr>
-                                <td colspan="100" class="text-center text-muted">
-                                    Esperando datos...
-                                </td>
-                            </tr>
-                        </tbody>
+                        <thead id="thead_consumo_balanceados"><tr><th style="min-width:120px;">FECHA</th><th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th></tr></thead>
+                        <tbody id="tbody_consumo_balanceados"><tr><td colspan="100" class="text-center text-muted">Esperando datos...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- PESTAÑA: INSUMOS DE BALANCEADO -->
             <div class="tab-pane fade" id="insumos-balanceado" role="tabpanel">
-                <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+                <div class="table-responsive" style="max-height:600px;overflow:auto;">
                     <table class="table table-kardex table-bordered" id="tb_kardex_balanceados">
-                        <thead id="thead_kardex_balanceados">
-                            <tr>
-                                <th style="min-width: 120px;">FECHA</th>
-                                <th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody_kardex_balanceados">
-                            <tr>
-                                <td colspan="100" class="text-center text-muted">
-                                    Esperando datos...
-                                </td>
-                            </tr>
-                        </tbody>
+                        <thead id="thead_kardex_balanceados"><tr><th style="min-width:120px;">FECHA</th><th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th></tr></thead>
+                        <tbody id="tbody_kardex_balanceados"><tr><td colspan="100" class="text-center text-muted">Esperando datos...</td></tr></tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- PESTAÑA: INSUMOS DE CAMPOS -->
             <div class="tab-pane fade" id="insumos-campo" role="tabpanel">
-                <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+                <div class="table-responsive" style="max-height:600px;overflow:auto;">
                     <table class="table table-kardex table-bordered" id="tb_kardex_campo">
-                        <thead id="thead_kardex_campo">
-                            <tr>
-                                <th style="min-width: 120px;">FECHA</th>
-                                <th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody_kardex_campo">
-                            <tr>
-                                <td colspan="100" class="text-center text-muted">
-                                    Esperando datos...
-                                </td>
-                            </tr>
-                        </tbody>
+                        <thead id="thead_kardex_campo"><tr><th style="min-width:120px;">FECHA</th><th colspan="100" class="text-center">Seleccione filtros y presione "Buscar"</th></tr></thead>
+                        <tbody id="tbody_kardex_campo"><tr><td colspan="100" class="text-center text-muted">Esperando datos...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -302,262 +138,169 @@
 
     </div>
 </div>
-
 </div>
 </div>
 </div>
-
 {% endblock %}
 
 {% block scripts %}
-
-    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
-    <script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
-    <script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
-    <script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
-
-    <!-- Agregando librerías para exportar a Excel y PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+<script src="{% static 'lib/daterangepicker-3.1/spanish.js' %}"></script>
+<script src="{% static 'lib/daterangepicker-3.1/daterangepicker.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
 <script>
-
 $(document).ready(function () {
-
     moment.locale('es');
+    $('#daterange').daterangepicker({ startDate: moment().subtract(7,'days'), endDate: moment(), locale:{format:'YYYY-MM-DD'} });
 
-    $('#daterange').daterangepicker({
-        startDate: moment().subtract(7, 'days'),
-        endDate: moment(),
-        locale: { format: 'YYYY-MM-DD' }
+    // Filtrar piscinas por empresa
+    $('#empresa_select').change(function(){
+        const empresa = $(this).val();
+        const piscinaSelect = $('#piscina_select');
+        piscinaSelect.val('');
+        piscinaSelect.find('option').hide();
+        piscinaSelect.find('option[value=""]').show();
+        piscinaSelect.find(`option[data-empresa="${empresa}"]`).show();
     });
 
-    // PISCINAS SEGÚN EMPRESA SELECCIONADA
-    $('#empresa_select').change(function () {
-        let empresa = $(this).val();
-        let piscinaSelect = $('#piscina_select');
-
-        piscinaSelect.html('<option value="">Seleccione...</option>');
-
-        let inicio = 1;
-        let fin = 1;
-
-        if (empresa === "PSM") {
-            inicio = 1;
-            fin = 20;
-        } else if (empresa === "BIO") {
-            inicio = 21;
-            fin = 45;
-        } else {
-            return;
-        }
-
-        for (let i = inicio; i <= fin; i++) {
-            piscinaSelect.append(`<option value="Piscina-${i}">Piscina ${i}</option>`);
-        }
-    });
-
-    $('#btn_buscar').click(function () {
-        buscarKardex();
-    });
-
-    $('#btn_excel').click(function() {
-        exportarAExcel();
-    });
-
-    $('#btn_pdf').click(function() {
-        exportarAPDF();
-    });
-
-    $('#btn_imprimir').click(function() {
-        window.print();
-    });
+    $('#btn_buscar').click(buscarKardex);
+    $('#btn_excel').click(exportarAExcel);
+    $('#btn_pdf').click(exportarAPDF);
+    $('#btn_imprimir').click(()=>window.print());
 });
 
-function exportarAExcel() {
-    const tabActiva = $('.nav-link.active').text().trim();
-    let tablaId = '';
+function getCookie(name){let cookieValue=null;if(document.cookie&&document.cookie!==''){const cookies=document.cookie.split(';');for(let i=0;i<cookies.length;i++){const cookie=cookies[i].trim();if(cookie.substring(0,name.length+1)===(name+'=')){cookieValue=decodeURIComponent(cookie.substring(name.length+1));break;}}}return cookieValue;}
 
-    if (tabActiva.includes('CONSUMO BALANCEADOS')) {
-        tablaId = '#tb_consumo_balanceados';
-    } else if (tabActiva.includes('INSUMOS DE BALANCEADO')) {
-        tablaId = '#tb_kardex_balanceados';
-    } else {
-        tablaId = '#tb_kardex_campo';
-    }
-
-    const tabla = $(tablaId)[0];
-    const wb = XLSX.utils.table_to_book(tabla, {sheet: tabActiva});
-
-    const empresa = $('#empresa_select').val() || 'Empresa';
-    const piscina = $('#piscina_select').val() || 'Piscina';
-    const fecha = moment().format('YYYY-MM-DD');
-
-    XLSX.writeFile(wb, `Kardex_${tabActiva}_${empresa}_${piscina}_${fecha}.xlsx`);
-}
-
-function exportarAPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('landscape');
-
-    const tabActiva = $('.nav-link.active').text().trim();
-    let tablaId = '';
-
-    if (tabActiva.includes('CONSUMO BALANCEADOS')) {
-        tablaId = '#tb_consumo_balanceados';
-    } else if (tabActiva.includes('INSUMOS DE BALANCEADO')) {
-        tablaId = '#tb_kardex_balanceados';
-    } else {
-        tablaId = '#tb_kardex_campo';
-    }
-
-    const empresa = $('#empresa_select').val() || 'Empresa';
-    const piscina = $('#piscina_select').val() || 'Piscina';
-    const fechas = $('#daterange').val();
-
-    doc.setFontSize(16);
-    doc.text(`KARDEX BODEGA DE INSUMOS - ${tabActiva}`, 14, 15);
-    doc.setFontSize(10);
-    doc.text(`Empresa: ${empresa} | Piscina: ${piscina} | Período: ${fechas}`, 14, 22);
-
-    doc.autoTable({
-        html: tablaId,
-        startY: 28,
-        theme: 'grid',
-        styles: { fontSize: 7, cellPadding: 2 },
-        headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { top: 28 }
-    });
-
-    const fecha = moment().format('YYYY-MM-DD');
-    doc.save(`Kardex_${tabActiva}_${empresa}_${piscina}_${fecha}.pdf`);
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function buscarKardex() {
-    const fechas = $('#daterange').data('daterangepicker');
-    const start_date = fechas.startDate.format('YYYY-MM-DD');
-    const end_date = fechas.endDate.format('YYYY-MM-DD');
-    const empresa = $('#empresa_select').val();
-    const piscina = $('#piscina_select').val();
-
-    const csrftoken = getCookie('csrftoken');
-
-    console.log('[v0] Enviando búsqueda:', { empresa, piscina, start_date, end_date });
+function buscarKardex(){
+    const fechas=$('#daterange').data('daterangepicker');
+    const start_date=fechas.startDate.format('YYYY-MM-DD');
+    const end_date=fechas.endDate.format('YYYY-MM-DD');
+    const empresa=$('#empresa_select').val();
+    const piscina=$('#piscina_select').val();
+    const csrftoken=getCookie('csrftoken');
 
     $.ajax({
-        url: '',
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrftoken
-        },
-        data: {
-            action: 'get_kardex_horizontal',
-            empresa: empresa,
-            piscina: piscina,
-            start_date: start_date,
-            end_date: end_date
-        },
-        success: function (response) {
-            console.log('[v0] Response recibido:', response);
-
-            if (!response || response.error) {
-                alert('Error al cargar datos: ' + (response.error || 'Sin respuesta'));
-                return;
-            }
-
+        url:'',
+        method:'POST',
+        headers:{'X-CSRFToken':csrftoken},
+        data:{action:'get_kardex_horizontal',empresa:empresa,piscina:piscina,start_date:start_date,end_date:end_date},
+        success:function(response){
             construirTablaHorizontal(response.productos_balanceados || [], response.datos_balanceados || [], 'consumo');
             construirTablaHorizontal(response.productos_insumos || [], response.datos_insumos || [], 'balanceados');
             construirTablaHorizontal(response.productos_campo || [], response.datos_campo || [], 'campo');
         },
-        error: function(xhr, status, error) {
-            console.error('[v0] Error AJAX:', error);
-            alert('Error al realizar la búsqueda: ' + error);
-        }
+        error:function(xhr,status,error){alert('Error al realizar la búsqueda: '+error);}
     });
 }
 
-function construirTablaHorizontal(productos, datos, tipo) {
-    console.log(`[v0] Construyendo tabla horizontal tipo ${tipo} con productos:`, productos);
-    console.log(`[v0] Datos:`, datos);
-
+function construirTablaHorizontal(productos, datos, tipo){
     let theadId, tbodyId;
+    if(tipo==='consumo'){theadId='#thead_consumo_balanceados';tbodyId='#tbody_consumo_balanceados';}
+    else if(tipo==='balanceados'){theadId='#thead_kardex_balanceados';tbodyId='#tbody_kardex_balanceados';}
+    else{theadId='#thead_kardex_campo';tbodyId='#tbody_kardex_campo';}
 
-    if (tipo === 'consumo') {
-        // CONSUMO BALANCEADOS
-        theadId = '#thead_consumo_balanceados';
-        tbodyId = '#tbody_consumo_balanceados';
-    } else if (tipo === 'balanceados') {
-        // INSUMOS DE BALANCEADO
-        theadId = '#thead_kardex_balanceados';
-        tbodyId = '#tbody_kardex_balanceados';
-    } else {
-        // INSUMOS DE CAMPOS
-        theadId = '#thead_kardex_campo';
-        tbodyId = '#tbody_kardex_campo';
-    }
-
-    if (!productos || productos.length === 0) {
-        $(theadId).html('<tr><th>FECHA</th><th>NO HAY PRODUCTOS</th></tr>');
+    // Si no hay datos, mostrar mensaje
+    if(!productos||productos.length===0||datos.length===0){
+        $(theadId).html('<tr><th>FECHA</th><th>NO HAY DATOS</th></tr>');
         $(tbodyId).html('<tr><td colspan="2" class="text-center text-muted">No hay datos</td></tr>');
         return;
     }
 
-    // Construir header con productos como columnas
-    let headerHTML = '<tr><th style="min-width: 120px; background-color: #2c3e50;">FECHA</th>';
-
-    productos.forEach(prod => {
-        headerHTML += `<th class="producto-header">${prod}</th>`;
-    });
-
-    headerHTML += '</tr>';
+    // Construir encabezado solo con productos que tengan valores
+    let headerHTML='<tr><th style="min-width:120px;background-color:#2c3e50;">FECHA</th>';
+    let productosConDatos = new Set();
+    datos.forEach(row=>Object.keys(row.productos).forEach(p=>productosConDatos.add(p)));
+    productos = productos.filter(p=>productosConDatos.has(p));
+    productos.forEach(p=>headerHTML+=`<th class="producto-header">${p}</th>`);
+    headerHTML+='</tr>';
     $(theadId).html(headerHTML);
 
-    const filasFiltradas = datos.filter(fila => {
-        return productos.some(prod => {
-            const valor = fila.productos[prod] || 0;
-            return valor > 0;
-        });
+    // Construir cuerpo solo con filas que tengan valores
+    let bodyHTML='';
+    datos.forEach(row=>{
+        const valores = Object.keys(row.productos);
+        if(valores.length>0){
+            bodyHTML+=`<tr><td class="fecha-col">${row.fecha}</td>`;
+            productos.forEach(p=>bodyHTML+=`<td class="consumo-cell">${row.productos[p]||''}</td>`);
+            bodyHTML+='</tr>';
+        }
     });
-
-    // Construir filas con datos (solo filas con consumo)
-    let bodyHTML = '';
-
-    if (!filasFiltradas || filasFiltradas.length === 0) {
-        bodyHTML = `<tr><td colspan="${productos.length + 1}" class="text-center text-muted">No hay datos para el rango seleccionado</td></tr>`;
-    } else {
-        filasFiltradas.forEach(fila => {
-            bodyHTML += `<tr><td class="fecha-col">${fila.fecha}</td>`;
-
-            productos.forEach(prod => {
-                const valor = fila.productos[prod] || 0;
-                const displayValor = valor > 0 ? valor.toFixed(2) : '';
-                bodyHTML += `<td class="consumo-cell">${displayValor}</td>`;
-            });
-
-            bodyHTML += '</tr>';
-        });
-    }
-
     $(tbodyId).html(bodyHTML);
 }
 
-</script>
+function exportarAExcel() {
+    let tablaActiva = $('.tab-pane.active table')[0];
+    if (!tablaActiva) { alert('No hay datos para exportar'); return; }
 
+    // Crear libro y hoja
+    let wb = XLSX.utils.book_new();
+
+    // Obtener info de filtros
+    let piscina = $('#piscina_select option:selected').text();
+    let empresa = $('#empresa_select option:selected').text();
+    let fechas = $('#daterange').data('daterangepicker');
+    let start_date = fechas.startDate.format('YYYY-MM-DD');
+    let end_date = fechas.endDate.format('YYYY-MM-DD');
+
+    // Crear una hoja temporal desde la tabla
+    let ws = XLSX.utils.table_to_sheet(tablaActiva);
+
+    // Agregar encabezados extra al inicio
+    XLSX.utils.sheet_add_aoa(ws, [
+        [`Piscina: ${piscina}`],
+        [`Empresa: ${empresa}`],
+        [`Rango de fechas: ${start_date} - ${end_date}`],
+        [] // fila vacía antes de la tabla
+    ], { origin: 0 });
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Kardex');
+
+    // Descargar Excel
+    XLSX.writeFile(wb, `kardex_horizontal_${piscina.replace(/\s+/g,'_')}.xlsx`);
+}
+
+function exportarAPDF() {
+    let tablaActiva = $('.tab-pane.active table')[0];
+    if (!tablaActiva) { alert('No hay datos para exportar'); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'pt', 'a4'); // horizontal
+
+    // Info de filtros
+    let piscina = $('#piscina_select option:selected').text();
+    let empresa = $('#empresa_select option:selected').text();
+    let fechas = $('#daterange').data('daterangepicker');
+    let start_date = fechas.startDate.format('YYYY-MM-DD');
+    let end_date = fechas.endDate.format('YYYY-MM-DD');
+
+    doc.setFontSize(12);
+    doc.text(`Kardex Horizontal - Piscina: ${piscina}`, 40, 25);
+    doc.setFontSize(11);
+    doc.text(`Empresa: ${empresa}`, 40, 45);
+    doc.text(`Rango de fechas: ${start_date} - ${end_date}`, 40, 60);
+
+    doc.autoTable({
+        html: tablaActiva,
+        startY: 80,
+        headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [232, 245, 233] },
+        styles: { fontSize: 10, cellPadding: 4 },
+        margin: { left: 20, right: 20 },
+        didDrawCell: function(data){
+            if(data.cell.section==='body' && data.cell.text[0] !== ''){
+                data.cell.styles.fillColor=[216,239,222]; // verde claro celdas con valor
+            }
+        }
+    });
+
+    doc.save(`kardex_horizontal_${piscina.replace(/\s+/g,'_')}.pdf`);
+}
+
+
+</script>
 {% endblock %}
