@@ -2,6 +2,7 @@
 import json
 import datetime
 import decimal
+from decimal import Decimal
 from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
@@ -24,7 +25,9 @@ from crum import get_current_user
 import xlsxwriter
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
-from app_stock.app_detalle_stock.views.stock import eliminar_asientos_por_detalle
+from app_stock.app_detalle_stock.services import eliminar_asientos_por_detalle
+from app_stock.app_detalle_stock.services import revertir_stock_por_detalle
+
 
 
 class crearAnioDietaView(CreateView):
@@ -95,29 +98,48 @@ class crearDiaDietaView(CreateView):
                     item = i.toJSON()
                     data.append(item)
             elif action == 'create':
+
                 with transaction.atomic():
-                    items = json.loads(request.POST['items'])
+
                     factura = DiaDietaRegistro.objects.get(id=self.kwargs['pk'])
+
+                    items = json.loads(request.POST.get('items', '[]'))
+
                     factura.mes_dieta_id = factura.mes_dieta.pk
-                    factura.fecha = request.POST['fecha']
+                    factura.fecha = request.POST.get('fecha')
                     factura.tip_dieta = True
                     factura.save()
+
                     for i in items:
                         inv = DetalleDiaDieta()
-                        inv.dieta_id = factura.pk
+
+                        inv.dieta_id = factura.id
                         inv.piscinas_id = int(i['id']) if i.get('id') else None
-                        balanceado_id = (i['balanceado']) if i.get('balanceado') else None
-                        inv.balanceado_id = balanceado_id
-                        inv.cantidad = decimal.Decimal(i['cantidad']) if i.get('cantidad') and balanceado_id is not None else 0
+
+                        # Balanceado
+                        inv.balanceado_id = i.get('balanceado') or None
+                        inv.cantidad = Decimal(i['cantidad']) if i.get('cantidad') else Decimal('0')
+
+                        # Insumo 1
                         inv.insumo1 = int(i['insumo1']) if i.get('insumo1') else 0
-                        inv.gramaje1 = decimal.Decimal(i['gramaje1']) if i.get('gramaje1') else decimal.Decimal('0.00')
+                        inv.gramaje1 = Decimal(i['gramaje1']) if i.get('gramaje1') else Decimal('0')
+
+                        # Insumo 2
                         inv.insumo2 = int(i['insumo2']) if i.get('insumo2') else 0
-                        inv.gramaje2 = decimal.Decimal(i['gramaje2']) if i.get('gramaje2') else decimal.Decimal('0.00')
+                        inv.gramaje2 = Decimal(i['gramaje2']) if i.get('gramaje2') else Decimal('0')
+
+                        # Insumo 3
                         inv.insumo3 = int(i['insumo3']) if i.get('insumo3') else 0
-                        inv.gramaje3 = decimal.Decimal(i['gramaje3']) if i.get('gramaje3') else decimal.Decimal('0.00')
+                        inv.gramaje3 = Decimal(i['gramaje3']) if i.get('gramaje3') else Decimal('0')
+
+                        # Insumo 4
                         inv.insumo4 = int(i['insumo4']) if i.get('insumo4') else 0
-                        inv.gramaje4 = decimal.Decimal(i['gramaje4']) if i.get('gramaje4') else decimal.Decimal('0.00')
+                        inv.gramaje4 = Decimal(i['gramaje4']) if i.get('gramaje4') else Decimal('0')
+
                         inv.save()
+
+                    data['success'] = True
+
             elif action == 'upload_excel':
                 print('LLEGO A UPLOAD EXCELL Y EMPEZO A RECORRER EL PYTHON DESDE AJAX')
                 try:
@@ -256,71 +278,45 @@ class editarDiaDietaView(UpdateView):
                     data.append(item)
             elif action == 'edit':
                 with transaction.atomic():
+
                     items = json.loads(request.POST['items'])
                     factura = self.get_object()
+
                     factura.mes_dieta_id = factura.mes_dieta.pk
                     factura.fecha = request.POST['fecha']
                     factura.tip_dieta = True
                     factura.save()
+
+                    # 🔁 REVERTIR STOCK + ELIMINAR DETALLES
                     for s in factura.detallediadieta_set.all():
                         eliminar_asientos_por_detalle(s.pk)
-                        datos = []
-                        if s.balanceado:
-                            datos.append((s.balanceado.id, int(s.cantidad)))
-                        if s.insumo1:
-                            datos.append((s.insumo1, int(s.gramaje1)))
-                        if s.insumo2:
-                            datos.append((s.insumo2, int(s.gramaje2)))
-                        if s.insumo3:
-                            datos.append((s.insumo3, int(s.gramaje3)))
-                        if s.insumo4:
-                            datos.append((s.insumo4, int(s.gramaje4)))
-                        print(datos)
-                        for d in datos:
-                            if not d[0]:
-                                continue
 
-                            ps = Total_Stock.objects.filter(
-                                nombre_empresa_id=s.piscinas.empresa.pk,
-                                nombre_prod_id=int(d[0])
-                            ).first()
+                        revertir_stock_por_detalle(
+                            detalle=s,
+                            texto_guia='EDICION DE DIETA Y REAJUSTE DE STOCK'
+                        )
 
-                            if not ps:
-                                continue
-
-                            producto = Producto_Stock()
-                            producto.producto_empresa_id = ps.pk
-                            producto.tipo = 'INGRESO'
-                            producto.piscinas = s.piscinas.numero
-                            producto.cantidad_ingreso = float(d[1])
-                            producto.fecha_ingreso = s.dieta.fecha
-                            producto.numero_guia = 'EDICION DE DIETA Y REAJUSTE DE STOCK'
-                            producto.responsable_ingreso = get_current_user()
-                            producto.activo = False
-                            producto.detalle_dieta_id = s.pk
-                            producto.save()
                         s.delete()
 
+                    # ➕ CREAR NUEVOS DETALLES
                     for i in items:
-                        inv = DetalleDiaDieta()
-                        inv.dieta_id = factura.pk
-                        inv.piscinas_id = (i['id']) if i.get('id') else None
-                        balanceado_id = (i['balanceado']) if i.get('balanceado') else None
-                        inv.balanceado_id = balanceado_id
-                        inv.cantidad = decimal.Decimal(i['cantidad']) if i.get('cantidad') and balanceado_id is not None else 0
-                        insumo1 = int(i['insumo1']) if i.get('insumo1') else 0
-                        inv.insumo1 = insumo1
-                        inv.gramaje1 = decimal.Decimal(i['gramaje1']) if i.get('gramaje1') and insumo1 > 0 else 0
-                        insumo2 = int(i['insumo2']) if i.get('insumo2') else 0
-                        inv.insumo2 = insumo2
-                        inv.gramaje2 = decimal.Decimal(i['gramaje2']) if i.get('gramaje2') and insumo2 > 0 else 0
-                        insumo3 = int(i['insumo3']) if i.get('insumo3') else 0
-                        inv.insumo3 = insumo3
-                        inv.gramaje3 = decimal.Decimal(i['gramaje3']) if i.get('gramaje3') and insumo3 > 0 else 0
-                        insumo4 = int(i['insumo4']) if i.get('insumo4') else 0
-                        inv.insumo4 = insumo4
-                        inv.gramaje4 = decimal.Decimal(i['gramaje4']) if i.get('gramaje4') and insumo4 > 0 else 0
-                        inv.save()
+                        DetalleDiaDieta.objects.create(
+                            dieta_id=factura.pk,
+                            piscinas_id=i.get('id'),
+                            balanceado_id=i.get('balanceado'),
+                            cantidad=decimal.Decimal(i['cantidad']) if i.get('balanceado') else 0,
+                            insumo1=int(i['insumo1']) if i.get('insumo1') else 0,
+                            gramaje1=decimal.Decimal(i['gramaje1']) if i.get('insumo1') else 0,
+                            insumo2=int(i['insumo2']) if i.get('insumo2') else 0,
+                            gramaje2=decimal.Decimal(i['gramaje2']) if i.get('insumo2') else 0,
+                            insumo3=int(i['insumo3']) if i.get('insumo3') else 0,
+                            gramaje3=decimal.Decimal(i['gramaje3']) if i.get('insumo3') else 0,
+                            insumo4=int(i['insumo4']) if i.get('insumo4') else 0,
+                            gramaje4=decimal.Decimal(i['gramaje4']) if i.get('insumo4') else 0,
+                        )
+
+                    data['success'] = True
+
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:
@@ -524,66 +520,45 @@ class editarDiaDietaPrecriaView(UpdateView):
             #             inv.save()
             elif action == 'edit':
                 with transaction.atomic():
+
                     items = json.loads(request.POST['items'])
                     factura = self.get_object()
+
                     factura.mes_dieta_id = factura.mes_dieta.pk
                     factura.fecha = request.POST['fecha']
                     factura.tip_dieta = False
                     factura.save()
+
+                    # 🔁 REVERTIR STOCK PRECRÍA
                     for s in factura.detallediadieta_set.all():
                         eliminar_asientos_por_detalle(s.pk)
-                        datos = []
-                        if s.balanceado:
-                            datos.append((s.balanceado.id, s.cantidad))
-                        if s.insumo1:
-                            datos.append((s.insumo1, s.gramaje1))
-                        if s.insumo2:
-                            datos.append((s.insumo2, s.gramaje2))
-                        if s.insumo3:
-                            datos.append((s.insumo3, s.gramaje3))
-                        if s.insumo4:
-                            datos.append((s.insumo4, s.gramaje4))
-                        for prod_id, cantidad in datos:
-                            if not prod_id or cantidad <= 0:
-                                continue
-                            ps = Total_Stock.objects.filter(
-                                nombre_empresa_id=s.piscinas.empresa.pk,
-                                nombre_prod_id=prod_id
-                            ).first()
-                            if not ps:
-                                continue
-                            producto = Producto_Stock()
-                            producto.producto_empresa_id = ps.pk
-                            producto.tipo = 'INGRESO'
-                            producto.piscinas = s.piscinas.numero
-                            producto.cantidad_ingreso = float(cantidad)
-                            producto.fecha_ingreso = s.dieta.fecha
-                            producto.numero_guia = 'EDICION DE PRECRIA Y REAJUSTE DE STOCK'
-                            producto.responsable_ingreso = get_current_user()
-                            producto.activo = False
-                            producto.detalle_dieta_id = s.pk
-                            producto.save()
+
+                        revertir_stock_por_detalle(
+                            detalle=s,
+                            texto_guia='EDICION DE PRECRIA Y REAJUSTE DE STOCK'
+                        )
+
                         s.delete()
+
+                    # ➕ CREAR NUEVOS DETALLES
                     for i in items:
-                        inv = DetalleDiaDieta()
-                        inv.dieta_id = factura.pk
-                        inv.piscinas_id = i.get('id')
-                        balanceado_id = i.get('balanceado')
-                        inv.balanceado_id = balanceado_id
-                        inv.cantidad = decimal.Decimal(i['cantidad']) if balanceado_id else 0
-                        insumo1 = int(i['insumo1']) if i.get('insumo1') else 0
-                        inv.insumo1 = insumo1
-                        inv.gramaje1 = decimal.Decimal(i['gramaje1']) if insumo1 else 0
-                        insumo2 = int(i['insumo2']) if i.get('insumo2') else 0
-                        inv.insumo2 = insumo2
-                        inv.gramaje2 = decimal.Decimal(i['gramaje2']) if insumo2 else 0
-                        insumo3 = int(i['insumo3']) if i.get('insumo3') else 0
-                        inv.insumo3 = insumo3
-                        inv.gramaje3 = decimal.Decimal(i['gramaje3']) if insumo3 else 0
-                        insumo4 = int(i['insumo4']) if i.get('insumo4') else 0
-                        inv.insumo4 = insumo4
-                        inv.gramaje4 = decimal.Decimal(i['gramaje4']) if insumo4 else 0
-                        inv.save()
+                        DetalleDiaDieta.objects.create(
+                            dieta_id=factura.pk,
+                            piscinas_id=i.get('id'),
+                            balanceado_id=i.get('balanceado'),
+                            cantidad=decimal.Decimal(i['cantidad']) if i.get('balanceado') else 0,
+                            insumo1=int(i['insumo1']) if i.get('insumo1') else 0,
+                            gramaje1=decimal.Decimal(i['gramaje1']) if i.get('insumo1') else 0,
+                            insumo2=int(i['insumo2']) if i.get('insumo2') else 0,
+                            gramaje2=decimal.Decimal(i['gramaje2']) if i.get('insumo2') else 0,
+                            insumo3=int(i['insumo3']) if i.get('insumo3') else 0,
+                            gramaje3=decimal.Decimal(i['gramaje3']) if i.get('insumo3') else 0,
+                            insumo4=int(i['insumo4']) if i.get('insumo4') else 0,
+                            gramaje4=decimal.Decimal(i['gramaje4']) if i.get('insumo4') else 0,
+                        )
+
+                    data['success'] = True
+
             else:
                 data['error'] = 'Ha ocurrido un error'
         except Exception as e:

@@ -60,7 +60,7 @@ LOCAL_APPS = [
     'app_contabilidad_planCuentas',
     'app_inventario.app_categoria',
     'app_inventario.app_producto',
-    'app_stock.app_detalle_stock',
+    'app_stock.app_detalle_stock.apps.AppDetalleStockConfig',
     'app_empresa.app_reg_empresa',
     'app_dieta.app_dieta_reg',
     'app_cliente',

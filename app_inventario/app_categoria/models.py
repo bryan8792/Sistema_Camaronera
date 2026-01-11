@@ -7,6 +7,8 @@ from Sistema_Camaronera.settings import MEDIA_URL, STATIC_URL
 from app_contabilidad_planCuentas.models import PlanCuenta
 from app_empresa.app_reg_empresa.models import Empresa
 from django.db import connection
+from django.apps import apps
+from django.db import transaction
 
 
 class Categoria(models.Model):
@@ -36,11 +38,35 @@ class Categoria(models.Model):
         ordering = ['id']
 
 
+class Linea(models.Model):
+    nombre = models.CharField(max_length=150, verbose_name='Nombre', unique=True)
+    descripcion = models.CharField(max_length=400, verbose_name='Descripcion')
+
+    def __str__(self):
+        return self.nombre
+
+    def toJSON(self):
+        item = model_to_dict(self)
+        return item
+
+    class Meta:
+        db_table = 'tb_linea'
+        verbose_name = 'Linea'
+        verbose_name_plural = 'Lineas'
+        ordering = ['id']
+
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=150, verbose_name='Nombre ', unique=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     gramaje = models.CharField(max_length=100, verbose_name='Gramaje ', null=True, blank=True)
-    descripcion = models.CharField(max_length=400, verbose_name='Sub-Categoria ', null=True, blank=True)
+    descripcion = models.ForeignKey(
+        Linea,
+        on_delete=models.CASCADE,
+        verbose_name='Sub-Categoría',
+        null=True,
+        blank=True
+    )
     presentacion = models.CharField(max_length=400, verbose_name='Presentacion ', null=True, blank=True)
     peso_presentacion = models.DecimalField(max_digits=19, decimal_places=0, verbose_name='Peso de la Presentacion ', null=True, blank=True)
     unid_medida = models.CharField(max_length=400, verbose_name='Unidad de Medida de la Presentación ', null=True, blank=True)
@@ -85,25 +111,46 @@ class Producto(models.Model):
         item['costo_aplicacion'] = format(self.costo_aplicacion, '.10f')
         return item
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        nuevo_producto = super(Producto, self).save()
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     nuevo_producto = super(Producto, self).save()
+    #
+    #     empresas = Empresa.objects.filter(estado=True)
+    #     cursor = connection.cursor()
+    #
+    #     for empresa in empresas:
+    #         # Validar si el producto-empresa ya existe
+    #         cursor.execute(
+    #             "SELECT nombre_empresa_id, nombre_prod_id FROM stock_total WHERE nombre_empresa_id = %s AND nombre_prod_id = %s;" % (
+    #             empresa.pk, self.id))
+    #         registros = cursor.fetchall()
+    #
+    #         if not registros:
+    #             cursor.execute(
+    #                 "INSERT INTO stock_total (nombre_empresa_id, nombre_prod_id, stock) VALUES (%s, %s, 0);" % (
+    #                 empresa.pk, self.id))
+    #
+    #     return nuevo_producto
+
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if not is_new:
+            return
+
+        TotalStock = apps.get_model('app_detalle_stock', 'Total_Stock')
+        Empresa = apps.get_model('app_reg_empresa', 'Empresa')
 
         empresas = Empresa.objects.filter(estado=True)
-        cursor = connection.cursor()
 
-        for empresa in empresas:
-            # Validar si el producto-empresa ya existe
-            cursor.execute(
-                "SELECT nombre_empresa_id, nombre_prod_id FROM stock_total WHERE nombre_empresa_id = %s AND nombre_prod_id = %s;" % (
-                empresa.pk, self.id))
-            registros = cursor.fetchall()
-
-            if not registros:
-                cursor.execute(
-                    "INSERT INTO stock_total (nombre_empresa_id, nombre_prod_id, stock) VALUES (%s, %s, 0);" % (
-                    empresa.pk, self.id))
-
-        return nuevo_producto
+        with transaction.atomic():
+            for empresa in empresas:
+                TotalStock.objects.get_or_create(
+                    nombre_prod=self,
+                    nombre_empresa=empresa,
+                    defaults={'stock': 0}
+                )
 
     class Meta:
         db_table = 'tb_producto'

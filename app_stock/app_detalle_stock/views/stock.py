@@ -1,5 +1,6 @@
 
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -955,159 +956,283 @@ def get_empresa_from_piscina(numero_piscina):
 #         print(f"{'=' * 60}\n")
 
 
-@receiver(post_save, sender=Producto_Stock)
-def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
-    """
-    Signal que crea automáticamente asientos contables cuando hay un EGRESO de stock
-    AJUSTADO PARA EDICIÓN DE DIETA (elimina asientos previos)
-    """
-
-    # 🔴 VALIDACIONES BASE (NO SE TOCAN)
-    if not created or instance.tipo != 'EGRESO':
-        return
-
-    # 🔴 SOLO PARA DIETAS (CLAVE)
-    if not instance.detalle_dieta_id:
-        return
-
-    print(f"\n{'=' * 60}")
-    print(f"[CONTABILIDAD] INICIANDO PROCESO DE ASIENTO CONTABLE (DIETA)")
-    print(f"{'=' * 60}")
-
-    try:
-        piscina_obj = instance.piscinas
-        if not piscina_obj:
-            return
-
-        piscina_nombre = str(piscina_obj)
-        match = re.search(r'\d+', piscina_nombre)
-        if not match:
-            return
-
-        piscina_numero = int(match.group())
-
-        empresa_siglas = 'PSM' if 1 <= piscina_numero <= 20 else 'BIO' if 21 <= piscina_numero <= 45 else None
-        if not empresa_siglas:
-            return
-
-        empresa_obj = Empresa.objects.filter(siglas=empresa_siglas).first()
-        if not empresa_obj:
-            return
-
-        producto_id = instance.producto_empresa.nombre_prod.id
-
-        stock_total = Total_Stock.objects.filter(
-            nombre_prod__id=producto_id,
-            nombre_empresa__id=empresa_obj.id
-        ).first()
-
-        if not stock_total or not stock_total.plan_cuenta:
-            return
-
-        cuenta_producto = stock_total.plan_cuenta
-
-        # CUENTA SUMINISTROS
-        cuenta_suministros = None
-        if hasattr(piscina_obj, 'cuenta_suministros') and piscina_obj.cuenta_suministros:
-            cuenta_suministros = piscina_obj.cuenta_suministros
-        else:
-            cuenta_piscina = None
-            for formato in [f'PISCINA#{piscina_numero}', f'PISCINA# {piscina_numero}']:
-                cuenta_piscina = PlanCuenta.objects.filter(
-                    empresa=empresa_obj,
-                    nombre__icontains=formato,
-                    estado=True
-                ).first()
-                if cuenta_piscina:
-                    break
-
-            if not cuenta_piscina:
-                return
-
-            cuenta_suministros = PlanCuenta.objects.filter(
-                empresa=empresa_obj,
-                parentId=cuenta_piscina,
-                nombre__iexact='SUMINISTROS',
-                estado=True
-            ).first()
-
-            if not cuenta_suministros:
-                return
-
-        monto = float(instance.cantidad_egreso or 0)
-        if monto <= 0:
-            return
-
-        # 🔴 🔴 🔴 MEJORA CLAVE 🔴 🔴 🔴
-        # BORRAR ASIENTOS CONTABLES ANTERIORES DE ESTA DIETA
-        comprobante_ref = f"EGR-DET-{instance.detalle_dieta_id}"
-
-        encabezados_previos = EncabezadoCuentasPlanCuenta.objects.filter(
-            comprobante=comprobante_ref,
-            empresa=empresa_obj
-        )
-
-        if encabezados_previos.exists():
-            print(f"[CONTABILIDAD] Eliminando asientos anteriores de dieta {instance.detalle_dieta_id}")
-            encabezados_previos.delete()
-
-        # 🔴 CREAR NUEVO ENCABEZADO
-        encabezado = EncabezadoCuentasPlanCuenta.objects.create(
-            codigo=int(datetime.now().timestamp()),
-            tip_cuenta='5',
-            tip_transa='EGRESO',
-            fecha=instance.fecha_ingreso or timezone.now().date(),
-            comprobante=comprobante_ref,
-            descripcion=f"Consumo Dieta Piscina {piscina_numero}",
-            empresa=empresa_obj,
-            reg_control='RT'
-        )
-
-        # DEBE
-        DetalleCuentasPlanCuenta.objects.create(
-            encabezadocuentaplan=encabezado,
-            orden=1,
-            cuenta=cuenta_suministros,
-            detalle=f"Consumo Piscina {piscina_numero}",
-            debe=monto,
-            haber=0.00,
-            origen='STOCK'
-        )
-
-        # HABER
-        DetalleCuentasPlanCuenta.objects.create(
-            encabezadocuentaplan=encabezado,
-            orden=2,
-            cuenta=cuenta_producto,
-            detalle="Egreso inventario",
-            debe=0.00,
-            haber=monto,
-            origen='STOCK'
-        )
-
-        print(f"[CONTABILIDAD] Asiento recreado correctamente ({comprobante_ref})")
-
-    except Exception as e:
-        print(f"[CONTABILIDAD] ERROR CRÍTICO")
-        import traceback
-        traceback.print_exc()
+# @receiver(post_save, sender=Producto_Stock)
+# def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
+#     """
+#     Crea o RECREA asientos contables por EGRESOS de stock asociados a DIETAS.
+#     Diseñado para PRODUCCIÓN.
+#     """
+#
+#     # ─────────────────────────────
+#     # VALIDACIONES BASE
+#     # ─────────────────────────────
+#     if not created:
+#         return
+#
+#     if instance.tipo != 'EGRESO':
+#         return
+#
+#     if not instance.detalle_dieta_id:
+#         return
+#
+#     piscina = instance.piscinas
+#     if not piscina:
+#         return
+#
+#     # ─────────────────────────────
+#     # EMPRESA DESDE LA PISCINA (CORRECTO)
+#     # ─────────────────────────────
+#     empresa = getattr(piscina, 'empresa', None)
+#     if not empresa:
+#         return
+#
+#     # ─────────────────────────────
+#     # CUENTA DEL PRODUCTO (INVENTARIO)
+#     # ─────────────────────────────
+#     producto = instance.producto_empresa.nombre_prod
+#
+#     stock_total = Total_Stock.objects.filter(
+#         nombre_prod=producto,
+#         nombre_empresa=empresa
+#     ).first()
+#
+#     if not stock_total or not stock_total.plan_cuenta:
+#         return
+#
+#     cuenta_producto = stock_total.plan_cuenta
+#
+#     # ─────────────────────────────
+#     # CUENTA SUMINISTROS (DESDE PISCINA)
+#     # ─────────────────────────────
+#     cuenta_suministros = getattr(piscina, 'cuenta_suministros', None)
+#     if not cuenta_suministros:
+#         return
+#
+#     # ─────────────────────────────
+#     # MONTO
+#     # ─────────────────────────────
+#     monto = float(instance.cantidad_egreso or 0)
+#     if monto <= 0:
+#         return
+#
+#     comprobante = f"EGR-DET-{instance.detalle_dieta_id}"
+#
+#     print("\n" + "=" * 60)
+#     print("[CONTABILIDAD] PROCESO ASIENTO DIETA")
+#     print("=" * 60)
+#
+#     with transaction.atomic():
+#
+#         # ─────────────────────────────
+#         # ELIMINAR ASIENTOS ANTERIORES
+#         # ─────────────────────────────
+#         encabezados_previos = EncabezadoCuentasPlanCuenta.objects.filter(
+#             comprobante=comprobante,
+#             empresa=empresa
+#         )
+#
+#         if encabezados_previos.exists():
+#             print(f"[CONTABILIDAD] Eliminando asientos previos ({comprobante})")
+#             encabezados_previos.delete()
+#
+#         # ─────────────────────────────
+#         # CREAR ENCABEZADO
+#         # ─────────────────────────────
+#         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
+#             codigo=int(datetime.now().timestamp()),
+#             tip_cuenta='5',
+#             tip_transa='EGRESO',
+#             fecha=instance.fecha_ingreso or timezone.now().date(),
+#             comprobante=comprobante,
+#             descripcion=f"Consumo Dieta Piscina {piscina}",
+#             empresa=empresa,
+#             reg_control='RT'
+#         )
+#
+#         # ─────────────────────────────
+#         # DEBE – SUMINISTROS
+#         # ─────────────────────────────
+#         DetalleCuentasPlanCuenta.objects.create(
+#             encabezadocuentaplan=encabezado,
+#             orden=1,
+#             cuenta=cuenta_suministros,
+#             detalle=f"Consumo dieta {piscina}",
+#             debe=monto,
+#             haber=0,
+#             origen='STOCK'
+#         )
+#
+#         # ─────────────────────────────
+#         # HABER – INVENTARIO
+#         # ─────────────────────────────
+#         DetalleCuentasPlanCuenta.objects.create(
+#             encabezadocuentaplan=encabezado,
+#             orden=2,
+#             cuenta=cuenta_producto,
+#             detalle="Egreso de inventario",
+#             debe=0,
+#             haber=monto,
+#             origen='STOCK'
+#         )
+#
+#         print(f"[CONTABILIDAD] Asiento recreado correctamente ({comprobante})")
 
 
-def connect_signals():
-    """
-    Connect all signals - call this in apps.py ready() method
-    """
-    pass
 
 
-def eliminar_asientos_por_detalle(detalle_id):
-    encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
-        comprobante__icontains=f"EGR-DET-{detalle_id}"
-    )
+# @receiver(post_save, sender=Producto_Stock)
+# def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
+#     """
+#     Signal que crea automáticamente asientos contables cuando hay un EGRESO de stock
+#     AJUSTADO PARA EDICIÓN DE DIETA (elimina asientos previos)
+#     """
+#
+#     # 🔴 VALIDACIONES BASE (NO SE TOCAN)
+#     if not created or instance.tipo != 'EGRESO':
+#         return
+#
+#     # 🔴 SOLO PARA DIETAS (CLAVE)
+#     if not instance.detalle_dieta_id:
+#         return
+#
+#     print(f"\n{'=' * 60}")
+#     print(f"[CONTABILIDAD] INICIANDO PROCESO DE ASIENTO CONTABLE (DIETA)")
+#     print(f"{'=' * 60}")
+#
+#     try:
+#         piscina_obj = instance.piscinas
+#         if not piscina_obj:
+#             return
+#
+#         piscina_nombre = str(piscina_obj)
+#         match = re.search(r'\d+', piscina_nombre)
+#         if not match:
+#             return
+#
+#         piscina_numero = int(match.group())
+#
+#         empresa_siglas = 'PSM' if 1 <= piscina_numero <= 20 else 'BIO' if 21 <= piscina_numero <= 45 else None
+#         if not empresa_siglas:
+#             return
+#
+#         empresa_obj = Empresa.objects.filter(siglas=empresa_siglas).first()
+#         if not empresa_obj:
+#             return
+#
+#         producto_id = instance.producto_empresa.nombre_prod.id
+#
+#         stock_total = Total_Stock.objects.filter(
+#             nombre_prod__id=producto_id,
+#             nombre_empresa__id=empresa_obj.id
+#         ).first()
+#
+#         if not stock_total or not stock_total.plan_cuenta:
+#             return
+#
+#         cuenta_producto = stock_total.plan_cuenta
+#
+#         # CUENTA SUMINISTROS
+#         cuenta_suministros = None
+#         if hasattr(piscina_obj, 'cuenta_suministros') and piscina_obj.cuenta_suministros:
+#             cuenta_suministros = piscina_obj.cuenta_suministros
+#         else:
+#             cuenta_piscina = None
+#             for formato in [f'PISCINA#{piscina_numero}', f'PISCINA# {piscina_numero}']:
+#                 cuenta_piscina = PlanCuenta.objects.filter(
+#                     empresa=empresa_obj,
+#                     nombre__icontains=formato,
+#                     estado=True
+#                 ).first()
+#                 if cuenta_piscina:
+#                     break
+#
+#             if not cuenta_piscina:
+#                 return
+#
+#             cuenta_suministros = PlanCuenta.objects.filter(
+#                 empresa=empresa_obj,
+#                 parentId=cuenta_piscina,
+#                 nombre__iexact='SUMINISTROS',
+#                 estado=True
+#             ).first()
+#
+#             if not cuenta_suministros:
+#                 return
+#
+#         monto = float(instance.cantidad_egreso or 0)
+#         if monto <= 0:
+#             return
+#
+#         # 🔴 🔴 🔴 MEJORA CLAVE 🔴 🔴 🔴
+#         # BORRAR ASIENTOS CONTABLES ANTERIORES DE ESTA DIETA
+#         comprobante_ref = f"EGR-DET-{instance.detalle_dieta_id}"
+#
+#         encabezados_previos = EncabezadoCuentasPlanCuenta.objects.filter(
+#             comprobante=comprobante_ref,
+#             empresa=empresa_obj
+#         )
+#
+#         if encabezados_previos.exists():
+#             print(f"[CONTABILIDAD] Eliminando asientos anteriores de dieta {instance.detalle_dieta_id}")
+#             encabezados_previos.delete()
+#
+#         # 🔴 CREAR NUEVO ENCABEZADO
+#         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
+#             codigo=int(datetime.now().timestamp()),
+#             tip_cuenta='5',
+#             tip_transa='EGRESO',
+#             fecha=instance.fecha_ingreso or timezone.now().date(),
+#             comprobante=comprobante_ref,
+#             descripcion=f"Consumo Dieta Piscina {piscina_numero}",
+#             empresa=empresa_obj,
+#             reg_control='RT'
+#         )
+#
+#         # DEBE
+#         DetalleCuentasPlanCuenta.objects.create(
+#             encabezadocuentaplan=encabezado,
+#             orden=1,
+#             cuenta=cuenta_suministros,
+#             detalle=f"Consumo Piscina {piscina_numero}",
+#             debe=monto,
+#             haber=0.00,
+#             origen='STOCK'
+#         )
+#
+#         # HABER
+#         DetalleCuentasPlanCuenta.objects.create(
+#             encabezadocuentaplan=encabezado,
+#             orden=2,
+#             cuenta=cuenta_producto,
+#             detalle="Egreso inventario",
+#             debe=0.00,
+#             haber=monto,
+#             origen='STOCK'
+#         )
+#
+#         print(f"[CONTABILIDAD] Asiento recreado correctamente ({comprobante_ref})")
+#
+#     except Exception as e:
+#         print(f"[CONTABILIDAD] ERROR CRÍTICO")
+#         import traceback
+#         traceback.print_exc()
 
-    for e in encabezados:
-        DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=e).delete()
-        e.delete()
+#
+# def connect_signals():
+#     """
+#     Connect all signals - call this in apps.py ready() method
+#     """
+#     pass
+
+#
+# def eliminar_asientos_por_detalle(detalle_id):
+#     encabezados = EncabezadoCuentasPlanCuenta.objects.filter(
+#         comprobante__icontains=f"EGR-DET-{detalle_id}"
+#     )
+#
+#     for e in encabezados:
+#         DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=e).delete()
+#         e.delete()
 
 
 class ListarAsientosContablesView(ListView):

@@ -66,7 +66,7 @@ class listarConsumoPiscinasView(ListView):
                 data = []
                 start_date = request.POST.get('start_date', '')
                 end_date = request.POST.get('end_date', '')
-                searchdata = Producto_Stock.objects.filter(piscinas__exact=Piscinas.objects.get(id=self.kwargs['pk']).numero, activo__exact=True)
+                searchdata = Producto_Stock.objects.filter(piscinas__exact=Piscinas.objects.get(id=self.kwargs['pk']).numero, activo__exact=True, cantidad_egreso__gt=0)
                 if len(start_date) and len(end_date):
                     searchdata = searchdata.filter(fecha_ingreso__range=[start_date, end_date])
                 for i in searchdata:

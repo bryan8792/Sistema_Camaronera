@@ -1,7 +1,7 @@
 import decimal
 from Sistema_Camaronera.settings import MEDIA_URL, STATIC_URL
 from datetime import datetime
-from django.db import models
+from django.db import models, transaction
 from django.forms import model_to_dict
 from app_empresa.app_reg_empresa.models import Piscinas, Empresa
 from app_inventario.app_categoria.models import Producto
@@ -69,11 +69,27 @@ class DiaDietaRegistro(models.Model):
         ordering = ['fecha']
 
 
+from django.db import models, transaction
+from django.forms import model_to_dict
+from crum import get_current_user
+
 class DetalleDiaDieta(models.Model):
-    dieta = models.ForeignKey(DiaDietaRegistro, on_delete=models.CASCADE)
-    piscinas = models.ForeignKey(Piscinas, on_delete=models.CASCADE, verbose_name='Empresa', null=True, blank=True)
-    balanceado = models.ForeignKey(Producto, on_delete=models.CASCADE, null=True, blank=True)
+    dieta = models.ForeignKey('DiaDietaRegistro', on_delete=models.CASCADE)
+    piscinas = models.ForeignKey(
+        Piscinas,
+        on_delete=models.CASCADE,
+        verbose_name='Empresa',
+        null=True,
+        blank=True
+    )
+    balanceado = models.ForeignKey(
+        Producto,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     cantidad = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+
     insumo1 = models.IntegerField(default=0)
     gramaje1 = models.DecimalField(max_digits=9, decimal_places=2, default=0)
     insumo2 = models.IntegerField(default=0)
@@ -84,152 +100,148 @@ class DetalleDiaDieta(models.Model):
     gramaje4 = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
     def __str__(self):
-        return self.dieta
+        return str(self.dieta)
 
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-    #     try:
-    #         nuevo_detalle = super(DetalleDiaDieta, self).save()
-    #         usuario_actual = '-'
-    #         user = get_current_user()
-    #
-    #         if user is not None:
-    #             usuario_actual = user
-    #         # Actualizar stock para producto
-    #         ps = Total_Stock.objects.get(nombre_empresa_id=self.piscinas.empresa.pk, nombre_prod_id=self.balanceado.pk)
-    #         print(ps)
-    #         if ps:
-    #             # Registrar egreso #
-    #             producto = Producto_Stock()
-    #             producto.producto_empresa_id = ps.pk
-    #             producto.tipo = 'EGRESO'
-    #             producto.piscinas = self.piscinas
-    #             producto.cantidad_egreso = float(self.cantidad)
-    #             producto.fecha_ingreso = self.dieta.fecha
-    #             producto.numero_guia = 'CONSUMO DE DIETA'
-    #             producto.responsable_ingreso = usuario_actual
-    #             producto.detalle_dieta_id = self.pk
-    #             producto.save()
-    #
-    #         # Actualizar stock para insumo
-    #         datos = [(self.insumo1, self.gramaje1), (self.insumo2, self.gramaje2), (self.insumo3, self.gramaje3), (self.insumo4, self.gramaje4)]
-    #         print(datos)
-    #         for d in datos:
-    #             if d[0]:
-    #                 ps = Total_Stock.objects.get(nombre_empresa_id=self.piscinas.empresa.pk, nombre_prod_id=int(d[0]))
-    #                 if ps:
-    #                     # Registrar egreso
-    #                     producto = Producto_Stock()
-    #                     producto.producto_empresa_id = ps.pk
-    #                     producto.tipo = 'EGRESO'
-    #                     producto.piscinas = self.piscinas
-    #                     producto.cantidad_egreso = float(d[1])
-    #                     producto.fecha_ingreso = self.dieta.fecha
-    #                     producto.numero_guia = 'CONSUMO DE DIETA'
-    #                     producto.responsable_ingreso = usuario_actual
-    #                     producto.detalle_dieta_id = self.pk
-    #                     producto.save()
-    #         return nuevo_detalle
-    #     except Exception as exc:
-    #         pass
+    # ======================================================
+    # SAVE → CREA / EDITA (ERP CONTROLADO)
+    # ======================================================
+    def save(self, *args, **kwargs):
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        # Guardar primero el detalle
-        nuevo_detalle = super(DetalleDiaDieta, self).save(force_insert, force_update, using, update_fields)
+        with transaction.atomic():
 
-        usuario_actual = '-'
-        user = get_current_user()
-        if user is not None:
-            usuario_actual = user
+            es_edicion = self.pk is not None
 
-        # ===============================
-        # VALIDACIONES OBLIGATORIAS
-        # ===============================
-        if not self.piscinas or not self.balanceado:
-            return nuevo_detalle
+            # --------------------------------------------------
+            # 1. SI ES EDICIÓN → REVERSAR EGRESOS ANTERIORES
+            # --------------------------------------------------
+            if es_edicion:
+                movimientos = Producto_Stock.objects.select_for_update().filter(
+                    detalle_dieta_id=self.pk,
+                    tipo='EGRESO',
+                    activo=True
+                )
 
-        # ===============================
-        # EGRESO DE BALANCEADO
-        # ===============================
-        try:
-            ps = Total_Stock.objects.get(
-                nombre_empresa_id=self.piscinas.empresa.pk,
-                nombre_prod_id=self.balanceado.pk
-            )
+                for mov in movimientos:
+                    stock = mov.producto_empresa
+                    stock.stock += mov.cantidad_egreso
+                    stock.save(update_fields=['stock'])
 
-            producto = Producto_Stock()
-            producto.producto_empresa_id = ps.pk
-            producto.tipo = 'EGRESO'
-            producto.piscinas = self.piscinas
-            producto.cantidad_egreso = float(self.cantidad)
-            producto.fecha_ingreso = self.dieta.fecha
-            producto.numero_guia = 'CONSUMO DE DIETA'
-            producto.responsable_ingreso = usuario_actual
-            producto.detalle_dieta_id = self.pk
-            producto.save()
+                    mov.activo = False
+                    mov.save(update_fields=['activo'])
 
-        except Total_Stock.DoesNotExist:
-            pass
+            # --------------------------------------------------
+            # 2. GUARDAR DETALLE
+            # --------------------------------------------------
+            super().save(*args, **kwargs)
 
-        # ===============================
-        # EGRESO DE INSUMOS
-        # ===============================
-        datos = [
-            (self.insumo1, self.gramaje1),
-            (self.insumo2, self.gramaje2),
-            (self.insumo3, self.gramaje3),
-            (self.insumo4, self.gramaje4),
-        ]
+            # Validaciones mínimas
+            if not self.piscinas:
+                return
 
-        for insumo_id, gramaje in datos:
-            if insumo_id:
+            empresa = self.piscinas.empresa
+            fecha = self.dieta.fecha
+            usuario = get_current_user() or '-'
+
+            # --------------------------------------------------
+            # 3. EGRESO DE BALANCEADO
+            # --------------------------------------------------
+            if self.balanceado and self.cantidad > 0:
                 try:
-                    ps = Total_Stock.objects.get(
-                        nombre_empresa_id=self.piscinas.empresa.pk,
-                        nombre_prod_id=int(insumo_id)
+                    ps = Total_Stock.objects.select_for_update().get(
+                        nombre_empresa=empresa,
+                        nombre_prod=self.balanceado
                     )
 
-                    producto = Producto_Stock()
-                    producto.producto_empresa_id = ps.pk
-                    producto.tipo = 'EGRESO'
-                    producto.piscinas = self.piscinas
-                    producto.cantidad_egreso = float(gramaje)
-                    producto.fecha_ingreso = self.dieta.fecha
-                    producto.numero_guia = 'CONSUMO DE DIETA'
-                    producto.responsable_ingreso = usuario_actual
-                    producto.detalle_dieta_id = self.pk
-                    producto.save()
+                    Producto_Stock.objects.create(
+                        producto_empresa=ps,
+                        tipo='EGRESO',
+                        piscinas=self.piscinas,
+                        cantidad_egreso=self.cantidad,
+                        fecha_ingreso=fecha,
+                        numero_guia='CONSUMO DE DIETA',
+                        responsable_ingreso=usuario,
+                        detalle_dieta_id=self.pk
+                    )
 
                 except Total_Stock.DoesNotExist:
                     pass
 
-        return nuevo_detalle
+            # --------------------------------------------------
+            # 4. EGRESO DE INSUMOS
+            # --------------------------------------------------
+            insumos = (
+                (self.insumo1, self.gramaje1),
+                (self.insumo2, self.gramaje2),
+                (self.insumo3, self.gramaje3),
+                (self.insumo4, self.gramaje4),
+            )
 
+            for insumo_id, gramaje in insumos:
+                if insumo_id and gramaje > 0:
+                    try:
+                        ps = Total_Stock.objects.select_for_update().get(
+                            nombre_empresa=empresa,
+                            nombre_prod_id=int(insumo_id)
+                        )
+
+                        Producto_Stock.objects.create(
+                            producto_empresa=ps,
+                            tipo='EGRESO',
+                            piscinas=self.piscinas,
+                            cantidad_egreso=gramaje,
+                            fecha_ingreso=fecha,
+                            numero_guia='CONSUMO DE DIETA',
+                            responsable_ingreso=usuario,
+                            detalle_dieta_id=self.pk
+                        )
+
+                    except Total_Stock.DoesNotExist:
+                        pass
+
+    # ======================================================
+    # DELETE → REVERSA STOCK + DESACTIVA KARDEX
+    # ======================================================
     def delete(self, using=None, keep_parents=False):
-        cursor = connection.cursor()
-        sql = 'UPDATE stock_prod SET activo = FALSE where detalle_dieta_id = %s;' % self.pk
-        cursor.execute(sql)
-        super(DetalleDiaDieta, self).delete()
 
+        with transaction.atomic():
+
+            movimientos = Producto_Stock.objects.select_for_update().filter(
+                detalle_dieta_id=self.pk,
+                tipo='EGRESO',
+                activo=True
+            )
+
+            for mov in movimientos:
+                stock = mov.producto_empresa
+                stock.stock += mov.cantidad_egreso
+                stock.save(update_fields=['stock'])
+
+                mov.activo = False
+                mov.save(update_fields=['activo'])
+
+            super().delete(using=using, keep_parents=keep_parents)
+
+    # ======================================================
+    # SERIALIZACIÓN
+    # ======================================================
     def toJSON(self):
         item = model_to_dict(self)
         item['piscinas'] = self.piscinas.toJSON() if self.piscinas else None
         item['balanceado'] = self.balanceado.toJSON() if self.balanceado else None
         item['cantidad'] = format(self.cantidad, '.0f')
-        item['insumo1'] = format(self.insumo1, '.0f')
-        item['gramaje1'] = format(self.gramaje1, '.2f')
-        item['insumo2'] = format(self.insumo2, '.0f')
-        item['gramaje2'] = format(self.gramaje2, '.2f')
-        item['insumo3'] = format(self.insumo3, '.0f')
-        item['gramaje3'] = format(self.gramaje3, '.2f')
-        item['insumo4'] = format(self.insumo4, '.0f')
-        item['gramaje4'] = format(self.gramaje4, '.2f')
+        for i in range(1, 5):
+            item[f'insumo{i}'] = format(getattr(self, f'insumo{i}'), '.0f')
+            item[f'gramaje{i}'] = format(getattr(self, f'gramaje{i}'), '.2f')
+
         return item
 
     class Meta:
         db_table = 'db_dia_dieta_detalle'
-        verbose_name = "4. Detalle del dia dieta"
-        verbose_name_plural = "4. Detalle del dia dietas"
+        verbose_name = "Detalle del día dieta"
+        verbose_name_plural = "Detalle del día dietas"
         ordering = ['id']
+
+
 
 
 class DescripcionDieta(models.Model):
