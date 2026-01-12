@@ -91,7 +91,7 @@
                             <button type="submit" class="btn btn-primary btn-flat btnTest">
                                 <i class="fas fa-save"></i> GUARDAR
                             </button>
-                            <a href="{% url 'app_stock_directo:listar_stock_directo_psm' %}" class="btn btn-danger btn-file">
+                            <a href="{% url 'app_stock_directo:listar_stock_directo_bio' %}" class="btn btn-danger btn-file">
                                 <i class="fas fa-undo"></i> CANCELAR
                             </a>
                         </div>
@@ -145,7 +145,7 @@
         $(function () {
             $('.btnTest').on('click', function () {
                 $.ajax({
-                    url: '{% url 'app_stock_directo:listar_stock_directo_psm' %}',
+                    url: '{% url 'app_stock_directo:listar_stock_directo_bio' %}',
                     type: 'POST',
                     data: {id: 1},
                     dataType: 'json'
