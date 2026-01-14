@@ -114,6 +114,7 @@ class ProdStockForm(ModelForm):
             ),
             'fecha_ingreso': DateInput(
                 attrs={
+                    'type': 'date',
                     'class': 'form-control',
                     'autocomplete': 'off',
                     'required': True

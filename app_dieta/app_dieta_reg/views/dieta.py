@@ -11,7 +11,7 @@ from django.template.loader import get_template
 from django.urls import reverse_lazy, reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import ListView, CreateView, View, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, View, UpdateView, DeleteView, TemplateView
 from weasyprint import HTML
 from app_dieta.app_dieta_reg.forms import AnioDietaForm, RegistroDiaDietaForm, DiaDietaForm, DescripcionDietaForm
 from app_dieta.app_dieta_reg.models import MesDieta, AnioDieta, DiaDietaRegistro, DetalleDiaDieta, DescripcionDieta
@@ -27,7 +27,6 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from app_stock.app_detalle_stock.services import eliminar_asientos_por_detalle
 from app_stock.app_detalle_stock.services import revertir_stock_por_detalle
-
 
 
 class crearAnioDietaView(CreateView):
@@ -62,7 +61,6 @@ class crearMesDietaView(CreateView):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Dieta'
         return context
-
 
 
 class crearDiaDietaView(CreateView):
@@ -242,7 +240,6 @@ class crearDiaDietaView(CreateView):
         return context
 
 
-
 class editarDiaDietaView(UpdateView):
     model = DiaDietaRegistro
     form_class = DiaDietaForm
@@ -356,7 +353,6 @@ class editarDiaDietaView(UpdateView):
         return context
 
 
-
 class crearDiaDietaPrecriaView(CreateView):
     model = DetalleDiaDieta
     form_class = DiaDietaForm
@@ -379,6 +375,8 @@ class crearDiaDietaPrecriaView(CreateView):
                 queryset = Piscinas.objects.all()
                 ids_exclude = json.loads(request.POST['ids'])
                 queryset = queryset.filter(empresa__siglas=empresa, prec__exact=True).exclude(id__in=ids_exclude)
+                print('queryset')
+                print(queryset)
                 for i in queryset:
                     item = i.toJSON()
                     data.append(item)
@@ -403,7 +401,8 @@ class crearDiaDietaPrecriaView(CreateView):
                         inv.piscinas_id = int(i['id']) if i.get('id') else None
                         balanceado_id = (i['balanceado']) if i.get('balanceado') else None
                         inv.balanceado_id = balanceado_id
-                        inv.cantidad = decimal.Decimal(i['cantidad']) if i.get('cantidad') and balanceado_id is not None else 0
+                        inv.cantidad = decimal.Decimal(i['cantidad']) if i.get(
+                            'cantidad') and balanceado_id is not None else 0
                         inv.insumo1 = int(i['insumo1']) if i.get('insumo1') else 0
                         inv.gramaje1 = decimal.Decimal(i['gramaje1']) if i.get('gramaje1') else decimal.Decimal('0.00')
                         inv.insumo2 = int(i['insumo2']) if i.get('insumo2') else 0
@@ -436,7 +435,6 @@ class crearDiaDietaPrecriaView(CreateView):
         context['pk'] = self.kwargs['pk']
         context['det'] = []
         return context
-
 
 
 class editarDiaDietaPrecriaView(UpdateView):
@@ -598,7 +596,6 @@ class editarDiaDietaPrecriaView(UpdateView):
         return context
 
 
-
 # Para listar las Dietas Año
 class listarDietaAnioPrincipalView(ListView):
     model = AnioDieta
@@ -623,7 +620,6 @@ class listarDietaAnioPrincipalView(ListView):
         context['nombre'] = 'Ventana Principal Dieta Año'
         context['dieta'] = AnioDieta.objects.all()
         return context
-
 
 
 # Para listar las Dietas Precria Año
@@ -652,7 +648,6 @@ class listarDietaAnioPrecriaView(ListView):
         return context
 
 
-
 # dietas del mes, crea, lista y modifica
 @login_required(login_url="/")
 def listarMesDietas(request, anio):
@@ -672,7 +667,6 @@ def listarMesDietas(request, anio):
     return render(request, 'app_dieta/dieta_principal_mes.html', contexto)
 
 
-
 # dietas del mes, crea, lista y modifica
 @login_required(login_url="/")
 def listarMesDietasPrecrias(request, anio):
@@ -690,7 +684,6 @@ def listarMesDietasPrecrias(request, anio):
             mes.descripcion = request.POST.get('descripcion')
         mes.save()
     return render(request, 'app_dieta/app_dias_dietas_prec/dieta_principal_mes_prec.html', contexto)
-
 
 
 # Para listar las Dietas del Dia Piscinas
@@ -714,7 +707,6 @@ def listarDiasDietas(request, pk):
     return render(request, 'app_dieta/app_dias_dietas/frm_dieta_dia_encabezado.html', contexto)
 
 
-
 # Para listar las Dietas del Dia Precrias
 @login_required(login_url="/")
 def listarDiasDietasPrecrias(request, pk):
@@ -734,7 +726,6 @@ def listarDiasDietasPrecrias(request, pk):
         'extension': '.xlsx',
     }
     return render(request, 'app_dieta/app_dias_dietas_prec/frm_dieta_prec_dia_encabezado.html', contexto)
-
 
 
 # CON XHTML2PDF
@@ -764,7 +755,6 @@ class ListarDietaPDF(View):
                         balanceado[nombre_b] = balanceado[nombre_b] + b.cantidad
                         acum = format(balanceado[nombre_b] / prod, '.1f')
 
-
                 nombre_i = b.insumo1
                 if nombre_i:
                     nombre_i = Producto.objects.get(id=nombre_i).nombre
@@ -774,7 +764,6 @@ class ListarDietaPDF(View):
                     else:
                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje1
                         acum = format(insumo[nombre_i] / prod, '.1f')
-
 
                 nombre_i = b.insumo2
                 if nombre_i:
@@ -786,7 +775,6 @@ class ListarDietaPDF(View):
                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje2
                         acum = format(insumo[nombre_i] / prod, '.1f')
 
-
                 nombre_i = b.insumo3
                 if nombre_i:
                     nombre_i = Producto.objects.get(id=nombre_i).nombre
@@ -797,7 +785,6 @@ class ListarDietaPDF(View):
                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje3
                         acum = format(insumo[nombre_i] / prod, '.1f')
 
-
                 nombre_i = b.insumo4
                 if nombre_i:
                     nombre_i = Producto.objects.get(id=nombre_i).nombre
@@ -807,7 +794,6 @@ class ListarDietaPDF(View):
                     else:
                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje4
                         acum = format(insumo[nombre_i] / prod, '.1f')
-
 
             resumen_totales = {
                 'psm': {'balanceado': balanceado, 'insumo': insumo}
@@ -870,7 +856,6 @@ class ListarDietaPDF(View):
             return HttpResponse(pdf, content_type='application/pdf')
 
 
-
 # CON WEASYPRINT
 class printDieta(View):
 
@@ -884,7 +869,6 @@ class printDieta(View):
             template = get_template("app_reportes/printDieta.html")
             html_template = template.render(data)
             HTML(string=html_template).write_pdf(target="dieta.pdf")
-
 
 
 class listarDescripcionDietaView(ListView):
@@ -948,3 +932,90 @@ class eliminarDescripcionDietaView(DeleteView):
         context['nombre'] = 'Descripción de Dieta'
         context['action'] = 'crear'
         return context
+
+
+class ReporteDietaDiaView(TemplateView):
+    template_name = 'app_dieta/reportes/reporte_dieta_dia.html'
+
+    @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['empresas'] = Empresa.objects.all()
+        context['titulo'] = 'Reporte de Dietas por Día'
+        return context
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action', '')
+
+            if action == 'filtrar':
+                fecha_desde = request.POST.get('fecha_desde', '')
+                fecha_hasta = request.POST.get('fecha_hasta', '')
+                empresa_id = request.POST.get('empresa', '')
+
+                # Filtrar DiaDietaRegistro por rango de fechas
+                queryset = DiaDietaRegistro.objects.all()
+
+                if fecha_desde:
+                    queryset = queryset.filter(fecha__gte=fecha_desde)
+                if fecha_hasta:
+                    queryset = queryset.filter(fecha__lte=fecha_hasta)
+
+                # Obtener todos los productos para mapear IDs a nombres
+                productos_dict = {p.id: p.nombre for p in Producto.objects.all()}
+
+                # Estructura de datos agrupada por fecha
+                dietas_por_dia = []
+
+                for dieta_registro in queryset.order_by('fecha'):
+                    # Filtrar detalles por empresa si se especificó
+                    detalles = DetalleDiaDieta.objects.filter(dieta=dieta_registro)
+
+                    if empresa_id:
+                        detalles = detalles.filter(piscinas__empresa_id=empresa_id)
+
+                    if not detalles.exists():
+                        continue
+
+                    filas = []
+                    for idx, det in enumerate(detalles.select_related('piscinas', 'balanceado'), 1):
+                        fila = {
+                            'numero': idx,
+                            'piscina': det.piscinas.numero if det.piscinas else '-',
+                            'balanceado': det.balanceado.nombre if det.balanceado else '-',
+                            'libras': float(det.cantidad) if det.cantidad else 0,
+                            'insumo1_nombre': productos_dict.get(det.insumo1, '') if det.insumo1 else '',
+                            'insumo1_gramos': float(det.gramaje1) if det.gramaje1 else 0,
+                            'insumo2_nombre': productos_dict.get(det.insumo2, '') if det.insumo2 else '',
+                            'insumo2_gramos': float(det.gramaje2) if det.gramaje2 else 0,
+                            'insumo3_nombre': productos_dict.get(det.insumo3, '') if det.insumo3 else '',
+                            'insumo3_gramos': float(det.gramaje3) if det.gramaje3 else 0,
+                            'insumo4_nombre': productos_dict.get(det.insumo4, '') if det.insumo4 else '',
+                            'insumo4_gramos': float(det.gramaje4) if det.gramaje4 else 0,
+                        }
+                        filas.append(fila)
+
+                    if filas:
+                        dietas_por_dia.append({
+                            'fecha': dieta_registro.fecha.strftime('%d-%m-%Y') if dieta_registro.fecha else '-',
+                            'dieta_id': dieta_registro.id,
+                            'filas': filas
+                        })
+
+                data = {
+                    'success': True,
+                    'dietas': dietas_por_dia,
+                    'fecha_desde': fecha_desde or 'Inicio',
+                    'fecha_hasta': fecha_hasta or 'Hoy',
+                    'empresa_nombre': Empresa.objects.get(id=empresa_id).nombre if empresa_id else 'TODAS LAS EMPRESAS'
+                }
+
+        except Exception as e:
+            data = {'error': str(e)}
+
+        return JsonResponse(data, safe=False)

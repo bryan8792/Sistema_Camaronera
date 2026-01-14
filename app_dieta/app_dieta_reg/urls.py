@@ -39,4 +39,6 @@ urlpatterns = [
     path('editar_desc_dieta/<int:pk>/', actualizarDescripcionDietaView.as_view(), name='editar_descripcion_dieta'),
     path('eliminar_desc_dieta/<int:pk>/', eliminarDescripcionDietaView.as_view(), name='eliminar_descripcion_dieta'),
 
+    # REPORTE DE DIA DIETA
+    path('reporte/dietas/dia/', ReporteDietaDiaView.as_view(), name='reporte_dieta_dia'),
 ]

@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="{% static 'acciones/app_inventario/app_categoria/tabla_listado/css/tab.css' %}" rel="stylesheet">
+<script src="{% static 'lib/moment-2.25.3/moment-with-locales.js' %}"></script>
+
+<!-- SheetJS para Excel -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<!-- pdfMake para PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<style>
+    .filtros-container {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .btn-export {
+        margin-right: 5px;
+        margin-bottom: 10px;
+    }
+    .btn-excel { background-color: #1d6f42; color: white; }
+    .btn-csv { background-color: #217346; color: white; }
+    .btn-pdf { background-color: #dc3545; color: white; }
+    .btn-print { background-color: #6c757d; color: white; }
+    
+    .encabezado-reporte {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .encabezado-reporte .fecha-hora {
+        color: #17a2b8;
+        font-size: 14px;
+    }
+    .encabezado-reporte h2 {
+        color: #212529;
+        margin: 10px 0 5px 0;
+    }
+    .encabezado-reporte h4 {
+        color: #495057;
+        margin: 5px 0;
+    }
+    .encabezado-reporte .rango-fechas {
+        color: #28a745;
+    }
+    
+    .dieta-grupo {
+        margin-bottom: 30px;
+    }
+    .dieta-header {
+        background-color: #f1f1f1;
+        padding: 10px 15px;
+        border-left: 4px solid #ffc107;
+        margin-bottom: 0;
+        font-weight: bold;
+        color: #856404;
+    }
+    
+    .tabla-dieta {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .tabla-dieta thead {
+        background-color: #343a40;
+        color: white;
+    }
+    .tabla-dieta th, .tabla-dieta td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: center;
+    }
+    .tabla-dieta tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    .tabla-dieta tbody tr:hover {
+        background-color: #e9ecef;
+    }
+    
+    .col-num { width: 3%; }
+    .col-piscina { width: 8%; }
+    .col-balanceado { width: 12%; }
+    .col-libras { width: 6%; }
+    .col-insumo { width: 12%; }
+    .col-gramos { width: 6%; }
+    
+    @media print {
+        .filtros-container, .btn-export-container, .no-print { display: none !important; }
+        .dieta-grupo { page-break-inside: avoid; }
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h5 class="m-0 text-dark">
+                    <i class="fas fa-clipboard-list"></i> <b>DETALLE PISCINA POR INSUMOS</b>
+                </h5>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Dietas</a></li>
+                    <li class="breadcrumb-item active">Reporte por Día</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="card">
+        <div class="card-body">
+            <!-- Filtros -->
+            <div class="filtros-container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>Fecha Desde:</label>
+                        <input type="date" id="fecha_desde" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label>Fecha Hasta:</label>
+                        <input type="date" id="fecha_hasta" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label>Empresa:</label>
+                        <select id="empresa" class="form-control">
+                            <option value="">Todas</option>
+                            {% for emp in empresas %}
+                            <option value="{{ emp.id }}">{{ emp.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" id="btnFiltrar" class="btn btn-info btn-block">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de exportación -->
+            <div class="btn-export-container mb-3">
+                <button type="button" class="btn btn-excel btn-export" id="btnExcel">
+                    <i class="fas fa-file-excel"></i> Excel
+                </button>
+                <button type="button" class="btn btn-csv btn-export" id="btnCSV">
+                    <i class="fas fa-file-csv"></i> CSV
+                </button>
+                <button type="button" class="btn btn-pdf btn-export" id="btnPDF">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </button>
+                <button type="button" class="btn btn-print btn-export" id="btnImprimir">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+            </div>
+
+            <!-- Encabezado del reporte -->
+            <div class="encabezado-reporte" id="encabezadoReporte">
+                <p class="fecha-hora">Fecha: <span id="fechaActual">-</span> - Hora: <span id="horaActual">-</span></p>
+                <h2 id="nombreEmpresa">TODAS LAS EMPRESAS</h2>
+                <h4>DETALLE PISCINA POR INSUMOS</h4>
+                <p class="rango-fechas">DESDE: <span id="rangoDesde">Inicio</span> | HASTA: <span id="rangoHasta">Hoy</span></p>
+            </div>
+
+            <!-- Contenedor de resultados -->
+            <div id="resultadosContainer"></div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function() {
+    // Variables globales
+    let datosReporte = [];
+
+    // Actualizar fecha y hora actual
+    function actualizarFechaHora() {
+        const ahora = moment();
+        $('#fechaActual').text(ahora.format('DD/MM/YYYY'));
+        $('#horaActual').text(ahora.format('HH:mm:ss'));
+    }
+    actualizarFechaHora();
+
+    // Evento filtrar
+    $('#btnFiltrar').on('click', function() {
+        filtrarDatos();
+    });
+
+    function filtrarDatos() {
+        const params = {
+            action: 'filtrar',
+            fecha_desde: $('#fecha_desde').val(),
+            fecha_hasta: $('#fecha_hasta').val(),
+            empresa: $('#empresa').val()
+        };
+
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: params,
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            beforeSend: function() {
+                $('#resultadosContainer').html('<div class="text-center p-5"><i class="fas fa-spinner fa-spin fa-3x"></i><p class="mt-3">Cargando datos...</p></div>');
+            },
+            success: function(response) {
+                if (response.error) {
+                    alert('Error: ' + response.error);
+                    return;
+                }
+
+                datosReporte = response.dietas || [];
+
+                // Actualizar encabezado
+                $('#nombreEmpresa').text(response.empresa_nombre);
+                $('#rangoDesde').text(response.fecha_desde);
+                $('#rangoHasta').text(response.fecha_hasta);
+                actualizarFechaHora();
+
+                // Renderizar tabla
+                renderizarTabla(datosReporte);
+            },
+            error: function(xhr, status, error) {
+                alert('Error al cargar datos: ' + error);
+                $('#resultadosContainer').html('<div class="alert alert-danger">Error al cargar los datos</div>');
+            }
+        });
+    }
+
+    function renderizarTabla(dietas) {
+        if (!dietas || dietas.length === 0) {
+            $('#resultadosContainer').html('<div class="alert alert-warning text-center">No se encontraron datos para los filtros seleccionados</div>');
+            return;
+        }
+
+        let html = '';
+
+        dietas.forEach(function(dieta) {
+            html += `
+            <div class="dieta-grupo">
+                <div class="dieta-header">
+                    Dieta ${dieta.fecha}
+                </div>
+                <table class="tabla-dieta">
+                    <thead>
+                        <tr>
+                            <th class="col-num">#</th>
+                            <th class="col-piscina">PISCINA</th>
+                            <th class="col-balanceado">BALANCEADO</th>
+                            <th class="col-libras">LIBRAS</th>
+                            <th class="col-insumo">INSUMO 1</th>
+                            <th class="col-gramos">GRAMOS</th>
+                            <th class="col-insumo">INSUMO 2</th>
+                            <th class="col-gramos">GRAMOS</th>
+                            <th class="col-insumo">INSUMO 3</th>
+                            <th class="col-gramos">GRAMOS</th>
+                            <th class="col-insumo">INSUMO 4</th>
+                            <th class="col-gramos">GRAMOS</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+            dieta.filas.forEach(function(fila) {
+                html += `
+                        <tr>
+                            <td>${fila.numero}</td>
+                            <td>${fila.piscina}</td>
+                            <td>${fila.balanceado}</td>
+                            <td>${fila.libras.toFixed(0)}</td>
+                            <td>${fila.insumo1_nombre}</td>
+                            <td>${fila.insumo1_gramos.toFixed(2)}</td>
+                            <td>${fila.insumo2_nombre}</td>
+                            <td>${fila.insumo2_gramos.toFixed(2)}</td>
+                            <td>${fila.insumo3_nombre}</td>
+                            <td>${fila.insumo3_gramos.toFixed(2)}</td>
+                            <td>${fila.insumo4_nombre}</td>
+                            <td>${fila.insumo4_gramos.toFixed(2)}</td>
+                        </tr>`;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            </div>`;
+        });
+
+        $('#resultadosContainer').html(html);
+    }
+
+    // Exportar a Excel
+    $('#btnExcel').on('click', function() {
+        if (!datosReporte || datosReporte.length === 0) {
+            alert('No hay datos para exportar');
+            return;
+        }
+
+        const wb = XLSX.utils.book_new();
+
+        const wsData = [];
+
+        // Encabezado del reporte
+        wsData.push([`Fecha: ${$('#fechaActual').text()} - Hora: ${$('#horaActual').text()}`]);
+        wsData.push([]);
+        wsData.push([$('#nombreEmpresa').text()]);
+        wsData.push(['DETALLE DIETA DE PISCINAS']);
+        wsData.push([`DESDE: ${$('#rangoDesde').text()} | HASTA: ${$('#rangoHasta').text()}`]);
+        wsData.push([]);
+        wsData.push([]);
+
+        // Agregar cada dieta con su encabezado de fecha
+        datosReporte.forEach(function(dieta, index) {
+            // Encabezado de la dieta (fecha)
+            wsData.push([`Dieta ${dieta.fecha}`]);
+
+            // Encabezados de columnas
+            wsData.push(['#', 'PISCINA', 'BALANCEADO', 'LIBRAS', 'INSUMO 1', 'GRAMOS', 'INSUMO 2', 'GRAMOS', 'INSUMO 3', 'GRAMOS', 'INSUMO 4', 'GRAMOS']);
+
+            // Datos de la dieta
+            dieta.filas.forEach(function(fila) {
+                wsData.push([
+                    fila.numero,
+                    fila.piscina,
+                    fila.balanceado,
+                    fila.libras,
+                    fila.insumo1_nombre,
+                    fila.insumo1_gramos,
+                    fila.insumo2_nombre,
+                    fila.insumo2_gramos,
+                    fila.insumo3_nombre,
+                    fila.insumo3_gramos,
+                    fila.insumo4_nombre,
+                    fila.insumo4_gramos
+                ]);
+            });
+
+            // Espacio entre dietas
+            wsData.push([]);
+            wsData.push([]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+        ws['!cols'] = [
+            { wch: 5 },   // #
+            { wch: 12 },  // PISCINA
+            { wch: 20 },  // BALANCEADO
+            { wch: 8 },   // LIBRAS
+            { wch: 18 },  // INSUMO 1
+            { wch: 10 },  // GRAMOS
+            { wch: 18 },  // INSUMO 2
+            { wch: 10 },  // GRAMOS
+            { wch: 18 },  // INSUMO 3
+            { wch: 10 },  // GRAMOS
+            { wch: 18 },  // INSUMO 4
+            { wch: 10 }   // GRAMOS
+        ];
+
+        ws['!merges'] = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } },  // Fecha y hora
+            { s: { r: 2, c: 0 }, e: { r: 2, c: 11 } },  // Nombre empresa
+            { s: { r: 3, c: 0 }, e: { r: 3, c: 11 } },  // Título
+            { s: { r: 4, c: 0 }, e: { r: 4, c: 11 } }   // Rango fechas
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Reporte Dietas');
+        
+        XLSX.writeFile(wb, `Reporte_Dietas_${moment().format('YYYY-MM-DD')}.xlsx`);
+    });
+    
+    // Exportar a CSV
+    $('#btnCSV').on('click', function() {
+        if (!datosReporte || datosReporte.length === 0) {
+            alert('No hay datos para exportar');
+            return;
+        }
+        
+        let csv = 'FECHA,#,PISCINA,BALANCEADO,LIBRAS,INSUMO1,GRAMOS1,INSUMO2,GRAMOS2,INSUMO3,GRAMOS3,INSUMO4,GRAMOS4\n';
+        
+        datosReporte.forEach(function(dieta) {
+            dieta.filas.forEach(function(fila) {
+                csv += `${dieta.fecha},${fila.numero},"${fila.piscina}","${fila.balanceado}",${fila.libras},"${fila.insumo1_nombre}",${fila.insumo1_gramos},"${fila.insumo2_nombre}",${fila.insumo2_gramos},"${fila.insumo3_nombre}",${fila.insumo3_gramos},"${fila.insumo4_nombre}",${fila.insumo4_gramos}\n`;
+            });
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Reporte_Dietas_${moment().format('YYYY-MM-DD')}.csv`;
+        link.click();
+    });
+    
+    // Exportar a PDF
+    $('#btnPDF').on('click', function() {
+        if (!datosReporte || datosReporte.length === 0) {
+            alert('No hay datos para exportar');
+            return;
+        }
+        
+        const content = [];
+        
+        // Título
+        content.push({
+            text: $('#nombreEmpresa').text(),
+            style: 'header',
+            alignment: 'center'
+        });
+        content.push({
+            text: 'DETALLE PISCINA POR INSUMOS',
+            style: 'subheader',
+            alignment: 'center'
+        });
+        content.push({
+            text: `DESDE: ${$('#rangoDesde').text()} | HASTA: ${$('#rangoHasta').text()}`,
+            alignment: 'center',
+            margin: [0, 0, 0, 20]
+        });
+        
+        datosReporte.forEach(function(dieta) {
+            content.push({
+                text: `Dieta ${dieta.fecha}`,
+                style: 'dietaHeader',
+                margin: [0, 10, 0, 5]
+            });
+            
+            const tableBody = [
+                [{text: '#', style: 'tableHeader'}, {text: 'PISCINA', style: 'tableHeader'}, {text: 'BALANCEADO', style: 'tableHeader'}, {text: 'LIBRAS', style: 'tableHeader'}, {text: 'INS.1', style: 'tableHeader'}, {text: 'G', style: 'tableHeader'}, {text: 'INS.2', style: 'tableHeader'}, {text: 'G', style: 'tableHeader'}, {text: 'INS.3', style: 'tableHeader'}, {text: 'G', style: 'tableHeader'}, {text: 'INS.4', style: 'tableHeader'}, {text: 'G', style: 'tableHeader'}]
+            ];
+            
+            dieta.filas.forEach(function(fila) {
+                tableBody.push([
+                    fila.numero,
+                    fila.piscina,
+                    fila.balanceado,
+                    fila.libras.toFixed(0),
+                    fila.insumo1_nombre || '',
+                    fila.insumo1_gramos.toFixed(2),
+                    fila.insumo2_nombre || '',
+                    fila.insumo2_gramos.toFixed(2),
+                    fila.insumo3_nombre || '',
+                    fila.insumo3_gramos.toFixed(2),
+                    fila.insumo4_nombre || '',
+                    fila.insumo4_gramos.toFixed(2)
+                ]);
+            });
+            
+            content.push({
+                table: {
+                    headerRows: 1,
+                    widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                    body: tableBody
+                },
+                layout: 'lightHorizontalLines',
+                fontSize: 7
+            });
+        });
+        
+        const docDefinition = {
+            pageOrientation: 'landscape',
+            pageSize: 'A4',
+            content: content,
+            styles: {
+                header: { fontSize: 16, bold: true },
+                subheader: { fontSize: 12, bold: true },
+                dietaHeader: { fontSize: 10, bold: true, fillColor: '#f1f1f1' },
+                tableHeader: { bold: true, fontSize: 7, fillColor: '#343a40', color: 'white' }
+            },
+            defaultStyle: { fontSize: 8 }
+        };
+        
+        pdfMake.createPdf(docDefinition).download(`Reporte_Dietas_${moment().format('YYYY-MM-DD')}.pdf`);
+    });
+    
+    // Imprimir
+    $('#btnImprimir').on('click', function() {
+        window.print();
+    });
+    
+    // Cargar datos iniciales
+    filtrarDatos();
+});
+</script>
+{% endblock %}
