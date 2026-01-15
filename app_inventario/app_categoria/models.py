@@ -59,7 +59,8 @@ class Linea(models.Model):
 class Producto(models.Model):
     nombre = models.CharField(max_length=150, verbose_name='Nombre ', unique=True)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
-    gramaje = models.CharField(max_length=100, verbose_name='Gramaje ', null=True, blank=True)
+    gramaje = models.CharField(max_length=100, verbose_name='Gramaje para aplicacion en Dieta', null=True, blank=True)
+    gramaje_precria = models.CharField(max_length=100, verbose_name='Gramaje para aplicacion en Precriadero', null=True, blank=True)
     descripcion = models.ForeignKey(
         Linea,
         on_delete=models.CASCADE,

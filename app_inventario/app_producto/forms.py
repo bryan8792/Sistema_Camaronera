@@ -69,6 +69,13 @@ class ProductoForm(ModelForm):
                     'autocomplete': 'off'
                 }
             ),
+            'gramaje_precria': TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Ingrese el Gramaje',
+                    'autocomplete': 'off'
+                }
+            ),
             'descripcion': Select(choices=OPCIONES_SUBCATEGORIA,
                 attrs={
                     'class': 'form-control select2'
