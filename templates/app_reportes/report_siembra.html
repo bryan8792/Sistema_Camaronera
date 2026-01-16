@@ -1,120 +1,146 @@
 <!DOCTYPE html>
 {% load static %}
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Guia</title>
-    <style>
+<meta charset="UTF-8">
+<title>Reporte Siembra</title>
 
-        @page {
-            size: A4 landscape;
-            margin: 2mm;
-        }
-        * {
-            color: black;
-            size: landscape;
-        }
+<style>
+@page {
+    size: A4 landscape;
+    margin: 5mm;
+}
 
-        body {
-            font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
-            padding: 0;
-            margin: 0;
-            color: black;
-        }
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    color: black;
+}
 
-        .name-company {
-            font-size: 25px;
-            padding: 0;
-            margin: 0;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-align: center;
-        }
+.titulo {
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
 
-        table thead tr th {
-            border: 1px solid black !important;
-            padding: 3px;
-        }
+.info {
+    margin-bottom: 8px;
+}
 
-        table tbody tr td {
-            border: 1px solid black;
-            padding: 3px;
-        }
+/* ================= TABLAS CONTABLES ================= */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-        .img-logo {
-            margin-top: 10px;
-            width: 75px;
-            height: 75px;
-            margin-bottom: 10px;
-        }
+/* TODOS LOS BORDES IGUALES */
+table,
+table thead th,
+table tbody td,
+table tfoot td {
+    border: 2px solid black;
+}
 
-    </style>
+/* ENCABEZADOS */
+thead th {
+    background: #e0e0e0;
+    text-align: center;
+    padding: 6px;
+    font-weight: bold;
+}
+
+/* CUERPO */
+tbody td {
+    padding: 6px;
+}
+
+/* PRIMERA COLUMNA (PISCINA) */
+tbody td:first-child {
+    font-weight: bold;
+    text-align: center;
+}
+
+/* TOTAL */
+tfoot td {
+    background: #f0f0f0;
+    font-weight: bold;
+    padding: 6px;
+}
+
+/* ALINEACIONES */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* SECCIONES */
+.seccion {
+    margin-top: 12px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.tabla-ajuste,
+.tabla-ajuste thead th,
+.tabla-ajuste tbody td {
+    border: 2px solid black;
+}
+
+.tabla-ajuste thead th {
+    background: #d9edf7;
+}
+
+</style>
 </head>
+
 <body>
+
 <div class="container-fluid">
-    <p class="text-center">
-        <b> {{ comp.comprobante }} </b>
-    </p>
-    <p>
-        <b>Fecha de Registro:</b> {{ fecha }}<br><br>
-        <b>Productos Utilizados:</b> {{ prod_cantidad }}<br><br>
-        <b>Observación:</b> {{ observacion }}<br>
-    </p>
-    <table class="table" style="width: 100%;">
+
+    <div class="titulo">
+        {{ comp.comprobante }}
+    </div>
+
+    <div class="info">
+        <b>Fecha de Registro:</b> {{ fecha }}<br>
+        <b>Productos Utilizados:</b><br>
+        {{ prod_cantidad }}<br>
+        <b>Observación:</b> {{ observacion }}
+    </div>
+
+    <table>
         <thead>
-        <tr style="border: 1px solid black;">
-            <th style="width: 10%;" class="text-center">Piscinas</th>
-            <th style="width: 8%;" class="text-center" >Dias</th>
-            <th style="width: 10%;" class="text-center">Siembra</th>
-            <th style="width: 10%;" class="text-center">Costo Larva</th>
-            <th style="width: 10%;" class="text-center">Dia por Hect</th>
-            <th style="width: 44%;" class="text-center">Calculos Realizados</th>
-            <th style="width: 8%;" class="text-center" >Total</th>
-        </tr>
+            <tr>
+                <th>Piscina</th>
+                <th>Días</th>
+                <th>Siembra</th>
+                <th>Costo Larva</th>
+                <th>Día por Hect</th>
+                <th>Cálculos</th>
+                <th>Total</th>
+            </tr>
         </thead>
         <tbody>
         {% for det in detalle_cuerpo %}
             <tr>
                 <td class="text-center">{{ det.piscina }}</td>
                 <td class="text-center">{{ det.dias }}</td>
-                <td class="text-center">{{ det.siembra }}</td>
-                <td class="text-center">{{ det.costo_larva }}</td>
-                <td class="text-center">{{ det.dia_por_hect }}</td>
-                <td class="text-center">{{ det.dia_por_hect }}</td>
-                <td class="text-center">{{ det.total }}</td>
+                <td class="text-right">{{ det.siembra|floatformat:2 }}</td>
+                <td class="text-right">{{ det.costo_larva|floatformat:2 }}</td>
+                <td class="text-right">{{ det.dia_por_hect|floatformat:2 }}</td>
+                <td class="text-right">{{ det.dia_por_hect|floatformat:2 }}</td>
+                <td class="text-right"><b>{{ det.total|floatformat:2 }}</b></td>
             </tr>
         {% endfor %}
-        <tr>
-            <td colspan="7" class="text-center"><b>Movimientos de Ajuste de Stock:</b></td>
-        </tr>
-        <tr>
-            <td colspan="7">
-                 {% comment %}{% for key, values in resul_oper.items %}
-                    {% if key == 'PSM' %}
-                        {% for key_2, values_2 in values.items %}
-                            <tr>
-                                <td class="text-center">{{ key_2 }}</td>
-                                <td class="text-center">-</td>
-                                <td class="text-center">{{ values_2 }}</td>
-                            </tr>
-                        {% endfor %}
-                    {% endif %}
-                    <p>{{ key }}</p>
-                    <p>{{ values }}</p>
-                {% endfor %}{% endcomment %}
-
-                <p> DATOS DE  </p>
-                {{ resul_oper }}
-
-                {% for x, y in resul_oper.items %}
-                    <p>The {{ x }} is {{ y }}.</p>
-                {% endfor %}
-
-            </td>
-        </tr>
         </tbody>
     </table>
 
+    <div class="seccion">Movimientos de Ajuste de Stock</div>
+
+    {{ tabla_resul_oper }}
+
 </div>
+
 </body>
 </html>

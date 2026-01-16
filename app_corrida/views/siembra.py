@@ -2,7 +2,7 @@
 import json
 import os
 from itertools import groupby
-
+from django.utils.safestring import mark_safe
 from click.core import F
 from django.conf import settings
 from django.db import transaction
@@ -29,41 +29,87 @@ from app_corrida.forms import ReportForm
 import pandas as pd
 #from datatable import (dt, f, by, ifelse, update, sort, count, min, max, mean, sum, rowsum)
 
-
 class reportSiembraPDF(View):
+
     def get(self, request, *args, **kwargs):
         try:
             template = get_template('app_reportes/report_siembra.html')
-            detalle_cuerpo = PrecSiembraCuerp.objects.filter(fecha_registro_id=self.kwargs['pk'])
 
-            fecha = '',
-            observacion = '',
-            prod_cantidad = '',
+            detalle_cuerpo = PrecSiembraCuerp.objects.filter(
+                fecha_registro_id=self.kwargs['pk']
+            )
+
+            fecha = ''
+            observacion = ''
+            prod_cantidad = ''
             resul_oper = ''
+            tabla_resul_oper = ''
 
-            if detalle_cuerpo:
-                fecha = detalle_cuerpo[0].fecha_registro.fecha_registro
-                observacion = detalle_cuerpo[0].fecha_registro.observacion
-                prod_cantidad = detalle_cuerpo[0].fecha_registro.prod_cantidad
-                resul_oper = detalle_cuerpo[0].fecha_registro.resul_oper
+            if detalle_cuerpo.exists():
+                enc = detalle_cuerpo.first().fecha_registro
+                fecha = enc.fecha_registro
+                observacion = enc.observacion
+                prod_cantidad = enc.prod_cantidad
+                resul_oper = enc.resul_oper
+
+            # ===== PROCESAR JSON =====
+            if resul_oper:
+                data = json.loads(resul_oper.replace("'", '"'))
+
+                tabla_resul_oper = """
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                """
+
+                for empresa, productos in data.items():
+                    for producto, cantidad in productos.items():
+                        tabla_resul_oper += f"""
+                        <tr>
+                            <td>{empresa}</td>
+                            <td>{producto}</td>
+                            <td style="text-align:right;">{float(cantidad):.2f}</td>
+                        </tr>
+                        """
+
+                tabla_resul_oper += "</tbody></table>"
 
             context = {
-                'sale': PrecSiembraEnc.objects.filter(pk=self.kwargs['pk']),
-                'comp': {'comprobante': 'HISTORIAL DE CONSUMO - CRIA DE CAMARON'},
+                'comp': {'comprobante': 'HISTORIAL DE CONSUMO - CRÍA DE CAMARÓN'},
                 'detalle_cuerpo': detalle_cuerpo,
                 'fecha': fecha,
                 'observacion': observacion,
-                'prod_cantidad': prod_cantidad,
-                'resul_oper': resul_oper,
+                'prod_cantidad': mark_safe(prod_cantidad),
+                'tabla_resul_oper': mark_safe(tabla_resul_oper),
             }
 
             html = template.render(context)
-            css_url = os.path.join(settings.BASE_DIR, 'static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css')
-            pdf = HTML(string=html, base_url=request.build_absolute_uri()).write_pdf(stylesheets=[CSS(css_url)])
+
+            css_url = os.path.join(
+                settings.BASE_DIR,
+                'static/lib/bootstrap-4.4.1-dist/css/bootstrap.min.css'
+            )
+
+            pdf = HTML(
+                string=html,
+                base_url=request.build_absolute_uri()
+            ).write_pdf(stylesheets=[CSS(css_url)])
+
             return HttpResponse(pdf, content_type='application/pdf')
-        except:
-            pass
-        return HttpResponseRedirect(reverse_lazy('app_corrida:listar_siembra'))
+
+        except Exception as e:
+            return HttpResponse(
+                f"Error al generar el PDF: {e}",
+                status=500
+            )
+
+
 
 
 class listarSiembraCuantificableView(ListView):

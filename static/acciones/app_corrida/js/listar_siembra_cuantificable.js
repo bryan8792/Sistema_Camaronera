@@ -79,7 +79,7 @@ var siembra_detalle = {
                     class: 'text-center',
                     orderable: false,
                     render: function (data, type, row) {
-                        var buttons = '<a rel="details" class="btn btn-success btn-xs" style="color: white;"><i class="fas fa-search"></i></a> ';
+                        var buttons = '<a rel="details" class="btn btn-info btn-xs" style="color: white;"><i class="fas fa-search"></i></a> ';
                         buttons += '&nbsp;';
                         buttons += '<a href="/corrida/reporte_siembra/' + data + '/" target="_blank" class="btn btn-info btn-xs btn-flat"><i class="fas fa-file-pdf"></i></a>';
                         return buttons;
@@ -136,45 +136,54 @@ $(function () {
                     targets: [-1],
                     class: 'text-center',
                     render: function (data, type, row) {
-                        /*console.log('row.resul_oper.items()')
-                        console.log(row.resul_oper)
-                        var func = row.resul_oper
-                        tabledev = '<table class="table">';
-                        foot_dev = '<tr>';
-                        for (var empresa in func) {
-                            for (var producto in func[empresa]) {
-                                tabledev += '<tr>'
-                                tabledev += '<td style="text-align: center">' + func[empresa] + '</td>'
-                                tabledev += '<td style="text-align: center">' + func[producto] + '</td>'
-                                tabledev += '<td style="text-align: center">' + func[empresa][producto] + '</td>'
-                                tabledev += '</tr>';
+
+                        let resul_oper = row.resul_oper;
+
+                        // 🔹 Si viene como string → convertir a objeto
+                        if (typeof resul_oper === 'string') {
+                            try {
+                                // Reemplaza comillas simples por dobles (caso Django)
+                                resul_oper = resul_oper.replace(/'/g, '"');
+                                resul_oper = JSON.parse(resul_oper);
+                            } catch (e) {
+                                console.error('Error parseando resul_oper:', resul_oper);
+                                return '<span class="text-danger">Formato inválido</span>';
                             }
                         }
-                        return tabledev += '</table>';*/
 
-                        // console.log('PROCESANDO AL EACH')
-                        // $.each([row.resul_oper], function (el, index) {
-                        //     console.log('index')
-                        //     console.log(index)
-                        // });
+                        // 🔹 Validación final
+                        if (!resul_oper || typeof resul_oper !== 'object') {
+                            return '<span class="text-muted">Sin datos</span>';
+                        }
 
-                        /*[row.resul_oper].forEach(function (valor, indice, array) {
-                            console.log('valor')
-                            console.log(valor)
-                            console.log('array')
-                            console.log(array)
-                            for (var empresa in array) {
-                                console.log('empresa')
-                                console.log(array[empresa])
-                            }
-                        })*/
+                        let html = `
+                            <table class="table table-sm table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Empresa</th>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
 
-                        // Object.keys([row.resul_oper]).forEach(function (key) {
-                        //     console.log('key, [row.resul_oper][key]')
-                        //     console.log(key, [row.resul_oper][key])
-                        // })
+                                    for (let empresa in resul_oper) {
+                                        for (let producto in resul_oper[empresa]) {
+                                            html += `
+                                <tr>
+                                    <td><b>${empresa}</b></td>
+                                    <td>${producto}</td>
+                                    <td class="text-end">${resul_oper[empresa][producto]}</td>
+                                </tr>
+                            `;
+                                        }
+                                    }
 
-                        return row.resul_oper;
+                                    html += `
+                                </tbody>
+                            </table>
+                            `;
+                        return html;
                     }
                 },
             ],

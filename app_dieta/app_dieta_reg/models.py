@@ -69,10 +69,6 @@ class DiaDietaRegistro(models.Model):
         ordering = ['fecha']
 
 
-from django.db import models, transaction
-from django.forms import model_to_dict
-from crum import get_current_user
-
 class DetalleDiaDieta(models.Model):
     dieta = models.ForeignKey('DiaDietaRegistro', on_delete=models.CASCADE)
     piscinas = models.ForeignKey(
