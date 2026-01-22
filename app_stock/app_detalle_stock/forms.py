@@ -60,6 +60,8 @@ PISCINAS_ESCOGER = (
     ('PISCINA 43', 'PISCINA 43'),
     ('PISCINA 44', 'PISCINA 44'),
     ('PISCINA 45', 'PISCINA 45'),
+    ('PISCINA PC-1', 'PISCINA PC-1'),
+    ('PISCINA PC-25', 'PISCINA PC-25'),
 )
 
 class ProdStockForm(ModelForm):
