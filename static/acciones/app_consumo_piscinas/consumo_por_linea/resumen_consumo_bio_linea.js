@@ -7,7 +7,7 @@ var date_now = moment().format("YYYY-MM-DD")
 
 function generate_report_piscinas() {
   var parameters = {
-    action: "search_insumos_conglomerado_psm_linea",
+    action: "search_insumos_conglomerado_bio_linea",
     start_date: date_now,
     end_date: date_now,
   }
@@ -30,44 +30,48 @@ function generate_report_piscinas() {
     data: parameters,
     dataType: "json",
     success: (json) => {
-      // Procesar datos para agrupar por producto
-      var movimientos_encontrados = []
-      var nuevo_ArrayObject = []
+      var groupedData = {}
 
       json.forEach((valor) => {
-        var descripcion = valor.producto_empresa.nombre_prod.descripcion
-        var index = movimientos_encontrados.indexOf(descripcion)
+        // Obtener linea y sublinea
+        var linea = valor.producto_empresa.nombre_prod.categoria.nombre
+        var sublinea = valor.producto_empresa.nombre_prod.descripcion.nombre
+        var costo = Number.parseFloat(valor.producto_empresa.nombre_prod.costo_aplicacion)
+        var cantidad = Number.parseFloat(valor.cantidad_egreso)
 
-        if (index === -1) {
-          movimientos_encontrados.push(descripcion)
-          // Clonar el objeto para no modificar el original
-          var nuevoObjeto = JSON.parse(JSON.stringify(valor))
-          nuevo_ArrayObject.push(nuevoObjeto)
-        } else {
-          nuevo_ArrayObject[index].cantidad_egreso =
-            Number.parseFloat(nuevo_ArrayObject[index].cantidad_egreso) + Number.parseFloat(valor.cantidad_egreso)
+        // Crear clave única combinando linea + sublinea
+        var key = linea + "|" + sublinea
+
+        if (!groupedData[key]) {
+          groupedData[key] = {
+            linea: linea,
+            sublinea: sublinea,
+            cantidad: 0,
+            total: 0,
+          }
         }
+
+        // Sumar cantidad y calcular total
+        groupedData[key].cantidad += cantidad
+        groupedData[key].total += cantidad * costo
       })
 
-      // Preparar datos para DataTable
+      // Convertir objeto agrupado a array y preparar datos para DataTable
       var tableData = []
       var totalCantidad = 0
       var totalMonto = 0
 
-      nuevo_ArrayObject.forEach((valor) => {
-        var cantidad = Number.parseFloat(valor.cantidad_egreso)
-        var costo = Number.parseFloat(valor.producto_empresa.nombre_prod.costo_aplicacion)
-        var total = cantidad * costo
-
-        totalCantidad += cantidad
-        totalMonto += total
+      Object.values(groupedData).forEach((item) => {
+        totalCantidad += item.cantidad
+        totalMonto += item.total
 
         tableData.push({
-          linea: valor.producto_empresa.nombre_prod.categoria.nombre,
-          sublinea: valor.producto_empresa.nombre_prod.descripcion.nombre,
-          cantidad: cantidad,
-          costo: costo,
-          total: total,
+          linea: item.linea,
+          sublinea: item.sublinea,
+          cantidad: item.cantidad,
+          // Calcular costo promedio: total / cantidad (evitar división por cero)
+          costo: item.cantidad > 0 ? item.total / item.cantidad : 0,
+          total: item.total,
         })
       })
 
@@ -108,7 +112,7 @@ function generate_report_piscinas() {
             titleAttr: "Exportar a Excel",
             className: "btn btn-success btn-sm",
             title:
-              "Resumen Consumo PSM - " +
+              "Resumen Consumo BIO - " +
               (date_range
                 ? date_range.startDate.format("YYYY-MM-DD") + " a " + date_range.endDate.format("YYYY-MM-DD")
                 : date_now),
@@ -122,7 +126,7 @@ function generate_report_piscinas() {
             text: '<i class="fa fa-print"></i> Imprimir',
             titleAttr: "Imprimir",
             className: "btn btn-info btn-sm",
-            title: "RESUMEN CONSUMO PSM",
+            title: "RESUMEN CONSUMO BIO",
             messageTop:
               "Fecha: " +
               (date_range
@@ -153,14 +157,14 @@ function generate_report_piscinas() {
             download: "open",
             orientation: "portrait",
             pageSize: "A4",
-            title: "RESUMEN CONSUMO PSM",
+            title: "RESUMEN CONSUMO BIO",
             exportOptions: {
               columns: ":visible",
             },
             footer: true,
             customize: (doc) => {
               // Título del documento
-              doc.content[0].text = "RESUMEN CONSUMO PSM"
+              doc.content[0].text = "RESUMEN CONSUMO BIO"
               doc.content[0].fontSize = 16
               doc.content[0].bold = true
               doc.content[0].alignment = "center"

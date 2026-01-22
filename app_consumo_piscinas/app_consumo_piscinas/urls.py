@@ -16,5 +16,6 @@ urlpatterns = [
     path('listar/resumen_general_psm/', listarResumenGeneralPSMView.as_view(), name='listar_resumen_general_psm'),
     path('listar/resumen_general_psm_linea/', listarResumenGeneralPSMLineaView.as_view(), name='listar_resumen_general_psm_linea'),
     path('listar/resumen_general_bio/', listarResumenGeneralBIOView.as_view(), name='listar_resumen_general_bio'),
+    path('listar/resumen_general_bio_linea/', listarResumenGeneralBIOLineaView.as_view(), name='listar_resumen_general_bio_linea'),
 
 ]

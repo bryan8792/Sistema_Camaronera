@@ -104,6 +104,7 @@ class Producto(models.Model):
         item = model_to_dict(self)
         item['valor_aplicacion'] = self.get_unidad_aplicacion()
         item['categoria'] = self.categoria.toJSON()
+        item['descripcion'] = self.descripcion.toJSON()
         item['imagen'] = self.get_image()
         item['minimo_stock'] = '0.00' if self.minimo_stock is None else format(self.minimo_stock, '.2f')
         item['stock'] = '0' if self.stock is None else self.stock

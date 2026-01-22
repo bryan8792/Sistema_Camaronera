@@ -365,6 +365,51 @@ class listarResumenGeneralPSMLineaView(ListView):
 
 
 
+class listarResumenGeneralBIOLineaView(ListView):
+    model = Piscinas
+    template_name = 'app_consumo_piscinas/consumo_por_linea/resumen_consumo_bio_linea.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+            if action == 'search_insumos_conglomerado_bio_linea':
+                print('Se busco por Piscinas por los Insumos')
+                data = []
+                start_date = request.POST.get('start_date', '')
+                end_date = request.POST.get('end_date', '')
+                searchdata = Producto_Stock.objects.filter(
+                    activo__exact=True,
+                    producto_empresa__nombre_empresa__siglas__icontains='BIO',
+                    producto_empresa__nombre_prod__descripcion__isnull=False  # Excluir productos sin descripcion
+                ).exclude(piscinas__exact='Todas las Piscinas')
+                if len(start_date) and len(end_date):
+                    searchdata = searchdata.filter(fecha_ingreso__range=[start_date, end_date])
+                for i in searchdata:
+                    data.append(i.toJSON())
+            else:
+                data['error'] = 'Ha ocurrido un error'
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    # defino el dicionario para enviar variables a mi plantilla
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'RESUMEN CONSUMO POR PRODUCTOS'
+        context['detail'] = 'RESUMEN CONSUMO EMPRESA BIO'
+        context['numero'] = Piscinas.objects.all()
+        context['numero_piscina'] = Piscinas.objects.all()
+        context['form'] = ReportForm()
+        return context
+
+
+
 # VENTANA PAR LISTAR EL CONSUMO DE PISCINAS POR DETALLES POR EMPRESA PSM DE BUSQUEDA EJEMPLO: ID
 class listarResumenGeneralBIOView(ListView):
     model = Piscinas
