@@ -8,6 +8,7 @@ var tot_deb = 0, tot_hab = 0, tot_sal = 0, deb = 0, hab = 0, acum = 0;
 var date_now = new moment().format('YYYY-MM-DD');
 var hour_now = new moment().format('HH-MM-SS');
 var json_glob = 0;
+var all_data_cache = []; // Cache para almacenar todos los datos para calculos
 
 function mayor_list() {
     var groupColumn = 0;
@@ -15,7 +16,7 @@ function mayor_list() {
         language: {
             "oPaginate": {
                 "sFirst": "Primero",
-                "sLast": "Último",
+                "sLast": "Ultimo",
                 "sNext": "Siguiente",
                 "sPrevious": "Anterior"
             },
@@ -24,191 +25,61 @@ function mayor_list() {
             "infoEmpty": "Tabla vacia por favor inserte datos",
             "lengthMenu": "Listando _MENU_ registros",
             "sSearch": "Buscar:",
-            "infoFiltered": "(filtrado de _MAX_ registros totales)"
+            "infoFiltered": "(filtrado de _MAX_ registros totales)",
+            "processing": "Procesando..."
         },
         responsive: true,
-        bPaginate: false,
+        // ========== PAGINACION SERVER-SIDE ==========
+        serverSide: true,
+        processing: true,
+        bPaginate: true,
+        pageLength: 50, // Registros por pagina
+        lengthMenu: [[25, 50, 100, 200], [25, 50, 100, 200]],
+        // ============================================
         autoWidth: false,
         destroy: true,
         deferRender: true,
         scrollY: "700px",
         scrollX: true,
-        // bFilter: false,
-        bInfo: false,
-        dom: 'Bfrtip',
+        bInfo: true,
+        dom: 'Blfrtip',
         ajax: {
             url: window.location.pathname,
             type: 'POST',
-            data: {
-                'action': 'searchdata',
-                'empresa': "BIO"
+            data: function(d) {
+                d.action = 'searchdata';
+                d.empresa = 'BIO';
+                return d;
             },
-            dataSrc: ""
+            // dataSrc ya no es necesario porque el servidor devuelve el formato correcto
         },
         buttons: [
             {
                 extend: 'excelHtml5',
                 text: '<i class="fas fa-file-csv"></i> ',
-                titleAttr: 'Exportar a Excell',
-                className: 'btn btn-success'
+                titleAttr: 'Exportar a Excel',
+                className: 'btn btn-success',
+                action: function (e, dt, button, config) {
+                    // Exportar todos los datos, no solo la pagina actual
+                    exportAllData('excel');
+                }
             },
             {
                 extend: 'print',
                 text: '<i class="fa fa-print"></i> ',
                 titleAttr: 'Imprimir',
-                className: 'btn btn-info'
+                className: 'btn btn-info',
+                action: function (e, dt, button, config) {
+                    exportAllData('print');
+                }
             },
             {
                 extend: 'pdfHtml5',
                 text: '<i class="fas fa-file-pdf"></i> ',
                 titleAttr: 'Exportar a PDF',
                 className: 'btn btn-danger',
-                download: 'open',
-                orientation: 'landscape',
-                //orientation: 'portrait',
-                pageSize: 'LEGAL',
-                footer: true,
-                header: true,
-                customize: function (doc) {
-                    var lastColX = null;
-                    var lastColY = null;
-                    var bod = [];
-                    doc.content[1].table.body.forEach(function (line, i) {
-                        if (lastColX !== line[0].text && line[0].text !== '') {
-                            bod.push([
-                                {text: '', style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'},
-                                {
-                                    text: tot_deb.toFixed(2) > 0.00 ? tot_deb.toFixed(2) : tot_deb.toFixed(2) === '0.00' ? '0.00' : ' ',
-                                    style: 'tableHeader'
-                                },
-                                {
-                                    text: tot_hab.toFixed(2) > 0.00 ? tot_hab.toFixed(2) : tot_hab.toFixed(2) === '0.00' ? '0.00' : ' ',
-                                    style: 'tableHeader'
-                                },
-                                {
-                                    text: tot_sal.toFixed(2) !== 'NaN' ? tot_sal.toFixed(2): '',
-                                    style: 'tableHeader'
-                                },
-                            ]);
-
-                            bod.push([
-                                {text: line[0].text, style: 'tableHeader'},
-                                {text: line[1].text, style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'}
-                            ]);
-                            //Update last
-                            lastColX = line[0].text;
-                            tot_deb = 0.00;
-                            tot_hab = 0.00;
-                            tot_sal = 0.00;
-                        }
-                        if (i < doc.content[1].table.body.length - 1) {
-                            tot_deb += parseFloat(line[6].text);
-                            tot_hab += parseFloat(line[7].text);
-                            tot_sal += parseFloat(line[8].text);
-                            bod.push([
-                                {text: line[4].text, style: 'defaultStyle'},
-                                {text: line[5].text, style: 'defaultStyle'},
-                                {text: line[2].text, style: 'defaultStyle'},
-                                {text: line[6].text, style: 'defaultStyle'},
-                                {text: line[7].text, style: 'defaultStyle'},
-                                {text: line[8].text, style: 'defaultStyle'}]
-                            );
-                        } else {
-                            tot_deb += parseFloat(line[6].text);
-                            tot_hab += parseFloat(line[7].text);
-                            tot_sal += parseFloat(line[8].text);
-                            bod.push([
-                                {text: line[4].text, style: 'defaultStyle'},
-                                {text: line[5].text, style: 'defaultStyle'},
-                                {text: line[2].text, style: 'defaultStyle'},
-                                {text: line[6].text, style: 'defaultStyle'},
-                                {text: line[7].text, style: 'defaultStyle'},
-                                {text: line[8].text, style: 'defaultStyle'}]
-                            );
-                            bod.push([
-                                {text: '', style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'},
-                                {text: '', style: 'tableHeader'},
-                                {
-                                    text: tot_deb.toFixed(2) > 0.00 ? tot_deb.toFixed(2) : tot_deb.toFixed(2) === '0.00' ? '0.00' : ' ',
-                                    style: 'tableHeader'
-                                },
-                                {
-                                    text: tot_hab.toFixed(2) > 0.00 ? tot_hab.toFixed(2) : tot_hab.toFixed(2) === '0.00' ? '0.00' : ' ',
-                                    style: 'tableHeader'
-                                },
-                                {
-                                    text: tot_sal.toFixed(2) !== 'NaN' ? tot_sal.toFixed(2): '',
-                                    style: 'tableHeader'
-                                },
-                            ]);
-                        }
-                    });
-                    doc.content[1].table.headerRows = 1;
-                    doc.content[1].table.widths = [90, 440, 75, 80, 80, 80];
-                    doc.content[1].table.body = bod;
-                    doc.content[1].layout = 'lightHorizontalLines';
-                    doc.styles = {
-                        header: {
-                            fontSize: 32,
-                            bold: true,
-                            alignment: 'center'
-                        },
-                        subheader: {
-                            fontSize: 10,
-                            bold: true,
-                            color: 'black'
-                        },
-                        tableHeader: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'white',
-                            fillColor: '#2d4154',
-                            alignment: 'center'
-                        },
-                        lastLine: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'black'
-                        },
-                        defaultStyle: {
-                            fontSize: 10,
-                            color: 'black'
-                        }
-                    }
-                    doc['footer'] = (function (page, pages) {
-                        return {
-                            columns: [
-                                {
-                                    alignment: 'left',
-                                    text: ['Fecha de creación: ', {text: date_now}, ' Hora: ', {text: hour_now}]
-                                },
-                                {
-                                    alignment: 'right',
-                                    text: ['página ', {text: page.toString()}, ' de ', {text: pages.toString()}]
-                                }
-                            ],
-                            margin: 20
-                        }
-                    });
-                    doc['header'] = (function (page, pages) {
-                        return {
-                            columns: [
-                                {
-                                    alignment: 'center',
-                                    text: ['ANALITICO AUXILIAR DE CUENTAS ', ' - DETALLE'],
-                                    margin: [0, 10]
-                                }
-                            ],
-                            margin: [30, 0]
-                        }
-                    });
+                action: function (e, dt, button, config) {
+                    exportAllData('pdf');
                 }
             }
         ],
@@ -295,7 +166,6 @@ function mayor_list() {
                 class: 'text-center',
                 orderable: false,
                 render: function (data, type, row, index) {
-
                     total = '';
                     deb = row.debe;
                     hab = row.haber;
@@ -303,56 +173,31 @@ function mayor_list() {
                         total += row.debe;
                     else
                         total -= row.haber;
-                    acum = total
-                    /*console.log('acum')
-                    console.log(acum)*/
+                    acum = total;
                     return parseFloat(acum).toFixed(2);
                 }
             },
         ],
-        // columnDefs: [{ visible: false, targets: groupColumn }],
         rowCallback: function (row, data, index) {
             var tr = $(row).closest('tr');
+            var pageInfo = tb_mayor_list.page.info();
+            var globalIndex = pageInfo.start + index;
 
-            const json = tb_mayor_list.rows().data().toArray();
+            // Calcular saldo basado en los datos de la pagina actual
+            var pageData = tb_mayor_list.rows({page: 'current'}).data().toArray();
 
-            /*let contador = 0;
-            cuenta = data.codigo_cuenta_plan;
-            for (let j = index; j <= index; j++) {
-                contador = (j - 1)
-                if (index > contador) {
-                    cantidad_ingreso = parseFloat(data.debe)
-                    cantidad_egreso = parseFloat(data.haber)
-
-                    /!*if (cantidad_ingreso > 0 && cuenta === data.codigo_cuenta_plan) {
-                        total_stock += cantidad_ingreso;
-                        $('td', row).eq(-1).css({'background-color': '#5f9ea0', 'color': 'black'});
-                    } else if(cantidad_egreso > 0 && cuenta === data.codigo_cuenta_plan) {
-                        total_stock -= cantidad_egreso;
-                        $('td', row).eq(-1).css({'background-color': '#f08080', 'color': 'black'});
+            for (let i = 0; i <= index; i++) {
+                if (i === index) {
+                    if ((i > 0 && pageData[i]['codigo_cuenta_plan'] === pageData[i - 1]["codigo_cuenta_plan"])) {
+                        pageData[i]["saldo"] = (parseFloat(pageData[i]['debe']) - parseFloat(pageData[i]['haber'])) + parseFloat(pageData[i - 1]['saldo'] || 0);
+                    } else {
+                        pageData[i]["saldo"] = parseFloat(pageData[i]['debe']) - parseFloat(pageData[i]['haber']);
                     }
-                    // console.log('nuevo total ' + total_stock);
-                    //$('td', row).eq(5).html('<b>' + total_stock.toFixed(0) + '</b>');
-                    // $('td', row).eq(-1).html('<b>' + total_stock.toFixed(2) + '</b>');
-                    $('td:eq(-1)', tb_mayor_list.row(tr).node()).html('<b>' + total_stock.toFixed(2) + '</b>');*!/
-                }
-            }*/
-
-            for (let i = 0; i < json.length; i++) {
-                for (let j = i; j <= index; j++) {
-                    if (i === j) {
-                        if ((i > 0 && json[i]['codigo_cuenta_plan'] === json[i - 1]["codigo_cuenta_plan"])) {
-                            json[i]["saldo"] = (parseFloat(json[i]['debe']) - parseFloat(json[i]['haber'])) + parseFloat(json[i - 1]['saldo']);
-                        } else {
-                            json[i]["saldo"] = parseFloat(json[i]['debe']) - parseFloat(json[i]['haber'])
-                        }
-                        $('td:eq(-1)', tb_mayor_list.row(tr).node()).html('<b>' + parseFloat(json[i]["saldo"]).toFixed(2) + '</b>');
-                    }
+                    $('td:eq(-1)', tb_mayor_list.row(tr).node()).html('<b>' + parseFloat(pageData[i]["saldo"]).toFixed(2) + '</b>');
                 }
             }
         },
         drawCallback: function (settings, json) {
-
             var api = this.api();
             var rows = api.rows({page: 'current'}).nodes();
             var last = null;
@@ -360,7 +205,6 @@ function mayor_list() {
             var filas = api.column(0, {page: 'current'}).data();
 
             filas.each(function (group, i, pos, dict) {
-
                 if (last !== group) {
                     if (last !== null) {
                         $(rows).eq(i - 1).after(
@@ -377,14 +221,14 @@ function mayor_list() {
                         total3 = 0;
                     }
                     $.each(settings.aoData, function (pos, dict) {
-                        if(dict._aFilterData[0] === group){
+                        if(dict._aFilterData && dict._aFilterData[0] === group){
                             resultado = dict._aFilterData[1]
                         }
                     })
 
                     $(rows).eq(i).before(
                         '<tr class="group text-left" style="background-color:rgb(255, 255, 255);font-weight:700;">' +
-                        '<td colspan="6" style="width: 100%">' + "Cuenta de Mayor: &nbsp;" + group + ' &nbsp; / &nbsp; ' + resultado + '</td>' +
+                        '<td colspan="6" style="width: 100%">' + "Cuenta de Mayor: &nbsp;" + group + ' &nbsp; / &nbsp; ' + (resultado || '') + '</td>' +
                         '</tr>'
                     );
                     last = group;
@@ -403,37 +247,125 @@ function mayor_list() {
                         </tr>`
                     );
                 }
-
             });
         },
         initComplete: function (settings, json) {
-
+            console.log('Tabla cargada correctamente');
         }
     });
 }
 
+// Funcion para exportar todos los datos (no solo la pagina actual)
+function exportAllData(type) {
+    // Mostrar loading
+    Swal.fire({
+        title: 'Cargando datos...',
+        text: 'Por favor espere mientras se cargan todos los registros',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    $.ajax({
+        url: window.location.pathname,
+        type: 'POST',
+        data: {
+            'action': 'searchdata_all',
+            'empresa': 'BIO'
+        },
+        success: function(data) {
+            Swal.close();
+
+            if (type === 'excel') {
+                exportToExcel(data);
+            } else if (type === 'pdf') {
+                exportToPDF(data);
+            } else if (type === 'print') {
+                printData(data);
+            }
+        },
+        error: function(xhr, status, error) {
+            Swal.fire('Error', 'No se pudieron cargar los datos', 'error');
+        }
+    });
+}
+
+// Funcion para exportar a Excel
+function exportToExcel(data) {
+    var wb = XLSX.utils.book_new();
+    var ws_data = [['Codigo', 'Nombre Cuenta', 'Descripcion', 'Fecha', 'Transaccion', 'Asiento', 'Debe', 'Haber', 'Saldo']];
+
+    data.forEach(function(row) {
+        ws_data.push([
+            row.codigo_cuenta_plan,
+            row.nombre_cuenta_plan,
+            row.detalle,
+            row.fecha_asiento_transaccion,
+            row.nombre_asiento_transaccion,
+            row.codigo_asiento_transaccion,
+            row.debe,
+            row.haber,
+            row.encabezadocuentaplan
+        ]);
+    });
+
+    var ws = XLSX.utils.aoa_to_sheet(ws_data);
+    XLSX.utils.book_append_sheet(wb, ws, "Libro Mayor");
+    XLSX.writeFile(wb, "libro_mayor_BIO_" + date_now + ".xlsx");
+}
+
+// Funcion para exportar a PDF (simplificada)
+function exportToPDF(data) {
+    // Crear ventana de impresion con formato PDF
+    var printWindow = window.open('', '_blank');
+    var html = '<html><head><title>Libro Mayor BIO</title>';
+    html += '<style>table{width:100%;border-collapse:collapse;}th,td{border:1px solid #000;padding:5px;font-size:10px;}th{background:#2d4154;color:#fff;}</style>';
+    html += '</head><body>';
+    html += '<h2 style="text-align:center;">ANALITICO AUXILIAR DE CUENTAS - DETALLE</h2>';
+    html += '<table><thead><tr><th>Codigo</th><th>Nombre</th><th>Descripcion</th><th>Fecha</th><th>Debe</th><th>Haber</th><th>Saldo</th></tr></thead><tbody>';
+
+    data.forEach(function(row) {
+        html += '<tr>';
+        html += '<td>' + row.codigo_cuenta_plan + '</td>';
+        html += '<td>' + row.nombre_cuenta_plan + '</td>';
+        html += '<td>' + row.detalle + '</td>';
+        html += '<td>' + row.fecha_asiento_transaccion + '</td>';
+        html += '<td>' + row.debe + '</td>';
+        html += '<td>' + row.haber + '</td>';
+        html += '<td>' + (parseFloat(row.debe) - parseFloat(row.haber)).toFixed(2) + '</td>';
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    html += '<p>Fecha de creacion: ' + date_now + '</p>';
+    html += '</body></html>';
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Funcion para imprimir
+function printData(data) {
+    exportToPDF(data);
+}
 
 function isEqual(a, b) {
     if (a instanceof Array && b instanceof Array) {
         if (a.length !== b.length) {
             return false;
         }
-
         for (var i = 0; i < a.length; i++) {
             if (!isEqual(a[i], b[i])) {
                 return false;
             }
         }
-
         return true;
     }
-
     return a === b;
 }
 
-
 $(function () {
-
     mayor_list();
-
 });

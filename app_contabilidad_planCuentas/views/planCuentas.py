@@ -995,7 +995,7 @@ class TransaccionInvoicePdfView(View):
             return HttpResponse(pdf, content_type="application/pdf")
 
         except Exception as e:
-            print("❌ Error en PDF:", e)
+            print(" Error en PDF:", e)
             return HttpResponseRedirect(reverse_lazy("app_planCuentas:reporte_pdf", kwargs={"pk": self.kwargs["pk"]}))
 
 

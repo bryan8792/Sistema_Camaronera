@@ -199,7 +199,7 @@ class listarConsumoGeneralEmpresasView(ListView):
 
                 # FILTRO POR FECHAS
                 if start_date and end_date:
-                    searchdata = searchdata.filter(fecha_ingreso__range=[start_date, end_date])
+                    searchdata = searchdata.filter(fecha_ingreso__range=[start_date, end_date], cantidad_egreso__gt=0)
                     print(f'[BACKEND] Registros después de filtrar por fecha: {searchdata.count()}')
 
                 # DEBUG: Mostrar primeros registros

@@ -70,7 +70,15 @@
 <table>
     <tr>
         <td><b>Código:</b> {{ encabezado.codigo }}</td>
-        <td><b>Tipo:</b> {{ encabezado.tip_cuenta|default:"---" }}</td>
+        <td><b>Tipo:</b>
+            {% if encabezado.tip_cuenta == '1' %} DIARIO CONTABLE
+            {% elif encabezado.tip_cuenta == '2' %} COMPROBANTE DE PAGO
+            {% elif encabezado.tip_cuenta == '3' %} INGRESO A CAJA
+            {% elif encabezado.tip_cuenta == '4' %} EGRESO DE CAJA
+            {% elif encabezado.tip_cuenta == '5' %} COMPROBANTE SISTEMA
+            {% else %} ------
+            {% endif %}
+        </td>
         <td><b>Fecha:</b> {{ encabezado.fecha|date:"d/m/Y" }}</td>
     </tr>
     <tr>

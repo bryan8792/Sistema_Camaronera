@@ -1,4 +1,4 @@
-
+/* global moment, XLSX, pdfMake, $ */
 var date_range = null;
 var multiplicadora = 0, total_stock = 0;
 var tb_piscinas_por_insumos;
@@ -7,7 +7,8 @@ var groupColumn = 1;
 var total_ing = 0;
 var total_eg = 0;
 var cant_tot = 0, tot = 0;
-var date_now = new moment().format('YYYY-MM-DD');
+var date_now = moment().format('YYYY-MM-DD');
+var datos_procesados = []; // Variable global para almacenar datos procesados
 
 function format(d) {
     console.log('d');
@@ -32,6 +33,329 @@ function format(d) {
     return html;
 }
 
+// Funcion para obtener el periodo formateado
+function getPeriodo() {
+    var start_date = date_now;
+    var end_date = date_now;
+    if (date_range !== null) {
+        start_date = date_range.startDate.format('YYYY-MM-DD');
+        end_date = date_range.endDate.format('YYYY-MM-DD');
+    }
+    return start_date + ' a ' + end_date;
+}
+
+// Funcion para exportar a Excel manualmente
+function exportarExcel() {
+    if (datos_procesados.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+
+    var fecha_hora = 'Fecha: ' + moment().format('DD/MM/YYYY') + ' - Hora: ' + moment().format('HH:mm:ss');
+    var periodo = getPeriodo();
+    
+    // Crear datos para Excel
+    var ws_data = [];
+    
+    // Fila 1: Fecha y hora
+    ws_data.push([fecha_hora, '', '', '', '']);
+    // Filas vacias
+    ws_data.push(['', '', '', '', '']);
+    ws_data.push(['', '', '', '', '']);
+    // Titulo centrado
+    ws_data.push(['', '', 'RESUMEN CONSUMO BIO', '', '']);
+    // Periodo
+    ws_data.push(['', '', 'Periodo: ' + periodo, '', '']);
+    // Fila vacia
+    ws_data.push(['', '', '', '', '']);
+    // Encabezados
+    ws_data.push(['LINEA', 'SUB-LINEA', 'CANTIDAD', 'COSTO', 'TOTAL']);
+    
+    // Datos
+    var total_cantidad = 0;
+    var total_total = 0;
+    
+    datos_procesados.forEach(function(item) {
+        ws_data.push([
+            'INSUMOS',
+            item.nombre,
+            item.cantidad,
+            item.costo,
+            item.total
+        ]);
+        total_cantidad += item.cantidad;
+        total_total += item.total;
+    });
+    
+    // Fila de totales
+    ws_data.push(['Cantidad Total', 'Cantidad Total', total_cantidad.toFixed(2), '', total_total.toFixed(2)]);
+    
+    // Crear libro de Excel
+    var wb = XLSX.utils.book_new();
+    var ws = XLSX.utils.aoa_to_sheet(ws_data);
+    
+    // Ajustar anchos de columna
+    ws['!cols'] = [
+        {wch: 20}, // LINEA
+        {wch: 30}, // SUB-LINEA
+        {wch: 15}, // CANTIDAD
+        {wch: 18}, // COSTO
+        {wch: 15}  // TOTAL
+    ];
+    
+    // Merge cells para titulo
+    ws['!merges'] = [
+        {s: {r: 3, c: 0}, e: {r: 3, c: 4}}, // Titulo
+        {s: {r: 4, c: 0}, e: {r: 4, c: 4}}  // Periodo
+    ];
+    
+    XLSX.utils.book_append_sheet(wb, ws, 'Resumen Consumo Bio');
+    XLSX.writeFile(wb, 'resumen_consumo_bio_' + moment().format('YYYY-MM-DD') + '.xlsx');
+}
+
+// Funcion para exportar a PDF manualmente
+function exportarPDF() {
+    if (datos_procesados.length === 0) {
+        alert('No hay datos para exportar');
+        return;
+    }
+
+    var periodo = getPeriodo();
+    
+    // Calcular totales
+    var total_cantidad = 0;
+    var total_total = 0;
+    
+    var body = [];
+    
+    // Encabezados
+    body.push([
+        {text: 'LINEA', style: 'tableHeader'},
+        {text: 'SUB-LINEA', style: 'tableHeader'},
+        {text: 'CANTIDAD', style: 'tableHeader'},
+        {text: 'COSTO', style: 'tableHeader'},
+        {text: 'TOTAL', style: 'tableHeader'}
+    ]);
+    
+    // Datos
+    datos_procesados.forEach(function(item) {
+        body.push([
+            {text: 'INSUMOS', style: 'tableCell'},
+            {text: item.nombre, style: 'tableCell'},
+            {text: item.cantidad.toFixed(2), style: 'tableCellRight'},
+            {text: item.costo.toFixed(10), style: 'tableCellRight'},
+            {text: item.total.toFixed(2), style: 'tableCellRight'}
+        ]);
+        total_cantidad += item.cantidad;
+        total_total += item.total;
+    });
+    
+    // Fila de totales
+    body.push([
+        {text: 'Cantidad Total', style: 'tableFooter'},
+        {text: 'Cantidad Total', style: 'tableFooter'},
+        {text: total_cantidad.toFixed(2), style: 'tableFooterRight'},
+        {text: '', style: 'tableFooter'},
+        {text: total_total.toFixed(2), style: 'tableFooterRight'}
+    ]);
+    
+    var docDefinition = {
+        pageSize: 'LETTER',
+        pageOrientation: 'portrait',
+        pageMargins: [40, 60, 40, 60],
+        content: [
+            {
+                text: 'RESUMEN CONSUMO BIO',
+                style: 'header'
+            },
+            {
+                text: 'Periodo: ' + periodo,
+                style: 'subheader'
+            },
+            {
+                text: ' ',
+                margin: [0, 10, 0, 10]
+            },
+            {
+                table: {
+                    headerRows: 1,
+                    widths: [80, 150, 70, 90, 70],
+                    body: body
+                },
+                layout: {
+                    hLineWidth: function(i, node) {
+                        return (i === 0 || i === 1 || i === node.table.body.length) ? 1 : 0.5;
+                    },
+                    vLineWidth: function(i) {
+                        return 0;
+                    },
+                    hLineColor: function(i, node) {
+                        return (i === 0 || i === 1) ? '#337AB7' : '#dddddd';
+                    },
+                    fillColor: function(rowIndex) {
+                        if (rowIndex === 0) return '#337AB7';
+                        return null;
+                    }
+                }
+            }
+        ],
+        styles: {
+            header: {
+                fontSize: 18,
+                bold: true,
+                alignment: 'center',
+                color: '#337AB7',
+                margin: [0, 0, 0, 10]
+            },
+            subheader: {
+                fontSize: 11,
+                alignment: 'center',
+                color: '#666666',
+                margin: [0, 0, 0, 20]
+            },
+            tableHeader: {
+                bold: true,
+                fontSize: 10,
+                color: 'white',
+                alignment: 'center'
+            },
+            tableCell: {
+                fontSize: 9,
+                color: '#333333',
+                margin: [0, 5, 0, 5]
+            },
+            tableCellRight: {
+                fontSize: 9,
+                color: '#333333',
+                alignment: 'right',
+                margin: [0, 5, 0, 5]
+            },
+            tableFooter: {
+                bold: true,
+                fontSize: 9,
+                color: '#337AB7',
+                fillColor: '#ecf0f1',
+                margin: [0, 5, 0, 5]
+            },
+            tableFooterRight: {
+                bold: true,
+                fontSize: 9,
+                color: '#337AB7',
+                alignment: 'right',
+                margin: [0, 5, 0, 5]
+            }
+        },
+        footer: function(currentPage, pageCount) {
+            return {
+                columns: [
+                    {
+                        text: 'Fecha de creacion: ' + moment().format('DD/MM/YYYY HH:mm:ss'),
+                        alignment: 'left',
+                        fontSize: 8,
+                        margin: [40, 0]
+                    },
+                    {
+                        text: 'Pagina ' + currentPage.toString() + ' de ' + pageCount,
+                        alignment: 'right',
+                        fontSize: 8,
+                        margin: [0, 0, 40, 0]
+                    }
+                ]
+            };
+        }
+    };
+    
+    pdfMake.createPdf(docDefinition).open();
+}
+
+// Funcion para imprimir
+function imprimirReporte() {
+    if (datos_procesados.length === 0) {
+        alert('No hay datos para imprimir');
+        return;
+    }
+
+    var periodo = getPeriodo();
+    
+    // Calcular totales
+    var total_cantidad = 0;
+    var total_total = 0;
+    
+    var filas = '';
+    datos_procesados.forEach(function(item) {
+        filas += '<tr>';
+        filas += '<td style="padding: 8px; border-bottom: 1px solid #ddd;">INSUMOS</td>';
+        filas += '<td style="padding: 8px; border-bottom: 1px solid #ddd;">' + item.nombre + '</td>';
+        filas += '<td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">' + item.cantidad.toFixed(2) + '</td>';
+        filas += '<td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">' + item.costo.toFixed(10) + '</td>';
+        filas += '<td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">' + item.total.toFixed(2) + '</td>';
+        filas += '</tr>';
+        total_cantidad += item.cantidad;
+        total_total += item.total;
+    });
+    
+    var printContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Resumen Consumo Bio</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { text-align: center; margin-bottom: 20px; }
+                .header h1 { color: #337AB7; margin: 0; font-size: 24px; }
+                .header p { color: #666; margin: 5px 0; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th { background-color: #337AB7; color: white; padding: 10px; text-align: center; }
+                td { padding: 8px; }
+                .total-row { background-color: #ecf0f1; font-weight: bold; color: #337AB7; }
+                .footer { margin-top: 20px; font-size: 10px; color: #666; }
+                @media print {
+                    body { margin: 0; }
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>RESUMEN CONSUMO BIO</h1>
+                <p>Periodo: ${periodo}</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>LINEA</th>
+                        <th>SUB-LINEA</th>
+                        <th>CANTIDAD</th>
+                        <th>COSTO</th>
+                        <th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${filas}
+                    <tr class="total-row">
+                        <td style="padding: 8px;">Cantidad Total</td>
+                        <td style="padding: 8px;">Cantidad Total</td>
+                        <td style="padding: 8px; text-align: right;">${total_cantidad.toFixed(2)}</td>
+                        <td style="padding: 8px;"></td>
+                        <td style="padding: 8px; text-align: right;">${total_total.toFixed(2)}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="footer">
+                <p>Fecha de creacion: ${moment().format('DD/MM/YYYY HH:mm:ss')}</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    var printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(function() {
+        printWindow.print();
+    }, 500);
+}
 
 function generate_report_piscinas() {
     var parameters = {
@@ -49,7 +373,6 @@ function generate_report_piscinas() {
         destroy: true,
         lengthChange: false,
         fixedHeader: true,
-        //responsive: true,
         language: {
             "lengthMenu": "Mostrar _MENU_ registros",
             "zeroRecords": "No se encontraron resultados",
@@ -59,13 +382,12 @@ function generate_report_piscinas() {
             "sSearch": "Buscar:",
             "oPaginate": {
                 "sFirst": "Primero",
-                "sLast": "Último",
+                "sLast": "Ultimo",
                 "sNext": "Siguiente",
                 "sPrevious": "Anterior"
             },
             "sProcessing": "Procesando...",
         },
-        //order: [[0, 'asc']],
         autoWidth: false,
         deferRender: true,
         ajax: {
@@ -74,8 +396,6 @@ function generate_report_piscinas() {
             data: parameters,
             dataSrc: ""
         },
-        // order: true,
-        // ordering: true,
         scrollY: "550px",
         scrollX: true,
         paging: false,
@@ -83,285 +403,32 @@ function generate_report_piscinas() {
         dom: 'Bfrtip',
         buttons: [
             {
-                extend: 'excelHtml5',
                 text: '<i class="fas fa-file-excel"></i> ',
-                titleAttr: 'Exportar a Excell',
+                titleAttr: 'Exportar a Excel',
                 className: 'btn btn-success',
-                customize: function (doc) {
-                    console.log("PRESENTANDO doc")
-                    console.log(doc)
-                    console.log("doc.data")
-                    console.log(doc.data)
-                    /*doc.content[1].table.body.forEach(function (line, i) {
-                        console.log("line")
-                        console.log(line)
-                        console.log("i")
-                        console.log(i)
-                    })*/
+                action: function (e, dt, node, config) {
+                    exportarExcel();
                 }
             },
             {
-                extend: 'print',
                 text: '<i class="fa fa-print"></i> ',
                 titleAttr: 'Imprimir',
-                className: 'btn btn-info'
+                className: 'btn btn-info',
+                action: function (e, dt, node, config) {
+                    imprimirReporte();
+                }
             },
             {
-                extend: 'pdfHtml5',
                 text: '<i class="fas fa-file-pdf"></i> ',
                 titleAttr: 'Exportar a PDF',
                 className: 'btn btn-danger',
-                download: 'open',
-                //orientation: 'landscape',
-                orientation: 'portrait',
-                pageSize: 'LEGAL',
-                footer : true,
-                header: true,
-                customize: function (doc) {
-                    var lastColX = null;
-                    var lastColY = null;
-                    var bod = [];
-                    doc.content[1].table.body.forEach(function (line, i) {
-                        if(lastColX !== line[0].text && line[0].text !== ''){
-                            bod.push([
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: cant_tot.toFixed(2) > 0 ? cant_tot.toFixed(2) : '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: tot.toFixed(2) > 0 ? tot.toFixed(2) : '', style:'tableHeader'}
-                            ]);
-
-                            bod.push([
-                                {text:line[0].text, style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'}
-                            ]);
-                            //Update last
-                            lastColX = line[0].text;
-                            cant_tot = 0;
-                            tot = 0;
-                        }
-                        if (i < doc.content[1].table.body.length - 1) {
-                                cant_tot += parseFloat(line[2].text);
-                                tot += parseFloat(line[4].text);
-                            bod.push([
-                                '', //{text: line[0].text, style: 'defaultStyle'},
-                                '',
-                                {text: line[1].text, style: 'defaultStyle'},
-                                {text: line[2].text, style: 'defaultStyle'},
-                                {text: line[3].text, style: 'defaultStyle'},
-                                {text: line[4].text, style: 'defaultStyle'},
-                                ]
-                            );
-                        } else {
-                                cant_tot += parseFloat(line[2].text);
-                                tot += parseFloat(line[4].text);
-                            bod.push([
-                                '', //{text: line[0].text, style: 'defaultStyle'},
-                                '',
-                                {text: line[1].text, style: 'defaultStyle'},
-                                {text: line[2].text, style: 'defaultStyle'},
-                                {text: line[3].text, style: 'defaultStyle'},
-                                {text: line[4].text, style: 'defaultStyle'},
-                                ]
-                            );
-                            bod.push([
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: cant_tot.toFixed(2) > 0 ? cant_tot.toFixed(2) : '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: tot.toFixed(2) > 0 ? tot.toFixed(2) : '', style:'tableHeader'}
-                            ]);
-                        }
-                    });
-                    doc.content[1].table.headerRows = 1;
-                    doc.content[1].table.widths = [130, 1, 60, 100, 50, 50, 50];
-                    doc.content[1].table.body = bod;
-                    doc.content[1].layout = 'lightHorizontalLines';
-                    doc.styles = {
-                        header: {
-                            fontSize: 22,
-                            bold: true,
-                            alignment: 'center'
-                        },
-                        subheader: {
-                            fontSize: 10,
-                            bold: true,
-                            color: 'black'
-                        },
-                        tableHeader: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'white',
-                            fillColor: '#2d4154',
-                            alignment: 'center'
-                        },
-                        lastLine: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'black'
-                        },
-                        defaultStyle: {
-                            fontSize: 10,
-                            color: 'black'
-                        }
-                    }
-                    doc['footer'] = (function (page, pages) {
-                        return {
-                            columns: [
-                                {
-                                    alignment: 'left',
-                                    text: ['Fecha de creación: ', {text: date_now}]
-                                },
-                                {
-                                    alignment: 'right',
-                                    text: ['página ', {text: page.toString()}, ' de ', {text: pages.toString()}]
-                                }
-                            ],
-                            margin: 20
-                        }
-                    });
-                    doc['header'] = (function (page, pages) {
-                        return {
-                            columns: [
-                                {
-                                    alignment: 'center',
-                                    text: ['DETALLE DE INSUMOS POR PISCINAS',' PSM & BIO'],
-                                    margin: [0, 10]
-                                }
-                            ],
-                            margin: [30, 0]
-                        }
-                    });
+                action: function (e, dt, node, config) {
+                    exportarPDF();
                 }
-                /*customize: function (doc) {
-                    var lastColX = null;
-                    var lastColY = null;
-                    var acum1=0, acum2=0, acum3=0;
-                    var bod = [];
-                    doc.content[1].table.body.forEach(function (line, i) {
-                        /!*if(lastColX !== line[0].text && line[0].text !== ''){
-
-                            /!*bod.push([
-                                {text:line[0].text, style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'}
-                            ]);*!/
-                            //Update last
-                            lastColX = line[0].text;
-                            cant_tot = 0;
-                            tot = 0;
-                        }*!/
-                        acum1 += line[0].text;
-                        bod.push([
-                            {text: acum1 , style: i},
-                            '',
-                            {text: line[1].text, style: 'defaultStyle'},
-                            {text: line[2].text, style: 'defaultStyle'},
-                            {text: line[3].text, style: 'defaultStyle'},
-                            {text: line[4].text, style: 'defaultStyle'},]
-                        );
-                        /!*if (i < doc.content[1].table.body.length - 1) {
-                            bod.push([
-                                {text: line[0].text, style: 'defaultStyle'},
-                                '',
-                                {text: line[1].text, style: 'defaultStyle'},
-                                {text: line[2].text, style: 'defaultStyle'},
-                                {text: line[3].text, style: 'defaultStyle'},
-                                {text: line[4].text, style: 'defaultStyle'},]
-                            );
-                        } else {
-                            bod.push([
-                                {text: line[0].text, style: 'defaultStyle'},
-                                '',
-                                {text: line[1].text, style: 'defaultStyle'},
-                                {text: line[2].text, style: 'defaultStyle'},
-                                {text: line[3].text, style: 'defaultStyle'},
-                                {text: line[4].text, style: 'defaultStyle'},]
-                            );
-                            bod.push([
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: cant_tot.toFixed(2) > 0 ? cant_tot.toFixed(2) : '', style:'tableHeader'},
-                                {text: '', style:'tableHeader'},
-                                {text: tot.toFixed(2) > 0 ? tot.toFixed(2) : '', style:'tableHeader'}
-                            ]);
-                        }*!/
-                    });
-                    doc.content[1].table.headerRows = 1;
-                    doc.content[1].table.widths = [150, 16, 100, 50, 50, 50];
-                    doc.content[1].table.body = bod;
-                    doc.content[1].layout = 'lightHorizontalLines';
-                    doc.styles = {
-                        header: {
-                            fontSize: 22,
-                            bold: true,
-                            alignment: 'center'
-                        },
-                        subheader: {
-                            fontSize: 10,
-                            bold: true,
-                            color: 'black'
-                        },
-                        tableHeader: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'white',
-                            fillColor: '#2d4154',
-                            alignment: 'center'
-                        },
-                        lastLine: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'black'
-                        },
-                        defaultStyle: {
-                            fontSize: 10,
-                            color: 'black'
-                        }
-                    }
-                    doc['footer'] = (function (page, pages) {
-                        return {
-                            columns: [
-                                {
-                                    alignment: 'left',
-                                    text: ['Fecha de creación: ', {text: date_now}]
-                                },
-                                {
-                                    alignment: 'right',
-                                    text: ['página ', {text: page.toString()}, ' de ', {text: pages.toString()}]
-                                }
-                            ],
-                            margin: 20
-                        }
-                    });
-                    doc['header'] = (function (page, pages) {
-                        return {
-                            columns: [
-                                {
-                                    alignment: 'center',
-                                    text: ['DETALLE DE PISCINAS POR INSUMOS',' PSM & BIO'],
-                                    margin: [0, 10]
-                                }
-                            ],
-                            margin: [30, 0]
-                        }
-                    });
-                }*/
             }
         ],
         columns: [
             {"data": "producto_empresa.nombre_prod.nombre","width": "50%"},
-            // {"data": "piscinas","width": "20%"},
             {"data": "cantidad_egreso","width": "10%"},
             {"data": "producto_empresa.nombre_prod.costo_aplicacion","width": "20%"},
             {"data": "producto_empresa.nombre_prod.costo_aplicacion","width": "20%"},
@@ -383,16 +450,6 @@ function generate_report_piscinas() {
                     return data;
                 }
             },
-            // {
-            //     targets: [3],
-            //     class: 'text-center',
-            //     orderable: false,
-            //     render: function (data, type, row) {
-            //         /*console.log("PRESENTANDO A ROW");
-            //         console.log(row);*/
-            //         return data;
-            //     }
-            // },
             {
                 targets: [-1],
                 class: 'text-center',
@@ -409,8 +466,6 @@ function generate_report_piscinas() {
             var nuevo_ArrayObject = new Array();
 
             json.map(function (valor, indice) {
-                console.log('valor', valor)
-                console.log('indice', indice)
                 if (movimientos_encontrados.indexOf(valor.producto_empresa.nombre_prod.nombre) === -1) {
                     movimientos_encontrados.push(valor.producto_empresa.nombre_prod.nombre);
                     nuevo_ArrayObject.push(valor);
@@ -421,15 +476,25 @@ function generate_report_piscinas() {
                 }
             });
 
+            // Guardar datos procesados en variable global para exportacion
+            datos_procesados = [];
             var total_consumos=0, cantidad=0.00, costo=0.000000000, acum1=0, acum2=0;
             var table = '<table class="table">';
             nuevo_ArrayObject.map(function (valor, indice) {
                 cantidad = parseFloat(valor.cantidad_egreso);
                 costo = parseFloat(valor.producto_empresa.nombre_prod.costo_aplicacion);
                 total_consumos = parseFloat(cantidad * costo);
+                
+                // Guardar para exportacion
+                datos_procesados.push({
+                    nombre: valor.producto_empresa.nombre_prod.nombre,
+                    cantidad: cantidad,
+                    costo: costo,
+                    total: total_consumos
+                });
+                
                 table+='<tr>'
                 table+='<td style="width: 50%; text-align: left"">'+valor.producto_empresa.nombre_prod.nombre+'</td>'
-                // table+='<td scope="col" style="width: 20%; text-align: center" >'+ valor.piscinas +'</td>'
                 table+='<td scope="col" style="width: 10%; text-align: center">'+ cantidad.toFixed(2) +'</td>'
                 table+='<td scope="col" style="width: 20%; text-align: center">'+ costo.toFixed(10) +'</td>'
                 table+='<td scope="col" style="width: 20%; text-align: center">'+ total_consumos.toFixed(2) +'</td>'
@@ -447,7 +512,6 @@ function generate_report_piscinas() {
             table += '</table>';
 
             document.getElementById("insumos_conglomerado_bio").innerHTML = table;
-            //$(table).appendTo("#tb_piscinas_por_insumos");
             console.log(table)
         }
     });
