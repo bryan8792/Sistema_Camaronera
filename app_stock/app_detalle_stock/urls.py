@@ -12,6 +12,8 @@ urlpatterns = [
     path('listarpsmybio/', listarStockPSMyBIOView.as_view(), name='listar_stock_psmybio'),
 
     path('asientos-contables/', ListarAsientosContablesView.as_view(), name='listar_asientos_contables'),
+    path('asientos_contables_bio/', ListarAsientosContablesBIOView.as_view(), name='listar_asientos_contables_bio'),
+    path('asientos_contables_psm/', ListarAsientosContablesPSMView.as_view(), name='listar_asientos_contables_psm'),
     path('reporte_asientos_contables/', ReporteAsientosContablesView.as_view(), name='reporte_asientos_contables'),
     path('diagnostico_contable/', DiagnosticoContableView.as_view(), name='diagnostico_contable'),
     path('reporte_piscina_insumos/', ReportePiscinaInsumosView.as_view(), name='reporte_piscina_insumos'),

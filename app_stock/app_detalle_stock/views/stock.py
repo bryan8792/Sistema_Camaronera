@@ -1328,6 +1328,186 @@ class ListarAsientosContablesView(ListView):
         return context
 
 
+class ListarAsientosContablesBIOView(ListView):
+    model = EncabezadoCuentasPlanCuenta
+    template_name = 'app_contabilidad_planCuentas/asientos_contables/asientos_contables_listar_bio.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action', '')
+
+            if action == 'get_asiento_detalle':
+                asiento_id = request.POST.get('id')
+                asiento = EncabezadoCuentasPlanCuenta.objects.get(pk=asiento_id)
+                detalles = DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=asiento).select_related('cuenta')
+
+                data = {
+                    'encabezado': {
+                        'codigo': asiento.codigo,
+                        'fecha': asiento.fecha.strftime('%Y-%m-%d') if asiento.fecha else '',
+                        'descripcion': asiento.descripcion,
+                        'comprobante': asiento.comprobante,
+                    },
+                    'detalles': [
+                        {
+                            'cuenta': d.cuenta.codigo if d.cuenta else '',
+                            'nombre_cuenta': d.cuenta.nombre if d.cuenta else '',
+                            'detalle': d.detalle,
+                            'debe': float(d.debe) if d.debe else 0,
+                            'haber': float(d.haber) if d.haber else 0,
+                        } for d in detalles
+                    ]
+                }
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Filtros de fecha
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+
+        # Query base - filtrar por empresa con siglas "BIO"
+        query = Q(empresa__siglas='BIO')  # <-- Filtro por siglas de empresa
+        query &= Q(tip_transa='EGRESO') | Q(descripcion__icontains='Consumo')
+
+        if fecha_desde:
+            query &= Q(fecha__gte=fecha_desde)
+        if fecha_hasta:
+            query &= Q(fecha__lte=fecha_hasta)
+
+        # Asientos con sus detalles
+        asientos = EncabezadoCuentasPlanCuenta.objects.filter(query).select_related('empresa'
+        ).prefetch_related('detallecuentasplancuenta_set__cuenta').order_by('-fecha', '-codigo')
+
+        # Calcular totales
+        total_debe = 0
+        total_haber = 0
+        asientos_data = []
+
+        for asiento in asientos:
+            detalles = asiento.detallecuentasplancuenta_set.all()
+            debe_asiento = sum(d.debe or 0 for d in detalles)
+            haber_asiento = sum(d.haber or 0 for d in detalles)
+
+            total_debe += debe_asiento
+            total_haber += haber_asiento
+
+            asientos_data.append({
+                'asiento': asiento,
+                'detalles': detalles,
+                'debe': debe_asiento,
+                'haber': haber_asiento,
+            })
+
+        context['nombre'] = 'Asientos Contables de Consumo - Empresa BIO'
+        context['asientos_data'] = asientos_data
+        context['total_debe'] = total_debe
+        context['total_haber'] = total_haber
+        context['fecha_desde'] = fecha_desde
+        context['fecha_hasta'] = fecha_hasta
+        return context
+
+
+class ListarAsientosContablesPSMView(ListView):
+    model = EncabezadoCuentasPlanCuenta
+    template_name = 'app_contabilidad_planCuentas/asientos_contables/asientos_contables_listar_psm.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action', '')
+
+            if action == 'get_asiento_detalle':
+                asiento_id = request.POST.get('id')
+                asiento = EncabezadoCuentasPlanCuenta.objects.get(pk=asiento_id)
+                detalles = DetalleCuentasPlanCuenta.objects.filter(encabezadocuentaplan=asiento).select_related('cuenta')
+
+                data = {
+                    'encabezado': {
+                        'codigo': asiento.codigo,
+                        'fecha': asiento.fecha.strftime('%Y-%m-%d') if asiento.fecha else '',
+                        'descripcion': asiento.descripcion,
+                        'comprobante': asiento.comprobante,
+                    },
+                    'detalles': [
+                        {
+                            'cuenta': d.cuenta.codigo if d.cuenta else '',
+                            'nombre_cuenta': d.cuenta.nombre if d.cuenta else '',
+                            'detalle': d.detalle,
+                            'debe': float(d.debe) if d.debe else 0,
+                            'haber': float(d.haber) if d.haber else 0,
+                        } for d in detalles
+                    ]
+                }
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Filtros de fecha
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+
+        # Query base - filtrar por empresa con siglas "PSM"
+        query = Q(empresa__siglas='PSM')  # <-- Filtro por siglas de empresa
+        query &= Q(tip_transa='EGRESO') | Q(descripcion__icontains='Consumo')
+
+        if fecha_desde:
+            query &= Q(fecha__gte=fecha_desde)
+        if fecha_hasta:
+            query &= Q(fecha__lte=fecha_hasta)
+
+        # Asientos con sus detalles
+        asientos = EncabezadoCuentasPlanCuenta.objects.filter(query).select_related('empresa'
+        ).prefetch_related('detallecuentasplancuenta_set__cuenta').order_by('-fecha', '-codigo')
+
+        # Calcular totales
+        total_debe = 0
+        total_haber = 0
+        asientos_data = []
+
+        for asiento in asientos:
+            detalles = asiento.detallecuentasplancuenta_set.all()
+            debe_asiento = sum(d.debe or 0 for d in detalles)
+            haber_asiento = sum(d.haber or 0 for d in detalles)
+
+            total_debe += debe_asiento
+            total_haber += haber_asiento
+
+            asientos_data.append({
+                'asiento': asiento,
+                'detalles': detalles,
+                'debe': debe_asiento,
+                'haber': haber_asiento,
+            })
+
+        context['nombre'] = 'Asientos Contables de Consumo - Empresa PSM'
+        context['asientos_data'] = asientos_data
+        context['total_debe'] = total_debe
+        context['total_haber'] = total_haber
+        context['fecha_desde'] = fecha_desde
+        context['fecha_hasta'] = fecha_hasta
+        return context
+
+
 class ReporteAsientosContablesView(ListView):
     model = DetalleCuentasPlanCuenta
     template_name = 'app_contabilidad_planCuentas/asientos_contables/reporte_asientos_contables.html'

@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/cdn/cdn_datatable.css' %}">
+
+    <style>
+        .debe-column {
+            text-align: right;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .haber-column {
+            text-align: right;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .total-row {
+            background-color: #e9ecef;
+            font-weight: bold;
+            border-top: 2px solid #000;
+        }
+        .cuenta-codigo {
+            font-family: monospace;
+            color: #6c757d;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                        <i class="far nav-icon fa fa-home"></i></a></li>
+                    <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                        <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="background-color:#3498DB">
+                    <h3 class="card-title"><strong>{{ nombre }}</strong></h3>
+                </div>
+                <div class="card-body">
+                    <!-- Filtros -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <form method="GET" class="form-inline">
+                                <div class="form-group mr-2">
+                                    <label class="mr-2">Desde:</label>
+                                    <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde|default:'' }}">
+                                </div>
+                                <div class="form-group mr-2">
+                                    <label class="mr-2">Hasta:</label>
+                                    <input type="date" name="fecha_hasta" class="form-control" value="{{ fecha_hasta|default:'' }}">
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Filtrar
+                                </button>
+                                <a href="{% url 'app_stock:listar_asientos_contables' %}" class="btn btn-secondary ml-2">
+                                    <i class="fas fa-sync"></i> Limpiar
+                                </a>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tabla -->
+                    <table id="tb_asientos" class="table table-sm table-bordered table-striped table-hover">
+                        <thead style="text-align: center; background-color:#3498DB">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Comprobante</th>
+                                <th>Descripcion</th>
+                                <th>Cuenta</th>
+                                <th>Detalle</th>
+                                <th class="text-right">Debe</th>
+                                <th class="text-right">Haber</th>
+                                <th>Empresa</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in asientos_data %}
+                                {% for detalle in item.detalles %}
+                                <tr>
+                                    <td>{{ item.asiento.fecha|date:"Y-m-d" }}</td>
+                                    <td><span class="badge badge-info">{{ item.asiento.comprobante }}</span></td>
+                                    <td>{{ item.asiento.descripcion }}</td>
+                                    <td><span class="cuenta-codigo">{{ detalle.cuenta.codigo|default:"-" }}</span></td>
+                                    <td>{{ detalle.detalle }}</td>
+                                    <td class="debe-column">
+                                        {% if detalle.debe > 0 %}${{ detalle.debe|floatformat:2 }}{% else %}-{% endif %}
+                                    </td>
+                                    <td class="haber-column">
+                                        {% if detalle.haber > 0 %}${{ detalle.haber|floatformat:2 }}{% else %}-{% endif %}
+                                    </td>
+                                    <td>{{ item.asiento.empresa.siglas|default:"N/A" }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center">No hay asientos contables registrados</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="total-row">
+                            <tr>
+                                <th colspan="5" class="text-right">TOTALES:</th>
+                                <th class="debe-column">${{ total_debe|floatformat:2 }}</th>
+                                <th class="haber-column">${{ total_haber|floatformat:2 }}</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'acciones/app_datatable/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/popper/popper.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.print.min.js' %}"></script>
+
+    <script>
+    $(document).ready(function () {
+        $('#tb_asientos').DataTable({
+            language: {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "zeroRecords": "No se encontraron resultados",
+                "info": "Mostrando _TOTAL_ registros",
+                "infoEmpty": "Mostrando 0 registros",
+                "infoFiltered": "(filtrado de _MAX_ registros)",
+                "sSearch": "Buscar:",
+                "sProcessing": "Procesando...",
+            },
+            autoWidth: false,
+            destroy: true,
+            order: [[0, 'desc']],
+            paging: false,
+            scrollY: '700px',
+            scrollCollapse: true,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    titleAttr: 'Exportar a Excel',
+                    className: 'btn btn-success btn-sm',
+                    title: 'Asientos Contables - PSM',
+                    footer: true
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    titleAttr: 'Exportar a PDF',
+                    className: 'btn btn-danger btn-sm',
+                    title: 'Asientos Contables - PSM',
+                    orientation: 'landscape',
+                    pageSize: 'LEGAL',
+                    footer: true
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Imprimir',
+                    titleAttr: 'Imprimir',
+                    className: 'btn btn-info btn-sm',
+                    title: 'Asientos Contables - PSM',
+                    footer: true
+                },
+                {
+                    extend: 'copyHtml5',
+                    text: '<i class="fas fa-copy"></i> Copiar',
+                    titleAttr: 'Copiar Datos',
+                    className: 'btn btn-secondary btn-sm',
+                    footer: true
+                },
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="fas fa-file-csv"></i> CSV',
+                    titleAttr: 'Exportar a CSV',
+                    className: 'btn btn-warning btn-sm',
+                    footer: true
+                }
+            ]
+        });
+    });
+    </script>
+{% endblock %}
