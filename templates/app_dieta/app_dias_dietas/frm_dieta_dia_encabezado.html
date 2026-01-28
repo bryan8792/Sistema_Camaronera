@@ -26,9 +26,6 @@
                     <strong><i class="fas fa-list-alt"></i> &nbsp LISTADO DE REGISTRO DE DIETAS POR DIAS:</strong>
                 </h1>
                 <div class="card-tools">
-                    {% comment %}<a href="#" data-toggle="modal" data-target="#modal_crear_dieta" class="btn btn-md bg-teal">
-                        <i class="fas fa-plus"></i> Generar Dieta
-                    </a>{% endcomment %}
                     <button id="btn_call_cabecera_dieta" type="submit" class="btn btn-md bg-gradient-primary">
                         <i class="fas fa-plus"></i> Generar Dieta
                     </button>
@@ -39,46 +36,61 @@
             </div>
 
             <div class="card-body bg-white">
-                <div class="row mt-6">
 
-                    {% for dieta in dietas %}
-                        {% if dieta.tip_dieta == True %}
-                            <div class="col-md-2">
-                            <div class="card card-widget">
-                                <div class="card-body">
-                                    <span class="mailbox-attachment-icon">
-                                        <i class="far fa-file-excel"></i>
-                                    </span>
-                                </div>
-                                <div class="card-footer card-comments">
-                                    <div class="mailbox-attachment-info">
-                                        <div class="text-center">
-                                            <span class="username">
-                                            <a href="/dieta/crear/dia/{{ dieta.id }}/" class="mailbox-attachment-name">
-                                                <i class="fas fa-paperclip"></i>
-                                                {{ detail }}-{{ dieta.fecha }}{{ extension }}
-                                            </a>
-                                        </span>
-                                            <a href="/dieta/crear/dia/{{ dieta.id }}/"
-                                               class="btn btn-secondary btn-sm">
-                                                <i class="fas fa-plus"></i>
-                                            </a>
-                                            <a href="/dieta/editar/dia/{{ dieta.id }}"
-                                               class="btn btn-secondary btn-sm">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="/dieta/reporte_dieta/{{ dieta.id }}/"
-                                               target="_blank" class="btn btn-sm btn-secondary">
-                                                <i class="fas fa-file-pdf"></i>
-                                            </a>
+                {% for empresa_nombre, dietas_empresa in dietas_por_empresa.items %}
+                    <!-- Seccion de cada empresa -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-olive">
+                            <h5 class="mb-0">
+                                <i class="fas fa-building"></i> {{ empresa_nombre }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for dieta in dietas_empresa %}
+                                    <div class="col-md-2">
+                                        <div class="card card-widget">
+                                            <div class="card-body">
+                                                <span class="mailbox-attachment-icon">
+                                                    <i class="far fa-file-excel"></i>
+                                                </span>
+                                            </div>
+                                            <div class="card-footer card-comments">
+                                                <div class="mailbox-attachment-info">
+                                                    <div class="text-center">
+                                                        <span class="username">
+                                                            <a href="/dieta/crear/dia/{{ dieta.id }}/" class="mailbox-attachment-name">
+                                                                <i class="fas fa-paperclip"></i>
+                                                                {{ detail }}-{{ dieta.fecha }}{{ extension }}
+                                                            </a>
+                                                        </span>
+                                                        <a href="/dieta/crear/dia/{{ dieta.id }}/" class="btn btn-secondary btn-sm">
+                                                            <i class="fas fa-plus"></i>
+                                                        </a>
+                                                        <a href="/dieta/editar/dia/{{ dieta.id }}" class="btn btn-secondary btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="/dieta/reporte_dieta/{{ dieta.id }}/" target="_blank" class="btn btn-sm btn-secondary">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-2 text-right">
+                                <small class="text-muted"><strong>Total Dietas:</strong> {{ dietas_empresa|length }}</small>
                             </div>
                         </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> No se encontraron dietas registradas para este mes.
+                    </div>
+                {% endfor %}
+
             </div>
 
         </div>
@@ -110,7 +122,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- /.card-body -->
                         <div class="card-footer">
                             <button id="btn_registrar_cabecera_dieta" type="submit" class="btn btn-primary">Registrar
                             </button>

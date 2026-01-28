@@ -54,6 +54,7 @@ function generate_report_stock() {
             {"data": "numero_guia"},
             {"data": "producto_empresa.nombre_prod.nombre"},
             {"data": "responsable_ingreso"},
+            {"data": "id"},
         ],
         columnDefs: [
             {
@@ -65,7 +66,7 @@ function generate_report_stock() {
                 }
             },
             {
-                targets: [-4],
+                targets: [-5],
                 class: 'text-center',
                 orderable: false,
                 render: function (row, type, data) {
@@ -86,13 +87,28 @@ function generate_report_stock() {
                 }
             },
             {
-                targets: [-1, -2, -3],
+                targets: [-2, -3, -4],
                 class: 'text-center',
                 orderable: false,
                 render: function (data, type, row) {
                     return data;
                 }
-            }
+            },
+            {
+                targets: [-1],
+                class: 'text-center',
+                render: function (data, type, row) {
+                    console.log('data')
+                    console.log(data)
+                    console.log('row')
+                    console.log(row)
+                    console.log('type')
+                    console.log(type)
+                    var buttons = '';
+                    buttons += '<a href="/stock_directo/stock/editarpsm_directo/editar/'+ row.id + '/" class="btn btn-warning btn-sm" title="Editar"><i class="fas fa-edit"></i></a> ';
+                    return buttons;
+                }
+            },
         ],
         initComplete: function (settings, json) {
             /*console.log(json);
@@ -179,8 +195,8 @@ function generate_report_stock() {
                             color: 'white'
                         }
                     };
-                    doc.content[1].table.widths = ['7%', '15%', '10%', '5%', '5%', '7%', '16%', '20%', '15%'];
-                    doc.content[1].margin = [0, 35, 0, 0];
+                    doc.content[1].table.widths = ['7%', '15%', '10%', '5%', '5%', '7%', '16%', '20%', '15%','0%'];
+                    doc.content[1].margin = [0, 35, 0, 0,0];
                     doc.content[1].layout = {};
                     doc['footer'] = (function (page, pages) {
                         return {
@@ -203,25 +219,27 @@ function generate_report_stock() {
         ],
         footerCallback: function (row, data, index) {
 
-            total_ing = this.api()
-                .column(3)
-                //.column(3, {page: 'current'})//para sumar solo la pagina actual
-                .data()
-                .reduce(function (a, b) {
-                    return parseInt(a) + parseInt(b);
-                }, 0);
-            $(this.api().column(3).footer()).html('' + total_ing);
+                total_ing = this.api()
+                    .column(3)//numero de columna a sumar
+                    //.column(3, {page: 'current'})//para sumar solo la pagina actual
+                    .data()
+                    .reduce(function (a, b) {
+                        return parseInt(a) + parseInt(b);
+                    }, 0);
+                $(this.api().column(3).footer()).html('' + total_ing);
 
-            total_eg = this.api()
-                .column(4)
-                //.column(4, {page: 'current'})//para sumar solo la pagina actual
-                .data()
-                .reduce(function (a, b) {
-                    return parseInt(a) + parseInt(b);
-                }, 0);
-            $(this.api().column(4).footer()).html('' + total_eg);
-            $(this.api().column(5).footer()).html('' + total_ing - total_eg);
-        },
+                total_eg = this.api()
+                    .column(4)//numero de columna a sumar
+                    //.column(4, {page: 'current'})//para sumar solo la pagina actual
+                    .data()
+                    .reduce(function (a, b) {
+                        return parseInt(a) + parseInt(b);
+                    }, 0);
+
+                $(this.api().column(4).footer()).html('- ' + total_eg);
+
+                $(this.api().column(5).footer()).html('' + total_ing - total_eg);
+            },
         rowCallback: function (row, data, index) {
             // aqui si sale bien pero añl imprimir no en cambio por este metodo de aca si sale al imprimir
             console.log('----------------------------------------------------------------------------------------------')

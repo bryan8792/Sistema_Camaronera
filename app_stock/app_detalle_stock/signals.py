@@ -34,7 +34,7 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
     comprobante = f"EGR-DET-{instance.detalle_dieta_id}"
 
     print("\n" + "=" * 60)
-    print("[CONTABILIDAD] RECONSTRUYENDO ASIENTO DE DIETA")
+    print("[CONTABILIDAD] CONSTRUYENDO O RECONSTRUYENDO ASIENTO DE DIETA")
     print("=" * 60)
 
     with transaction.atomic():
@@ -53,7 +53,6 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
         if not movimientos.exists():
             return
 
-        total_egreso = 0
         valores = []
 
         for mov in movimientos:
@@ -61,20 +60,32 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
             cantidad = float(mov.cantidad_egreso or 0)
             costo = float(producto.costo_aplicacion or 0)
 
-            # ✅ LÓGICA SEGURA
             valor = cantidad * costo if costo > 0 else cantidad
 
             if valor <= 0:
                 continue
 
             valores.append((mov, producto, valor))
-            total_egreso += valor
 
-        if total_egreso <= 0:
+        if not valores:
             return
 
         cuenta_suministros = getattr(piscina, 'cuenta_suministros', None)
         if not cuenta_suministros:
+            return
+
+        valores_redondeados = []
+        for mov, producto, valor in valores:
+            valor_redondeado = round(valor, 2)
+            if valor_redondeado > 0:
+                valores_redondeados.append((mov, producto, valor_redondeado))
+
+        if not valores_redondeados:
+            return
+
+        total_debe = sum(v[2] for v in valores_redondeados)
+
+        if total_debe <= 0:
             return
 
         encabezado = EncabezadoCuentasPlanCuenta.objects.create(
@@ -88,20 +99,20 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
             reg_control='RT'
         )
 
-        # DEBE – SUMINISTROS
+        # DEBE – SUMINISTROS (usa la suma de los HABER redondeados)
         DetalleCuentasPlanCuenta.objects.create(
             encabezadocuentaplan=encabezado,
             orden=1,
             cuenta=cuenta_suministros,
             detalle=f"Consumo dieta {piscina}",
-            debe=round(total_egreso, 2),
+            debe=total_debe,
             haber=0,
             origen='STOCK'
         )
 
         orden = 2
 
-        for mov, producto, valor in valores:
+        for mov, producto, valor in valores_redondeados:
 
             stock_total = Total_Stock.objects.filter(
                 nombre_prod=producto,
@@ -117,7 +128,7 @@ def crear_asiento_contable_egreso(sender, instance, created, **kwargs):
                 cuenta=stock_total.plan_cuenta,
                 detalle=f"Egreso inventario {producto}",
                 debe=0,
-                haber=round(valor, 2),
+                haber=valor,  # Ya está redondeado
                 origen='STOCK'
             )
 

@@ -687,48 +687,126 @@ def listarMesDietasPrecrias(request, anio):
 
 
 # Para listar las Dietas del Dia Piscinas
+# @login_required(login_url="/")
+# def listarDiasDietas(request, pk):
+#     dietas = DiaDietaRegistro.objects.filter(mes_dieta_id=pk)
+#     mes = MesDieta.objects.get(id=pk)
+#     if request.POST:
+#         dietasR = DiaDietaRegistro(mes_dieta_id=pk)
+#         dietasR.save()
+#         return redirect(reverse('app_dieta:crear_dia_dieta', kwargs={'pk': dietasR.pk}))
+#     contexto = {
+#         'anio_id': mes.anio.id,
+#         'mes': mes,
+#         'fecha': datetime.datetime.now(),
+#         'dietas': dietas,
+#         'nombre': 'Ventana Principal Dieta Dia',
+#         'detail': 'Dieta',
+#         'extension': '.xlsx',
+#     }
+#     return render(request, 'app_dieta/app_dias_dietas/frm_dieta_dia_encabezado.html', contexto)
+
+# Para listar las Dietas del Dia Piscinas
+# Para listar las Dietas del Dia Piscinas
+
 @login_required(login_url="/")
 def listarDiasDietas(request, pk):
     dietas = DiaDietaRegistro.objects.filter(mes_dieta_id=pk)
     mes = MesDieta.objects.get(id=pk)
+
     if request.POST:
         dietasR = DiaDietaRegistro(mes_dieta_id=pk)
         dietasR.save()
         return redirect(reverse('app_dieta:crear_dia_dieta', kwargs={'pk': dietasR.pk}))
+
+    dietas_por_empresa = {}
+    empresas = Empresa.objects.all()
+
+    for empresa in empresas:
+        dietas_empresa = DiaDietaRegistro.objects.filter(
+            mes_dieta_id=pk,
+            tip_dieta=True,
+            detallediadieta__piscinas__empresa=empresa
+        ).distinct().order_by('fecha')
+
+        if dietas_empresa.exists():
+            dietas_por_empresa[empresa.nombre] = dietas_empresa
+
     contexto = {
         'anio_id': mes.anio.id,
         'mes': mes,
         'fecha': datetime.datetime.now(),
         'dietas': dietas,
+        'dietas_por_empresa': dietas_por_empresa,
         'nombre': 'Ventana Principal Dieta Dia',
         'detail': 'Dieta',
         'extension': '.xlsx',
     }
     return render(request, 'app_dieta/app_dias_dietas/frm_dieta_dia_encabezado.html', contexto)
 
-
 # Para listar las Dietas del Dia Precrias
+# @login_required(login_url="/")
+# def listarDiasDietasPrecrias(request, pk):
+#     dietas = DiaDietaRegistro.objects.filter(mes_dieta_id=pk)
+#     mes = MesDieta.objects.get(id=pk)
+#     if request.POST:
+#         dietasR = DiaDietaRegistro(mes_dieta_id=pk)
+#         dietasR.save()
+#         return redirect(reverse('app_dieta:crear_dia_dieta_prec', kwargs={'pk': dietasR.pk}))
+#     contexto = {
+#         'anio_id': mes.anio.id,
+#         'mes': mes,
+#         'fecha': datetime.datetime.now(),
+#         'dietas': dietas,
+#         'nombre': 'Ventana Principal Dieta Precria Dia',
+#         'detail': 'PrecDieta',
+#         'extension': '.xlsx',
+#     }
+#     return render(request, 'app_dieta/app_dias_dietas_prec/frm_dieta_prec_dia_encabezado.html', contexto)
+
+
+# CON XHTML2PDF
+
+
 @login_required(login_url="/")
 def listarDiasDietasPrecrias(request, pk):
     dietas = DiaDietaRegistro.objects.filter(mes_dieta_id=pk)
     mes = MesDieta.objects.get(id=pk)
+
+    # 🔹 Crear nuevo día de dieta (PRECRÍA)
     if request.POST:
         dietasR = DiaDietaRegistro(mes_dieta_id=pk)
         dietasR.save()
         return redirect(reverse('app_dieta:crear_dia_dieta_prec', kwargs={'pk': dietasR.pk}))
+
+    dietas_por_empresa = {}
+    empresas = Empresa.objects.all()
+
+    for empresa in empresas:
+        dietas_empresa = DiaDietaRegistro.objects.filter(
+            mes_dieta_id=pk,
+            tip_dieta=False,  # PRECRÍA
+            detallediadieta__piscinas__empresa=empresa,
+            detallediadieta__piscinas__prec=True
+        ).distinct().order_by('fecha')
+
+        if dietas_empresa.exists():
+            dietas_por_empresa[empresa.nombre] = dietas_empresa
+
     contexto = {
         'anio_id': mes.anio.id,
         'mes': mes,
         'fecha': datetime.datetime.now(),
         'dietas': dietas,
-        'nombre': 'Ventana Principal Dieta Precria Dia',
+        'dietas_por_empresa': dietas_por_empresa,
+        'nombre': 'Ventana Principal Dieta Precría Día',
         'detail': 'PrecDieta',
         'extension': '.xlsx',
     }
     return render(request, 'app_dieta/app_dias_dietas_prec/frm_dieta_prec_dia_encabezado.html', contexto)
 
 
-# CON XHTML2PDF
+
 class ListarDietaPDF(View):
     def get(self, request, *args, **kwargs):
         if 'pk' in kwargs:

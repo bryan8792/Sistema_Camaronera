@@ -14,6 +14,8 @@ urlpatterns = [
     path('empresa/eliminar/<int:pk>/', eliminarEmpresaView.as_view(), name='eliminar_empresa'),
     path('dashboard_bio', listarDashboardBIO.as_view(), name='dashboard_bio'),
 
+    path('piscinas/reporte/', reportePiscinasView.as_view(), name='reporte_piscinas'),
+
     path('piscina/listar/', listarPiscinasView.as_view(), name='listar_piscinas'),
     path('piscina/crear/', crearPiscinaView.as_view(), name='crear_piscinas'),
     path('piscina/actualizar/<int:pk>/', actualizarPiscinaView.as_view(), name='actualizar_piscinas'),

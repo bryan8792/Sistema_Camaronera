@@ -1,26 +1,16 @@
 var tblProducts;
-var date_range = null;
 var date_now = new moment().format('YYYY-MM-DD');
-var total = 0;
-var total_stock = 0;
 
 function generate_report_stock() {
-    var parameters = {
-        'action': 'search_report',
-        'start_date': date_now,
-        'end_date': date_now,
-    };
-
-    if (date_range !== null) {
-        parameters['start_date'] = date_range.startDate.format('YYYY-MM-DD');
-        parameters['end_date'] = date_range.endDate.format('YYYY-MM-DD');
+    if ($.fn.DataTable.isDataTable('#tb_kardex_general')) {
+        $('#tb_kardex_general').DataTable().destroy();
     }
 
     tblProducts = $('#tb_kardex_general').DataTable({
         language: {
             "oPaginate": {
                 "sFirst": "Primero",
-                "sLast": "Último",
+                "sLast": "Ultimo",
                 "sNext": "Siguiente",
                 "sPrevious": "Anterior"
             },
@@ -29,30 +19,36 @@ function generate_report_stock() {
             "infoEmpty": "Tabla vacia por favor inserte datos",
             "lengthMenu": "Listando _MENU_ registros",
             "sSearch": "Buscar:",
-            "infoFiltered": "(filtrado de _MAX_ registros totales)"
+            "infoFiltered": "(filtrado de _MAX_ registros totales)",
+            "processing": "<div class='spinner-border text-primary' role='status'><span class='sr-only'>Cargando...</span></div>"
         },
-        bPaginate: false,
+
+        processing: true,
+        serverSide: true,
+
+        paging: true,
+        pageLength: 50,
+        lengthMenu: [[25, 50, 100, 200], [25, 50, 100, 200]],
+
         responsive: true,
         autoWidth: false,
-        destroy: true,
         deferRender: true,
-        scrollY: "600px",
+        scrollY: "500px",
         scrollX: true,
-        //dom: 'Bfrtilp',
-        bJQueryUI: true,
-        order: false,
-        paging: false,
+        scrollCollapse: true,
         ordering: false,
 
-        dom: 'Bfrtip',
+        dom: 'Blfrtip',
+
         ajax: {
             url: window.location.pathname,
             type: 'POST',
-            data: {
-                'action': 'searchdata'
-            },
-            dataSrc: ""
+            data: function(d) {
+                d.action = 'searchdata';
+                return d;
+            }
         },
+
         columns: [
             {"data": "producto_empresa.nombre_empresa.siglas"},
             {"data": "fecha_ingreso"},
@@ -64,63 +60,38 @@ function generate_report_stock() {
             {"data": "producto_empresa.nombre_prod.nombre"},
             {"data": "responsable_ingreso"},
         ],
+
         columnDefs: [
             {
-                targets: [0, 1, 2, 3, 4],
-                class: 'text-center',
-                orderable: false,
-                render: function (data, type, row) {
-                    return data;
-                }
+                targets: [0, 1, 2, 3, 4, 6, 7, 8],
+                className: 'text-center',
+                orderable: false
             },
             {
-                targets: [-4],
-                class: 'text-center',
+                targets: [5],
+                className: 'text-center',
                 orderable: false,
-                render: function (row, type, data) {
-                    /*console.log('----------------------------------------------------------------------------------------------')
-                    total = '';
-                    ingreso = data.cantidad_ingreso;
-                    egreso = data.cantidad_egreso;
-                    if (ingreso > 0)
-                        total += ingreso;
-                    else
-                        total -= egreso;
-                    return total;*/
-                    return ``;
-                }
-            },
-            {
-                targets: [-1, -2, -3],
-                class: 'text-center',
-                orderable: false,
-                render: function (data, type, row) {
-                    return data;
+                render: function(data, type, row) {
+                    var ingreso = parseFloat(row.cantidad_ingreso) || 0;
+                    var egreso = parseFloat(row.cantidad_egreso) || 0;
+                    var saldo = ingreso - egreso;
+
+                    if (row.tipo === 'INGRESO') {
+                        return '<span style="background-color:#5f9ea0;color:white;padding:2px 8px;border-radius:3px;"><b>' + saldo.toFixed(0) + '</b></span>';
+                    } else {
+                        return '<span style="background-color:#f08080;color:white;padding:2px 8px;border-radius:3px;"><b>' + saldo.toFixed(0) + '</b></span>';
+                    }
                 }
             }
         ],
-        initComplete: function (settings, json) {
-            /*console.log(json);
-            $.each(json,function (pos, dict){
-                console.log('pos   '+pos);
-                console.log('dict   '+dict.cantidad_ingreso);
-                ingreso = dict.cantidad_ingreso;
-                egreso = dict.cantidad_egreso;
-                if(ingreso > 0){
-                    total_stock += ingreso;
-                }else{
-                    total_stock -= egreso;
-                }
-                console.log('total_stock')
-                console.log(total_stock)
-            });*/
-        },
+
         buttons: [
             {
                 extend: 'print',
                 text: '<i class="fa fa-print"></i> ',
                 titleAttr: 'Imprimir',
-                className: 'btn btn-info'
+                className: 'btn btn-info',
+                exportOptions: { modifier: { page: 'current' } }
             },
             {
                 extend: 'copyHtml5',
@@ -138,125 +109,46 @@ function generate_report_stock() {
                 extend: 'pdfHtml5',
                 text: '<i class="fas fa-file-pdf"></i>',
                 titleAttr: 'PDF',
-                title: 'KARDEX DE MOVIMIENTO DE PRODUCTO "EMPRESA PESQUERA SAN MIGUEL"',
+                title: 'KARDEX DE MOVIMIENTO A DETALLE',
                 className: 'btn btn-danger btn-flat btn-xs',
                 download: 'open',
                 orientation: 'landscape',
                 pageSize: 'LEGAL',
-                customize: function (doc) {
-                    doc.styles = {
-                        title: {
-                            fontSize: 22,
-                            bold: true,
-                            alignment: 'center'
-                        },
-                        header: {
-                            fontSize: 18,
-                            bold: true,
-                            alignment: 'center'
-                        },
-                        subheader: {
-                            fontSize: 13,
-                            bold: true,
-                            alignment: 'center'
-                        },
-                        quote: {
-                            italics: true
-                        },
-                        small: {
-                            fontSize: 8
-                        },
-                        tableHeader: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'white',
-                            fillColor: '#2d4154',
-                            alignment: 'center'
-                        },
-                        body: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'white'
-                        },
-                        tableBody: {
-                            bold: true,
-                            fontSize: 11,
-                            color: 'white'
-                        }
-                    };
+                exportOptions: { modifier: { page: 'current' } },
+                customize: function(doc) {
                     doc.content[1].table.widths = ['6%', '7%', '10%', '7%', '7%', '7%', '24%', '17%', '15%'];
                     doc.content[1].margin = [0, 35, 0, 0];
-                    doc.content[1].layout = {};
-                    doc['footer'] = (function (page, pages) {
+                    doc['footer'] = function(page, pages) {
                         return {
                             columns: [
-                                {
-                                    alignment: 'left',
-                                    text: ['Fecha de creación: ', {text: date_now}]
-                                },
-                                {
-                                    alignment: 'right',
-                                    text: ['página ', {text: page.toString()}, ' de ', {text: pages.toString()}]
-                                }
+                                { alignment: 'left', text: ['Fecha de creacion: ', {text: date_now}] },
+                                { alignment: 'right', text: ['pagina ', {text: page.toString()}, ' de ', {text: pages.toString()}] }
                             ],
                             margin: 20
                         }
-                    });
-
+                    };
                 }
             }
         ],
-        footerCallback: function (row, data, index) {
 
-            total_ing = this.api()
-                .column(3)
-                //.column(3, {page: 'current'})//para sumar solo la pagina actual
-                .data()
-                .reduce(function (a, b) {
-                    return parseInt(a) + parseInt(b);
-                }, 0);
-            $(this.api().column(3).footer()).html('' + total_ing);
+        footerCallback: function(row, data, start, end, display) {
+            var api = this.api();
 
-            total_eg = this.api()
-                .column(4)
-                //.column(4, {page: 'current'})//para sumar solo la pagina actual
-                .data()
-                .reduce(function (a, b) {
-                    return parseInt(a) + parseInt(b);
-                }, 0);
-            $(this.api().column(4).footer()).html('' + total_eg);
-            $(this.api().column(5).footer()).html('' + total_ing - total_eg);
-        },
-        rowCallback: function (row, data, index) {
-            console.log('----------------------------------------------------------------------------------------------')
-            let contador = 0;
-            for (let i = index; i <= index; i++) {
-                contador = (i - 1);
-                if (index > contador) {
-                    cantidad_ingreso = parseFloat(data.cantidad_ingreso)
-                    cantidad_egreso = parseFloat(data.cantidad_egreso)
-                    console.log('total : ' + total_stock);
-                    if (data.tipo === 'INGRESO') {
-                        console.log('entro a ingreso');
-                        total_stock += cantidad_ingreso;
-                        $('td', row).eq(5).css({'background-color': '#5f9ea0', 'color': 'white',});
-                    } else {
-                        console.log('entro a egreso');
-                        total_stock -= cantidad_egreso;
-                        $('td', row).eq(5).css({'background-color': '#f08080', 'color': 'white',});
-                    }
-                    console.log('nuevo total ' + total_stock);
-                    //$('td', row).eq(5).html('<b>' + total_stock.toFixed(0) + '</b>');
-                    $('td', row).eq(5).html('<b>' + total_stock.toFixed(0) + '</b>');
-                }
-            }
+            var total_ing = api.column(3, {page: 'current'}).data().reduce(function(a, b) {
+                return parseFloat(a) + parseFloat(b || 0);
+            }, 0);
+
+            var total_eg = api.column(4, {page: 'current'}).data().reduce(function(a, b) {
+                return parseFloat(a) + parseFloat(b || 0);
+            }, 0);
+
+            $(api.column(3).footer()).html(total_ing.toFixed(0));
+            $(api.column(4).footer()).html(total_eg.toFixed(0));
+            $(api.column(5).footer()).html((total_ing - total_eg).toFixed(0));
         }
     });
 }
 
-
-$(function () {
-
+$(function() {
     generate_report_stock();
-
 });

@@ -69,6 +69,7 @@
                                 <th style="width: 15%;">N. Guia</th>
                                 <th style="width: 20%;">Producto</th>
                                 <th style="width: 10%;">Responsable</th>
+                                <th style="width: 10%;">Acciones</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -85,6 +86,12 @@
                                         <td style="text-align: center">{{ reg.numero_guia }}</td>
                                         <td style="text-align: center">{{ reg.producto_empresa.nombre_prod }}</td>
                                         <td style="text-align: center">{{ reg.responsable_ingreso }}</td>
+                                        <td style="text-align: center">
+                                            <a href="{% url 'app_stock_directo:editar_stock_directo_bio' reg.pk %}"
+                                               class="btn btn-warning btn-sm" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                 {% endif %}
                             {% endfor %}
@@ -98,6 +105,7 @@
                                 <th style="text-align: center"></th>
                                 <th style="text-align: center"></th>
                                 <th style="text-align: center"></th>
+                                <th></th>
                                 <th></th>
                                 <th></th>
                             </tr>

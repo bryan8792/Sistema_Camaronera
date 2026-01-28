@@ -112,8 +112,7 @@ class Piscinas(models.Model):
         null=True,
         blank=True,
         related_name='piscinas',
-        verbose_name='Plan de Cuentas',
-        help_text='Cuenta contable principal de la piscina (ej: 102030101 PISCINA# 21)'
+        verbose_name='Plan de Cuentas'
     )
 
     cuenta_suministros = models.ForeignKey(
@@ -122,8 +121,7 @@ class Piscinas(models.Model):
         null=True,
         blank=True,
         related_name='piscinas_suministros',
-        verbose_name='Cuenta Suministros',
-        help_text='Subcuenta de suministros (ej: 102030101002 SUMINISTROS)'
+        verbose_name='Cuenta de Suministros'
     )
 
     def __str__(self):
@@ -136,9 +134,20 @@ class Piscinas(models.Model):
             raise ValidationError("Debe seleccionar Piscina o Precría.")
 
     def save(self, *args, **kwargs):
-        if self.pk:
+        es_nuevo = self.pk is None
+
+        if not es_nuevo:
             anterior = Piscinas.objects.get(pk=self.pk)
 
+        super().save(*args, **kwargs)
+
+        if es_nuevo:
+            PiscinaHistorial.objects.create(
+                piscina=self,
+                fue_piscina=self.pis,
+                fue_precria=self.prec
+            )
+        else:
             if anterior.pis != self.pis or anterior.prec != self.prec:
                 PiscinaHistorial.objects.filter(
                     piscina=self,
@@ -150,20 +159,8 @@ class Piscinas(models.Model):
                     fue_piscina=self.pis,
                     fue_precria=self.prec
                 )
-        else:
-            # primera vez que se crea la piscina
-            PiscinaHistorial.objects.create(
-                piscina=self,
-                fue_piscina=self.pis,
-                fue_precria=self.prec
-            )
-
-        super().save(*args, **kwargs)
 
     def get_area_hectareas(self):
-        """
-        Convierte el campo hect (texto) en número decimal
-        """
         try:
             return float(str(self.hect).replace(",", "."))
         except:
@@ -172,8 +169,8 @@ class Piscinas(models.Model):
     def toJSON(self):
         item = model_to_dict(self)
         item['empresa'] = self.empresa.toJSON()
-        item['plan_cuenta'] = self.plan_cuenta.toJSON()
-        item['cuenta_suministros'] = self.cuenta_suministros.toJSON()
+        item['plan_cuenta'] = self.plan_cuenta.toJSON() if self.plan_cuenta else None
+        item['cuenta_suministros'] = self.cuenta_suministros.toJSON() if self.cuenta_suministros else None
         return item
 
     class Meta:
@@ -181,6 +178,7 @@ class Piscinas(models.Model):
         verbose_name = 'Piscina'
         verbose_name_plural = 'Piscinas'
         ordering = ['id']
+
 
 
 class PiscinaHistorial(models.Model):

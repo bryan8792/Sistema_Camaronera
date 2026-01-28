@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark"><i class="fas fa-globe-americas"></i> DETALLE DE PISCINAS</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Reportes</a></li>
+                    <li class="breadcrumb-item active">Detalle de Piscinas</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <!-- Filtros -->
+                <form method="GET" id="filtroForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Empresa:</label>
+                                <select name="empresa" class="form-control">
+                                    <option value="">Todas</option>
+                                    {% for emp in empresas %}
+                                        <option value="{{ emp.id }}" {% if empresa_seleccionada == emp.id|stringformat:"s" %}selected{% endif %}>{{ emp.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn btn-info btn-block">
+                                    <i class="fas fa-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Botones de exportación -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <button class="btn btn-success btn-sm" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button class="btn btn-info btn-sm" onclick="exportToCSV()">
+                            <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="imprimirReporte()">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Área de impresión -->
+                <div id="areaPrintReporte">
+                    <!-- Encabezado del reporte -->
+                    <div class="text-center mb-4">
+                        <p class="text-primary mb-1"><strong>Fecha:</strong> {{ fecha_actual }} - <strong>Hora:</strong> {{ hora_actual }}</p>
+                        <h3><strong>{% if empresa_nombre %}{{ empresa_nombre }}{% else %}TODAS LAS EMPRESAS{% endif %}</strong></h3>
+                        <h5><strong>DETALLE DE PISCINAS</strong></h5>
+                    </div>
+
+                    <hr>
+
+                    <!-- Contenido del reporte agrupado por empresa -->
+                    {% for empresa, piscinas_list in piscinas_por_empresa.items %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-building"></i> {{ empresa }}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered table-striped">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th class="text-center">Orden</th>
+                                                <th class="text-center">Número Piscina</th>
+                                                <th class="text-center">Hectáreas</th>
+                                                <th class="text-center">Piscina</th>
+                                                <th class="text-center">Precría</th>
+                                                <th class="text-center">Estado</th>
+                                                <th class="text-center">Plan de Cuentas</th>
+                                                <th class="text-center">Cuenta Suministros</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for piscina in piscinas_list %}
+                                            <tr>
+                                                <td class="text-center">{{ piscina.orden }}</td>
+                                                <td class="text-center"><strong>{{ piscina.numero }}</strong></td>
+                                                <td class="text-center">{{ piscina.hect }}</td>
+                                                <td class="text-center">
+                                                    {% if piscina.pis %}
+                                                        <span class="badge badge-success">SI</span>
+                                                    {% else %}
+                                                        <span class="badge badge-danger">NO</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if piscina.prec %}
+                                                        <span class="badge badge-success">SI</span>
+                                                    {% else %}
+                                                        <span class="badge badge-danger">NO</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if piscina.estado %}
+                                                        <span class="badge badge-primary">ACTIVA</span>
+                                                    {% else %}
+                                                        <span class="badge badge-danger">INACTIVA</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if piscina.plan_cuenta %}
+                                                        {{ piscina.plan_cuenta }}
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if piscina.cuenta_suministros %}
+                                                        {{ piscina.cuenta_suministros }}
+                                                    {% else %}
+                                                        <span class="text-muted">-</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="bg-light">
+                                                <td colspan="2" class="text-right"><strong>Total Piscinas:</strong></td>
+                                                <td class="text-center"><strong>{{ piscinas_list|length }}</strong></td>
+                                                <td colspan="5"></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> No se encontraron piscinas con los filtros seleccionados.
+                        </div>
+                    {% endfor %}
+
+                    <!-- Resumen general -->
+                    {% if piscinas_por_empresa %}
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <h5><strong>Total Empresas:</strong></h5>
+                                    <h3 class="text-primary">{{ piscinas_por_empresa|length }}</h3>
+                                </div>
+                                <div class="col-md-3">
+                                    <h5><strong>Total Piscinas:</strong></h5>
+                                    <h3 class="text-success">{{ total_piscinas }}</h3>
+                                </div>
+                                <div class="col-md-3">
+                                    <h5><strong>Total Hectáreas:</strong></h5>
+                                    <h3 class="text-info">{{ total_hectareas|floatformat:2 }}</h3>
+                                </div>
+                                <div class="col-md-3">
+                                    <h5><strong>Piscinas Activas:</strong></h5>
+                                    <h3 class="text-warning">{{ total_activas }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+<script>
+    function imprimirReporte() {
+    var contenido = document.getElementById('areaPrintReporte').innerHTML;
+    var ventana = window.open('', '_blank');
+
+    ventana.document.write(
+        '<html>' +
+        '<head>' +
+        '<title>Reporte de Piscinas</title>' +
+        '<link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">' +
+        '<style>' +
+        'body { padding: 20px; font-family: Arial, sans-serif; }' +
+
+        /* 👇 IMPORTANTE: orientación horizontal */
+        '@page { size: landscape; margin: 20mm; }' +
+
+        '.card { border: 1px solid #ddd; margin-bottom: 15px; }' +
+        '.card-header { background-color: #007bff; color: white; padding: 10px; }' +
+        '.card-body { padding: 15px; }' +
+        '.table { width: 100%; border-collapse: collapse; }' +
+        '.table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: center; }' +
+        '.table th { background-color: #343a40; color: white; }' +
+        '.badge { padding: 3px 8px; border-radius: 3px; font-size: 12px; }' +
+        '.badge-success { background-color: #28a745; color: white; }' +
+        '.badge-danger { background-color: #dc3545; color: white; }' +
+        '.badge-primary { background-color: #007bff; color: white; }' +
+        '.text-center { text-align: center; }' +
+        '.text-primary { color: #007bff; }' +
+        '.text-success { color: #28a745; }' +
+        '.text-info { color: #17a2b8; }' +
+        '.text-warning { color: #ffc107; }' +
+        '.bg-light { background-color: #f8f9fa; }' +
+        '@media print { .badge { border: 1px solid #000; } }' +
+        '</style>' +
+        '</head>' +
+        '<body>' +
+        contenido +
+        '<script>window.print(); window.close();<\/script>' +
+        '</body>' +
+        '</html>'
+    );
+
+    ventana.document.close();
+}
+
+
+    function exportToExcel() {
+        var table = document.getElementById('areaPrintReporte');
+        var html = table.outerHTML;
+        var url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+        var downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = 'reporte_piscinas.xls';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    function exportToCSV() {
+        var csv = [];
+        var tables = document.querySelectorAll('#areaPrintReporte table');
+
+        tables.forEach(function(table) {
+            var rows = table.querySelectorAll('tr');
+            rows.forEach(function(row) {
+                var cols = row.querySelectorAll('td, th');
+                var rowData = [];
+                cols.forEach(function(col) {
+                    rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
+                });
+                csv.push(rowData.join(','));
+            });
+            csv.push('');
+        });
+
+        var csvContent = csv.join('\n');
+        var downloadLink = document.createElement("a");
+        downloadLink.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+        downloadLink.download = 'reporte_piscinas.csv';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    function exportToPDF() {
+        imprimirReporte();
+    }
+</script>
+{% endblock %}

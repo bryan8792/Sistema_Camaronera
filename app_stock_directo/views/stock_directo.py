@@ -48,6 +48,40 @@ class crearStockPSMDirectoView(CreateView):
         return context
 
 
+class editarStockPSMDirectoView(UpdateView):
+    model = Producto_Stock
+    form_class = ProdStockForm
+    template_name = 'app_stock_directo/stock_dir_editar_psm.html'
+    success_url = reverse_lazy('app_stock_directo:listar_stock_directo_psm')
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Stock Productos Aplicación Directa PSM'
+        producto = self.object.producto_empresa
+        context['producto'] = producto
+
+        unidad_aplicacion = producto.nombre_prod.unid_aplicacion
+        if unidad_aplicacion == 'GR':
+            aplicacion = 1000
+        elif unidad_aplicacion == 'KG':
+            aplicacion = 2.2
+        elif unidad_aplicacion == 'LB':
+            aplicacion = 55
+        else:
+            aplicacion = 1000
+
+        context['aplicacion'] = aplicacion
+        context['peso_presentacion'] = producto.nombre_prod.peso_presentacion
+
+        return context
+
+
 class listarStockPSMDirectoView(ListView):
     model = Total_Stock
     template_name = 'app_stock_directo/stock_dir_listar_psm.html'
@@ -143,6 +177,41 @@ class crearStockBIODirectoView(CreateView):
         context['peso_presentacion'] = producto.nombre_prod.peso_presentacion
 
         return context
+
+
+class editarStockBIODirectoView(UpdateView):
+    model = Producto_Stock
+    form_class = ProdStockForm
+    template_name = 'app_stock_directo/stock_dir_editar_bio.html'
+    success_url = reverse_lazy('app_stock_directo:listar_stock_directo_bio')
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Stock Productos Aplicación Directa BIO'
+        producto = self.object.producto_empresa
+        context['producto'] = producto
+
+        unidad_aplicacion = producto.nombre_prod.unid_aplicacion
+        if unidad_aplicacion == 'GR':
+            aplicacion = 1000
+        elif unidad_aplicacion == 'KG':
+            aplicacion = 2.2
+        elif unidad_aplicacion == 'LB':
+            aplicacion = 55
+        else:
+            aplicacion = 1000
+
+        context['aplicacion'] = aplicacion
+        context['peso_presentacion'] = producto.nombre_prod.peso_presentacion
+
+        return context
+
 
 class listarStockBIODirectoView(ListView):
     model = Total_Stock
