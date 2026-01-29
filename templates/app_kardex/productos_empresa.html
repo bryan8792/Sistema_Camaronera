@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+
+    <script src="{% static 'lib/moment-2.25.3/moment.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/cdn/cdn_datatable.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/buttons-1.6.1/css/buttons.bootstrap.min.css' %}"/>
+
+    <style>
+        .stock-psm {
+            background-color: #FFFF00 !important;
+            font-weight: bold;
+            text-align: center;
+        }
+        .stock-bio {
+            background-color: #00FFFF !important;
+            font-weight: bold;
+            text-align: center;
+        }
+        .stock-total {
+            background-color: #90EE90 !important;
+            font-weight: bold;
+            text-align: center;
+        }
+        .header-yellow {
+            background-color: #FFFF00 !important;
+            color: #000 !important;
+        }
+        .header-cyan {
+            background-color: #00FFFF !important;
+            color: #000 !important;
+        }
+        .header-green {
+            background-color: #90EE90 !important;
+            color: #000 !important;
+        }
+        #tb_productos_empresa tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header" style="background-color:#3498DB">
+                        <h3 class="card-title"><strong>{{ nombre }}</strong></h3>
+                        <div class="card-tools">
+                            <ul class="pagination pagination-sm float-right">
+                                <li class="page-item">
+                                    <a href="{% url 'app_stock:listar_stock_psm' %}"
+                                       class="btn btn-block btn-default btn-sm">
+                                        <strong><i class="fas fa-undo"></i> REGRESAR</strong>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="tb_productos_empresa" class="table table-sm table-bordered table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th style="background-color:#FFFF00; width: 25%;">INGRESO DE INSUMOS</th>
+                                <th style="background-color:#FFFF00; width: 8%;">COD.</th>
+                                <th style="background-color:#FFFF00; width: 12%;">Stock Total PSM</th>
+                                <th style="background-color:#00FFFF; width: 12%;">Stock Total BIO</th>
+                                <th style="background-color:#90EE90; width: 12%;">STOCK TOTAL</th>
+                                <th style="background-color:#FFFF00; width: 10%;">TIPO DE UNIDAD</th>
+                                <th style="background-color:#FFFF00; width: 21%;">UNIDAD DE PRESENTACION</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <th colspan="2">TOTALES:</th>
+                                <th style="text-align: center; background-color:#FFFF00;"></th>
+                                <th style="text-align: center; background-color:#00FFFF;"></th>
+                                <th style="text-align: center; background-color:#90EE90;"></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script src="{% static 'acciones/app_datatable/jquery/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/popper/popper.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/bootstrap/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/dataTables.buttons.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/JSZip-2.5.0/jszip.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/pdfmake.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/pdfmake-0.1.36/vfs_fonts.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.html5.min.js' %}"></script>
+    <script src="{% static 'acciones/app_datatable/datatables/Buttons-1.5.6/js/buttons.print.min.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'acciones/app_kardex/productos_empresa.js' %}"></script>
+
+{% endblock %}

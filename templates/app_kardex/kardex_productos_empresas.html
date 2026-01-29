@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <link href="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}" rel="stylesheet"/>
+    <link href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'acciones/app_datatable/datatables/datatables.min.css' %}">
+    <link rel="stylesheet" type="text/css"
+          href="{% static 'acciones/app_datatable/datatables/DataTables-1.10.18/css/dataTables.bootstrap4.min.css' %}">
+
+    <style>
+        .kardex-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .kardex-header-psm {
+            background: linear-gradient(135deg, #1e5128 0%, #4e9f3d 100%);
+        }
+        
+        .kardex-header-bio {
+            background: linear-gradient(135deg, #0d3b66 0%, #3a86ff 100%);
+        }
+        
+        .kardex-header h5 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .kardex-header .stock-badge {
+            background-color: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        
+        .kardex-header .stock-badge strong {
+            color: #ffeb3b;
+        }
+        
+        .producto-info {
+            background-color: #f8f9fa;
+            padding: 8px 15px;
+            border-left: 1px solid #dee2e6;
+            border-right: 1px solid #dee2e6;
+            font-size: 13px;
+        }
+        
+        .producto-info .producto-nombre {
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .kardex-table-container {
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            overflow: hidden;
+        }
+        
+        .kardex-table {
+            margin-bottom: 0 !important;
+            font-size: 11px;
+        }
+        
+        .kardex-table thead th {
+            background-color: #495057 !important;
+            color: white !important;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 8px 5px;
+            text-align: center;
+            border: 1px solid #343a40;
+        }
+        
+        .kardex-table tbody td {
+            padding: 6px 5px;
+            text-align: center;
+            font-size: 11px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .kardex-table tbody td:first-child {
+            text-align: left;
+            padding-left: 10px;
+        }
+        
+        .kardex-table tbody tr:nth-child(odd) {
+            background-color: #f8f9fa;
+        }
+        
+        .kardex-table tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        .kardex-table .col-ingreso {
+            background-color: #d4edda !important;
+            color: #155724;
+            font-weight: 600;
+        }
+        
+        .kardex-table .col-egreso {
+            background-color: #f8d7da !important;
+            color: #721c24;
+            font-weight: 600;
+        }
+        
+        .kardex-table .col-saldo {
+            background-color: #fff3cd !important;
+            color: #856404;
+            font-weight: 700;
+        }
+        
+        .kardex-table tfoot td {
+            background-color: #343a40 !important;
+            color: white !important;
+            font-weight: 700;
+            font-size: 11px;
+            padding: 8px 5px;
+            border: 1px solid #212529;
+        }
+        
+        .saldo-bodega-container {
+            background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .saldo-bodega-container h6 {
+            margin: 0 0 5px 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .saldo-bodega-container .saldo-valor {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .search-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .search-container label {
+            font-weight: 600;
+            color: #495057;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+        
+        #search {
+            font-size: 14px;
+            padding: 10px 15px;
+            border: 2px solid #ced4da;
+            border-radius: 5px;
+        }
+        
+        #search:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .ui-autocomplete {
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 9999 !important;
+        }
+        
+        .ui-menu-item {
+            padding: 8px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .ui-menu-item:hover {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 10px;
+        }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+        
+        .dataTables_wrapper .dataTables_info {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            font-size: 11px;
+            padding: 3px 8px;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}
+                            <i class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">{{ nombre }}&nbsp
+                            <i class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Buscador -->
+            <div class="search-container">
+                <div class="row align-items-end">
+                    <div class="col-md-10">
+                        <label for="search">BUSCADOR DE PRODUCTOS ( * ) :</label>
+                        <input type="text" class="form-control" name="search" id="search" 
+                               autocomplete="off" placeholder="Escriba el nombre del producto...">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" id="btn_limpiar" class="btn btn-outline-secondary btn-block">
+                            <i class="fas fa-eraser"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Producto seleccionado y Saldo Bodega -->
+            <div id="producto_seleccionado" style="display: none;">
+                <div class="row mb-3">
+                    <div class="col-md-10">
+                        <div class="alert alert-info mb-0 py-2">
+                            <strong>Producto:</strong> <span id="nombre_producto_seleccionado"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="saldo-bodega-container">
+                            <h6>SALDO BODEGA</h6>
+                            <div class="saldo-valor" id="saldo_bodega_total">0,00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kardex PSM y BIO lado a lado -->
+            <div class="row">
+                <!-- KARDEX PSM -->
+                <div class="col-lg-6 mb-4">
+                    <div class="kardex-header kardex-header-psm">
+                        <h5><i class="fas fa-warehouse"></i> KARDEX PESQUERA SAN MIGUEL</h5>
+                        <span class="stock-badge">STOCK: <strong id="stock_psm">0,00</strong></span>
+                    </div>
+                    <div class="producto-info" id="producto_info_psm" style="display: none;">
+                        <span class="producto-nombre" id="producto_nombre_psm"></span>
+                    </div>
+                    <div class="kardex-table-container">
+                        <table id="tblProducts_psm" class="table kardex-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 18%;">FECHA</th>
+                                    <th style="width: 30%;">PROVEEDOR</th>
+                                    <th style="width: 15%;">ING_SC_PSM</th>
+                                    <th style="width: 15%;">EG_SC_PSM</th>
+                                    <th style="width: 22%;">SALDO PSM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2"><strong>Total general</strong></td>
+                                    <td id="total_ing_psm">0,00</td>
+                                    <td id="total_eg_psm">0,00</td>
+                                    <td id="saldo_final_psm">0,00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- KARDEX BIO -->
+                <div class="col-lg-6 mb-4">
+                    <div class="kardex-header kardex-header-bio">
+                        <h5><i class="fas fa-warehouse"></i> KARDEX BIOCASCAJAL</h5>
+                        <span class="stock-badge">STOCK: <strong id="stock_bio">0,00</strong></span>
+                    </div>
+                    <div class="producto-info" id="producto_info_bio" style="display: none;">
+                        <span class="producto-nombre" id="producto_nombre_bio"></span>
+                    </div>
+                    <div class="kardex-table-container">
+                        <table id="tblProducts_bio" class="table kardex-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 18%;">FECHA</th>
+                                    <th style="width: 30%;">PROVEEDOR</th>
+                                    <th style="width: 15%;">ING_SC_BIO</th>
+                                    <th style="width: 15%;">EG_SC_BIO</th>
+                                    <th style="width: 22%;">SALDO BIO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2"><strong>Total general</strong></td>
+                                    <td id="total_ing_bio">0,00</td>
+                                    <td id="total_eg_bio">0,00</td>
+                                    <td id="saldo_final_bio">0,00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'lib/jquery-ui-1.12.1/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <script src="{% static 'lib/select2-4.0.13/js/i18n/es.js' %}"></script>
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+    
+    <script type="text/javascript" src="{% static 'acciones/app_kardex/kardex_productos_empresas.js' %}"></script>
+{% endblock %}

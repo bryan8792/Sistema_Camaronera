@@ -10,5 +10,7 @@ urlpatterns = [
     path('stock/kardexmovpsm/listar/', listarKardexMovimientosPSMView.as_view(), name='listar_kardex_movimientos_psm'),
     path('stock/kardexmovbio/listar/', listarKardexMovimientosBIOView.as_view(), name='listar_kardex_movimientos_bio'),
     path('stock/kardexproductos/listar/', listarKardexProductosView.as_view(), name='listar_kardex_productos'),
-
+    path('stock/kardexproductos_empresas/listar/', listarKardexProductosEmpresasView.as_view(), name='listar_kardex_productos_empresas'),
+    path('stock/productos_empresa/', listarProductosEmpresaView.as_view(), name='listar_productos_empresa'),
+    path('stock/movimientos_por_producto/', listarMovimientosPorProductoView.as_view(), name='listar_movimientos_producto'),
 ]
