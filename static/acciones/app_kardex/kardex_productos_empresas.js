@@ -4,6 +4,10 @@ var productoSeleccionado = '';
 var stockPSM = 0;
 var stockBIO = 0;
 
+// Variables globales para totales
+var totalesPSM = { total_ingreso: 0, total_egreso: 0, saldo_final: 0 };
+var totalesBIO = { total_ingreso: 0, total_egreso: 0, saldo_final: 0 };
+
 // Formatear numero con 2 decimales y separador de miles
 function formatNumber(valor) {
     if (valor === null || valor === undefined || isNaN(valor)) {
@@ -18,6 +22,13 @@ function formatNumber(valor) {
 
 // Inicializar DataTable PSM
 function initTablePSM(data, totales) {
+    // Guardar totales globalmente
+    if (totales) {
+        totalesPSM = totales;
+    } else {
+        totalesPSM = { total_ingreso: 0, total_egreso: 0, saldo_final: 0 };
+    }
+
     if (tblProducts_psm !== null) {
         tblProducts_psm.destroy();
         $('#tblProducts_psm tbody').empty();
@@ -30,7 +41,6 @@ function initTablePSM(data, totales) {
             "info": "Pag _PAGE_ de _PAGES_",
             "infoEmpty": "Sin registros",
             "infoFiltered": "",
-            "sSearch": "Buscar:",
             "oPaginate": {
                 "sFirst": "<<",
                 "sLast": ">>",
@@ -43,6 +53,7 @@ function initTablePSM(data, totales) {
         pageLength: 15,
         lengthChange: false,
         ordering: false,
+        searching: false,  // QUITAR BUSCAR
         autoWidth: false,
         scrollY: "350px",
         scrollCollapse: true,
@@ -71,26 +82,26 @@ function initTablePSM(data, totales) {
                 }
             }
         ],
-        drawCallback: function() {
-            // Actualizar totales en el footer despues de cada redibujado
-            if (totales) {
-                $('#total_ing_psm').text(formatNumber(totales.total_ingreso));
-                $('#total_eg_psm').text(formatNumber(totales.total_egreso));
-                $('#saldo_final_psm').text(formatNumber(totales.saldo_final));
-            }
+        footerCallback: function(row, data, start, end, display) {
+            var api = this.api();
+
+            // Actualizar footer con los totales guardados
+            $(api.column(2).footer()).html(formatNumber(totalesPSM.total_ingreso));
+            $(api.column(3).footer()).html(formatNumber(totalesPSM.total_egreso));
+            $(api.column(4).footer()).html(formatNumber(totalesPSM.saldo_final));
         }
     });
-
-    // Actualizar totales inmediatamente
-    if (totales) {
-        $('#total_ing_psm').text(formatNumber(totales.total_ingreso));
-        $('#total_eg_psm').text(formatNumber(totales.total_egreso));
-        $('#saldo_final_psm').text(formatNumber(totales.saldo_final));
-    }
 }
 
 // Inicializar DataTable BIO
 function initTableBIO(data, totales) {
+    // Guardar totales globalmente
+    if (totales) {
+        totalesBIO = totales;
+    } else {
+        totalesBIO = { total_ingreso: 0, total_egreso: 0, saldo_final: 0 };
+    }
+
     if (tblProducts_bio !== null) {
         tblProducts_bio.destroy();
         $('#tblProducts_bio tbody').empty();
@@ -103,7 +114,6 @@ function initTableBIO(data, totales) {
             "info": "Pag _PAGE_ de _PAGES_",
             "infoEmpty": "Sin registros",
             "infoFiltered": "",
-            "sSearch": "Buscar:",
             "oPaginate": {
                 "sFirst": "<<",
                 "sLast": ">>",
@@ -116,6 +126,7 @@ function initTableBIO(data, totales) {
         pageLength: 15,
         lengthChange: false,
         ordering: false,
+        searching: false,  // QUITAR BUSCAR
         autoWidth: false,
         scrollY: "350px",
         scrollCollapse: true,
@@ -144,22 +155,15 @@ function initTableBIO(data, totales) {
                 }
             }
         ],
-        drawCallback: function() {
-            // Actualizar totales en el footer despues de cada redibujado
-            if (totales) {
-                $('#total_ing_bio').text(formatNumber(totales.total_ingreso));
-                $('#total_eg_bio').text(formatNumber(totales.total_egreso));
-                $('#saldo_final_bio').text(formatNumber(totales.saldo_final));
-            }
+        footerCallback: function(row, data, start, end, display) {
+            var api = this.api();
+
+            // Actualizar footer con los totales guardados
+            $(api.column(2).footer()).html(formatNumber(totalesBIO.total_ingreso));
+            $(api.column(3).footer()).html(formatNumber(totalesBIO.total_egreso));
+            $(api.column(4).footer()).html(formatNumber(totalesBIO.saldo_final));
         }
     });
-
-    // Actualizar totales inmediatamente
-    if (totales) {
-        $('#total_ing_bio').text(formatNumber(totales.total_ingreso));
-        $('#total_eg_bio').text(formatNumber(totales.total_egreso));
-        $('#saldo_final_bio').text(formatNumber(totales.saldo_final));
-    }
 }
 
 // Buscar producto en PSM
@@ -174,7 +178,6 @@ function buscarProductoPSM(nombreProducto) {
         dataType: 'json'
     }).done(function(response) {
         if (response.error) {
-            console.log('[v0] Error PSM:', response.error);
             initTablePSM([], null);
             return;
         }
@@ -205,7 +208,6 @@ function buscarProductoPSM(nombreProducto) {
         actualizarSaldoBodega();
 
     }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.log('[v0] Error al buscar PSM:', textStatus);
         initTablePSM([], null);
     });
 }
@@ -222,7 +224,6 @@ function buscarProductoBIO(nombreProducto) {
         dataType: 'json'
     }).done(function(response) {
         if (response.error) {
-            console.log('[v0] Error BIO:', response.error);
             initTableBIO([], null);
             return;
         }
@@ -253,7 +254,6 @@ function buscarProductoBIO(nombreProducto) {
         actualizarSaldoBodega();
 
     }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.log('[v0] Error al buscar BIO:', textStatus);
         initTableBIO([], null);
     });
 }
@@ -285,6 +285,8 @@ function limpiarBusqueda() {
     productoSeleccionado = '';
     stockPSM = 0;
     stockBIO = 0;
+    totalesPSM = { total_ingreso: 0, total_egreso: 0, saldo_final: 0 };
+    totalesBIO = { total_ingreso: 0, total_egreso: 0, saldo_final: 0 };
 
     $('#producto_seleccionado').hide();
     $('#producto_info_psm').hide();
@@ -293,14 +295,6 @@ function limpiarBusqueda() {
     $('#stock_psm').text('0,00');
     $('#stock_bio').text('0,00');
     $('#saldo_bodega_total').text('0,00');
-
-    $('#total_ing_psm').text('0,00');
-    $('#total_eg_psm').text('0,00');
-    $('#saldo_final_psm').text('0,00');
-
-    $('#total_ing_bio').text('0,00');
-    $('#total_eg_bio').text('0,00');
-    $('#saldo_final_bio').text('0,00');
 
     initTablePSM([], null);
     initTableBIO([], null);
