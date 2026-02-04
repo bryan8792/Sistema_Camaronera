@@ -40,6 +40,7 @@ urlpatterns = [
     path('usuario/', include('app_user.urls')),
     path('cliente/', include('app_cliente.urls')),
     path('venta/', include('app_venta.urls')),
+    path('retencion/', include('app_retencion.urls')),
     path('cuentasCobrar/', include('app_cuentasCobrar.urls')),
     path('cuentasPagar/', include('app_cuentasPagar.urls')),
     path('notaCredito/', include('app_notaCredito.urls')),

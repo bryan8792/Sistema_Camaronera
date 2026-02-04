@@ -1,4 +1,5 @@
 import base64
+import mimetypes
 import math
 import tempfile
 import time
@@ -80,6 +81,17 @@ class Empresa(models.Model):
         if self.electronic_signature:
             return f'{MEDIA_URL}{self.electronic_signature}'
         return None
+
+    def get_logo_base64(self):
+        if not self.logo:
+            return None
+
+        mime, _ = mimetypes.guess_type(self.logo.path)
+
+        with open(self.logo.path, 'rb') as f:
+            encoded = base64.b64encode(f.read()).decode('utf-8')
+
+        return f'data:{mime};base64,{encoded}'
 
     def toJSON(self):
         item = model_to_dict(self)

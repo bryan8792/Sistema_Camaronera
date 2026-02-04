@@ -70,6 +70,7 @@ LOCAL_APPS = [
     'app_cuentasCobrar',
     'app_filemanager',
     'app_anticipo',
+    'app_retencion',
 
 ]
 
