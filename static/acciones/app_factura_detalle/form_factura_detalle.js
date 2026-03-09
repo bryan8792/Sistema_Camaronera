@@ -286,13 +286,15 @@ $(function () {
 
 
     $('#tblSearchProducts tbody').on('click', 'a[rel="add"]', function () {
-        var tr = tblSearchProducts.cell($(this).closest('td, li')).index();
-        var product = tblSearchProducts.row(tr).data();
-        //var product = tblSearchProducts.row(tr.row).data();
+        var row = tblSearchProducts.row($(this).closest('tr'));
+        if (row.child.isShown()) {
+            row = tblSearchProducts.row($(this).closest('tr').prev());
+        }
+        var product = row.data();
         product.cantidad_usar = 0;
         product.subtotal = 0.00;
         vents.add(product);
-        tblSearchProducts.row($(this).parents('tr')).remove().draw();
+        row.remove().draw();
     });
 
 

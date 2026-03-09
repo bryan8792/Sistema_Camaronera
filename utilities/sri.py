@@ -83,33 +83,53 @@ class SRI:
                 voucher_errors.errors = errors
             voucher_errors.environment_type = instance.environment_type
             voucher_errors.save()
-        except:
-            pass
+        except Exception as e:
+            print("Error guardando VoucherErrors:", str(e))
         finally:
             if self.check_sequential_error(errors=errors):
                 print('ooooooooooooooooo')
                 print(INVOICE_STATUS[4][0])
                 instance.status = INVOICE_STATUS[4][0]
-                instance.edit()
+                # instance.edit()
                 # instance.save()
+                instance.save(update_fields=['status'])
+
+    # def create_xml(self, instance):
+    #     response = {'resp': False, 'stage': VOUCHER_STAGE[1][0]}
+    #     try:
+    #         xml, access_code = instance.generate_xml()
+    #         print('*************************')
+    #         print('access_code')
+    #         print(access_code)
+    #         instance.access_code = access_code
+    #         instance.save()
+    #         response['resp'] = True
+    #         response['xml'] = xml
+    #     except Exception as e:
+    #         response['error'] = str(e)
+    #     finally:
+    #         if 'error' in response:
+    #             self.create_voucher_errors(instance, response)
+    #     return response
 
     def create_xml(self, instance):
         response = {'resp': False, 'stage': VOUCHER_STAGE[1][0]}
         try:
             xml, access_code = instance.generate_xml()
-            print('*************************')
-            print('access_code')
-            print(access_code)
             instance.access_code = access_code
-            instance.save()
+            instance.save(update_fields=['access_code'])
+
             response['resp'] = True
             response['xml'] = xml
+
         except Exception as e:
             response['error'] = str(e)
-        finally:
-            if 'error' in response:
-                self.create_voucher_errors(instance, response)
+
+        if 'error' in response:
+            self.create_voucher_errors(instance, response)
+
         return response
+
 
     def firm_xml(self, instance, xml):
         response = {'resp': False, 'stage': VOUCHER_STAGE[1][0]}

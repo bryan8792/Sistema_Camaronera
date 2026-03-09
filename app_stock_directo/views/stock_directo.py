@@ -40,11 +40,11 @@ class crearStockPSMDirectoView(CreateView):
         else:
             aplicacion = 1000
 
-        context['unidad_aplicacion'] = producto.nombre_prod.unid_aplicacion
+        # context['unidad_aplicacion'] = producto.nombre_prod.unid_aplicacion
         context['aplicacion'] = aplicacion
         context['peso_presentacion'] = producto.nombre_prod.peso_presentacion
-        context['nombre_presentacion'] = producto.nombre_prod.nombre
-        context['total'] = decimal.Decimal(aplicacion) * producto.nombre_prod.peso_presentacion
+        # context['nombre_presentacion'] = producto.nombre_prod.nombre
+        # context['total'] = decimal.Decimal(aplicacion) * producto.nombre_prod.peso_presentacion
         return context
 
 
@@ -52,12 +52,13 @@ class editarStockPSMDirectoView(UpdateView):
     model = Producto_Stock
     form_class = ProdStockForm
     template_name = 'app_stock_directo/stock_dir_editar_psm.html'
-    success_url = reverse_lazy('app_stock_directo:listar_stock_directo_psm')
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
+        # Guardamos la piscina_id de donde viene el usuario para mantener el filtro
+        self.piscina_origen = request.GET.get('piscina_id', None)
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -80,6 +81,29 @@ class editarStockPSMDirectoView(UpdateView):
         context['peso_presentacion'] = producto.nombre_prod.peso_presentacion
 
         return context
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        print(f"[DEBUG] Antes de guardar: ID={obj.pk}, Producto Empresa={obj.producto_empresa}")
+        obj.save()
+        print(f"[DEBUG] Después de guardar: ID={obj.pk}, Producto Empresa={obj.producto_empresa}")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print(f"[DEBUG] Errores del formulario: {form.errors}")
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        # Si el usuario vino con piscina_id en GET, mantenemos ese filtro
+        if self.piscina_origen:
+            return reverse_lazy(
+                'app_stock_directo:listarpsmunico_directo',
+                kwargs={'pk': self.piscina_origen}
+            )
+        # Si no, usamos el filtro basado en el objeto editado
+        piscina_id = self.object.producto_empresa.piscina_id
+        return reverse_lazy('app_stock_directo:listarpsmunico_directo', kwargs={'pk': piscina_id})
+
 
 
 class listarStockPSMDirectoView(ListView):

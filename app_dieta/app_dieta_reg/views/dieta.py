@@ -177,11 +177,11 @@ class crearDiaDietaView(CreateView):
                                 print(f"Piscina con orden {orden} no encontrada")
 
                             # Balanceado
-                            name_balanceado = excel.cell(row=row, column=4).value
+                            name_balanceado = excel.cell(row=row, column=3).value
                             if name_balanceado and Producto.objects.filter(nombre__exact=name_balanceado).exists():
                                 balanceado = Producto.objects.get(nombre__exact=name_balanceado)
                                 inv.balanceado_id = balanceado.id
-                                inv.cantidad = safe_float(excel.cell(row=row, column=2).value)
+                                inv.cantidad = safe_float(excel.cell(row=row, column=4).value)
                                 print(f"Balanceado: {balanceado.nombre} ({inv.cantidad} lb)")
                             else:
                                 print(f"Balanceado no encontrado: {name_balanceado}")

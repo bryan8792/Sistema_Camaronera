@@ -4,12 +4,11 @@ from io import BytesIO
 from decimal import Decimal, ROUND_HALF_UP
 import xml.etree.ElementTree as ET
 from datetime import date
-
 from django.db import models, transaction
 from django.forms import model_to_dict
 from django.template.loader import render_to_string
 from django.core.files import File
-
+from xml.sax.saxutils import escape
 from weasyprint import HTML
 from barcode.writer import ImageWriter
 import barcode
@@ -32,8 +31,8 @@ class Retention(models.Model):
     provider = models.ForeignKey(Proveedor, on_delete=models.PROTECT, null=True, blank=True)
     receipt = models.ForeignKey(Recibo, on_delete=models.PROTECT, null=True, blank=True)
 
-    voucher_number = models.CharField(max_length=9, default='', blank=True)
-    voucher_number_full = models.CharField(max_length=20, default='', blank=True)
+    voucher_number = models.CharField(max_length=9)
+    voucher_number_full = models.CharField(max_length=20)
 
     date_joined = models.DateField(auto_now_add=True)
     authorization_date = models.DateField(null=True, blank=True)
@@ -44,13 +43,24 @@ class Retention(models.Model):
     total_renta = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_retained = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    pdf_authorized = models.FileField(upload_to='retenciones/', null=True, blank=True)
+    pdf_authorized = models.FileField(upload_to='retenciones/pdf/', null=True, blank=True)
+    xml_authorized = models.FileField(upload_to='retenciones/xml/', null=True, blank=True)
 
     email_sent = models.BooleanField(default=False)
+    status = models.CharField(max_length=30, blank=True, null=True)
 
     def __str__(self):
         return f'{self.voucher_number_full} / {self.provider.razon_soc if self.provider else "-"}'
 
+    # ==================================================
+    # NUMERO DOCUMENTO SUSTENTO (DIVIDENDOS – SRI)
+    # ==================================================
+    def get_num_doc_sustento(self):
+        return (
+            f"{self.receipt.establishment_code}"
+            f"{self.receipt.issuing_point_code}"
+            f"{self.voucher_number.zfill(9)}"
+        )
     # --------------------------------------------------
     # SECUENCIA ATS (RECIBO)
     # --------------------------------------------------
@@ -133,18 +143,9 @@ class Retention(models.Model):
             'logo_base64': self.company.get_logo_base64(),
         }
 
-        html_string = render_to_string(
-            'app_retencion/admin/retention.html',
-            context
-        )
-
+        html_string = render_to_string('app_retencion/admin/retention.html', context)
         pdf_file = BytesIO()
-
-        HTML(
-            string=html_string,
-            base_url=settings.BASE_DIR  # 🔥 ESTA LÍNEA ES LA CLAVE
-        ).write_pdf(pdf_file)
-
+        HTML(string=html_string, base_url=settings.BASE_DIR).write_pdf(pdf_file)
         pdf_file.seek(0)
         return pdf_file
 
@@ -165,46 +166,114 @@ class Retention(models.Model):
     # XML SRI
     # --------------------------------------------------
     # En tu modelo Retention, modifica el método generate_xml
-    def generate_xml(self, filepath):
-        self.generate_access_code()
+    def generate_xml(self):
+        """
+        Genera el XML de Retención SRI 2.0.0 (MEMORIA)
+        """
+        sri = SRI()
+        access_key = sri.create_access_key(self)
 
-        comprobante = ET.Element("comprobanteRetencion", id="comprobante", version="2.0.0")
+        # ===============================
+        # IDENTIFICACIÓN SUJETO RETENIDO
+        # ===============================
+        ident = ''.join(filter(str.isdigit, self.provider.ruc or ''))
+        if len(ident) == 13:
+            tipo_id = '04'  # RUC
+        elif len(ident) == 10:
+            tipo_id = '05'  # CÉDULA
+        else:
+            raise Exception('Identificación del proveedor inválida para SRI')
 
-        info = ET.SubElement(comprobante, "infoTributaria")
-        ET.SubElement(info, "razonSocial").text = self.company.business_name
-        ET.SubElement(info, "ruc").text = self.company.ruc
-        ET.SubElement(info, "claveAcceso").text = self.access_code
-        ET.SubElement(info, "codDoc").text = "07"
-        ET.SubElement(info, "estab").text = self.receipt.establishment_code
-        ET.SubElement(info, "ptoEmi").text = self.receipt.issuing_point_code
-        ET.SubElement(info, "secuencial").text = self.voucher_number
-        ET.SubElement(info, "dirMatriz").text = self.company.direccion or "-"
+        if not access_key:
+            raise Exception('No se pudo generar la clave de acceso')
 
-        info_ret = ET.SubElement(comprobante, "infoCompRetencion")
-        ET.SubElement(info_ret, "fechaEmision").text = self.date_joined.strftime('%d/%m/%Y')
-        ET.SubElement(info_ret, "razonSocialSujetoRetenido").text = self.provider.razon_soc
-        ET.SubElement(info_ret, "identificacionSujetoRetenido").text = self.provider.ruc
-        ET.SubElement(info_ret, "dirEstablecimiento").text = (
-                self.provider.direccion1 or "-"
-        )
-        ET.SubElement(info_ret, "periodoFiscal").text = self.date_joined.strftime('%m/%Y')
+        self.access_code = access_key
+        self.save(update_fields=['access_code'])
 
-        impuestos = ET.SubElement(comprobante, "impuestos")
-        for d in self.details.all():
-            imp = ET.SubElement(impuestos, "impuesto")
-            ET.SubElement(imp, "codigo").text = "2" if d.tax_type == "IVA" else "1"
-            ET.SubElement(imp, "baseImponible").text = f"{d.base:.2f}"
-            ET.SubElement(imp, "porcentajeRetener").text = f"{d.percentage:.2f}"
-            ET.SubElement(imp, "valorRetenido").text = f"{d.value:.2f}"
+        xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+    <comprobanteRetencion id="comprobante" version="2.0.0">
+        <infoTributaria>
+            <ambiente>{self.company.environment_type}</ambiente>
+            <tipoEmision>{self.company.emission_type}</tipoEmision>
+            <razonSocial>{escape(self.company.business_name)}</razonSocial>
+            <nombreComercial>{escape(self.company.tradename or self.company.business_name)}</nombreComercial>
+            <ruc>{self.company.ruc}</ruc>
+            <claveAcceso>{access_key}</claveAcceso>
+            <codDoc>07</codDoc>
+            <estab>{self.receipt.establishment_code}</estab>
+            <ptoEmi>{self.receipt.issuing_point_code}</ptoEmi>
+            <secuencial>{self.voucher_number.zfill(9)}</secuencial>
+            <dirMatriz>{escape(self.company.direccion)}</dirMatriz>
+        </infoTributaria>
 
-            # AGREGAR NUEVOS CAMPOS AL XML
-            if d.numero_15_digitos:  # Solo incluir si tiene valor
-                ET.SubElement(imp, "numeroDocumento").text = d.numero_15_digitos
-            ET.SubElement(imp, "compPagoCuota").text = d.comp_pago_cuota
-            # Si quieres el valor legible en lugar del código:
-            # ET.SubElement(imp, "compPagoCuota").text = d.get_comp_pago_cuota_display()
+        <infoCompRetencion>
+            <fechaEmision>{self.date_joined.strftime('%d/%m/%Y')}</fechaEmision>
+            <dirEstablecimiento>{escape(self.company.direccion)}</dirEstablecimiento>
+            <obligadoContabilidad>NO</obligadoContabilidad>
 
-        ET.ElementTree(comprobante).write(filepath, encoding="UTF-8", xml_declaration=True)
+            <tipoIdentificacionSujetoRetenido>{tipo_id}</tipoIdentificacionSujetoRetenido>
+            <parteRel>NO</parteRel>
+
+            <razonSocialSujetoRetenido>{escape(self.provider.razon_soc)}</razonSocialSujetoRetenido>
+            <identificacionSujetoRetenido>{ident}</identificacionSujetoRetenido>
+            <periodoFiscal>{self.date_joined.strftime('%m/%Y')}</periodoFiscal>
+        </infoCompRetencion>
+
+        <docsSustento>
+            <docSustento>
+                <codSustento>01</codSustento>
+                <codDocSustento>19</codDocSustento>
+                <numDocSustento>{self.get_num_doc_sustento()}</numDocSustento>
+                <fechaEmisionDocSustento>{self.date_joined.strftime('%d/%m/%Y')}</fechaEmisionDocSustento>
+            
+                <fechaRegistroContable>{self.date_joined.strftime('%d/%m/%Y')}</fechaRegistroContable>
+                <numAutDocSustento>0000000000</numAutDocSustento>
+            
+                <!-- 🔥 ESTE VA PRIMERO SÍ O SÍ -->
+                <pagoLocExt>01</pagoLocExt>
+                            
+                <totalSinImpuestos>{self.subtotal:.2f}</totalSinImpuestos>
+                <importeTotal>{self.subtotal:.2f}</importeTotal>
+                
+                <impuestosDocSustento>
+                    <impuestoDocSustento>
+                        <codImpuestoDocSustento>2</codImpuestoDocSustento>
+                        <codigoPorcentaje>0</codigoPorcentaje>
+                        <baseImponible>{self.subtotal:.2f}</baseImponible>
+                        <tarifa>0</tarifa>
+                        <valorImpuesto>{Decimal('0.00')}</valorImpuesto>
+                    </impuestoDocSustento>
+                </impuestosDocSustento>
+                            
+                <retenciones>
+                    {''.join([
+                        f'''
+                        <retencion>
+                            <codigo>{'2' if d.tax_type == 'IVA' else '1'}</codigo>
+                            <codigoRetencion>{d.tax_code}</codigoRetencion>
+                            <baseImponible>{d.base:.2f}</baseImponible>
+                            <porcentajeRetener>{d.percentage}</porcentajeRetener>
+                            <valorRetenido>{d.value:.2f}</valorRetenido>
+                        </retencion>
+                        '''
+                        for d in self.details.all()
+                    ])}
+                </retenciones>
+                
+                <pagos>
+                    <pago>
+                        <formaPago>01</formaPago>
+                        <total>{self.subtotal:.2f}</total>
+                    </pago>
+                </pagos>
+
+                
+            </docSustento>
+        </docsSustento>
+    </comprobanteRetencion>
+    """
+
+        return xml, access_key
 
     def toJSON(self):
         item = model_to_dict(self)

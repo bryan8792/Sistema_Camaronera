@@ -370,15 +370,35 @@ $(function () {
     });
 
 
-    $('#tblSearchProducts tbody').on('click', 'a[rel="add"]', function () {
-        var tr = tblSearchProducts.cell($(this).closest('td, li')).index();
-        var product = tblSearchProducts.row(tr).data();
-        // var product = tblSearchProducts.row(tr.row).data();
-        product.cantidad_usar = '0';
-        product.subtotal = 0.00;
-        vents_sup.add_sup(product);
-        tblSearchProducts.row($(this).parents('tr')).remove().draw();
-    });
+    // 🔴 Primero eliminamos cualquier evento previo
+$('#tblSearchProducts tbody').off('click', 'a[rel="add"]');
+
+// 🟢 Luego registramos el evento correcto
+$('#tblSearchProducts tbody').on('click', 'a[rel="add"]', function () {
+
+    var tr = $(this).closest('tr');
+
+    if (tr.hasClass('child')) {
+        tr = tr.prev();
+    }
+
+    var product = tblSearchProducts.row(tr).data();
+
+    if (!product) {
+        console.error('Producto no encontrado');
+        return;
+    }
+
+    product = $.extend(true, {}, product);
+
+    product.cantidad_usar = 0;
+    product.cantidad_ingreso = 0;
+    product.subtotal = 0.00;
+
+    vents_sup.add_sup(product);
+
+    tblSearchProducts.row(tr).remove().draw(false);
+});
 
 
     $('#tblProducts_sup tbody')

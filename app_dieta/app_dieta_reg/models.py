@@ -71,29 +71,17 @@ class DiaDietaRegistro(models.Model):
 
 class DetalleDiaDieta(models.Model):
     dieta = models.ForeignKey('DiaDietaRegistro', on_delete=models.CASCADE)
-    piscinas = models.ForeignKey(
-        Piscinas,
-        on_delete=models.CASCADE,
-        verbose_name='Empresa',
-        null=True,
-        blank=True
-    )
-    balanceado = models.ForeignKey(
-        Producto,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
+    piscinas = models.ForeignKey(Piscinas, on_delete=models.CASCADE, verbose_name='Empresa', null=True, blank=True)
+    balanceado = models.ForeignKey(Producto, on_delete=models.CASCADE, null=True, blank=True)
     cantidad = models.DecimalField(max_digits=9, decimal_places=2, default=0)
-
     insumo1 = models.IntegerField(default=0)
-    gramaje1 = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    gramaje1 = models.DecimalField(max_digits=9, decimal_places=0, default=0)
     insumo2 = models.IntegerField(default=0)
-    gramaje2 = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    gramaje2 = models.DecimalField(max_digits=9, decimal_places=0, default=0)
     insumo3 = models.IntegerField(default=0)
-    gramaje3 = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    gramaje3 = models.DecimalField(max_digits=9, decimal_places=0, default=0)
     insumo4 = models.IntegerField(default=0)
-    gramaje4 = models.DecimalField(max_digits=9, decimal_places=2, default=0)
+    gramaje4 = models.DecimalField(max_digits=9, decimal_places=0, default=0)
 
     def __str__(self):
         return str(self.dieta)

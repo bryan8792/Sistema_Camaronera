@@ -33,6 +33,8 @@ from io import BytesIO
 from django.core.files import File
 import time
 from django.core.validators import MinValueValidator, MaxValueValidator
+from datetime import date
+from django.core.exceptions import ValidationError
 
 
 class Cuenta_Prueba(models.Model):
@@ -84,6 +86,64 @@ class Folder(models.Model):
         db_table = 'tb_Carpeta'
         verbose_name = "Carpeta"
         verbose_name_plural = "Carpetas"
+
+
+class PeriodoFiscal(models.Model):
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
+    anio = models.IntegerField()
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    activo = models.BooleanField(default=False)
+    cerrado = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('empresa', 'anio')
+        ordering = ['-anio']
+
+    def __str__(self):
+        return f"{self.empresa} - {self.anio}"
+
+    def save(self, *args, **kwargs):
+        if self.activo:
+            existe = PeriodoFiscal.objects.filter(
+                empresa=self.empresa,
+                activo=True
+            ).exclude(pk=self.pk).exists()
+
+            if existe:
+                raise ValidationError("Ya existe un período activo para esta empresa.")
+
+        super().save(*args, **kwargs)
+
+    # Método para obtener siguiente año
+    @classmethod
+    def obtener_siguiente_anio(cls, empresa):
+        ultimo = cls.objects.filter(
+            empresa=empresa
+        ).order_by('-anio').first()
+
+        return ultimo.anio + 1 if ultimo else 2026
+
+    # Método para abrir nuevo período
+    @classmethod
+    def abrir_nuevo_periodo(cls, empresa):
+        nuevo_anio = cls.obtener_siguiente_anio(empresa)
+
+        # Desactivar período activo actual
+        cls.objects.filter(
+            empresa=empresa,
+            activo=True
+        ).update(activo=False)
+
+        # Crear nuevo período
+        return cls.objects.create(
+            empresa=empresa,
+            anio=nuevo_anio,
+            fecha_inicio=date(nuevo_anio, 1, 1),
+            fecha_fin=date(nuevo_anio, 12, 31),
+            activo=True,
+            cerrado=False
+        )
 
 
 class PlanCuenta(models.Model):

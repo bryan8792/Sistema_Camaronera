@@ -1,15 +1,13 @@
-# app_retencion/views/retencion.py
 from django.views.generic import CreateView, ListView
 from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db import transaction
 from decimal import Decimal
-import json, os
-from django.conf import settings
-from django.views.generic import ListView
-from django.http import JsonResponse
+import json
+
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+
 from app_retencion.models import Retention, RetentionDetail
 from app_empresa.app_reg_empresa.models import Empresa
 from app_proveedor.models import Proveedor
@@ -17,6 +15,9 @@ from app_contabilidad_planCuentas.models import Recibo
 from utilities.sri import SRI
 
 
+# ======================================================
+# CREAR RETENCIÓN + FLUJO SRI REAL
+# ======================================================
 class RetentionCreateView(CreateView):
     model = Retention
     template_name = 'app_retencion/admin/create.html'
@@ -32,80 +33,109 @@ class RetentionCreateView(CreateView):
 
     def post(self, request, *args, **kwargs):
         response = {}
+
         try:
             with transaction.atomic():
+
+                # ================= CREAR RETENCIÓN =================
                 retention = Retention.objects.create(
                     company_id=request.POST.get('company'),
                     provider_id=request.POST.get('provider') or None,
                     receipt_id=request.POST.get('receipt') or None,
-                    voucher_number=request.POST.get('voucher_number', ''),
-                    voucher_number_full=request.POST.get('voucher_number_full', ''),
                 )
 
+                # ================= DETALLES =================
                 details = request.POST.getlist('details[]')
+                if not details:
+                    raise Exception('Debe ingresar al menos un detalle')
+
                 for d in details:
                     if not d:
                         continue
+
                     data = json.loads(d)
                     if isinstance(data, dict):
                         data = [data]
 
                     for item in data:
-                        # Validar y limpiar el campo numero_15_digitos
-                        numero_15_digitos = item.get('numero_15_digitos', '')
-                        if numero_15_digitos:
-                            # Asegurar que solo sean números y máximo 15 dígitos
-                            numero_15_digitos = ''.join(filter(str.isdigit, str(numero_15_digitos)))[:15]
-
-                        # Validar el campo comp_pago_cuota
-                        comp_pago_cuota = item.get('comp_pago_cuota', '')
-                        # Si no viene, asignar un valor por defecto
-                        if not comp_pago_cuota:
-                            comp_pago_cuota = 'OPCION_1'  # O el valor por defecto que prefieras
-
-                        # Crear el detalle con los nuevos campos
                         RetentionDetail.objects.create(
                             retention=retention,
                             tax_type=item.get('tax_type', 'IVA'),
                             tax_code=item.get('tax_code', ''),
-                            numero_15_digitos=numero_15_digitos,  # Nuevo campo
-                            comp_pago_cuota=comp_pago_cuota,  # Nuevo campo
+                            numero_15_digitos=str(item.get('numero_15_digitos', ''))[:15],
+                            comp_pago_cuota=item.get('comp_pago_cuota') or 'OPCION_1',
                             percentage=Decimal(str(item.get('percentage', 0))),
                             base=Decimal(str(item.get('base', 0))),
                         )
 
                 retention.update_totals()
+
+                # Validar que existan detalles válidos
+                if retention.details.count() == 0:
+                    raise Exception('Debe ingresar al menos un detalle válido')
+
+                retention.update_totals()
+
+                # ================= VALIDACIONES =================
+                if not retention.provider:
+                    raise Exception('Debe seleccionar proveedor')
+
+                if not retention.provider.ruc:
+                    raise Exception('Proveedor sin identificación')
+
+                # ================= FLUJO SRI REAL =================
+                sri = SRI()
+
+                # 1️⃣ Crear XML
+                resp = sri.create_xml(retention)
+                if not resp.get('resp'):
+                    raise Exception(resp.get('error', 'Error al crear XML'))
+
+                # 2️⃣ Firmar XML
+                resp = sri.firm_xml(retention, resp['xml'])
+                if not resp.get('resp'):
+                    raise Exception(resp.get('error', 'Error al firmar XML'))
+
+                # 3️⃣ Validar XML
+                resp = sri.validate_xml(retention, resp['xml'])
+                if not resp.get('resp'):
+                    raise Exception(resp.get('error', 'XML rechazado por el SRI'))
+
+                # 4️⃣ Autorizar XML
+                resp = sri.authorize_xml(retention)
+                if not resp.get('resp'):
+                    raise Exception(resp.get('error', 'Comprobante NO autorizado'))
+
+                # 5️⃣ Generar PDF autorizado
                 retention.save_pdf_authorized()
 
-                xml_dir = os.path.join(settings.MEDIA_ROOT, 'retenciones')
-                os.makedirs(xml_dir, exist_ok=True)
-                xml_path = os.path.join(xml_dir, f"retention_{retention.id}.xml")
-                retention.generate_xml(xml_path)
-
                 response['success'] = True
-                response['pdf_url'] = retention.pdf_authorized.url
-                response['xml_url'] = settings.MEDIA_URL + f"retenciones/retention_{retention.id}.xml"
+                response['message'] = 'Retención AUTORIZADA correctamente por el SRI'
+                response['pdf_url'] = (retention.pdf_authorized.url if retention.pdf_authorized else '')
 
         except Exception as e:
+            transaction.set_rollback(True)
+            response['success'] = False
             response['error'] = str(e)
 
         return JsonResponse(response)
 
 
+# ======================================================
+# LISTADO + ENVÍO EMAIL
+# ======================================================
 @method_decorator(csrf_exempt, name='dispatch')
 class RetentionListView(ListView):
     model = Retention
     template_name = 'app_retencion/admin/list.html'
 
     def post(self, request, *args, **kwargs):
-        print('POST ACTION:', request.POST.get('action'))
         action = request.POST.get('action')
-        data = {}
+        data = []
 
         try:
             # ================= LISTADO =================
             if action == 'searchdata':
-                data = []
                 for r in Retention.objects.select_related('company', 'provider'):
                     data.append({
                         'id': r.id,
@@ -114,13 +144,19 @@ class RetentionListView(ListView):
                         'date_joined': r.date_joined.strftime('%d/%m/%Y'),
                         'total_retained': f'{r.total_retained:.2f}',
                         'pdf': r.pdf_authorized.url if r.pdf_authorized else '',
-                        'xml': f'/media/retenciones/retention_{r.id}.xml',
+                        'xml': r.xml_authorized.url if hasattr(r, 'xml_authorized') and r.xml_authorized else '',
                         'email_sent': r.email_sent,
                     })
 
             # ================= ENVIAR EMAIL =================
             elif action == 'send_retention_by_email':
                 retention = Retention.objects.get(pk=request.POST.get('id'))
+
+                if not retention.pdf_authorized:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'La retención aún no está autorizada'
+                    })
 
                 if not retention.provider or not retention.provider.mail:
                     return JsonResponse({
@@ -143,10 +179,7 @@ class RetentionListView(ListView):
                     'message': 'Comprobante enviado por correo correctamente'
                 })
 
-
         except Exception as e:
             data = {'error': str(e)}
 
         return JsonResponse(data, safe=False)
-
-
