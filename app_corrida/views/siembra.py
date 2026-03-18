@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from app_corrida.forms import PrecSiembraCuerpForm
 from app_corrida.models import PrecSiembraCuerp, PrecSiembraEnc
-from app_empresa.app_reg_empresa.models import Piscinas
+from app_empresa.app_piscinas.models import Piscinas
 from app_inventario.app_categoria.models import Producto
 from app_stock.app_detalle_stock.models import Producto_Stock, Total_Stock
 from django.db.models.functions import Coalesce

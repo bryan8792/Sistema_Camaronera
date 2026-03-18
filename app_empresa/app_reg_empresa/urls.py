@@ -1,5 +1,7 @@
 from django.urls import path
+from .utils import reset_password_empresa, superadmin_usuarios
 from .views.crear_transaccion import *
+from .views.dashboard_public import DashboardPublicView
 from .views.debug_view import *
 from .views.empresa import *
 from .views.piscinas import *
@@ -7,12 +9,30 @@ from .views.piscinas import *
 app_name = 'app_empresa'
 
 urlpatterns = [
+    # DASHBOARD
+    path("", DashboardPublicView.as_view(), name="dashboard_public"),
 
+    # EMPRESAS
+    path("empresa/", listarEmpresaView.as_view(), name="listar_empresa"),
+
+    path("empresa/crear/", crearEmpresaView.as_view(), name="crear_empresa"),
+
+    # PERIODOS
+    path("periodos/", PeriodoFiscalListView.as_view(), name="periodo_list"),
+
+    path("periodos/crear/", PeriodoFiscalCreateView.as_view(), name="periodo_create"),
+
+    # PUBLIC
     path('empresa/listar/', listarEmpresaView.as_view(), name='listar_empresa'),
     path('empresa/crear/', crearEmpresaView.as_view(), name='crear_empresa'),
     path('empresa/actualizar/<int:pk>/', actualizarEmpresaView.as_view(), name='actualizar_empresa'),
     path('empresa/eliminar/<int:pk>/', eliminarEmpresaView.as_view(), name='eliminar_empresa'),
     path('dashboard_bio', listarDashboardBIO.as_view(), name='dashboard_bio'),
+    # TENANT
+    path('empresa/detalle', empresaTenantView.as_view(), name='empresa_tenant'),
+
+    path("superadmin/usuarios/", superadmin_usuarios, name="superadmin_usuarios"),
+    path("superadmin/reset/<str:schema>/<str:username>/", reset_password_empresa, name="reset_password_empresa"),
 
     path('piscinas/reporte/', reportePiscinasView.as_view(), name='reporte_piscinas'),
 
@@ -65,5 +85,15 @@ urlpatterns = [
     path('debug/producciones/', DebugProduccionListView.as_view(), name='debug_produccion_list'),
 
     path('desglose-costos/', DesgloseCostosView.as_view(), name='desglose_costos'),
+
+    # ===============================
+    # PERIODOS FISCALES
+    # ===============================
+
+    path('periodos/', PeriodoFiscalListView.as_view(), name='periodo_list'),
+    path('periodos/crear/', PeriodoFiscalCreateView.as_view(), name='periodo_create'),
+    path('periodos/editar/<int:pk>/', PeriodoFiscalUpdateView.as_view(), name='periodo_update'),
+    path('periodos/eliminar/<int:pk>/', PeriodoFiscalDeleteView.as_view(), name='periodo_delete'),
+
 
 ]

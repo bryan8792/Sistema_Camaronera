@@ -26,7 +26,6 @@ from utilities import printer
 from utilities.sri import SRI
 from datetime import datetime
 from django.core.files.base import ContentFile
-from app_empresa.app_reg_empresa.models import Empresa
 import base64
 import tempfile
 from io import BytesIO
@@ -96,7 +95,7 @@ class PlanCuenta(models.Model):
     band_total = models.BooleanField(default=False, verbose_name='Cuenta de Total')
     band_valida = models.BooleanField(default=False)
     band_gastoDistribuido = models.BooleanField(default=False)
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, verbose_name="Empresa ", null=True, blank=True)
+    empresa = models.ForeignKey('app_reg_empresa.Empresa', on_delete=models.CASCADE, verbose_name="Empresa ", null=True, blank=True)
     periodo = models.CharField(max_length=150, verbose_name='Periodo (Año)')
     parentId = models.ForeignKey('self', db_column='idparentId', null=True, blank=True, on_delete=models.CASCADE,
                                  related_name='idparentId', verbose_name='Cuenta Raiz o Cuenta Padre')
@@ -157,7 +156,7 @@ class EncabezadoCuentasPlanCuenta(models.Model):
     direccion = models.TextField(default="Ingrese una Direccion", null=True, blank=True, verbose_name='Dirección')
     ruc = models.CharField(max_length=400, verbose_name='RUC', null=True, blank=True)
     reg_ats = models.CharField(max_length=400, verbose_name='Es ATS', default='SIN REGISTRO DE ATS')
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, verbose_name="Seleccionar Empresa:")
+    empresa = models.ForeignKey('app_reg_empresa.Empresa', on_delete=models.CASCADE, verbose_name="Seleccionar Empresa:")
     reg_control = models.CharField(max_length=400, verbose_name='Tipo de Registro', default='RT')
     proveedor = models.ForeignKey('app_proveedor.Proveedor', on_delete=models.PROTECT, verbose_name="Seleccionar Proveedor ",
                                   null=True, blank=True)
@@ -287,7 +286,7 @@ class Recibo(models.Model):
     establishment_code = models.CharField(max_length=3, verbose_name='Código del Establecimiento Emisor')
     issuing_point_code = models.CharField(max_length=3, verbose_name='Código del Punto de Emisión')
     sequence = models.PositiveIntegerField(default=0, verbose_name='Secuencia actual')
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, null=True, blank=True)
+    empresa = models.ForeignKey('app_reg_empresa.Empresa', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f'{self.name}'
@@ -324,7 +323,7 @@ class AnexoTransaccional(models.Model):
                                              blank=True)
     # detallecuentaplan = models.ForeignKey(DetalleCuentasPlanCuenta, on_delete=models.CASCADE, null=True, blank=True)
     estab = models.CharField(max_length=6, default=000, verbose_name='Establecimiento')
-    company = models.ForeignKey(Empresa, on_delete=models.PROTECT, verbose_name='Seleccionar empresa')
+    company = models.ForeignKey('app_reg_empresa.Empresa', on_delete=models.PROTECT, verbose_name='Seleccionar empresa')
     estab_serie = models.CharField(max_length=6, default=000, verbose_name='Establecimiento - Serie')
     # DATOS COMPROBANTE DE VENTA
     receipt = models.ForeignKey(Recibo, on_delete=models.CASCADE, verbose_name='Tipo de comprobante',
@@ -490,12 +489,27 @@ class AnexoTransaccional(models.Model):
         number = self.receipt.sequence + 1 if increase else self.receipt.sequence
         return f'{number:09d}'
 
+
+    # DENTRO DE LA FUNCION - SI ponlo asi:
     def generate_voucher_number_full(self):
         if self.receipt_id is None:
-            self.company = Empresa.objects.first()
-            self.receipt = Recibo.objects.get(voucher_type=VOUCHER_TYPE[0][0],
-                                              establishment_code=self.company.establishment_code,
-                                              issuing_point_code=self.company.issuing_point_code)
+            # Import DENTRO de la funcion (lazy import) - esto SI funciona
+            from django.db import connection
+            from app_empresa.app_reg_empresa.models import Empresa  # <-- AQUI SI
+
+            current_schema = connection.schema_name
+
+            if current_schema and current_schema != 'public':
+                self.company = Empresa.objects.filter(schema_name=current_schema).first()
+            else:
+                self.company = Empresa.objects.first()
+
+            if self.company:
+                self.receipt = Recibo.objects.get(
+                    voucher_type=VOUCHER_TYPE[0][0],
+                    establishment_code=self.company.establishment_code,
+                    issuing_point_code=self.company.issuing_point_code
+                )
         self.voucher_number = self.generate_voucher_number()
         return self.get_voucher_number_full()
 

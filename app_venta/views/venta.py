@@ -13,7 +13,8 @@ from django.views.generic import CreateView, DeleteView, FormView
 from Sistema_Camaronera import settings
 from app_cliente.forms import Client, ClientUserForm, ClientForm
 from app_contabilidad_planCuentas.forms import *
-from app_empresa.app_reg_empresa.models import Piscinas
+from app_empresa.app_piscinas.models import Piscinas
+from app_empresa.app_reg_empresa.models import Empresa
 from app_inventario.app_producto.forms import *
 from app_notaCredito.models import CreditNoteDetail, CreditNote
 from app_venta.forms import SaleForm

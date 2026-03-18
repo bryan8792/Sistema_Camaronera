@@ -20,7 +20,8 @@ from django.forms import model_to_dict
 from django.db import models
 from Sistema_Camaronera import settings
 from app_contabilidad_planCuentas.models import Recibo
-from app_empresa.app_reg_empresa.models import Empresa, Piscinas
+from app_empresa.app_piscinas.models import Piscinas
+from app_empresa.app_reg_empresa.models import Empresa
 from app_inventario.app_categoria.models import Producto
 from app_venta.models import Sale, SaleDetail
 from utilities import printer

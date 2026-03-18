@@ -276,59 +276,54 @@ class crearGrupoView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         try:
-            # Primero guardamos el grupo
             response = super().form_valid(form)
 
-            # Asignar permisos
+            # Permisos Django
             if form.cleaned_data.get('permissions'):
                 self.object.permissions.set(form.cleaned_data['permissions'])
 
-            # Asignar módulos
-            selected_modules = self.request.POST.get('selected_modules', '[]')
-            print(f"Módulos seleccionados (raw): {selected_modules}")  # Debug
+            # ===== PERMISOS POR MÓDULO =====
+            selected_modules = self.request.POST.get('selected_modules', '{}')
 
             try:
-                if selected_modules and selected_modules != '[]':
-                    module_ids = json.loads(selected_modules)
-                    print(f"Módulos parseados: {module_ids}")  # Debug
+                modules_data = json.loads(selected_modules)
+            except:
+                modules_data = {}
 
-                    # Eliminar asignaciones anteriores
-                    GrupoModulo.objects.filter(grupo=self.object).delete()
+            GrupoModulo.objects.filter(grupo=self.object).delete()
 
-                    # Crear nuevas asignaciones
-                    created_count = 0
-                    for module_id in module_ids:
-                        try:
-                            modulo = Modulo.objects.get(id=module_id)
-                            GrupoModulo.objects.create(grupo=self.object, modulo=modulo)
-                            created_count += 1
-                            print(f"Módulo asignado: {modulo.nombre}")  # Debug
-                        except Modulo.DoesNotExist:
-                            print(f"Módulo con ID {module_id} no existe")  # Debug
-                            continue
+            for module_id, perms in modules_data.items():
+                try:
+                    modulo = Modulo.objects.get(id=module_id)
 
-                    messages.success(self.request,
-                                     f'Grupo "{self.object.name}" creado exitosamente con {created_count} módulos asignados.')
-                else:
-                    messages.success(self.request,
-                                     f'Grupo "{self.object.name}" creado exitosamente sin módulos asignados.')
+                    # Si no tiene acceso (view=False), no se guarda
+                    if not perms.get('view', False):
+                        continue
 
-            except (json.JSONDecodeError, ValueError) as e:
-                print(f"Error al procesar módulos: {str(e)}")  # Debug
-                messages.warning(self.request,
-                                 f'Grupo "{self.object.name}" creado, pero hubo un error al asignar módulos: {str(e)}')
+                    GrupoModulo.objects.create(
+                        grupo=self.object,
+                        modulo=modulo,
+                        can_view=perms.get('view', False),
+                        can_add=perms.get('add', False),
+                        can_change=perms.get('change', False),
+                        can_delete=perms.get('delete', False),
+                    )
+                except Modulo.DoesNotExist:
+                    continue
 
+            messages.success(self.request, f'Grupo "{self.object.name}" creado exitosamente.')
             return response
 
         except Exception as e:
-            print(f"Error general en form_valid: {str(e)}")  # Debug
-            messages.error(self.request, f'Error al crear grupo: {str(e)}')
+            print("ERROR crear grupo:", e)
+            messages.error(self.request, f'Error al crear grupo: {e}')
             return self.form_invalid(form)
 
     def form_invalid(self, form):
-        print(f"Errores del formulario: {form.errors}")  # Debug
-        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        print("Errores:", form.errors)
+        messages.error(self.request, 'Por favor corrige los errores.')
         return super().form_invalid(form)
+
 
 
 class actualizarGrupoView(LoginRequiredMixin, UpdateView):
@@ -344,9 +339,9 @@ class actualizarGrupoView(LoginRequiredMixin, UpdateView):
         context['all_permissions'] = Permission.objects.all().select_related('content_type').order_by(
             'content_type__app_label', 'codename')
 
-        # Obtener módulos ya asignados al grupo
-        modulos_asignados = GrupoModulo.objects.filter(grupo=self.object).values_list('modulo_id', flat=True)
-        context['modulos_asignados'] = list(modulos_asignados)
+        # IDs de módulos ya asignados
+        modulos_asignados = GrupoModulo.objects.filter(grupo=self.object)
+        context['modulos_asignados'] = list(modulos_asignados.values_list('modulo_id', flat=True))
 
         return context
 
@@ -354,55 +349,51 @@ class actualizarGrupoView(LoginRequiredMixin, UpdateView):
         try:
             response = super().form_valid(form)
 
-            # Asignar permisos
+            # Permisos Django
             if form.cleaned_data.get('permissions'):
                 self.object.permissions.set(form.cleaned_data['permissions'])
 
-            # Asignar módulos
-            selected_modules = self.request.POST.get('selected_modules', '[]')
-            print(f"Módulos seleccionados para actualizar: {selected_modules}")  # Debug
+            # ===== PERMISOS POR MÓDULO =====
+            selected_modules = self.request.POST.get('selected_modules', '{}')
 
             try:
-                if selected_modules and selected_modules != '[]':
-                    module_ids = json.loads(selected_modules)
+                modules_data = json.loads(selected_modules)
+            except:
+                modules_data = {}
 
-                    # Eliminar asignaciones anteriores
-                    GrupoModulo.objects.filter(grupo=self.object).delete()
+            GrupoModulo.objects.filter(grupo=self.object).delete()
 
-                    # Crear nuevas asignaciones
-                    created_count = 0
-                    for module_id in module_ids:
-                        try:
-                            modulo = Modulo.objects.get(id=module_id)
-                            GrupoModulo.objects.create(grupo=self.object, modulo=modulo)
-                            created_count += 1
-                        except Modulo.DoesNotExist:
-                            continue
+            for module_id, perms in modules_data.items():
+                try:
+                    modulo = Modulo.objects.get(id=module_id)
 
-                    messages.success(self.request,
-                                     f'Grupo "{self.object.name}" actualizado exitosamente con {created_count} módulos asignados.')
-                else:
-                    # Si no hay módulos seleccionados, eliminar todas las asignaciones
-                    GrupoModulo.objects.filter(grupo=self.object).delete()
-                    messages.success(self.request,
-                                     f'Grupo "{self.object.name}" actualizado exitosamente sin módulos asignados.')
+                    if not perms.get('view', False):
+                        continue
 
-            except (json.JSONDecodeError, ValueError) as e:
-                print(f"Error al procesar módulos: {str(e)}")  # Debug
-                messages.warning(self.request,
-                                 f'Grupo "{self.object.name}" actualizado, pero hubo un error al asignar módulos: {str(e)}')
+                    GrupoModulo.objects.create(
+                        grupo=self.object,
+                        modulo=modulo,
+                        can_view=perms.get('view', False),
+                        can_add=perms.get('add', False),
+                        can_change=perms.get('change', False),
+                        can_delete=perms.get('delete', False),
+                    )
+                except Modulo.DoesNotExist:
+                    continue
 
+            messages.success(self.request, f'Grupo "{self.object.name}" actualizado exitosamente.')
             return response
 
         except Exception as e:
-            print(f"Error general en form_valid: {str(e)}")  # Debug
-            messages.error(self.request, f'Error al actualizar grupo: {str(e)}')
+            print("ERROR actualizar grupo:", e)
+            messages.error(self.request, f'Error al actualizar grupo: {e}')
             return self.form_invalid(form)
 
     def form_invalid(self, form):
-        print(f"Errores del formulario: {form.errors}")  # Debug
-        messages.error(self.request, 'Por favor corrige los errores en el formulario.')
+        print("Errores:", form.errors)
+        messages.error(self.request, 'Por favor corrige los errores.')
         return super().form_invalid(form)
+
 
 
 class eliminarGrupoView(LoginRequiredMixin, DeleteView):

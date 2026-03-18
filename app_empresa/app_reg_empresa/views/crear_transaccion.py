@@ -13,10 +13,13 @@ import json
 import logging
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from app_costoutilidad.forms import *
+from app_costoutilidad.models import *
 from ..export_utils import export_to_excel, export_to_pdf
 from ..initial_data import cargar_tipos_costo_iniciales
 from app_empresa.app_reg_empresa.forms import *
-from ..models import CostoUtilidadHectarea, Empresa, TipoCosto, CostoOperativo, Piscinas, Produccion, Ciclo
+from ..models import Empresa
+
 
 logger = logging.getLogger(__name__)
 
@@ -307,12 +310,6 @@ class CostoUtilidadHectareaAPIView(View):
 
         return JsonResponse(data, safe=False)
 
-
-from django.views.generic import TemplateView
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime
-from ..models import CostoUtilidadHectarea, CostoOperativo
 
 @method_decorator(csrf_exempt, name='dispatch')
 class DesgloseCostosView(TemplateView):

@@ -1,7 +1,6 @@
 
 from django.forms import *
-
-from app_empresa.app_reg_empresa.models import Piscinas
+from app_empresa.app_piscinas.models import Piscinas
 
 
 class PiscinasForm(ModelForm):

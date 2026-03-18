@@ -16,8 +16,10 @@ from weasyprint import HTML
 from app_dieta.app_dieta_reg.forms import AnioDietaForm, RegistroDiaDietaForm, DiaDietaForm, DescripcionDietaForm
 from app_dieta.app_dieta_reg.models import MesDieta, AnioDieta, DiaDietaRegistro, DetalleDiaDieta, DescripcionDieta
 from django.http import HttpResponse, Http404, JsonResponse, HttpResponseRedirect
+
+from app_empresa.app_piscinas.models import Piscinas
 # Para crear las Dietas
-from app_empresa.app_reg_empresa.models import Empresa, Piscinas
+from app_empresa.app_reg_empresa.models import Empresa
 from app_inventario.app_categoria.models import Producto
 from app_reportes.utils import render_to_pdf
 from app_stock.app_detalle_stock.models import Producto_Stock, Total_Stock

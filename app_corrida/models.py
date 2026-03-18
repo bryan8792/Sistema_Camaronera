@@ -2,7 +2,8 @@
 from django.db import models
 from datetime import datetime
 from django.forms import model_to_dict
-from app_empresa.app_reg_empresa.models import Piscinas
+
+from app_empresa.app_piscinas.models import Piscinas
 from app_inventario.app_categoria.models import Producto
 
 

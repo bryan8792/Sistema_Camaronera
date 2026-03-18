@@ -1,4 +1,9 @@
-{% extends 'base.html' %}
+{% if IS_PUBLIC %}
+    {% extends 'base_public.html' %}
+{% else %}
+    {% extends 'base_tenant.html' %}
+{% endif %}
+
 
 {% load static %}
 
@@ -51,39 +56,102 @@
                     <!-- /.card-header -->
                     <div class="card-body">
                         <table id="tb_categoria" class="table table-striped table-bordered">
-                            <thead>
-                            <tr role="row">
-                                <th>Siglas</th>
-                                <th>Nombre</th>
-                                <th>RUC</th>
-                                <th>Actividad</th>
-                                <th>Dirección</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody>
+{#                            <thead>#}
+{#                            <tr role="row">#}
+{#                                <th>Siglas</th>#}
+{#                                <th>Nombre</th>#}
+{#                                <th>RUC</th>#}
+{#                                <th>Actividad</th>#}
+{#                                <th>Dirección</th>#}
+{#                                <th class="text-center">Acciones</th>#}
+{#                            </tr>#}
+{#                            </thead>#}
+{#                            <tbody>#}
+{##}
+{#                            {% for emp in object_list %}#}
+{#                                <tr role="row" class="odd">#}
+{#                                    <td><strong>{{ emp.siglas }}</strong></td>#}
+{#                                    <td>{{ emp.nombre }}</td>#}
+{#                                    <td>{{ emp.ruc }}</td>#}
+{#                                    <td>{{ emp.actividad }}</td>#}
+{#                                    <td>{{ emp.direccion }}</td>#}
+{#                                    <td class="text-center">#}
+{#                                        <a href="{% url 'app_empresa:actualizar_empresa' emp.id %}"#}
+{#                                           class="btn btn-xs btn-flat" style="background-color:#AEAEAE">#}
+{#                                            <i class="fas fa-edit"></i>#}
+{#                                        </a>#}
+{#                                        <a href="{% url 'app_empresa:eliminar_empresa' emp.id %}"#}
+{#                                           class="btn btn-danger btn-xs btn-flat">#}
+{#                                            <i class="fas fa-trash-alt"></i>#}
+{#                                        </a>#}
+{#                                    </td>#}
+{#                                </tr>#}
+{#                            {% endfor %}#}
+{##}
+{#                            </tbody>#}
 
-                            {% for emp in object_list %}
-                                <tr role="row" class="odd">
-                                    <td><strong>{{ emp.siglas }}</strong></td>
-                                    <td>{{ emp.nombre }}</td>
-                                    <td>{{ emp.ruc }}</td>
-                                    <td>{{ emp.actividad }}</td>
-                                    <td>{{ emp.direccion }}</td>
-                                    <td class="text-center">
-                                        <a href="{% url 'app_empresa:actualizar_empresa' emp.id %}"
-                                           class="btn btn-xs btn-flat" style="background-color:#AEAEAE">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'app_empresa:eliminar_empresa' emp.id %}"
-                                           class="btn btn-danger btn-xs btn-flat">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-
-                            </tbody>
+                            <!-- empresa_listar.html - Agregar columnas en la tabla -->
+<thead>
+    <tr>
+        <th>Id</th>
+        <th>Razon social</th>
+        <th>Nombre Comercial</th>
+        <th>Numero de RUC</th>
+        <th>Telefono</th>
+        <th>Esquema</th>  <!-- NUEVO -->
+        <th>Plan</th>      <!-- NUEVO -->
+        <th>Estado</th>
+        <th>Opciones</th>
+    </tr>
+</thead>
+<tbody>
+    {% for empresa in object_list %}
+    <tr>
+        <td>{{ empresa.id }}</td>
+        <td>{{ empresa.business_name }}</td>
+        <td>{{ empresa.tradename }}</td>
+        <td>{{ empresa.ruc }}</td>
+        <td>{{ empresa.mobile }}</td>
+        <td>
+            {% if empresa.schema_name %}
+                <a href="http://{{ empresa.schema_name }}.{{ DOMAIN }}/"
+                   target="_blank" class="badge badge-info">
+                    {{ empresa.schema_name }}
+                </a>
+            {% else %}
+                <span class="badge badge-secondary">Sin esquema</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if empresa %}
+                <span class="badge badge-warning">Activa</span>
+            {% else %}
+                <span class="badge badge-warning">Inactiva</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if empresa.estado %}
+                <span class="badge badge-success">Activo</span>
+            {% else %}
+                <span class="badge badge-danger">Inactivo</span>
+            {% endif %}
+        </td>
+        <td>
+            <!-- Botones de acciones -->
+            <a href="http://{{ empresa.schema_name }}.{{ DOMAIN }}/"
+               target="_blank" class="btn btn-light btn-sm">
+                {{ empresa.schema_name }}
+            </a>
+            <a href="{% url 'app_empresa:actualizar_empresa' empresa.pk %}" class="btn btn-warning btn-sm" title="Editar">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'app_empresa:eliminar_empresa' empresa.pk %}" class="btn btn-danger btn-sm" title="Eliminar">
+                <i class="fas fa-trash"></i>
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
 
                         </table>
                     </div>

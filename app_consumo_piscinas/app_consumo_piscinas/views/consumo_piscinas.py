@@ -8,7 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 from app_consumo_piscinas.app_consumo_piscinas.forms import ReportForm
-from app_empresa.app_reg_empresa.models import Piscinas
+from app_empresa.app_piscinas.models import Piscinas
 from app_stock.app_detalle_stock.models import Producto_Stock
 from django.db.models.functions import Cast
 from django.db.models import IntegerField

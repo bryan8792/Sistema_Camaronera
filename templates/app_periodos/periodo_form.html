@@ -1,0 +1,73 @@
+{% extends 'base_public.html' %}
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+
+            <h1>
+                {% if object %}
+                    Editar Periodo
+                {% else %}
+                    Crear Periodo Fiscal
+                {% endif %}
+            </h1>
+
+        </div>
+    </div>
+
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <section class="content">
+
+            <div class="card">
+
+                <div class="card-header" style="background:#3498DB;color:white;">
+                    <h3 class="card-title">Datos del Periodo</h3>
+                </div>
+
+
+                <div class="card-body">
+
+                    <div class="form-group">
+
+                        <label>Empresa</label>
+                        {{ form.empresa }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Año</label>
+                        {{ form.anio }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-footer">
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+
+                    <a href="{% url 'app_empresa:periodo_list' %}"
+                       class="btn btn-danger">
+                        Cancelar
+                    </a>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </form>
+
+{% endblock %}

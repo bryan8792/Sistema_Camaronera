@@ -204,7 +204,7 @@
     }
 
     /**
-     * Context management
+     * Context commands
      */
     function Context(type, indent, prev, line) {
       this.type = type;

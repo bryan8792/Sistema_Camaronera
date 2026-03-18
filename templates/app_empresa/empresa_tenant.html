@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Datos de la Empresa</h3>
+            </div>
+            <div class="card-body">
+
+                <p><strong>Nombre:</strong> {{ object.nombre }}</p>
+                <p><strong>Razón Social:</strong> {{ object.business_name }}</p>
+                <p><strong>RUC:</strong> {{ object.ruc }}</p>
+                <p><strong>Teléfono:</strong> {{ object.mobile }}</p>
+                <p><strong>Dirección:</strong> {{ object.direccion }}</p>
+
+                <a href="{% url 'app_empresa:actualizar_empresa' object.pk %}"
+                   class="btn btn-warning">
+                    <i class="fas fa-edit"></i> Editar Empresa
+                </a>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

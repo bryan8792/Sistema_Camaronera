@@ -1,5 +1,4 @@
 {% load static %}
-
 {% load widget_tweaks %}
 
 <!DOCTYPE html>
@@ -8,43 +7,55 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{{ nombre }}</title>
-    <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'lib/adminlte-3.0.4/plugins/font-awesome-5.11.1/css/all.min.css' %}">
-    <!-- Me sirve para la alerta de los registros -->
+    <!-- SweetAlert -->
     <script src="{% static 'lib/sweetalert2-9.10.0/sweetalert2.all.min.js' %}"></script>
     <!-- Theme style -->
     <link rel="stylesheet" href="{% static 'lib/adminlte-3.0.4/css/adminlte.min.css' %}">
-    <!-- Google Font: Source Sans Pro -->
+    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 </head>
+
 <body class="hold-transition login-page">
+
 <div class="login-box">
+
+    <!-- LOGO Y NOMBRE DINÁMICO -->
     <div class="login-logo">
-        <a href="#"><b>PSM & BIO</b> Login</a>
-        <H6><strong>SISTEMA INFORMATICO DE CONTROL Y PRODUCCIÓN</strong></H6>
+        {% if logo %}
+            <img src="{{ logo }}" style="max-height:80px;margin-bottom:10px">
+        {% endif %}
+        <a href="#"><b>{{ nombre }}</b></a>
+        <h6><strong>SISTEMA INFORMATICO DE CONTROL Y PRODUCCIÓN</strong></h6>
     </div>
-    <!-- /.login-logo -->
+
     <div class="card">
         <div class="card-body login-card-body" style="text-align: center">
-            <h3><strong>
-                    <button class="alert alert-dismissible alert-dismissible btn btn-lg" style="text-align: center;height: 130px;width: 195px">
-                        <i class="fas fa-ship fa-6x"></i>
-                    </button>
-            </strong></h3>
-            <p class="login-box-msg"><strong>Identifiquese para Iniciar Sesion</strong></p>
+
+            <h3>
+                <button class="alert btn btn-lg" style="height:130px;width:195px">
+                    <i class="fas fa-ship fa-6x"></i>
+                </button>
+            </h3>
+
+            <p class="login-box-msg"><strong>Identifíquese para Iniciar Sesión</strong></p>
+
             <form action="." method="post">
                 <input type="hidden" name="next" value="{{ next }}">
                 {% csrf_token %}
+
                 <div class="input-group mb-3">
                     {{ form.username|add_class:'form-control'|attr:'autocomplete:off' }}
                     <div class="input-group-append">
                         <div class="input-group-text">
-                            <span class="fas fa-envelope"></span>
+                            <span class="fas fa-user"></span>
                         </div>
                     </div>
                 </div>
+
                 <div class="input-group mb-3">
                     {{ form.password|add_class:'form-control'|attr:'autocomplete:off' }}
                     <div class="input-group-append">
@@ -53,6 +64,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary btn-block">
@@ -64,31 +76,24 @@
         </div>
     </div>
 
-    <script type="application/javascript">
+    <!-- ALERTA DE ERROR -->
+    <script>
         {% if form.errors %}
-            var errores = '';
-            {% for field in form %}
-                {% for error in field.errors %}
-                    errores = '{{ error }}\n';
-                {% endfor %}
-            {% endfor %}
-            Swal.fire({
-                title: 'Error',
-                html: "Datos incorrectos o es usuario no activo </br> Por favor verifique sus datos o credenciales y vuelva a ingresar",
-                icon: 'error',
-                confirmButtonText: 'OK'
-            })
+        Swal.fire({
+            title: 'Error',
+            html: "Datos incorrectos o el usuario no está activo.<br>Verifique sus credenciales.",
+            icon: 'error',
+            confirmButtonText: 'OK'
+        })
         {% endif %}
-
     </script>
 
 </div>
-<!-- /.login-box -->
-<!-- jQuery -->
+
+<!-- JS -->
 <script src="{% static 'lib/adminlte-3.0.4/plugins/jquery/jquery.min.js' %}"></script>
-<!-- Bootstrap 4 -->
 <script src="{% static 'lib/adminlte-3.0.4/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-<!-- AdminLTE App -->
 <script src="{% static 'lib/adminlte-3.0.4/js/adminlte.min.js' %}"></script>
+
 </body>
 </html>

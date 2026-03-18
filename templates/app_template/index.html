@@ -1,236 +1,132 @@
 {% extends 'base.html' %}
-
 {% load static %}
 
 {% block contenido %}
 
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0 text-dark">Dashboard PSM & BIO</h1>
-                </div><!-- /.col -->
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Principal</a></li>
-                        <li class="breadcrumb-item active">PSM & BIO Sistema Informático</li>
-                    </ol>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
-    </div>
-
-
-    <section class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box">
-                        <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">CPU Traffic</span>
-                            <span class="info-box-number">10<small>%</small></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box mb-3">
-                        <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-thumbs-up"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Likes</span>
-                            <span class="info-box-number">41,410</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="clearfix hidden-md-up"></div>
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box mb-3">
-                        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">Sales</span>
-                            <span class="info-box-number">760</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- /.col -->
-                <div class="col-12 col-sm-6 col-md-3">
-                    <div class="info-box mb-3">
-                        <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
-                        <div class="info-box-content">
-                            <span class="info-box-text">New Members</span>
-                            <span class="info-box-number">2,000</span>
-                        </div>
-                    </div>
-                </div>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">Dashboard Empresas</h1>
             </div>
-
-            <div class="col-lg-12">
-                <div class="card">
-                    <br>
-                    <div class="card-header text-center" style="text-align: center">
-                        <div class="text-center mb-4">
-                            <h2 class="text-info"><b>Seleccione una Empresa:</b></h2>
-                        </div>
-                    </div>
-                    <div class="card-body">
-
-                        <div class="row justify-content-center">
-
-                            <div class="col-md-5">
-                                <div class="card empresa-card" data-empresa="psm" style="border: 2px solid #0099cc; border-radius: 15px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
-                                    <div class="card-body text-center">
-                                        <img src="{% static 'img/img_empresa/PSM.png' %}">
-                                        <hr>
-                                        <h4 class="text-dark"><b>Empresa PSM</b></h4>
-                                        {% comment %}<p class="text-dark">Escuela de Posgrado</p>{% endcomment %}
-                                        <div class="mt-3">
-                                            <h5 class="text-dark">Industria Pesquera San Miguel</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-5">
-                                <div class="card empresa-card" data-empresa="bio" style="border: 2px solid #0099cc; border-radius: 15px; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
-                                    <div class="card-body text-center">
-                                        <img src="{% static 'img/img_empresa/BIO.png' %}">
-                                        <hr>
-                                        <h4 class="text-dark"><b>Empresa BIO</b></h4>
-                                        {% comment %}<p class="text-dark">LA UNIVERSIDAD EN INTERNET</p>{% endcomment %}
-                                        <div class="mt-3">
-                                            <h5 class="text-dark">Empresa de Produccion Bioacuática Biocascajal</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Principal</a></li>
+                    <li class="breadcrumb-item active">Sistema Multiempresa</li>
+                </ol>
             </div>
-
         </div>
-    </section>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info elevation-1"><i class="fas fa-cog"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">CPU Traffic</span>
+                        <span class="info-box-number">10<small>%</small></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-thumbs-up"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Likes</span>
+                        <span class="info-box-number">41,410</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clearfix hidden-md-up"></div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-success elevation-1"><i class="fas fa-shopping-cart"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Sales</span>
+                        <span class="info-box-number">760</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+                <div class="info-box mb-3">
+                    <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">New Members</span>
+                        <span class="info-box-number">2,000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empresas -->
+        <div class="col-lg-12">
+            <div class="card">
+                <br>
+                <div class="card-header text-center">
+                    <h2 class="text-info"><b>Seleccione una Empresa:</b></h2>
+                </div>
+
+                <div class="card-body">
+                    <div class="row justify-content-center">
+
+                        {% for empresa in empresas %}
+                        <div class="col-md-5 mb-3">
+                            <div class="card empresa-card"
+                                 data-schema="{{ empresa.schema_name }}"
+                                 style="border:2px solid #0099cc;border-radius:15px;cursor:pointer;transition:.3s"
+                                 onmouseover="this.style.transform='scale(1.03)';this.style.boxShadow='0 10px 20px rgba(0,0,0,.2)'"
+                                 onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none'">
+
+                                <div class="card-body text-center">
+                                    {% if empresa.logo %}
+                                        <img src="{{ empresa.logo.url }}" style="max-height:120px">
+                                    {% else %}
+                                        <img src="{% static 'img/img_empresa/logo_slider-png.png' %}" style="max-height:120px">
+                                    {% endif %}
+                                    <hr>
+                                    <h4 class="text-dark"><b>{{ empresa.nombre }}</b></h4>
+                                    <div class="mt-3">
+                                        <h5 class="text-dark">{{ empresa.razon_social }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
 
 {% endblock %}
 
 {% block scripts %}
 
-    <script src="{% static 'acciones/app_index/js/Control_Sistema_PSM_BIO.js' %}"></script>
-    <script src="{% static 'acciones/app_index/js/Dashboard_Seguimiento_Mes.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Obtener todas las tarjetas de empresa
-            const empresaCards = document.querySelectorAll('.empresa-card');
+    const empresaCards = document.querySelectorAll('.empresa-card');
 
-            // Añadir evento de clic a cada tarjeta
-            empresaCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Obtener el tipo de empresa (psm o bio)
-                    const empresa = this.getAttribute('data-empresa');
-
-                    // Actualizar el sidebar según la empresa seleccionada
-                    actualizarSidebar(empresa);
-
-                    // Si también quieres redireccionar después de actualizar el sidebar
-                    if (empresa === 'psm') {
-                        window.location.href = "{% url 'app_empresa:dashboard_bio' %}";
-                    } else if (empresa === 'bio') {
-                        window.location.href = "{% url 'app_empresa:dashboard_bio' %}";
-                    }
-                });
-            });
-
-            // Función para actualizar el sidebar según la empresa seleccionada
-            function actualizarSidebar(empresa) {
-                // Guardar la selección en localStorage para mantenerla entre páginas
-                localStorage.setItem('empresaSeleccionada', empresa);
-
-                // Elementos del sidebar a actualizar
-                const empresaSidebarTitle = document.getElementById('empresa-sidebar-title');
-                const logoEmpresaSidebar = document.getElementById('logo-empresa-sidebar');
-                const menuTitleSidebar = document.getElementById('menu-title-sidebar');
-
-                // Elementos específicos de cada empresa
-                const psmItems = document.querySelectorAll('.psm-item');
-                const bioItems = document.querySelectorAll('.bio-item');
-                const bothItems = document.querySelectorAll('.both-item');
-
-                // Actualizar según la empresa seleccionada
-                if (empresa === 'psm') {
-                    // Actualizar título y logo
-                    if (empresaSidebarTitle) empresaSidebarTitle.textContent = 'PSM';
-                    if (logoEmpresaSidebar) logoEmpresaSidebar.src = "{% static 'img/img_empresa/PSM.png' %}";
-                    if (menuTitleSidebar) menuTitleSidebar.textContent = 'PSM';
-
-                    // Mostrar elementos de PSM y ocultar elementos de BIO
-                    psmItems.forEach(item => item.style.display = 'block');
-                    bioItems.forEach(item => item.style.display = 'none');
-                    bothItems.forEach(item => item.style.display = 'block');
-                } else if (empresa === 'bio') {
-                    // Actualizar título y logo
-                    if (empresaSidebarTitle) empresaSidebarTitle.textContent = 'BIO';
-                    if (logoEmpresaSidebar) logoEmpresaSidebar.src = "{% static 'img/img_empresa/BIO.png' %}";
-                    if (menuTitleSidebar) menuTitleSidebar.textContent = 'BIO';
-
-                    // Mostrar elementos de BIO y ocultar elementos de PSM
-                    bioItems.forEach(item => item.style.display = 'block');
-                    psmItems.forEach(item => item.style.display = 'none');
-                    bothItems.forEach(item => item.style.display = 'block');
-                } else {
-                    // Mostrar ambos (estado predeterminado)
-                    if (empresaSidebarTitle) empresaSidebarTitle.textContent = 'PSM & BIO';
-                    if (logoEmpresaSidebar) logoEmpresaSidebar.src = "{% static 'img/img_empresa/logo_slider-png.png' %}";
-                    if (menuTitleSidebar) menuTitleSidebar.textContent = 'PSM & BIO';
-
-                    psmItems.forEach(item => item.style.display = 'block');
-                    bioItems.forEach(item => item.style.display = 'block');
-                    bothItems.forEach(item => item.style.display = 'block');
-                }
-
-                // Enviar la selección al servidor mediante una petición AJAX
-                fetch('/actualizar-sidebar/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify({ empresa: empresa })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Sidebar actualizado:', data);
-                })
-                .catch(error => {
-                    console.error('Error al actualizar sidebar:', error);
-                });
-            }
-
-            // Función para obtener el token CSRF
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            }
-
-            // Verificar si hay una empresa seleccionada previamente en localStorage
-            const empresaGuardada = localStorage.getItem('empresaSeleccionada');
-            if (empresaGuardada) {
-                // Aplicar la selección guardada al cargar la página
-                actualizarSidebar(empresaGuardada);
-            }
+    empresaCards.forEach(card => {
+        card.addEventListener('click', function () {
+            const schema = this.getAttribute('data-schema');
+            window.location.href = `http://${schema}.{{ DOMAIN }}/`;
         });
-    </script>
+    });
+
+});
+</script>
 
 {% endblock %}

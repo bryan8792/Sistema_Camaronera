@@ -1,0 +1,41 @@
+{% extends 'base_public.html' %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <h1>Eliminar Periodo</h1>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <p>
+                    ¿Seguro que deseas eliminar el periodo
+                    <strong>{{ object.anio }}</strong> de
+                    <strong>{{ object.empresa.nombre }}</strong>?
+                </p>
+
+            </div>
+
+            <div class="card-footer">
+
+                <button type="submit" class="btn btn-danger">
+                    Eliminar
+                </button>
+
+                <a href="{% url 'app_empresa:periodo_list' %}"
+                   class="btn btn-secondary">
+                    Cancelar
+                </a>
+
+            </div>
+
+        </div>
+
+    </form>
+
+{% endblock %}

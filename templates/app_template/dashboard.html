@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">
+                        Dashboard de {{ request.tenant.schema_name|upper }}
+                    </h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Principal</a></li>
+                        <li class="breadcrumb-item active">Sistema Multiempresa</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <p>¡Bienvenido <strong>{{ user.get_full_name }}</strong>!
+                Empresa activa: <b>{{ request.tenant.schema_name|upper }}</b></p>
+
+            <!-- FILA 1 -->
+            <div class="row text-center justify-content-center mb-4">
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_categoria:listar_categoria' %}'">
+                        <div class="card-header font-weight-bold">CATEGORÍAS</div>
+                        <div class="card-body">
+                            <i class="fas fa-tags fa-3x mb-3 text-primary"></i>
+                            <div><a class="btn btn-info">Ir a Categorías</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_categoria:listar_producto' %}'">
+                        <div class="card-header font-weight-bold">PRODUCTOS</div>
+                        <div class="card-body">
+                            <i class="fas fa-boxes fa-3x mb-3 text-warning"></i>
+                            <div><a class="btn btn-info">Ir a Productos</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_stock:listar_stock' %}'">
+                        <div class="card-header font-weight-bold">INSUMOS</div>
+                        <div class="card-body">
+                            <i class="fas fa-box-open fa-3x mb-3 text-info"></i>
+                            <div><a class="btn btn-info">Ir a Insumos</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FILA 2 -->
+            <div class="row text-center justify-content-center mb-4">
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_consumo:listar_resumen_general' %}'">
+                        <div class="card-header font-weight-bold">CONSUMO</div>
+                        <div class="card-body">
+                            <i class="fas fa-chart-line fa-3x mb-3 text-primary"></i>
+                            <div><a class="btn btn-info">Ver Resumen</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100"
+                         onclick="location.href='{% url 'app_planCuentas:listar_transaccionPlan' %}'">
+                        <div class="card-header font-weight-bold">TRANSACCIONES</div>
+                        <div class="card-body">
+                            <i class="fas fa-random fa-3x mb-3 text-warning"></i>
+                            <div><a class="btn btn-info">Ver Transacciones</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_planCuentas:listar_fact_gasto' %}'">
+                        <div class="card-header font-weight-bold">GASTOS</div>
+                        <div class="card-body">
+                            <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-danger"></i>
+                            <div><a class="btn btn-info">Ver Gastos</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FILA 3 -->
+            <div class="row text-center justify-content-center mb-4">
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_planCuentas:listar_planCuenta' %}'">
+                        <div class="card-header font-weight-bold">PLAN CUENTAS</div>
+                        <div class="card-body">
+                            <i class="fas fa-book fa-3x mb-3 text-dark"></i>
+                            <div><a class="btn btn-info">Ver Plan</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_planCuentas:listar_balancePlan' %}'">
+                        <div class="card-header font-weight-bold">BALANCE</div>
+                        <div class="card-body">
+                            <i class="fas fa-balance-scale fa-3x mb-3 text-info"></i>
+                            <div><a class="btn btn-info">Ver Balance</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2 col-sm-6 mb-4">
+                    <div class="card h-100" onclick="location.href='{% url 'app_kardex:listar_kardex_movimientos' %}'">
+                        <div class="card-header font-weight-bold">KARDEX</div>
+                        <div class="card-body">
+                            <i class="fas fa-warehouse fa-3x mb-3 text-secondary"></i>
+                            <div><a class="btn btn-info">Ver Kardex</a></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+{% endblock %}

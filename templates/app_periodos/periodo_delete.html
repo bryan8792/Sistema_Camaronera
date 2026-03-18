@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <h1 class="m-0 text-dark">Eliminar Periodo</h1>
+    </div>
+</div>
+
+<section class="content">
+    <div class="card card-danger">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
+            </h3>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="card-body">
+                <p>¿Está seguro que desea eliminar el periodo <strong>{{ object.anio }}</strong>?</p>
+                <p class="text-danger">Esta acción no se puede deshacer.</p>
+            </div>
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+                <a href="{% url 'app_empresa:periodo_list' %}" class="btn btn-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+
+{% endblock %}

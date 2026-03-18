@@ -311,7 +311,7 @@ export default GanttSeries;
  * specifying further connecting [options](series.gantt.connectors) between the
  * points. Multiple connections can be specified by providing an array.
  *
- * @sample gantt/demo/project-management
+ * @sample gantt/demo/project-commands
  *         Dependencies
  * @sample gantt/pathfinder/demo
  *         Different connection types

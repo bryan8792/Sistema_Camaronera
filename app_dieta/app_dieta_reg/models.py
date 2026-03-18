@@ -3,7 +3,9 @@ from Sistema_Camaronera.settings import MEDIA_URL, STATIC_URL
 from datetime import datetime
 from django.db import models, transaction
 from django.forms import model_to_dict
-from app_empresa.app_reg_empresa.models import Piscinas, Empresa
+
+from app_empresa.app_piscinas.models import Piscinas
+from app_empresa.app_reg_empresa.models import Empresa
 from app_inventario.app_categoria.models import Producto
 # Create your models here.
 from app_stock.app_detalle_stock.models import Total_Stock, Producto_Stock

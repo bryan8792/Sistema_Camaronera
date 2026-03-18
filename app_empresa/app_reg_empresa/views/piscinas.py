@@ -10,8 +10,9 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from app_empresa.app_piscinas.forms import PiscinasForm
+from app_empresa.app_piscinas.models import Piscinas, PiscinaHistorial
 from app_empresa.app_reg_empresa.forms import EmpresaForm
-from app_empresa.app_reg_empresa.models import Empresa, Piscinas, PiscinaHistorial
+from app_empresa.app_reg_empresa.models import Empresa
 from django.shortcuts import get_object_or_404
 from datetime import datetime
 from collections import OrderedDict

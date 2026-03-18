@@ -1,6 +1,7 @@
 from django.db import models
 from xml.etree import ElementTree
 from app_compra.models import Purchase
+from app_empresa.app_piscinas.models import Piscinas
 from app_empresa.app_reg_empresa.models import *
 import barcode
 import logging

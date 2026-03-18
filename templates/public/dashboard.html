@@ -1,0 +1,40 @@
+{% extends "base_public.html" %}
+
+{% block content %}
+
+    <h2>Empresas</h2>
+
+    <table class="table">
+
+        <tr>
+            <th>Empresa</th>
+            <th>Periodos</th>
+        </tr>
+
+        {% for empresa in empresas %}
+
+            <tr>
+
+                <td>{{ empresa.nombre }}</td>
+
+                <td>
+
+                    {% for periodo in empresa.periodos.all %}
+
+                        <a href="http://{{ periodo.schema_name }}.localhost:8000">
+                            {{ periodo.anio }}
+                        </a>
+
+                        <br>
+
+                    {% endfor %}
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+    </table>
+
+{% endblock %}

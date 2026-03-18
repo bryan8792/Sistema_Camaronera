@@ -10,7 +10,9 @@ from django.db.models import Q, Sum, DecimalField
 from django.db.models.functions import Coalesce
 from datetime import datetime
 import json
-from app_empresa.app_reg_empresa.models import Empresa, Piscinas
+
+from app_empresa.app_piscinas.models import Piscinas
+from app_empresa.app_reg_empresa.models import Empresa
 from app_stock.app_detalle_stock.models import Producto_Stock
 
 

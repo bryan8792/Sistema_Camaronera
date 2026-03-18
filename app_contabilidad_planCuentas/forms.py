@@ -1,4 +1,6 @@
 from django.forms import *
+from django import forms
+from datetime import datetime
 from app_contabilidad_planCuentas.models import *
 
 OPCIONES_NIVEL = (
@@ -156,9 +158,25 @@ OPCIONES_T_F_PAGO = (
 
 
 class PlanCuentaForm(ModelForm):
+    # Definir empresa manualmente para evitar dependencia circular
+    empresa = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        widget=Select(attrs={
+            'class': 'form-control select2',
+            'placeholder': 'Selecciona una Empresa',
+            'autocomplete': 'off'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from app_empresa.app_reg_empresa.models import Empresa
+        self.fields['empresa'].queryset = Empresa.objects.all()
+
     class Meta:
         model = PlanCuenta
-        fields = '__all__'
+        exclude = ['empresa']  # Excluir empresa - se define arriba manualmente
         widgets = {
             'codigo': NumberInput(
                 attrs={
@@ -184,16 +202,8 @@ class PlanCuentaForm(ModelForm):
             'tipo_cuenta': Select(choices=OPCIONES_CUENTA,
                                   attrs={
                                       'class': 'form-control select2'
-
                                   }
                                   ),
-            'empresa': Select(
-                attrs={
-                    'class': 'form-control select2',
-                    'placeholder': 'Selecciona una Empresa',
-                    'autocomplete': 'off'
-                }
-            ),
             'nivel': Select(choices=OPCIONES_NIVEL,
                             attrs={
                                 'class': 'form-control select2'
@@ -202,17 +212,30 @@ class PlanCuentaForm(ModelForm):
             'parentId': Select(
                 attrs={
                     'class': 'form-control select2',
-                    # 'multiple': 'multiple'
                 }
             ),
-
         }
 
 
 class EncabezadoCuentasPlanCuentaForm(ModelForm):
+    empresa = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        widget=Select(attrs={
+            'class': 'form-control select2',
+            'autocomplete': 'off',
+            'style': 'width: 100%;'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from app_empresa.app_reg_empresa.models import Empresa
+        self.fields['empresa'].queryset = Empresa.objects.all()
+
     class Meta:
         model = EncabezadoCuentasPlanCuenta
-        fields = '__all__'
+        exclude = ['empresa']
         widgets = {
             'codigo': NumberInput(
                 attrs={
@@ -243,7 +266,7 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
             'descripcion': TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'Ingrese una Descripción',
+                    'placeholder': 'Ingrese una Descripcion',
                     'autocomplete': 'off'
                 }
             ),
@@ -259,13 +282,6 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
                     'class': 'form-control',
                     'placeholder': 'Ingrese un numero de RUC',
                     'autocomplete': 'off'
-                }
-            ),
-            'empresa': Select(
-                attrs={
-                    'class': 'form-control select2',
-                    'autocomplete': 'off',
-                    'style': 'width: 100%;'
                 }
             ),
             'proveedor': Select(
@@ -293,19 +309,33 @@ class EncabezadoCuentasPlanCuentaForm(ModelForm):
                 attrs={
                     'class': 'form-control',
                     'autocomplete': 'off',
-                    'placeholder': 'Ingrese una Dirección',
+                    'placeholder': 'Ingrese una Direccion',
                     'rows': "3",
                     'cols': "50"
                 }
             ),
-
         }
 
 
 class DetalleCuentasPlanCuentaForm(ModelForm):
+    empresa = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        widget=Select(attrs={
+            'class': 'form-control select2',
+            'placeholder': 'Selecciona una Empresa',
+            'autocomplete': 'off'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from app_empresa.app_reg_empresa.models import Empresa
+        self.fields['empresa'].queryset = Empresa.objects.all()
+
     class Meta:
         model = DetalleCuentasPlanCuenta
-        fields = '__all__'
+        exclude = ['empresa']
         widgets = {
             'codigo': NumberInput(
                 attrs={
@@ -333,13 +363,6 @@ class DetalleCuentasPlanCuentaForm(ModelForm):
                                     'class': 'form-control select2'
                                 }
                                 ),
-            'empresa': Select(
-                attrs={
-                    'class': 'form-control select2',
-                    'placeholder': 'Selecciona una Empresa',
-                    'autocomplete': 'off'
-                }
-            ),
             'nivel': Select(choices=OPCIONES_NIVEL,
                             attrs={
                                 'class': 'form-control select2'
@@ -348,10 +371,8 @@ class DetalleCuentasPlanCuentaForm(ModelForm):
             'cuentasuma': Select(
                 attrs={
                     'class': 'form-control select2',
-                    # 'multiple': 'multiple'
                 }
             ),
-
         }
 
 
@@ -364,23 +385,30 @@ class ReportForm(Form):
 
 
 class ReciboForm(ModelForm):
+    empresa = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        widget=Select(attrs={
+            'class': 'form-control select2',
+            'style': 'width: 100%;',
+            'name': 'empresa_id'
+        })
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['voucher_type'].widget.attrs['autofocus'] = True
+        from app_empresa.app_reg_empresa.models import Empresa
+        self.fields['empresa'].queryset = Empresa.objects.all()
 
     class Meta:
         model = Recibo
-        fields = '__all__'
+        exclude = ['empresa']
         widgets = {
             'voucher_type': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
-            'empresa': Select(attrs={
-                'class': 'form-control select2',
-                'style': 'width: 100%;',
-                'name': 'empresa_id'
-            }),
-            'establishment_code': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un número'}),
-            'issuing_point_code': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un número'}),
-            'sequence': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un número de secuencia'}),
+            'establishment_code': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un numero'}),
+            'issuing_point_code': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un numero'}),
+            'sequence': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un numero de secuencia'}),
         }
 
     def save(self, commit=True):
@@ -396,21 +424,30 @@ class ReciboForm(ModelForm):
 
 
 class AnextoTransaccionalForm(ModelForm):
+    company = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        widget=Select(attrs={
+            'class': 'form-control select2', 'style': 'width: 100%;'
+        })
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        from app_empresa.app_reg_empresa.models import Empresa
+        self.fields['company'].queryset = Empresa.objects.all()
         self.fields['receipt'].queryset = Recibo.objects.filter(
             voucher_type__in=[VOUCHER_TYPE[0][0], VOUCHER_TYPE[-1][0]], empresa_id=self.instance.company_id
         )
-        # self.fields['receipt'].choices = tuple((code, label) for code, label in VOUCHER_TYPE if code != VOUCHER_TYPE[-1][0])
 
     class Meta:
         model = AnexoTransaccional
-        fields = '__all__'
+        exclude = ['company']
         widgets = {
             'estab': TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'Ingrese una Descripción',
+                    'placeholder': 'Ingrese una Descripcion',
                     'autocomplete': 'off'
                 }
             ),
@@ -419,11 +456,6 @@ class AnextoTransaccionalForm(ModelForm):
                                      'class': 'form-control select2'
                                  }
                                  ),
-            'company': Select(
-                attrs={
-                    'class': 'form-control select2', 'style': 'width: 100%;'
-                }
-            ),
             'receipt': Select(
                 attrs={
                     'class': 'form-control select2', 'style': 'width: 100%;'
@@ -466,7 +498,7 @@ class AnextoTransaccionalForm(ModelForm):
             'descripcion': TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'Ingrese una Descripción',
+                    'placeholder': 'Ingrese una Descripcion',
                     'autocomplete': 'off'
                 }
             ),
@@ -481,7 +513,7 @@ class AnextoTransaccionalForm(ModelForm):
                 attrs={
                     'class': 'form-control',
                     'autocomplete': 'off',
-                    'placeholder': 'Ingrese una Observación',
+                    'placeholder': 'Ingrese una Observacion',
                     'rows': "3",
                     'cols': "50"
                 }
@@ -576,12 +608,10 @@ class AnextoTransaccionalForm(ModelForm):
                                    'class': 'form-control select2'
                                }
                                ),
-
         }
 
 
 class ATSGenerarXMLForm(Form):
-    """Formulario para generar XML ATS"""
     id_receptor = CharField(
         max_length=13,
         widget=TextInput(attrs={
@@ -613,7 +643,7 @@ class ATSGenerarXMLForm(Form):
         ],
         widget=Select(attrs={'class': 'form-control'}),
         initial='Agosto',
-        label="Período"
+        label="Periodo"
     )
     anio = IntegerField(
         widget=NumberInput(attrs={
@@ -622,7 +652,7 @@ class ATSGenerarXMLForm(Form):
             'max': 2050
         }),
         initial=datetime.now().year,
-        label="Año"
+        label="Ano"
     )
     destino = CharField(
         widget=TextInput(attrs={
@@ -636,11 +666,11 @@ class ATSGenerarXMLForm(Form):
         widget=CheckboxInput(attrs={'class': 'form-check-input'}),
         required=False,
         initial=False,
-        label="Eliminar caracteres de separación de línea y tabulación"
+        label="Eliminar caracteres de separacion de linea y tabulacion"
     )
 
+
 class ATSImportarComprasForm(Form):
-    """Formulario para importar compras desde XLS"""
     periodicidad = ChoiceField(
         choices=[('mensual', 'Mensual'), ('semestral', 'Semestral')],
         widget=RadioSelect(attrs={'class': 'form-check-input'}),
@@ -656,7 +686,7 @@ class ATSImportarComprasForm(Form):
         ],
         widget=Select(attrs={'class': 'form-control'}),
         initial='Agosto',
-        label="Período"
+        label="Periodo"
     )
     anio = IntegerField(
         widget=NumberInput(attrs={
@@ -665,7 +695,7 @@ class ATSImportarComprasForm(Form):
             'max': 2050
         }),
         initial=datetime.now().year,
-        label="Año"
+        label="Ano"
     )
     ruta = CharField(
         widget=TextInput(attrs={
@@ -676,16 +706,16 @@ class ATSImportarComprasForm(Form):
     )
     modo_insercion = ChoiceField(
         choices=[
-            ('agregar', 'Agregar datos a período'),
-            ('reemplazar', 'Reemplazar período de contribuyente')
+            ('agregar', 'Agregar datos a periodo'),
+            ('reemplazar', 'Reemplazar periodo de contribuyente')
         ],
         widget=RadioSelect(attrs={'class': 'form-check-input'}),
         initial='agregar',
-        label="Modo de inserción de datos"
+        label="Modo de insercion de datos"
     )
 
+
 class ATSImportarVentasForm(Form):
-    """Formulario para importar ventas desde XLS"""
     periodicidad = ChoiceField(
         choices=[('mensual', 'Mensual'), ('semestral', 'Semestral')],
         widget=RadioSelect(attrs={'class': 'form-check-input'}),
@@ -701,7 +731,7 @@ class ATSImportarVentasForm(Form):
         ],
         widget=Select(attrs={'class': 'form-control'}),
         initial='Agosto',
-        label="Período"
+        label="Periodo"
     )
     anio = IntegerField(
         widget=NumberInput(attrs={
@@ -710,7 +740,7 @@ class ATSImportarVentasForm(Form):
             'max': 2050
         }),
         initial=datetime.now().year,
-        label="Año"
+        label="Ano"
     )
     ruta = CharField(
         widget=TextInput(attrs={
@@ -720,27 +750,27 @@ class ATSImportarVentasForm(Form):
         label="Ruta"
     )
 
+
 class ATSImportarXMLForm(Form):
-    """Formulario para importar datos desde XML ATS"""
     archivo_xml = FileField(
         widget=FileInput(attrs={
             'class': 'form-control-file',
             'accept': '.xml'
         }),
-        label="Ubicación de archivo XML"
+        label="Ubicacion de archivo XML"
     )
     modo_insercion = ChoiceField(
         choices=[
-            ('agregar', 'Agregar datos a período'),
-            ('reemplazar', 'Reemplazar período de contribuyente')
+            ('agregar', 'Agregar datos a periodo'),
+            ('reemplazar', 'Reemplazar periodo de contribuyente')
         ],
         widget=RadioSelect(attrs={'class': 'form-check-input'}),
         initial='agregar',
-        label="Modo de inserción de datos"
+        label="Modo de insercion de datos"
     )
 
+
 class ATSRevisionDatosForm(forms.Form):
-    """Formulario para revisión de datos ATS"""
     id_receptor = CharField(
         max_length=13,
         widget=Select(attrs={'class': 'form-control'}),
@@ -761,7 +791,7 @@ class ATSRevisionDatosForm(forms.Form):
         ],
         widget=Select(attrs={'class': 'form-control'}),
         initial='Agosto',
-        label="Período"
+        label="Periodo"
     )
     anio = IntegerField(
         widget=NumberInput(attrs={
@@ -770,7 +800,7 @@ class ATSRevisionDatosForm(forms.Form):
             'max': 2050
         }),
         initial=datetime.now().year,
-        label="Año"
+        label="Ano"
     )
     tipo_transaccion = ChoiceField(
         choices=[
@@ -780,17 +810,17 @@ class ATSRevisionDatosForm(forms.Form):
         ],
         widget=RadioSelect(attrs={'class': 'form-check-input'}),
         initial='compras',
-        label="Tipo de transacción"
+        label="Tipo de transaccion"
     )
 
+
 class ATSCarpetaXMLForm(Form):
-    """Formulario para cargar archivos XML desde carpeta"""
     ubicacion_origen = CharField(
         widget=TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ubicación origen de archivos XML'
+            'placeholder': 'Ubicacion origen de archivos XML'
         }),
-        label="Ubicación Origen de archivos XML"
+        label="Ubicacion Origen de archivos XML"
     )
     mostrar_pendientes = BooleanField(
         widget=CheckboxInput(attrs={'class': 'form-check-input'}),

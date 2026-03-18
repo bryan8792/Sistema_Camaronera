@@ -147,6 +147,12 @@ class Modulo(models.Model):
 class GrupoModulo(models.Model):
     grupo = models.ForeignKey(Group, on_delete=models.CASCADE)
     modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE)
+
+    can_view = models.BooleanField(default=True)
+    can_add = models.BooleanField(default=False)
+    can_change = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
+
     fecha_asignacion = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -156,3 +162,4 @@ class GrupoModulo(models.Model):
 
     def __str__(self):
         return f"{self.grupo.name} - {self.modulo.nombre}"
+

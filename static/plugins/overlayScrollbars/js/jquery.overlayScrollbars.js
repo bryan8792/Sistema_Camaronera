@@ -2905,7 +2905,7 @@
                             _hostElement[_strScrollTop](0);
                         _viewportElement[_strScrollLeft](currScroll.x)[_strScrollTop](currScroll.y);
 
-                        //scrollbars management:
+                        //scrollbars commands:
                         var scrollbarsVisibilityVisible = scrollbarsVisibility === 'v';
                         var scrollbarsVisibilityHidden = scrollbarsVisibility === 'h';
                         var scrollbarsVisibilityAuto = scrollbarsVisibility === 'a';

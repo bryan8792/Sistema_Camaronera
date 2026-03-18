@@ -18573,7 +18573,7 @@ tasks:
       - downloads
       - loading
       - progress
-      - project management
+      - project commands
       - settings
       - to do
   styles:

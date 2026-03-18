@@ -2,15 +2,31 @@ from django.conf.global_settings import DATE_INPUT_FORMATS
 from django.db.models import DateField
 from django.forms import *
 from django.forms.widgets import DateTimeBaseInput
+from app_empresa.app_reg_empresa.models import Empresa
+from django.conf.global_settings import DATE_INPUT_FORMATS
+from django.db.models import DateField
+from django.forms import *
+from django.forms.widgets import DateTimeBaseInput
+import re
 
-from app_empresa.app_reg_empresa.models import Empresa, TipoCosto, CostoOperativo, Ciclo, Produccion, Piscinas
+from app_empresa.app_reg_empresa.models import Empresa
 
 
 class EmpresaForm(ModelForm):
     class Meta:
         model = Empresa
         fields = '__all__'
+        exclude = ['scheme']
         widgets = {
+            'schema_name': TextInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Ej: miempresa (solo minusculas y numeros)',
+                    'autocomplete': 'off',
+                    'pattern': '[a-z0-9]+',
+                    'title': 'Solo letras minusculas y numeros, sin espacios ni caracteres especiales'
+                }
+            ),
             'nombre': TextInput(
                 attrs={
                     'class': 'form-control',
@@ -28,7 +44,7 @@ class EmpresaForm(ModelForm):
             'direccion': TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'Ingrese una Dirección',
+                    'placeholder': 'Ingrese una Direccion',
                     'autocomplete': 'off'
                 }
             ),
@@ -56,44 +72,44 @@ class EmpresaForm(ModelForm):
             'issuing_point_code': TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'Ingrese un código de punto de emisión',
+                    'placeholder': 'Ingrese un codigo de punto de emision',
                     'autocomplete': 'off'
                 }
             ),
             'business_name': TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'Ingrese un nombre de razón social',
+                    'placeholder': 'Ingrese un nombre de razon social',
                     'autocomplete': 'off'
                 }
             ),
             'main_address': TextInput(
                 attrs={
                     'class': 'form-control',
-                    'placeholder': 'Ingrese una dirección principal',
+                    'placeholder': 'Ingrese una direccion principal',
                     'autocomplete': 'off'
                 }
             ),
             'tradename': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un nombre comercial'}),
             'establishment_address': TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Ingrese una dirección establecimiento'}),
+                attrs={'class': 'form-control', 'placeholder': 'Ingrese una direccion establecimiento'}),
             'establishment_code': TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Ingrese un código de establecimiento'}),
+                attrs={'class': 'form-control', 'placeholder': 'Ingrese un codigo de establecimiento'}),
             'special_taxpayer': TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Ingrese un número de resolución'}),
+                attrs={'class': 'form-control', 'placeholder': 'Ingrese un numero de resolucion'}),
             'obligated_accounting': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
             'environment_type': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
             'emission_type': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
             'retention_agent': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
-            'mobile': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un teléfono celular'}),
-            'phone': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un teléfono convencional'}),
+            'mobile': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un telefono celular'}),
+            'phone': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un telefono convencional'}),
             'email': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese un email'}),
-            'website': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese una dirección web'}),
-            'description': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese una descripción'}),
+            'website': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese una direccion web'}),
+            'description': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese una descripcion'}),
             'iva': TextInput(attrs={'class': 'form-control', }),
             'vat_percentage': Select(attrs={'class': 'form-control select2', 'style': 'width: 100%;'}),
             'electronic_signature_key': TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Ingrese la clave de la firma electrónica'}),
+                attrs={'class': 'form-control', 'placeholder': 'Ingrese la clave de la firma electronica'}),
             'email_host': TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el servidor de correo'}),
             'email_port': TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Ingrese el puerto de servidor de correo'}),
@@ -101,82 +117,33 @@ class EmpresaForm(ModelForm):
                 attrs={'class': 'form-control', 'placeholder': 'Ingrese el username del servidor de correo'}),
             'email_host_password': TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Ingrese el password del servidor de correo'}),
-
         }
 
+    def clean_schema_name(self):
+        """Validar el nombre del esquema para multi-tenant"""
+        schema_name = self.cleaned_data.get('schema_name')
 
-class TipoCostoForm(ModelForm):
-    class Meta:
-        model = TipoCosto
-        fields = ['nombre', 'descripcion']
-        widgets = {
-            'nombre': TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre del tipo de costo'}),
-            'descripcion': Textarea(
-                attrs={'class': 'form-control', 'placeholder': 'Ingrese una descripción', 'rows': 3}),
-        }
+        if schema_name:
+            schema_name = schema_name.lower().strip()
 
-class CostoOperativoForm(ModelForm):
-    class Meta:
-        model = CostoOperativo
-        fields = ['piscina', 'tipo_costo', 'fecha', 'monto', 'descripcion', 'comprobante', 'proveedor']
-        widgets = {
-            'piscina': Select(attrs={'class': 'form-control select2'}),
-            'tipo_costo': Select(attrs={'class': 'form-control select2'}),
-            'fecha': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'monto': NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
-            'descripcion': Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'comprobante': TextInput(attrs={'class': 'form-control'}),
-            'proveedor': Select(attrs={'class': 'form-control select2'}),
-        }
+            if not re.match('^[a-z0-9]+$', schema_name):
+                raise ValidationError(
+                    'Solo se permiten letras minusculas y numeros, sin espacios ni caracteres especiales')
 
+            if len(schema_name) < 3:
+                raise ValidationError('El nombre del esquema debe tener al menos 3 caracteres')
 
-class CicloForm(ModelForm):
-    class Meta:
-        model = Ciclo
-        fields = ['piscina', 'nombre', 'fecha_inicio', 'fecha_fin', 'densidad_siembra', 'cantidad_larvas',
-                  'activo']
-        widgets = {
-            'piscina': Select(attrs={'class': 'form-control select2'}),
-            'nombre': TextInput(attrs={'class': 'form-control'}),
-            'fecha_inicio': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'fecha_fin': DateInput(attrs={'class': 'form-control', 'type': 'date', 'required': False}),
-            'densidad_siembra': NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
-            'cantidad_larvas': NumberInput(attrs={'class': 'form-control', 'min': '0'}),
-            'activo': CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
+            reserved = ['public', 'admin', 'www', 'api', 'static', 'media', 'localhost', 'mail', 'ftp', 'ssh']
+            if schema_name in reserved:
+                raise ValidationError(f'El nombre "{schema_name}" esta reservado y no se puede usar')
 
-class ProduccionForm(ModelForm):
-    class Meta:
-        model = Produccion
-        fields = ['piscina', 'ciclo', 'fecha_cosecha', 'cantidad_kg', 'precio_venta_kg', 'talla_promedio',
-                  'cliente', 'factura', 'observaciones']
-        widgets = {
-            'piscina': Select(attrs={'class': 'form-control select2'}),
-            'ciclo': Select(attrs={'class': 'form-control select2'}),
-            'fecha_cosecha': DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'cantidad_kg': NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
-            'precio_venta_kg': NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
-            'talla_promedio': NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
-            'cliente': TextInput(attrs={'class': 'form-control'}),
-            'factura': TextInput(attrs={'class': 'form-control'}),
-            'observaciones': Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
+            if not self.instance.pk:
+                from app_tenant.models import Scheme
+                if Scheme.objects.filter(schema_name=schema_name).exists():
+                    raise ValidationError(f'Ya existe una empresa con el esquema "{schema_name}"')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Filtrar ciclos activos
-        self.fields['ciclo'].queryset = Ciclo.objects.filter(activo=True)
+        return schema_name
 
-        # Si ya hay una piscina seleccionada, filtrar ciclos por esa piscina
-        if 'piscina' in self.data:
-            try:
-                piscina_id = int(self.data.get('piscina'))
-                self.fields['ciclo'].queryset = Ciclo.objects.filter(piscina_id=piscina_id, activo=True)
-            except (ValueError, TypeError):
-                pass
-        elif self.instance.pk and self.instance.piscina:
-            self.fields['ciclo'].queryset = Ciclo.objects.filter(piscina=self.instance.piscina, activo=True)
 
 class FiltroFechaForm(Form):
     fecha_inicio = DateField(

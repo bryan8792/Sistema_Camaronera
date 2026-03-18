@@ -30,7 +30,7 @@ urlpatterns = [
     # Dashboard
     path('', DashboardView.as_view(), name='dashboard'),
 
-    # File management
+    # File commands
     path('files/', FileListView.as_view(), name='file_list'),
     path('files/folder/<int:folder_id>/', FileListView.as_view(), name='folder_detail'),
     path('upload/', FileUploadView.as_view(), name='file_upload'),
@@ -41,7 +41,7 @@ urlpatterns = [
     path('ajax/move/', ajax_move, name='ajax_move'),
     path('ajax/user-search/', user_search, name='user_search'),
 
-    # Folder management
+    # Folder commands
     path('folder/create/', FolderCreateView.as_view(), name='folder_create'),
     path('folder/<int:pk>/', FolderDetailView.as_view(), name='folder_detail'),
     path('folder/<int:pk>/edit/', FolderEditView.as_view(), name='folder_edit'),

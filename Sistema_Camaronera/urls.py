@@ -18,13 +18,16 @@ from Sistema_Camaronera import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from app_empresa.app_reg_empresa.views.empresa import TenantDashboardView
 from app_login.views.login import loginFormView
 from app_template.views.template import IndexView
 
+
 urlpatterns = [
 
-    path('admin/', admin.site.urls),
     path('', IndexView.as_view(), name='inicio_dashboard'),
+    path('dashboard/', TenantDashboardView.as_view(), name='tenant_dashboard'),
+    path('admin/', admin.site.urls),
     path('login/', include('app_login.urls')),
     path('inventario/', include('app_inventario.app_categoria.urls')),
     path('proveedor/', include('app_proveedor.urls')),

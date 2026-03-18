@@ -115,7 +115,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
     return ret(null, "(");
   }
 
-  // Context management
+  // Context commands
 
   function Context(type, indent, prev) {
     this.type = type;

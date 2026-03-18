@@ -1,7 +1,8 @@
 from django.db import transaction
-from .models import TipoCosto
 from django.db import transaction
-from app_empresa.app_reg_empresa.models import TipoCosto
+
+from app_costoutilidad.models import TipoCosto
+
 
 @transaction.atomic
 def cargar_tipos_costo_iniciales():

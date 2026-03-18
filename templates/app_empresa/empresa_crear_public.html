@@ -1,0 +1,215 @@
+{% extends 'base_public.html' %}
+
+{% load static %}
+{% load pos_extras %}
+{% load widget_tweaks %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">{{ nombre }}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{% url 'app_empresa:listar_empresa' %}">Empresas</a></li>
+                        <li class="breadcrumb-item active">{{ nombre }}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" action="." enctype="multipart/form-data" id="formEmpresa">
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header" style="background-color:#3498DB; color: white;">
+                            <h3 class="card-title">
+                                <i class="fas fa-building"></i> Datos de la Empresa
+                            </h3>
+                        </div>
+
+                        <div class="card-body">
+                            {% csrf_token %}
+
+                            <!-- SECCION MULTI-TENANT (NUEVO) -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        <strong>Configuracion Multi-Tenant:</strong>
+                                        El nombre del esquema sera el subdominio de acceso (ej: <code>miempresa.tudominio.com</code>)
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="id_schema_name" class="font-weight-bold">
+                                            <i class="fas fa-globe"></i> Nombre del Esquema (Subdominio):
+                                        </label>
+                                        {{ form.schema_name }}
+                                        <small class="form-text text-muted">
+                                            Solo letras minusculas y numeros. Ej: camaronera1, empresa2023
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">URL de Acceso:</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">https://</span>
+                                            </div>
+                                            <input type="text" class="form-control" id="previewUrl" readonly
+                                                   placeholder="[esquema].tudominio.com">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <!-- CAMPOS EXISTENTES -->
+                            {% for fields in form|split_form_fields:4 %}
+                                <div class="row">
+                                    {% for field in fields %}
+                                        {% if field.name != 'schema_name' %}
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <label for="{{ field.id_for_label }}" class="font-weight-bold">
+                                                    {{ field.label }}:
+                                                </label>
+                                                {% if field.name == 'electronic_signature' %}
+                                                    <div class="input-group mb-3">
+                                                        {{ field }}
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-secondary btnLoadCertificate" disabled type="button">
+                                                                <i class="fa-solid fa-file-circle-check"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    {{ field }}
+                                                {% endif %}
+                                                {% if field.errors %}
+                                                    <small class="text-danger">{{ field.errors.0 }}</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <!-- Modal Certificado -->
+                        <div class="modal fade" id="myModalCertificate" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title font-weight-bold">
+                                            <i class="fa-solid fa-file-circle-check"></i> Informacion de la firma electronica
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container-fluid" id="content-certificate"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer navbar-white">
+                            <button type="submit" class="btn btn-primary btn-flat" id="btnGuardar">
+                                <i class="fas fa-save"></i> Guardar Empresa
+                            </button>
+                            <a href="{% url 'app_empresa:listar_empresa' %}" class="btn btn-danger btn-file">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </form>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script type="application/javascript">
+        $(function () {
+            // Preview de la URL del tenant
+            $('#id_schema_name').on('input', function() {
+                var schema = $(this).val().toLowerCase().replace(/[^a-z0-9]/g, '');
+                $(this).val(schema); // Forzar minusculas y solo alfanumerico
+
+                if (schema.length > 0) {
+                    $('#previewUrl').val(schema + '.{{ DOMAIN|default:"tudominio.com" }}');
+                } else {
+                    $('#previewUrl').val('');
+                }
+            });
+
+            // Validacion del formulario antes de enviar
+            $('#formEmpresa').on('submit', function(e) {
+                var schema = $('#id_schema_name').val();
+                var nombre = $('#id_nombre').val();
+
+                if (!nombre || nombre.trim() === '') {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'El nombre de la empresa es obligatorio',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                }
+
+                // Mostrar loading
+                $('#btnGuardar').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+            });
+
+            // Mostrar errores del formulario
+            {% if form.errors %}
+                var errores = '';
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        errores += '{{ field.label }}: {{ error }}\n';
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    errores += '{{ error }}\n';
+                {% endfor %}
+
+                Swal.fire({
+                    title: 'Error de Validacion',
+                    text: errores,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            {% endif %}
+
+            // Mensaje de exito si viene de redirect
+            {% if messages %}
+                {% for message in messages %}
+                    Swal.fire({
+                        title: '{% if message.tags == "success" %}Exito{% else %}Informacion{% endif %}',
+                        text: '{{ message }}',
+                        icon: '{% if message.tags == "success" %}success{% elif message.tags == "error" %}error{% else %}info{% endif %}',
+                        confirmButtonText: 'OK'
+                    });
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base_public.html' %}
+
+{% load static %}
+
+{% block head %}
+
+<link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}"/>
+<link rel="stylesheet"
+      href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}"/>
+
+<script src="{% static 'lib/datatables-1.10.20/js/jquery.dataTables.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.20/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/js/responsive.bootstrap4.min.js' %}"></script>
+
+<script src="{% static 'lib/sweetalert2-11.0.16/js/sweetalert2.all.min.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Usuarios de todos los Tenants</h3>
+        </div>
+        <div class="card-body">
+            <table id="tablaUsuarios" class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                    <th>Empresa</th>
+                    <th>Schema</th>
+                    <th>Usuario</th>
+                    <th>Activo</th>
+                    <th>Acción</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for u in usuarios %}
+                    <tr>
+                        <td>{{ u.empresa }}</td>
+                        <td>{{ u.schema }}</td>
+                        <td>{{ u.username }}</td>
+                        <td>
+                            {% if u.activo %}
+                                <span class="badge badge-success">Sí</span>
+                            {% else %}
+                                <span class="badge badge-danger">No</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="#"
+                               class="btn btn-sm btn-primary btn-reset"
+                               data-url="{% url 'app_empresa:reset_password_empresa' u.schema u.username %}"
+                               data-user="{{ u.username }}">
+                                Reset clave
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            $('#tablaUsuarios').DataTable({
+                responsive: true,
+                autoWidth: false,
+                pageLength: 10,
+                language: {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "zeroRecords": "No se encontraron resultados",
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+                    "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Último",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+$(document).on('click', '.btn-reset', function(e){
+
+    e.preventDefault();
+
+    let url = $(this).data('url');
+    let user = $(this).data('user');
+
+    Swal.fire({
+        title: '¿Resetear contraseña?',
+        text: 'Usuario: ' + user,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, resetear',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+
+});
+</script>
+
+{% endblock %}

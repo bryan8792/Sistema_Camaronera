@@ -1,508 +1,99 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block head %}
-<link rel="stylesheet" href="{% static 'lib/select2-4.0.6-rc.1/css/select2.min.css' %}">
-<link rel="stylesheet" href="{% static 'lib/select2-4.0.6-rc.1/css/select2-bootstrap4.min.css' %}">
-<style>
-.permission-selector {
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    background: #f8f9fa;
-    padding: 15px;
-}
-
-.permission-panel, .module-panel {
-    border: 1px solid #ced4da;
-    border-radius: 0.375rem;
-    background: white;
-    height: 200px;
-    overflow-y: auto;
-    padding: 0;
-}
-
-.permission-item, .module-item {
-    cursor: pointer;
-    border: none;
-    border-bottom: 1px solid #f1f3f4;
-    padding: 8px 12px;
-    font-size: 13px;
-    display: block;
-    width: 100%;
-    background: white;
-    transition: all 0.2s;
-    text-align: left;
-}
-
-.permission-item:hover, .module-item:hover {
-    background-color: #e3f2fd;
-}
-
-.permission-item.selected, .module-item.selected {
-    background-color: #2196f3;
-    color: white;
-}
-
-.arrow-buttons {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 10px;
-    align-items: center;
-    height: 200px;
-}
-
-.arrow-btn {
-    width: 40px;
-    height: 35px;
-    border: none;
-    border-radius: 5px;
-    background: #007bff;
-    color: white;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.arrow-btn:hover:not(:disabled) {
-    background: #0056b3;
-    transform: scale(1.1);
-}
-
-.arrow-btn:disabled {
-    background: #6c757d;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.panel-header {
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
-    padding: 8px 12px;
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    color: #495057;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.panel-counter {
-    float: right;
-    background: #007bff;
-    color: white;
-    border-radius: 10px;
-    padding: 2px 8px;
-    font-size: 11px;
-}
-
-.empty-panel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 150px;
-    color: #6c757d;
-    font-style: italic;
-}
-</style>
-{% endblock %}
-
 {% block contenido %}
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0 text-dark">
-                    <i class="fas fa-users-cog"></i> Configuración del Nuevo Grupo
-                </h1>
+<section class="content">
+<div class="container-fluid">
+
+<form method="post" id="frmGroup">
+    {% csrf_token %}
+
+    <div class="card">
+        <div class="card-header bg-primary">
+            <h3 class="card-title">Crear Grupo</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="form-group">
+                <label>Nombre</label>
+                {{ form.name }}
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="{% url 'inicio_dashboard' %}">Inicio</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'app_usuario:listar_grupo' %}">Grupos</a></li>
-                    <li class="breadcrumb-item active">Crear Grupo</li>
-                </ol>
-            </div>
+
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Módulo</th>
+                        <th>Tipo</th>
+                        <th>URL</th>
+                        <th>Acceso</th>
+                        <th>Permisos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for modulo in modulos %}
+                    <tr>
+                        <td>{{ modulo.id }}</td>
+                        <td>{{ modulo.nombre }}</td>
+                        <td>{{ modulo.tipo.nombre }}</td>
+                        <td>{{ modulo.url }}</td>
+
+                        <td class="text-center">
+                            <input type="checkbox"
+                                   class="modulo-check"
+                                   data-id="{{ modulo.id }}">
+                        </td>
+
+                        <td>
+                            {% for perm in all_permissions %}
+                                {% if perm.content_type.app_label == modulo.tipo.nombre|lower %}
+                                    <div class="form-check form-check-inline">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               name="permissions"
+                                               value="{{ perm.id }}">
+                                        <label class="form-check-label">
+                                            {{ perm.codename }}
+                                        </label>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+
+        <input type="hidden" name="selected_modules" id="selectedModules">
+
+        <div class="card-footer">
+            <button type="submit" class="btn btn-success">
+                Guardar
+            </button>
         </div>
     </div>
+
+</form>
 </div>
-
-<section class="content">
-    <div class="container-fluid">
-        <form method="post" id="frmGroup">
-            {% csrf_token %}
-            <div class="row">
-                <!-- Información Básica -->
-                <div class="col-lg-6">
-                    <div class="card card-outline card-info">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                Información Básica
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="{{ form.name.id_for_label }}">
-                                    <i class="fas fa-tag mr-1"></i>
-                                    Nombre del Grupo *
-                                </label>
-                                {{ form.name }}
-                                <small class="form-text text-muted">
-                                    Ejemplo: Administradores, Operadores, Supervisores
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Módulos del Sistema -->
-                <div class="col-lg-6">
-                    <div class="card card-outline card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-th-large mr-2"></i>
-                                Módulos del Sistema
-                            </h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-success btn-xs" id="selectAllModules">
-                                    <i class="fas fa-check-double mr-1"></i>
-                                    Seleccionar Todos
-                                </button>
-                                <button type="button" class="btn btn-warning btn-xs ml-1" id="clearAllModules">
-                                    <i class="fas fa-times mr-1"></i>
-                                    Limpiar Todo
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <small class="form-text text-muted mb-3">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Selecciona los módulos a los que tendrá acceso este grupo
-                            </small>
-
-                            <div class="permission-selector">
-                                <div class="row">
-                                    <!-- Panel de Módulos Disponibles -->
-                                    <div class="col-5">
-                                        <div class="module-panel">
-                                            <div class="panel-header">
-                                                MÓDULOS DISPONIBLES
-                                                <span class="panel-counter" id="availableModulesCounter">0</span>
-                                            </div>
-                                            <div id="availableModules">
-                                                <div class="empty-panel">Cargando módulos...</div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Botones de Flecha -->
-                                    <div class="col-2">
-                                        <div class="arrow-buttons">
-                                            <button type="button" class="arrow-btn" id="addSelectedModules" title="Agregar seleccionados">
-                                                <i class="fas fa-chevron-right"></i>
-                                            </button>
-                                            <button type="button" class="arrow-btn" id="addAllModules" title="Agregar todos">
-                                                <i class="fas fa-angle-double-right"></i>
-                                            </button>
-                                            <button type="button" class="arrow-btn" id="removeSelectedModules" title="Quitar seleccionados">
-                                                <i class="fas fa-chevron-left"></i>
-                                            </button>
-                                            <button type="button" class="arrow-btn" id="removeAllModules" title="Quitar todos">
-                                                <i class="fas fa-angle-double-left"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <!-- Panel de Módulos Asignados -->
-                                    <div class="col-5">
-                                        <div class="module-panel">
-                                            <div class="panel-header">
-                                                MÓDULOS ASIGNADOS
-                                                <span class="panel-counter" id="assignedModulesCounter">0</span>
-                                            </div>
-                                            <div id="assignedModules">
-                                                <div class="empty-panel">No hay módulos asignados</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <small class="form-text text-muted mt-2">
-                                Los módulos determinan qué secciones del sistema podrá ver el grupo
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Permisos del Sistema -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card card-outline card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-shield-alt mr-2"></i>
-                                Permisos del Sistema
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label for="{{ form.permissions.id_for_label }}">
-                                    <i class="fas fa-key mr-1"></i>
-                                    Permisos Específicos (Opcional)
-                                </label>
-                                {{ form.permissions }}
-                                <small class="form-text text-muted">
-                                    Selecciona los permisos específicos para este grupo
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Campos ocultos para módulos -->
-            <input type="hidden" id="selectedModules" name="selected_modules" value="">
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-save mr-2"></i>
-                                    Guardar Grupo
-                                </button>
-                            </div>
-                            <div class="col-lg-6 text-right">
-                                <a href="{% url 'app_usuario:listar_grupo' %}" class="btn btn-secondary btn-lg">
-                                    <i class="fas fa-times mr-2"></i>
-                                    Cancelar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
 </section>
-{% endblock %}
 
-{% block scripts %}
-<script src="{% static 'lib/select2-4.0.6-rc.1/js/select2.min.js' %}"></script>
 <script>
-$(document).ready(function() {
-    console.log('Iniciando aplicación de grupos...');
-
-    // Inicializar Select2 para permisos
-    $('#id_permissions').select2({
-        theme: 'bootstrap4',
-        placeholder: 'Selecciona los permisos...',
-        allowClear: true
+function updateHidden(){
+    let ids = [];
+    document.querySelectorAll('.modulo-check:checked').forEach(el=>{
+        ids.push(parseInt(el.dataset.id));
     });
+    document.getElementById('selectedModules').value = JSON.stringify(ids);
+}
 
-    // Variables para manejar módulos
-    let availableModules = [];
-    let assignedModules = [];
-
-    // Cargar módulos desde el contexto de Django
-    function loadModules() {
-        console.log('Cargando módulos...');
-
-        // Limpiar arrays
-        availableModules = [];
-        assignedModules = [];
-
-        // Cargar módulos del contexto (pasados desde la vista)
-        {% if modulos %}
-            {% for modulo in modulos %}
-                availableModules.push({
-                    id: {{ modulo.id }},
-                    name: '{{ modulo.nombre|escapejs }}',
-                    tipo: '{{ modulo.tipo.nombre|escapejs }}',
-                    icono: '{{ modulo.icono|default:"fas fa-cube"|escapejs }}'
-                });
-            {% endfor %}
-        {% endif %}
-
-        console.log('Total módulos cargados:', availableModules.length);
-        renderAll();
-
-        return availableModules.length > 0;
-    }
-
-    // Función para renderizar módulos disponibles
-    function renderAvailableModules() {
-        const container = $('#availableModules');
-        container.empty();
-
-        if (availableModules.length === 0) {
-            container.html('<div class="empty-panel">No hay módulos disponibles</div>');
-            return;
-        }
-
-        availableModules.forEach(function(modulo) {
-            container.append(`
-                <div class="module-item" data-id="${modulo.id}">
-                    <i class="${modulo.icono} mr-2"></i>
-                    ${modulo.name}
-                    <small class="text-muted d-block">${modulo.tipo}</small>
-                </div>
-            `);
-        });
-    }
-
-    // Función para renderizar módulos asignados
-    function renderAssignedModules() {
-        const container = $('#assignedModules');
-        container.empty();
-
-        if (assignedModules.length === 0) {
-            container.html('<div class="empty-panel">No hay módulos asignados</div>');
-            return;
-        }
-
-        assignedModules.forEach(function(modulo) {
-            container.append(`
-                <div class="module-item" data-id="${modulo.id}">
-                    <i class="${modulo.icono} mr-2 text-success"></i>
-                    ${modulo.name}
-                    <small class="text-muted d-block">${modulo.tipo}</small>
-                </div>
-            `);
-        });
-    }
-
-    // Función para actualizar contadores
-    function updateCounters() {
-        $('#availableModulesCounter').text(availableModules.length);
-        $('#assignedModulesCounter').text(assignedModules.length);
-    }
-
-    // Función para actualizar botones
-    function updateButtons() {
-        const hasAvailableSelected = $('#availableModules .selected').length > 0;
-        const hasAssignedSelected = $('#assignedModules .selected').length > 0;
-
-        $('#addSelectedModules').prop('disabled', !hasAvailableSelected);
-        $('#addAllModules').prop('disabled', availableModules.length === 0);
-        $('#removeSelectedModules').prop('disabled', !hasAssignedSelected);
-        $('#removeAllModules').prop('disabled', assignedModules.length === 0);
-    }
-
-    // Función para actualizar campo oculto
-    function updateHiddenField() {
-        const moduleIds = assignedModules.map(m => m.id);
-        $('#selectedModules').val(JSON.stringify(moduleIds));
-        console.log('Módulos seleccionados:', moduleIds);
-    }
-
-    // Función para renderizar todo
-    function renderAll() {
-        renderAvailableModules();
-        renderAssignedModules();
-        updateCounters();
-        updateButtons();
-        updateHiddenField();
-    }
-
-    // Eventos de selección
-    $(document).on('click', '#availableModules .module-item', function() {
-        $(this).toggleClass('selected');
-        updateButtons();
-    });
-
-    $(document).on('click', '#assignedModules .module-item', function() {
-        $(this).toggleClass('selected');
-        updateButtons();
-    });
-
-    // Botones de movimiento
-    $('#addSelectedModules').click(function() {
-        $('#availableModules .selected').each(function() {
-            const id = parseInt($(this).data('id'));
-            const modulo = availableModules.find(m => m.id === id);
-
-            if (modulo) {
-                assignedModules.push(modulo);
-                availableModules = availableModules.filter(m => m.id !== id);
-            }
-        });
-        renderAll();
-    });
-
-    $('#addAllModules').click(function() {
-        assignedModules = assignedModules.concat(availableModules);
-        availableModules = [];
-        renderAll();
-    });
-
-    $('#removeSelectedModules').click(function() {
-        $('#assignedModules .selected').each(function() {
-            const id = parseInt($(this).data('id'));
-            const modulo = assignedModules.find(m => m.id === id);
-
-            if (modulo) {
-                availableModules.push(modulo);
-                assignedModules = assignedModules.filter(m => m.id !== id);
-            }
-        });
-        renderAll();
-    });
-
-    $('#removeAllModules').click(function() {
-        availableModules = availableModules.concat(assignedModules);
-        assignedModules = [];
-        renderAll();
-    });
-
-    // Botones de acceso rápido
-    $('#selectAllModules').click(function() {
-        assignedModules = assignedModules.concat(availableModules);
-        availableModules = [];
-        renderAll();
-    });
-
-    $('#clearAllModules').click(function() {
-        availableModules = availableModules.concat(assignedModules);
-        assignedModules = [];
-        renderAll();
-    });
-
-    // Actualizar campo oculto antes de enviar
-    $('#frmGroup').on('submit', function() {
-        updateHiddenField();
-        console.log('Enviando formulario con módulos:', $('#selectedModules').val());
-    });
-
-    // Cargar módulos al iniciar
-    loadModules();
-
-    // Validación del formulario
-    $('#frmGroup').on('submit', function(e) {
-        let isValid = true;
-
-        const nombre = $('#id_name').val();
-        if (!nombre || !nombre.trim()) {
-            $('#id_name').addClass('is-invalid');
-            isValid = false;
-        } else {
-            $('#id_name').removeClass('is-invalid');
-        }
-
-        if (!isValid) {
-            e.preventDefault();
-            alert('Por favor completa todos los campos requeridos');
-        }
-    });
-
-    $('input').on('input', function() {
-        $(this).removeClass('is-invalid');
-    });
+document.querySelectorAll('.modulo-check').forEach(el=>{
+    el.addEventListener('change', updateHidden);
 });
+
+document.getElementById('frmGroup').addEventListener('submit', updateHidden);
 </script>
+
 {% endblock %}

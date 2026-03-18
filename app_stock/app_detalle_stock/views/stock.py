@@ -12,7 +12,8 @@ from django.utils import timezone
 from datetime import datetime
 from app_contabilidad_planCuentas.models import PlanCuenta, DetalleCuentasPlanCuenta, EncabezadoCuentasPlanCuenta
 from app_dieta.app_dieta_reg.models import DetalleDiaDieta
-from app_empresa.app_reg_empresa.models import Empresa, Piscinas
+from app_empresa.app_piscinas.models import Piscinas
+from app_empresa.app_reg_empresa.models import Empresa
 from app_inventario.app_categoria.models import Producto
 from app_reportes.utils import render_to_pdf
 from app_stock.app_detalle_stock.forms import ProdStockForm, ProdStockTotalForm, StockAccountingForm
