@@ -21,8 +21,12 @@
     <script src="{% static 'lib/bootstrap-touchspin-4.2.5/js/jquery.bootstrap-touchspin.js' %}"></script>
 
     <script src="{% static 'acciones/app_factura_detalle/functions.js' %}"></script>
-    <script src="{% static 'acciones/app_factura_detalle/form_factura_detalle.js' %}"></script>
-    <script src="{% static 'acciones/app_factura_detalle/form_factura_detalle_super.js' %}"></script>
+
+    {% if request.user.is_superuser %}
+        <script src="{% static 'acciones/app_factura_detalle/form_factura_detalle_super.js' %}"></script>
+    {% else %}
+        <script src="{% static 'acciones/app_factura_detalle/form_factura_detalle.js' %}"></script>
+    {% endif %}
 
 {% endblock %}
 
@@ -90,8 +94,9 @@
                                         </div>
                                         <hr>
                                         <table width="100%"
-                                               class="table table-sm table-striped table-bordered display nowrap" style="width: auto" id="tblProducts_sup">
-{#                                            <thead style="background: #5d6974">#}
+                                               class="table table-sm table-striped table-bordered display nowrap"
+                                               style="width: auto" id="tblProducts_sup">
+                                            {#                                            <thead style="background: #5d6974">#}
                                             <thead>
                                             <tr>
                                                 <th>Eliminar</th>
@@ -115,7 +120,8 @@
                             <div class="col-lg-3">
                                 <div class="card card-secondary">
                                     <div class="card-header">
-                                        <h3 class="card-title"><i class="fas fa-shopping-cart"></i> &nbsp Datos de la Factura</h3>
+                                        <h3 class="card-title"><i class="fas fa-shopping-cart"></i> &nbsp Datos de la
+                                            Factura</h3>
                                     </div>
                                     <div class="card-body">
                                         <input type="hidden" name="action" value="{{ action }}">
@@ -145,7 +151,7 @@
                                         </div>
                                         <div class="form-group">
                                             <label>IVA Calculado:</label>
-{#                                            <input type="text" class="form-control" readonly name="ivacalc" value="0.00">#}
+                                            {#                                            <input type="text" class="form-control" readonly name="ivacalc" value="0.00">#}
                                             {{ form.ivacalc }}
                                         </div>
                                         <div class="form-group">
@@ -163,7 +169,8 @@
                                         <div class="form-group">
                                             <label for="{{ form.observacion.label }}">{{ form.observacion.label }}:</label>
                                             {{ form.observacion|attr:"cols:10"|attr:"rows:3" }}
-                                            <small class="form-text text-danger"><b>Ingrese una Observación en caso de haber alguna..</b></small>
+                                            <small class="form-text text-danger"><b>Ingrese una Observación en caso de
+                                                haber alguna..</b></small>
                                         </div>
                                     </div>
                                 </div>
@@ -206,8 +213,9 @@
                                         </div>
                                         <hr>
                                         <table width="100%"
-                                               class="table table-sm table-striped table-bordered display nowrap" id="tblProducts">
-{#                                            <thead style="background: #5d6974">#}
+                                               class="table table-sm table-striped table-bordered display nowrap"
+                                               id="tblProducts">
+                                            {#                                            <thead style="background: #5d6974">#}
                                             <thead>
                                             <tr>
                                                 <th>Eliminar</th>
@@ -253,7 +261,8 @@
                                         <div class="form-group">
                                             <label for="{{ form.observacion.label }}">{{ form.observacion.label }}:</label>
                                             {{ form.observacion }}
-                                            <small class="form-text text-muted">Observación en caso de haber alguna..</small>
+                                            <small class="form-text text-muted">Observación en caso de haber
+                                                alguna..</small>
                                         </div>
                                     </div>
                                 </div>
@@ -263,7 +272,7 @@
                     </div>
                 </div>
                 <!-- /.card-footer -->
-                <div class="card-footer navbar-white" >
+                <div class="card-footer navbar-white">
                     <button type="submit" class="btn btn-primary btn-flat btnSave">
                         <i class="fas fa-save"></i> Guardar
                     </button>
@@ -315,8 +324,11 @@
     </div>
 
     <script>
-        vents.items.products = {{ det|safe }};
-        vents_sup.items.products = {{ det|safe }};
+        {% if request.user.is_superuser %}
+            vents_sup.items.products = {{ det|safe }};
+        {% else %}
+            vents.items.products = {{ det|safe }};
+        {% endif %}
     </script>
 
 {% endblock %}

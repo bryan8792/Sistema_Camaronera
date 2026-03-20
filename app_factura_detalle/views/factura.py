@@ -138,54 +138,80 @@ class editarFacturaView(UpdateView):
     def post(self, request, *args, **kwargs):
         data = {}
         try:
-            action = request.POST['action']
+            action = request.POST.get('action')
+
             if action == 'search_products':
                 data = []
-                empresa = request.POST['empresa']
-                queryset = Total_Stock.objects.filter()
-                ids_exclude = json.loads(request.POST['ids'])
-                queryset = queryset.filter(nombre_empresa__siglas=empresa).exclude(id__in=ids_exclude)
+                empresa = request.POST.get('empresa')
+                queryset = Total_Stock.objects.all()
+                ids_exclude = json.loads(request.POST.get('ids', '[]'))
+
+                queryset = queryset.filter(
+                    nombre_empresa__siglas=empresa
+                ).exclude(id__in=ids_exclude)
+
                 for i in queryset:
                     item = i.toJSON()
                     item['cantidad_usar'] = 0
                     item['cantidad_ingreso'] = 0
+                    item['subtotal'] = 0  # 👈 importante
                     data.append(item)
+
             elif action == 'edit':
                 with transaction.atomic():
-                    items = json.loads(request.POST['items'])
+                    items = json.loads(request.POST.get('items', '[]'))
                     factura = self.get_object()
+
                     factura.user = request.user
-                    factura.fecha_ingreso = request.POST['fecha_ingreso']
-                    factura.numero_guia = request.POST['numero_guia']
-                    factura.responsable_ingreso = request.POST['responsable_ingreso']
-                    factura.proveedor_id = request.POST['proveedor']
-                    factura.observacion = request.POST['observacion']
-                    factura.subtotal = request.POST['subtotal']
-                    factura.iva = request.POST['iva']
-                    factura.ivacalc = request.POST['ivacalc']
-                    factura.total = request.POST['total']
+                    factura.fecha_ingreso = request.POST.get('fecha_ingreso')
+                    factura.numero_guia = request.POST.get('numero_guia')
+                    factura.responsable_ingreso = request.POST.get('responsable_ingreso')
+                    factura.proveedor_id = request.POST.get('proveedor')
+                    factura.observacion = request.POST.get('observacion')
+
+                    # 👇 MANEJO SEGURO SEGÚN USUARIO
+                    if request.user.is_superuser:
+                        factura.subtotal = request.POST.get('subtotal', 0)
+                        factura.iva = request.POST.get('iva', 0)
+                        factura.ivacalc = request.POST.get('ivacalc', 0)
+                        factura.total = request.POST.get('total', 0)
+                    else:
+                        factura.subtotal = 0
+                        factura.iva = 0
+                        factura.ivacalc = 0
+                        factura.total = 0
+
                     factura.save()
+
+                    # 🔁 Revertir stock anterior
                     for s in factura.producto_stock_set.all():
                         s.producto_empresa.stock = float(s.producto_empresa.stock) - float(s.cantidad_ingreso)
                         s.producto_empresa.save()
                         s.delete()
+
+                    # 🔁 Guardar nuevos items
                     for i in items:
                         inv = Producto_Stock()
                         inv.invoice_stock = factura
-                        inv.producto_empresa_id = int(i['id'])
-                        inv.cantidad_usar = float(i['cantidad_usar'])
-                        inv.cantidad_ingreso = float(i['cantidad_ingreso'])
-                        inv.subtotal = float(i['subtotal'])
-                        inv.fecha_ingreso = request.POST['fecha_ingreso']
-                        inv.numero_guia = request.POST['numero_guia']
-                        inv.responsable_ingreso = request.POST['responsable_ingreso']
-                        inv.proveedor_id = request.POST['proveedor']
-                        inv.observacion = request.POST['observacion']
+                        inv.producto_empresa_id = int(i.get('id'))
+                        inv.cantidad_usar = float(i.get('cantidad_usar', 0))
+                        inv.cantidad_ingreso = float(i.get('cantidad_ingreso', 0))
+                        inv.subtotal = float(i.get('subtotal', 0))  # 👈 protegido
+
+                        inv.fecha_ingreso = request.POST.get('fecha_ingreso')
+                        inv.numero_guia = request.POST.get('numero_guia')
+                        inv.responsable_ingreso = request.POST.get('responsable_ingreso')
+                        inv.proveedor_id = request.POST.get('proveedor')
+                        inv.observacion = request.POST.get('observacion')
+
                         inv.save()
+
             else:
                 data['error'] = 'Ha ocurrido un error'
+
         except Exception as e:
             data['error'] = str(e)
+
         return JsonResponse(data, safe=False)
 
     def get_detalle(self):
@@ -195,6 +221,7 @@ class editarFacturaView(UpdateView):
             item['cantidad_usar'] = format(i.cantidad_usar, '.2f')
             item['cantidad_ingreso'] = format(i.cantidad_ingreso, '.2f')
             item['cantidad_egreso'] = format(i.cantidad_egreso, '.2f')
+            item['subtotal'] = format(i.subtotal, '.2f')  # 👈 agregado
             data.append(item)
         return json.dumps(data)
 

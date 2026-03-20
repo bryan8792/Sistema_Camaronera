@@ -356,6 +356,10 @@ $(function () {
                 'responsable_ingreso': $('input[name="responsable_ingreso"]').val(),
                 'proveedor': $('select[name="proveedor"]').val(),
                 'observacion': $('textarea[name="observacion"]').val(),
+                'subtotal': 0.00,
+                'iva': 0.00,
+                'ivacalc': 0.00,
+                'total': 0.00,
                 'items': JSON.stringify(items)
             },
             type: 'POST',
