@@ -18,6 +18,7 @@ urlpatterns = [
     path('diagnostico_contable/', DiagnosticoContableView.as_view(), name='diagnostico_contable'),
     path('reporte_piscina_insumos/', ReportePiscinaInsumosView.as_view(), name='reporte_piscina_insumos'),
     path('consumo_piscina_insumos/', ConsumoPiscinaInsumosView.as_view(), name='consumo_piscina_insumos'),
+    path('consumo_insumos_piscina/', ConsumoInsumosPiscinaView.as_view(), name='consumo_insumos_piscina'),
 
     path('listarpsmunico/<int:pk>/', listarStockUnicoPSMView.as_view(), name='listar_stock_unico_psm'),
     path('listarbiounico/<int:pk>/', listarStockUnicoBIOView.as_view(), name='listar_stock_unico_bio'),

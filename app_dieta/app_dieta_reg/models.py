@@ -215,7 +215,7 @@ class DetalleDiaDieta(models.Model):
         item['cantidad'] = format(self.cantidad, '.0f')
         for i in range(1, 5):
             item[f'insumo{i}'] = format(getattr(self, f'insumo{i}'), '.0f')
-            item[f'gramaje{i}'] = format(getattr(self, f'gramaje{i}'), '.2f')
+            item[f'gramaje{i}'] = format(getattr(self, f'gramaje{i}'), '.0f')
 
         return item
 

@@ -1868,3 +1868,119 @@ class ConsumoPiscinaInsumosView(TemplateView):
         })
 
         return context
+
+
+
+class ConsumoInsumosPiscinaView(TemplateView):
+    template_name = 'app_consumo_piscinas/consumo_piscina_insumo/consumo_insumos_piscina.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+        empresa_id = self.request.GET.get('empresa')
+        producto_id = self.request.GET.get('producto')  # NUEVO
+
+        filtros = Q(tipo='EGRESO', activo=True)
+
+        if fecha_desde:
+            filtros &= Q(fecha_ingreso__gte=fecha_desde)
+        if fecha_hasta:
+            filtros &= Q(fecha_ingreso__lte=fecha_hasta)
+        if empresa_id:
+            filtros &= Q(producto_empresa__nombre_empresa_id=empresa_id)
+        if producto_id:  # NUEVO - Filtrar por producto
+            filtros &= Q(producto_empresa__nombre_prod_id=producto_id)
+
+        movimientos = (
+            Producto_Stock.objects
+            .filter(filtros)
+            .select_related('producto_empresa__nombre_prod')
+            .order_by('producto_empresa__nombre_prod__nombre', 'piscinas', 'fecha_ingreso')
+        )
+
+        # Estructura: PRODUCTO > PISCINA > EGRESOS
+        productos_data = defaultdict(lambda: defaultdict(list))
+
+        for mov in movimientos:
+            if not mov.piscinas:
+                continue
+
+            piscina = mov.piscinas
+            producto = mov.producto_empresa.nombre_prod
+
+            cantidad = Decimal(mov.cantidad_egreso or 0)
+            precio = Decimal(getattr(producto, 'costo_aplicacion', 0) or 0)
+            total = cantidad * precio
+
+            productos_data[producto.nombre][piscina].append({
+                'tipo': 'OE',
+                'documento': mov.numero_guia,
+                'fecha': mov.fecha_ingreso.strftime('%Y/%m/%d'),
+                'cantidad': cantidad,
+                'precio': precio,
+                'total': total,
+            })
+
+        # Construir lista final
+        productos_list = []
+        total_general_cantidad = Decimal('0')
+        total_general_monto = Decimal('0')
+
+        for producto_nombre in sorted(productos_data.keys()):
+            piscinas_dict = productos_data[producto_nombre]
+            piscinas_list = []
+
+            for piscina_num in sorted(piscinas_dict.keys()):
+                egresos = piscinas_dict[piscina_num]
+                total_cantidad = sum(e['cantidad'] for e in egresos)
+                total_monto = sum(e['total'] for e in egresos)
+
+                piscinas_list.append({
+                    'numero': piscina_num,
+                    'egresos': egresos,
+                    'total_cantidad': total_cantidad,
+                    'total_monto': total_monto,
+                })
+
+                total_general_cantidad += total_cantidad
+                total_general_monto += total_monto
+
+            productos_list.append({
+                'nombre': producto_nombre,
+                'piscinas': piscinas_list,
+            })
+
+        empresa = Empresa.objects.filter(pk=empresa_id).first() if empresa_id else None
+
+        # Formatear fechas para el encabezado
+        fecha_desde_fmt = None
+        fecha_hasta_fmt = None
+        if fecha_desde:
+            from datetime import datetime
+            fd = datetime.strptime(fecha_desde, '%Y-%m-%d')
+            fecha_desde_fmt = f"{fd.day} de {fd.strftime('%b')} del {fd.year}"
+        if fecha_hasta:
+            fh = datetime.strptime(fecha_hasta, '%Y-%m-%d')
+            fecha_hasta_fmt = f"{fh.day} de {fh.strftime('%b')} del {fh.year}"
+
+        context.update({
+            'nombre': 'DETALLE INSUMOS POR PISCINA',
+            'empresa': empresa,
+            'productos': productos_list,
+            'total_general_cantidad': total_general_cantidad,
+            'total_general_monto': total_general_monto,
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+            'fecha_desde_fmt': fecha_desde_fmt,
+            'fecha_hasta_fmt': fecha_hasta_fmt,
+            'empresas': Empresa.objects.all(),
+            'productos_lista': Producto.objects.filter(estado=True).order_by('nombre'),
+        })
+
+        return context

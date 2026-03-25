@@ -100,9 +100,7 @@ class crearDiaDietaView(CreateView):
                 with transaction.atomic():
 
                     factura = DiaDietaRegistro.objects.get(id=self.kwargs['pk'])
-
                     items = json.loads(request.POST.get('items', '[]'))
-
                     factura.mes_dieta_id = factura.mes_dieta.pk
                     factura.fecha = request.POST.get('fecha')
                     factura.tip_dieta = True
@@ -110,32 +108,24 @@ class crearDiaDietaView(CreateView):
 
                     for i in items:
                         inv = DetalleDiaDieta()
-
                         inv.dieta_id = factura.id
                         inv.piscinas_id = int(i['id']) if i.get('id') else None
-
                         # Balanceado
                         inv.balanceado_id = i.get('balanceado') or None
                         inv.cantidad = Decimal(i['cantidad']) if i.get('cantidad') else Decimal('0')
-
                         # Insumo 1
                         inv.insumo1 = int(i['insumo1']) if i.get('insumo1') else 0
                         inv.gramaje1 = Decimal(i['gramaje1']) if i.get('gramaje1') else Decimal('0')
-
                         # Insumo 2
                         inv.insumo2 = int(i['insumo2']) if i.get('insumo2') else 0
                         inv.gramaje2 = Decimal(i['gramaje2']) if i.get('gramaje2') else Decimal('0')
-
                         # Insumo 3
                         inv.insumo3 = int(i['insumo3']) if i.get('insumo3') else 0
                         inv.gramaje3 = Decimal(i['gramaje3']) if i.get('gramaje3') else Decimal('0')
-
                         # Insumo 4
                         inv.insumo4 = int(i['insumo4']) if i.get('insumo4') else 0
                         inv.gramaje4 = Decimal(i['gramaje4']) if i.get('gramaje4') else Decimal('0')
-
                         inv.save()
-
                     data['success'] = True
 
             elif action == 'upload_excel':
@@ -278,7 +268,6 @@ class editarDiaDietaView(UpdateView):
 
                     items = json.loads(request.POST['items'])
                     factura = self.get_object()
-
                     factura.mes_dieta_id = factura.mes_dieta.pk
                     factura.fecha = request.POST['fecha']
                     factura.tip_dieta = True
@@ -327,13 +316,13 @@ class editarDiaDietaView(UpdateView):
             item['balanceado'] = i.balanceado.id if i.balanceado else None
             item['cantidad'] = format(i.cantidad, '.0f')
             item['insumo1'] = format(i.insumo1, '.0f')
-            item['gramaje1'] = format(i.gramaje1, '.2f')
+            item['gramaje1'] = format(i.gramaje1, '.0f')
             item['insumo2'] = format(i.insumo2, '.0f')
-            item['gramaje2'] = format(i.gramaje2, '.2f')
+            item['gramaje2'] = format(i.gramaje2, '.0f')
             item['insumo3'] = format(i.insumo3, '.0f')
-            item['gramaje3'] = format(i.gramaje3, '.2f')
+            item['gramaje3'] = format(i.gramaje3, '.0f')
             item['insumo4'] = format(i.insumo4, '.0f')
-            item['gramaje4'] = format(i.gramaje4, '.2f')
+            item['gramaje4'] = format(i.gramaje4, '.0f')
             data.append(item)
         return json.dumps(data)
 

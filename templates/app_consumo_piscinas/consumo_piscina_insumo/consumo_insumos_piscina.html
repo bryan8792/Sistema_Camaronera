@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            body {
+                font-size: 9pt;
+            }
+
+            @page {
+                margin: 0.5cm;
+            }
+        }
+
+        .reporte-container {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            width: 100%;
+            max-width: 100%;
+            padding: 15px;
+            background: #fff;
+        }
+
+        .reporte-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+
+        .reporte-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .reporte-header h4 {
+            margin: 0;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .reporte-header p {
+            margin: 3px 0;
+            font-size: 14px;
+        }
+
+        .tabla-reporte {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .tabla-reporte thead th {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 6px 5px;
+            text-align: center;
+            font-weight: bold;
+            background: #fff;
+            font-size: 14px;
+        }
+
+        .tabla-reporte tbody td {
+            padding: 4px 5px;
+            vertical-align: top;
+            border: none;
+        }
+
+        .col-producto {
+            width: 15%;
+            text-align: left;
+        }
+
+        .col-piscina {
+            width: 6%;
+            text-align: center;
+        }
+
+        .col-egresos {
+            width: 35%;
+            text-align: left;
+        }
+
+        .col-cantidad {
+            width: 14%;
+            text-align: right;
+        }
+
+        .col-precio {
+            width: 14%;
+            text-align: right;
+        }
+
+        .col-total {
+            width: 16%;
+            text-align: right;
+        }
+
+        .producto-nombre {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .subtotal-piscina td {
+            padding-top: 4px;
+            font-size: 14px;
+        }
+
+        .subtotal-piscina .linea-subtotal {
+            border-top: 1px solid #333;
+            display: inline-block;
+            padding-top: 2px;
+        }
+
+        .total-general td {
+            border-top: 1px solid #000;
+            font-weight: bold;
+            padding-top: 8px;
+            font-size: 14px;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        .text-center {
+            text-align: center !important;
+        }
+
+        .btn-group-export button {
+            margin-right: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+
+    <!-- ===== HEADER ===== -->
+    <div class="content-header no-print">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">DETALLE INSUMOS POR PISCINA</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}</a></li>
+                        <li class="breadcrumb-item active">Reporte</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CONTENIDO ===== -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="card">
+
+                        <!-- HEADER CARD -->
+                        <div class="card-header no-print">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-pie"></i> <b>{{ nombre }}</b>
+                            </h3>
+                        </div>
+
+                        <!-- FILTROS -->
+                        <div class="card-body no-print">
+                            <form method="GET" class="row">
+
+                                <div class="col-md-2">
+                                    <label>Fecha Desde:</label>
+                                    <input type="date" name="fecha_desde" class="form-control"
+                                           value="{{ fecha_desde }}">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label>Fecha Hasta:</label>
+                                    <input type="date" name="fecha_hasta" class="form-control"
+                                           value="{{ fecha_hasta }}">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Empresa:</label>
+                                    <select name="empresa" class="form-control">
+                                        <option value="">Todas</option>
+                                        {% for emp in empresas %}
+                                            <option value="{{ emp.id }}"
+                                                    {% if request.GET.empresa == emp.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ emp.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>Producto:</label>
+                                    <select name="producto" class="form-control">
+                                        <option value="">Todos</option>
+                                        {% for prod in productos_lista %}
+                                            <option value="{{ prod.id }}"
+                                                    {% if request.GET.producto == prod.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ prod.nombre }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+
+                                <div class="col-md-2">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block">
+                                        <i class="fas fa-search"></i> Filtrar
+                                    </button>
+                                </div>
+
+                            </form>
+
+                            <hr>
+
+                            <!-- BOTONES EXPORTACION -->
+                            <div class="btn-group-export">
+                                <button onclick="exportarExcel()" class="btn btn-success btn-sm">
+                                    <i class="fas fa-file-excel"></i> Excel
+                                </button>
+
+                                <button onclick="exportarCSV()" class="btn btn-info btn-sm">
+                                    <i class="fas fa-file-csv"></i> CSV
+                                </button>
+
+                                <button onclick="window.print()" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-file-pdf"></i> PDF
+                                </button>
+
+                                <button onclick="window.print()" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- CONTENIDO DEL REPORTE -->
+                        <div class="card-body">
+                            <div class="reporte-container" id="reporte-container">
+
+                                <div class="reporte-header">
+                                    <h3>
+                                        {% if empresa %}
+                                            <b>{{ empresa.nombre }}</b>
+                                        {% else %}
+                                            TODAS LAS EMPRESAS
+                                        {% endif %}
+                                    </h3>
+                                    <h4><strong>DETALLE INSUMOS POR PISCINA</strong></h4>
+                                    <p>DESDE: {{ fecha_desde_fmt|default:"1 de Feb del 2026" }}
+                                        HASTA: {{ fecha_hasta_fmt|default:"28 de Feb del 2026" }}</p>
+                                </div>
+
+                                <!-- TABLA REPORTE -->
+                                <table class="tabla-reporte" id="tabla-reporte">
+                                    <thead>
+                                    <tr>
+                                        <th class="col-producto">PRODUCTO</th>
+                                        <th class="col-piscina">PISCINA</th>
+                                        <th class="col-egresos">EGRESOS</th>
+                                        <th class="col-cantidad">CANTIDAD</th>
+                                        <th class="col-precio">PRECIO</th>
+                                        <th class="col-total">TOTAL</th>
+                                    </tr>
+                                    </thead>
+
+                                    <tbody>
+                                    {% for producto in productos %}
+                                        {% for piscina in producto.piscinas %}
+                                            {% for egreso in piscina.egresos %}
+                                                <tr>
+                                                    {% if forloop.first and forloop.parentloop.first %}
+                                                        <td class="producto-nombre">{{ producto.nombre }}</td>
+                                                    {% else %}
+                                                        <td></td>
+                                                    {% endif %}
+
+                                                    {% if forloop.first %}
+                                                        <td class="text-center">{{ piscina.numero }}</td>
+                                                    {% else %}
+                                                        <td></td>
+                                                    {% endif %}
+
+                                                    <td>{{ egreso.tipo }}&nbsp;&nbsp;{{ egreso.documento }}&nbsp;{{ egreso.fecha }}</td>
+                                                    <td class="text-right">{{ egreso.cantidad|floatformat:2 }}</td>
+                                                    <td class="text-right">{{ egreso.precio|floatformat:4 }}</td>
+                                                    <td class="text-right">{{ egreso.total|floatformat:2 }}</td>
+                                                </tr>
+                                            {% endfor %}
+
+                                            <!-- SUBTOTAL PISCINA -->
+                                            <tr class="subtotal-piscina">
+                                                <td></td>
+                                                <td></td>
+                                                <td class="text-right"><span class="linea-subtotal">PISCINA_____</span>
+                                                </td>
+                                                <td class="text-right"><span
+                                                        class="linea-subtotal">{{ piscina.total_cantidad|floatformat:2 }}</span>
+                                                </td>
+                                                <td></td>
+                                                <td class="text-right"><span
+                                                        class="linea-subtotal">{{ piscina.total_monto|floatformat:2 }}</span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center">No hay datos para mostrar</td>
+                                        </tr>
+                                    {% endfor %}
+
+                                    <!-- TOTAL GENERAL -->
+                                    {% if productos %}
+                                        <tr class="total-general">
+                                            <td></td>
+                                            <td></td>
+                                            <td class="text-right">TOTAL_____</td>
+                                            <td class="text-right">{{ total_general_cantidad|floatformat:2 }}</td>
+                                            <td></td>
+                                            <td class="text-right">{{ total_general_monto|floatformat:2 }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function exportarExcel() {
+            const tabla = document.getElementById('tabla-reporte');
+            let html = '<table>' + tabla.innerHTML + '</table>';
+            const blob = new Blob(['\ufeff' + html], {type: 'application/vnd.ms-excel;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'detalle_insumos_piscina.xls';
+            link.click();
+        }
+
+        function exportarCSV() {
+            const tabla = document.getElementById('tabla-reporte');
+            let csv = [];
+            tabla.querySelectorAll('tr').forEach(row => {
+                let cols = [];
+                row.querySelectorAll('th,td').forEach(c => cols.push('"' + c.innerText.replace(/"/g, '""') + '"'));
+                csv.push(cols.join(','));
+            });
+            const blob = new Blob(['\ufeff' + csv.join('\n')], {type: 'text/csv;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'detalle_insumos_piscina.csv';
+            link.click();
+        }
+    </script>
+{% endblock %}
