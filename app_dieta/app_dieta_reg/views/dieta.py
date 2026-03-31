@@ -342,6 +342,58 @@ class editarDiaDietaView(UpdateView):
         return context
 
 
+class eliminarDiaDietaView(DeleteView):
+    model = DiaDietaRegistro
+    template_name = 'app_dieta/app_dias_dietas/eliminar_dieta_dia.html'
+    success_url = reverse_lazy('app_dieta:principal_dia')
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            with transaction.atomic():
+                factura = self.get_object()
+
+                # 🔁 REVERTIR STOCK + ELIMINAR ASIENTOS + ELIMINAR DETALLES
+                for detalle in factura.detallediadieta_set.all():
+                    # Eliminar asientos contables relacionados
+                    eliminar_asientos_por_detalle(detalle.pk)
+
+                    # Revertir stock
+                    revertir_stock_por_detalle(
+                        detalle=detalle,
+                        texto_guia='ELIMINACION DE DIETA Y REAJUSTE DE STOCK'
+                    )
+
+                    # Eliminar el detalle
+                    detalle.delete()
+
+                # Eliminar el registro principal
+                factura.delete()
+
+                data['success'] = True
+
+        except Exception as e:
+            data['error'] = 'Error al eliminar: ' + str(e)
+
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        dieta = self.object.mes_dieta
+        context['nombre'] = 'Dia de Dieta'
+        context['entity'] = 'Eliminar Registro de Dieta'
+        context['list_url'] = self.success_url
+        context['mes'] = dieta.mes_dieta
+        context['fecha'] = self.object.fecha
+        return context
+
+
 class crearDiaDietaPrecriaView(CreateView):
     model = DetalleDiaDieta
     form_class = DiaDietaForm
@@ -1084,5 +1136,164 @@ class ReporteDietaDiaView(TemplateView):
 
         except Exception as e:
             data = {'error': str(e)}
+
+        return JsonResponse(data, safe=False)
+
+
+
+
+# class CopiarGuardarView(TemplateView):
+#     template_name = 'app_copiarguardar/copiar_pegar.html'
+#
+#     def post(self, request, *args, **kwargs):
+#         data = {}
+#
+#         try:
+#             action = request.POST.get('action')
+#
+#             if action == 'edit':
+#
+#                 with transaction.atomic():
+#
+#                     items = json.loads(request.POST['items'])
+#                     fecha = request.POST.get('fecha')
+#
+#                     # 🔥 CREAR CABECERA (puedes adaptar a tu modelo real)
+#                     dieta = DiaDietaRegistro.objects.create(
+#                         fecha=fecha,
+#                         tip_dieta=False
+#                     )
+#
+#                     # 🔥 CREAR DETALLES (AQUÍ ESTÁ LO IMPORTANTE)
+#                     for i in items:
+#
+#                         DetalleDiaDieta.objects.create(
+#                             dieta_id=dieta.pk,
+#                             piscinas_id=i.get('id'),
+#
+#                             balanceado_id=i.get('balanceado'),
+#
+#                             cantidad=decimal.Decimal(i.get('cantidad', 0)) if i.get('balanceado') else 0,
+#
+#                             insumo1=int(i.get('insumo1', 0)),
+#                             gramaje1=decimal.Decimal(i.get('gramaje1', 0)) if i.get('insumo1') else 0,
+#
+#                             insumo2=int(i.get('insumo2', 0)),
+#                             gramaje2=decimal.Decimal(i.get('gramaje2', 0)) if i.get('insumo2') else 0,
+#
+#                             insumo3=int(i.get('insumo3', 0)),
+#                             gramaje3=decimal.Decimal(i.get('gramaje3', 0)) if i.get('insumo3') else 0,
+#
+#                             insumo4=int(i.get('insumo4', 0)),
+#                             gramaje4=decimal.Decimal(i.get('gramaje4', 0)) if i.get('insumo4') else 0,
+#                         )
+#
+#                     data['success'] = True
+#
+#             else:
+#                 data['error'] = 'Acción no válida'
+#
+#         except Exception as e:
+#             data['error'] = str(e)
+#
+#         return JsonResponse(data, safe=False)
+
+
+class CopiarGuardarView(TemplateView):
+    template_name = 'app_copiarguardar/copiar_pegar.html'
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+            if action == 'edit':
+
+                with transaction.atomic():
+
+                    items = json.loads(request.POST['items'])
+                    fecha = request.POST.get('fecha')
+                    empresa_id = request.POST.get('empresa')
+
+                    fecha_obj = datetime.strptime(fecha, "%Y-%m-%d")
+
+                    meses = {
+                        1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL',
+                        5: 'MAYO', 6: 'JUNIO', 7: 'JULIO', 8: 'AGOSTO',
+                        9: 'SEPTIEMBRE', 10: 'OCTUBRE', 11: 'NOVIEMBRE', 12: 'DICIEMBRE'
+                    }
+
+                    anio_obj, _ = AnioDieta.objects.get_or_create(
+                        anio_dieta=fecha_obj.year
+                    )
+
+                    mes_obj, _ = MesDieta.objects.get_or_create(
+                        anio=anio_obj,
+                        mes_dieta=meses[fecha_obj.month]
+                    )
+
+                    # CREAR CABECERA (puedes adaptar a tu modelo real)
+                    dieta, created = DiaDietaRegistro.objects.get_or_create(
+                       mes_dieta=mes_obj,
+                       fecha=fecha_obj,
+                       defaults={'tip_dieta': False}
+                    )
+
+                    if not created:
+                        dieta.detallediadieta_set.all().delete()
+
+                    # GUARDAR DETALLES CON MAPEO REAL
+                    for i in items:
+
+                        # IGNORAR FILAS VACIAS
+                        if not i.get('id') or not i.get('cantidad'):
+                            continue
+
+                        piscina = Piscinas.objects.filter(
+                            numero=i.get('id')
+                        ).first()
+
+                        if not piscina:
+                            continue
+
+                        empresa = piscina.empresa
+
+                        nombre_balanceado = i.get('balanceado', '').strip()
+
+                        producto = Producto.objects.filter(
+                            nombre__icontains=nombre_balanceado
+                        ).first()
+
+                        if producto:
+                            stock = Total_Stock.objects.filter(
+                                nombre_empresa__id=empresa_id,
+                                nombre_prod=producto
+                            ).first()
+
+                            if not stock:
+                                continue
+
+                        # CREAR DETALLE
+                        DetalleDiaDieta.objects.create(
+                            dieta=dieta,
+                            piscinas=piscina,
+                            balanceado=producto,
+                            cantidad=decimal.Decimal(i.get('cantidad', 0)),
+                            insumo1=int(i.get('insumo1', 0) or 0),
+                            gramaje1=decimal.Decimal(i.get('gramaje1', 0)),
+                            insumo2=int(i.get('insumo2', 0) or 0),
+                            gramaje2=decimal.Decimal(i.get('gramaje2', 0)),
+                            insumo3=int(i.get('insumo3', 0) or 0),
+                            gramaje3=decimal.Decimal(i.get('gramaje3', 0)),
+                            insumo4=int(i.get('insumo4', 0) or 0),
+                            gramaje4=decimal.Decimal(i.get('gramaje4', 0)),
+                        )
+
+                    data['success'] = True
+
+            else:
+                data['error'] = 'Acción no válida'
+
+        except Exception as e:
+            data['error'] = str(e)
 
         return JsonResponse(data, safe=False)

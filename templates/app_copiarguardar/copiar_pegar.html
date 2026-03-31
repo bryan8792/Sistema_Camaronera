@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <h5><b>Copiar Dieta desde Excel</b></h5>
+            <p>Presionar <b>CTRL + V</b> para pegar</p>
+        </div>
+    </div>
+
+    <section class="content">
+
+        <form id="frmExcel">
+
+            <div class="card">
+
+                <div class="card-header" style="background:#3498DB">
+                    <h3 class="card-title"><b>Pegar Dieta</b></h3>
+                </div>
+
+                <div class="card-body">
+
+                    <input type="hidden" name="action" value="edit">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label>Fecha:</label>
+                            <input type="date" name="fecha" class="form-control">
+                        </div>
+                    </div>
+
+                    <table class="table table-bordered table-striped" id="tblProducts">
+                        <thead style="background:#3498DB">
+                        <tr>
+                            <th>#</th>
+                            <th>Piscina</th>
+                            <th>Tipo Balanceado</th>
+                            <th>Libras</th>
+                            <th>Insumo1</th>
+                            <th>Gramos</th>
+                            <th>Insumo2</th>
+                            <th>Gramos</th>
+                            <th>Insumo3</th>
+                            <th>Gramos</th>
+                            <th>Insumo4</th>
+                            <th>Gramos</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success">
+                        Guardar
+                    </button>
+                </div>
+
+            </div>
+
+        </form>
+
+    </section>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+    <script>
+
+        // 🔥 OBJETO PRINCIPAL
+        let vents = {
+            items: {
+                products: []
+            },
+
+            list: function () {
+                let html = '';
+
+                this.items.products.forEach((item, index) => {
+                    html += `<tr>
+                <td>${index + 1}</td>
+                <td>${item.id}</td>
+                <td>${item.balanceado}</td>
+                <td>${item.cantidad}</td>
+                <td>${item.insumo1 || '-'}</td>
+                <td>${item.gramaje1 || 0}</td>
+                <td>${item.insumo2 || '-'}</td>
+                <td>${item.gramaje2 || 0}</td>
+                <td>${item.insumo3 || '-'}</td>
+                <td>${item.gramaje3 || 0}</td>
+                <td>${item.insumo4 || '-'}</td>
+                <td>${item.gramaje4 || 0}</td>
+            </tr>`;
+                });
+
+                $('#tblProducts tbody').html(html);
+            }
+        };
+
+
+        // 🔥 LIMPIAR NUMEROS
+        function limpiarNumero(valor) {
+            if (!valor) return 0;
+
+            valor = valor.toString().trim();
+            valor = valor.replace(/\./g, '');
+            valor = valor.replace(',', '.');
+
+            return parseFloat(valor) || 0;
+        }
+
+
+        // 🔥 PEGAR DESDE EXCEL (CLAVE TOTAL)
+        document.addEventListener('paste', function (e) {
+
+            if ($(e.target).is("input, textarea")) return;
+
+            let texto = e.clipboardData.getData('text');
+            if (!texto) return;
+
+            let filas = texto.trim().split("\n").map(f => f.split("\t"));
+
+            let data = [];
+            let ignoradas = 0;
+
+            for (let i = 1; i < filas.length; i++) {
+
+                let f = filas[i];
+
+                let piscina = f[0]?.trim();
+                let libras = f[1]?.trim();
+                let tipo = f[3]?.trim();
+                let ins1 = f[5]?.trim();
+                let gr1 = f[6];
+                let ins2 = f[8]?.trim();
+                let gr2 = f[9];
+                let ins3 = f[11]?.trim();
+                let gr3 = f[12];
+                let ins4 = f[14]?.trim();
+                let gr4 = f[15];
+
+                // 🔥 VALIDACIONES
+                if (!piscina || (!libras && !tipo)) {
+                    ignoradas++;
+                    continue;
+                }
+
+                data.push({
+                    id: piscina,
+                    balanceado: tipo,
+                    cantidad: limpiarNumero(libras),
+
+                    insumo1: ins1 && ins1 !== '-' ? ins1 : '',
+                    gramaje1: limpiarNumero(gr1),
+
+                    insumo2: ins2 && ins2 !== '-' ? ins2 : '',
+                    gramaje2: limpiarNumero(gr2),
+
+                    insumo3: ins3 && ins3 !== '-' ? ins3 : '',
+                    gramaje3: limpiarNumero(gr3),
+
+                    insumo4: ins4 && ins4 !== '-' ? ins4 : '',
+                    gramaje4: limpiarNumero(gr4),
+                });
+            }
+
+            vents.items.products = data;
+            vents.list();
+
+            console.log("Datos transformados:", data);
+
+            if (ignoradas > 0) {
+                alert("Filas ignoradas: " + ignoradas);
+            }
+        });
+
+
+        // 🔥 GUARDAR
+        $('#frmExcel').on('submit', function (e) {
+
+            e.preventDefault();
+
+            $.ajax({
+                url: window.location.pathname,
+                type: "POST",
+                data: {
+                    action: 'edit',
+                    fecha: $('input[name="fecha"]').val(),
+                    items: JSON.stringify(vents.items.products),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (resp) {
+                    if (resp.success) {
+                        alert('Guardado correctamente');
+                    } else {
+                        alert('Error: ' + resp.error);
+                    }
+                }
+            });
+        });
+
+    </script>
+
+{% endblock %}

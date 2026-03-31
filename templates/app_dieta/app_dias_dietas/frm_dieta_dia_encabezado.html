@@ -23,7 +23,7 @@
         <div class="card">
             <div class="card-header" style="background-color: #0d8ddb">
                 <h1 class="card-title text-center">
-                    <strong><i class="fas fa-list-alt"></i> &nbsp LISTADO DE REGISTRO DE DIETAS POR DIAS:</strong>
+                    <strong><i class="fas fa-list-alt"></i> &nbsp; LISTADO DE REGISTRO DE DIETAS POR DIAS:</strong>
                 </h1>
                 <div class="card-tools">
                     <button id="btn_call_cabecera_dieta" type="submit" class="btn btn-md bg-gradient-primary">
@@ -69,6 +69,9 @@
                                                         </a>
                                                         <a href="/dieta/editar/dia/{{ dieta.id }}" class="btn btn-secondary btn-sm">
                                                             <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <a href="/dieta/eliminar/dia/{{ dieta.id }}" class="btn btn-secondary btn-sm">
+                                                            <i class="fas fa-trash"></i>
                                                         </a>
                                                         <a href="/dieta/reporte_dieta/{{ dieta.id }}/" target="_blank" class="btn btn-sm btn-secondary">
                                                             <i class="fas fa-file-pdf"></i>
