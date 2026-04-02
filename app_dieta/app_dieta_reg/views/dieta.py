@@ -345,7 +345,6 @@ class editarDiaDietaView(UpdateView):
 class eliminarDiaDietaView(DeleteView):
     model = DiaDietaRegistro
     template_name = 'app_dieta/app_dias_dietas/eliminar_dieta_dia.html'
-    success_url = reverse_lazy('app_dieta:principal_dia')
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
@@ -353,13 +352,21 @@ class eliminarDiaDietaView(DeleteView):
         self.object = self.get_object()
         return super().dispatch(request, *args, **kwargs)
 
+    def get_success_url(self):
+        # Obtener el pk del mes_dieta para redirigir correctamente
+        mes_dieta_pk = self.object.mes_dieta.pk
+        return reverse('app_dieta:principal_dia', kwargs={'pk': mes_dieta_pk})
+
     def post(self, request, *args, **kwargs):
         data = {}
         try:
             with transaction.atomic():
                 factura = self.get_object()
 
-                # 🔁 REVERTIR STOCK + ELIMINAR ASIENTOS + ELIMINAR DETALLES
+                # Guardar el pk del mes antes de eliminar
+                mes_dieta_pk = factura.mes_dieta.pk
+
+                # Revertir stock + eliminar asientos + eliminar detalles
                 for detalle in factura.detallediadieta_set.all():
                     # Eliminar asientos contables relacionados
                     eliminar_asientos_por_detalle(detalle.pk)
@@ -377,6 +384,7 @@ class eliminarDiaDietaView(DeleteView):
                 factura.delete()
 
                 data['success'] = True
+                data['redirect_url'] = reverse('app_dieta:principal_dia', kwargs={'pk': mes_dieta_pk})
 
         except Exception as e:
             data['error'] = 'Error al eliminar: ' + str(e)
@@ -388,7 +396,7 @@ class eliminarDiaDietaView(DeleteView):
         dieta = self.object.mes_dieta
         context['nombre'] = 'Dia de Dieta'
         context['entity'] = 'Eliminar Registro de Dieta'
-        context['list_url'] = self.success_url
+        context['list_url'] = reverse('app_dieta:principal_dia', kwargs={'pk': dieta.pk})
         context['mes'] = dieta.mes_dieta
         context['fecha'] = self.object.fecha
         return context
@@ -1199,22 +1207,47 @@ class ReporteDietaDiaView(TemplateView):
 #         return JsonResponse(data, safe=False)
 
 
+
 class CopiarGuardarView(TemplateView):
     template_name = 'app_copiarguardar/copiar_pegar.html'
+
+    @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}
         try:
             action = request.POST.get('action')
+
             if action == 'edit':
+                print('LLEGO A COPIAR/PEGAR Y EMPEZO A RECORRER EL PYTHON DESDE AJAX')
 
-                with transaction.atomic():
+                try:
+                    def safe_decimal(value):
+                        """Convierte valores a Decimal de forma segura"""
+                        try:
+                            if value in [None, '-', '', 0, '0']:
+                                return Decimal('0')
+                            return Decimal(str(value).replace(',', '.'))
+                        except:
+                            return Decimal('0')
 
-                    items = json.loads(request.POST['items'])
-                    fecha = request.POST.get('fecha')
-                    empresa_id = request.POST.get('empresa')
+                    items = json.loads(request.POST.get('items', '[]'))
+                    fecha_str = request.POST.get('fecha')
 
-                    fecha_obj = datetime.strptime(fecha, "%Y-%m-%d")
+                    # Validaciones
+                    if not items:
+                        data['error'] = 'No hay datos para guardar'
+                        return JsonResponse(data, safe=False)
+
+                    if not fecha_str:
+                        data['error'] = 'Debe seleccionar una fecha'
+                        return JsonResponse(data, safe=False)
+
+                    # Parsear fecha
+                    fecha_obj = datetime.datetime.strptime(fecha_str, "%Y-%m-%d")
 
                     meses = {
                         1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL',
@@ -1222,78 +1255,128 @@ class CopiarGuardarView(TemplateView):
                         9: 'SEPTIEMBRE', 10: 'OCTUBRE', 11: 'NOVIEMBRE', 12: 'DICIEMBRE'
                     }
 
-                    anio_obj, _ = AnioDieta.objects.get_or_create(
-                        anio_dieta=fecha_obj.year
-                    )
+                    with transaction.atomic():
 
-                    mes_obj, _ = MesDieta.objects.get_or_create(
-                        anio=anio_obj,
-                        mes_dieta=meses[fecha_obj.month]
-                    )
-
-                    # CREAR CABECERA (puedes adaptar a tu modelo real)
-                    dieta, created = DiaDietaRegistro.objects.get_or_create(
-                       mes_dieta=mes_obj,
-                       fecha=fecha_obj,
-                       defaults={'tip_dieta': False}
-                    )
-
-                    if not created:
-                        dieta.detallediadieta_set.all().delete()
-
-                    # GUARDAR DETALLES CON MAPEO REAL
-                    for i in items:
-
-                        # IGNORAR FILAS VACIAS
-                        if not i.get('id') or not i.get('cantidad'):
-                            continue
-
-                        piscina = Piscinas.objects.filter(
-                            numero=i.get('id')
-                        ).first()
-
-                        if not piscina:
-                            continue
-
-                        empresa = piscina.empresa
-
-                        nombre_balanceado = i.get('balanceado', '').strip()
-
-                        producto = Producto.objects.filter(
-                            nombre__icontains=nombre_balanceado
-                        ).first()
-
-                        if producto:
-                            stock = Total_Stock.objects.filter(
-                                nombre_empresa__id=empresa_id,
-                                nombre_prod=producto
-                            ).first()
-
-                            if not stock:
-                                continue
-
-                        # CREAR DETALLE
-                        DetalleDiaDieta.objects.create(
-                            dieta=dieta,
-                            piscinas=piscina,
-                            balanceado=producto,
-                            cantidad=decimal.Decimal(i.get('cantidad', 0)),
-                            insumo1=int(i.get('insumo1', 0) or 0),
-                            gramaje1=decimal.Decimal(i.get('gramaje1', 0)),
-                            insumo2=int(i.get('insumo2', 0) or 0),
-                            gramaje2=decimal.Decimal(i.get('gramaje2', 0)),
-                            insumo3=int(i.get('insumo3', 0) or 0),
-                            gramaje3=decimal.Decimal(i.get('gramaje3', 0)),
-                            insumo4=int(i.get('insumo4', 0) or 0),
-                            gramaje4=decimal.Decimal(i.get('gramaje4', 0)),
+                        # Crear o obtener Anio
+                        anio_obj, _ = AnioDieta.objects.get_or_create(
+                            anio_dieta=fecha_obj.year
                         )
 
-                    data['success'] = True
+                        # Crear o obtener Mes
+                        mes_obj, _ = MesDieta.objects.get_or_create(
+                            anio=anio_obj,
+                            mes_dieta=meses[fecha_obj.month]
+                        )
+
+                        # Crear o obtener DiaDietaRegistro
+                        factura, created = DiaDietaRegistro.objects.get_or_create(
+                            mes_dieta=mes_obj,
+                            fecha=fecha_obj,
+                            defaults={'tip_dieta': False}
+                        )
+
+                        # Si ya existia, eliminar detalles anteriores
+                        if not created:
+                            factura.detallediadieta_set.all().delete()
+                            print(f"Registros anteriores eliminados para fecha: {fecha_obj}")
+
+                        factura.tip_dieta = True
+                        factura.save()
+
+                        guardados = 0
+                        errores = []
+
+                        for idx, i in enumerate(items, start=1):
+                            piscina_orden = i.get('id')
+
+                            # Ignorar filas vacias
+                            if not piscina_orden:
+                                continue
+
+                            print(f"Procesando fila {idx} - Piscina orden: {piscina_orden}")
+
+                            inv = DetalleDiaDieta(dieta_id=factura.pk)
+
+                            # CORRECCION: Buscar piscina por ORDEN (igual que upload_excel)
+                            piscina = Piscinas.objects.filter(orden=piscina_orden).first()
+
+                            if piscina:
+                                inv.piscinas_id = piscina.id
+                                print(f"  Piscina encontrada: {piscina} (id={piscina.id})")
+                            else:
+                                print(f"  Piscina con orden {piscina_orden} no encontrada")
+                                errores.append(f"Piscina orden {piscina_orden} no encontrada")
+                                continue
+
+                            # Balanceado - buscar por nombre exacto
+                            name_balanceado = i.get('balanceado', '').strip()
+                            if name_balanceado:
+                                balanceado = Producto.objects.filter(nombre__iexact=name_balanceado).first()
+                                if not balanceado:
+                                    # Intentar busqueda parcial
+                                    balanceado = Producto.objects.filter(nombre__icontains=name_balanceado).first()
+
+                                if balanceado:
+                                    inv.balanceado_id = balanceado.id
+                                    inv.cantidad = safe_decimal(i.get('cantidad', 0))
+                                    print(f"  Balanceado: {balanceado.nombre} ({inv.cantidad} lb)")
+                                else:
+                                    print(f"  Balanceado no encontrado: {name_balanceado}")
+                                    inv.cantidad = safe_decimal(i.get('cantidad', 0))
+                            else:
+                                inv.cantidad = safe_decimal(i.get('cantidad', 0))
+
+                            # INSUMOS 1-4 (igual que upload_excel)
+                            for num in range(1, 5):
+                                name_insumo = i.get(f'insumo{num}', '')
+                                cant_insumo = safe_decimal(i.get(f'gramaje{num}', 0))
+
+                                if name_insumo and name_insumo not in ['-', '', None, '0']:
+                                    # Buscar insumo por nombre
+                                    insumo = Producto.objects.filter(nombre__iexact=name_insumo).first()
+                                    if not insumo:
+                                        insumo = Producto.objects.filter(nombre__icontains=name_insumo).first()
+
+                                    if insumo:
+                                        setattr(inv, f"insumo{num}", insumo.id)
+                                        setattr(inv, f"gramaje{num}", cant_insumo)
+                                        print(f"  Insumo {num}: {insumo.nombre} ({cant_insumo} g)")
+                                    else:
+                                        print(f"  Insumo {num} no encontrado: {name_insumo}")
+                                        setattr(inv, f"insumo{num}", 0)
+                                        setattr(inv, f"gramaje{num}", Decimal('0'))
+                                else:
+                                    setattr(inv, f"insumo{num}", 0)
+                                    setattr(inv, f"gramaje{num}", Decimal('0'))
+
+                            inv.save()
+                            guardados += 1
+
+                        print(f"Proceso completado. Guardados: {guardados}, Errores: {len(errores)}")
+
+                        data['success'] = True
+                        data['guardados'] = guardados
+                        data['errores'] = errores
+
+                except Exception as e:
+                    import traceback
+                    print("ERROR GENERAL EN COPIAR/PEGAR:", e)
+                    traceback.print_exc()
+                    data['error'] = str(e)
 
             else:
-                data['error'] = 'Acción no válida'
+                data['error'] = 'Accion no valida'
 
         except Exception as e:
+            import traceback
+            print("ERROR:", e)
+            traceback.print_exc()
             data['error'] = str(e)
 
         return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Copiar Dieta desde Excel'
+        return context
+

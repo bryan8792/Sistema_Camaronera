@@ -3,207 +3,322 @@
 
 {% block contenido %}
 
-    <div class="content-header">
-        <div class="container-fluid">
-            <h5><b>Copiar Dieta desde Excel</b></h5>
-            <p>Presionar <b>CTRL + V</b> para pegar</p>
-        </div>
+<div class="content-header">
+    <div class="container-fluid">
+        <h5><b>Copiar Dieta desde Excel</b></h5>
+        <p>Presionar <b>CTRL + V</b> para pegar</p>
     </div>
+</div>
 
-    <section class="content">
+<section class="content">
 
-        <form id="frmExcel">
+    <form id="frmExcel">
 
-            <div class="card">
+        <div class="card">
 
-                <div class="card-header" style="background:#3498DB">
-                    <h3 class="card-title"><b>Pegar Dieta</b></h3>
+            <div class="card-header" style="background:#3498DB; color: white;">
+                <h3 class="card-title"><b>Pegar Dieta</b></h3>
+            </div>
+
+            <div class="card-body">
+
+                <input type="hidden" name="action" value="edit">
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label><b>Fecha:</b></label>
+                        <input type="date" name="fecha" id="fecha" class="form-control" required>
+                    </div>
                 </div>
 
-                <div class="card-body">
+                <!-- MENSAJE DE ESTADO -->
+                <div id="statusMessage" class="alert" style="display: none;"></div>
 
-                    <input type="hidden" name="action" value="edit">
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label>Fecha:</label>
-                            <input type="date" name="fecha" class="form-control">
-                        </div>
-                    </div>
-
-                    <table class="table table-bordered table-striped" id="tblProducts">
-                        <thead style="background:#3498DB">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover" id="tblProducts">
+                        <thead style="background:#3498DB; color: white;">
                         <tr>
                             <th>#</th>
-                            <th>Piscina</th>
-                            <th>Tipo Balanceado</th>
-                            <th>Libras</th>
-                            <th>Insumo1</th>
-                            <th>Gramos</th>
-                            <th>Insumo2</th>
-                            <th>Gramos</th>
-                            <th>Insumo3</th>
-                            <th>Gramos</th>
-                            <th>Insumo4</th>
-                            <th>Gramos</th>
+                            <th>PISCINA</th>
+                            <th>TIPO BALANCEADO</th>
+                            <th>LIBRAS</th>
+                            <th>INSUMO1</th>
+                            <th>GRAMOS</th>
+                            <th>INSUMO2</th>
+                            <th>GRAMOS</th>
+                            <th>INSUMO3</th>
+                            <th>GRAMOS</th>
+                            <th>INSUMO4</th>
+                            <th>GRAMOS</th>
                         </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                        <!-- Los datos se cargan dinamicamente -->
+                        </tbody>
                     </table>
-
-                </div>
-
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success">
-                        Guardar
-                    </button>
                 </div>
 
             </div>
 
-        </form>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-success" id="btnGuardar">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-warning ml-2" id="btnLimpiar">
+                    <i class="fas fa-eraser"></i> Limpiar Tabla
+                </button>
+            </div>
 
-    </section>
+        </div>
+
+    </form>
+
+</section>
 
 {% endblock %}
 
 
 {% block scripts %}
 
-    <script>
+<script>
 
-        // 🔥 OBJETO PRINCIPAL
-        let vents = {
-            items: {
-                products: []
-            },
+    // OBJETO PRINCIPAL PARA MANEJAR LOS DATOS
+    let vents = {
+        items: {
+            products: []
+        },
 
-            list: function () {
-                let html = '';
+        // Renderizar la tabla
+        list: function () {
+            let html = '';
 
-                this.items.products.forEach((item, index) => {
-                    html += `<tr>
-                <td>${index + 1}</td>
-                <td>${item.id}</td>
-                <td>${item.balanceado}</td>
-                <td>${item.cantidad}</td>
-                <td>${item.insumo1 || '-'}</td>
-                <td>${item.gramaje1 || 0}</td>
-                <td>${item.insumo2 || '-'}</td>
-                <td>${item.gramaje2 || 0}</td>
-                <td>${item.insumo3 || '-'}</td>
-                <td>${item.gramaje3 || 0}</td>
-                <td>${item.insumo4 || '-'}</td>
-                <td>${item.gramaje4 || 0}</td>
-            </tr>`;
-                });
+            this.items.products.forEach((item, index) => {
+                html += '<tr>';
+                html += '<td>' + (index + 1) + '</td>';
+                html += '<td>' + (item.id || '-') + '</td>';
+                html += '<td>' + (item.balanceado || '-') + '</td>';
+                html += '<td>' + (item.cantidad || 0) + '</td>';
+                html += '<td>' + (item.insumo1 || '-') + '</td>';
+                html += '<td>' + (item.gramaje1 || 0) + '</td>';
+                html += '<td>' + (item.insumo2 || '-') + '</td>';
+                html += '<td>' + (item.gramaje2 || 0) + '</td>';
+                html += '<td>' + (item.insumo3 || '-') + '</td>';
+                html += '<td>' + (item.gramaje3 || 0) + '</td>';
+                html += '<td>' + (item.insumo4 || '-') + '</td>';
+                html += '<td>' + (item.gramaje4 || 0) + '</td>';
+                html += '</tr>';
+            });
 
-                $('#tblProducts tbody').html(html);
+            $('#tblProducts tbody').html(html);
+        },
+
+        // LIMPIAR TODO
+        clear: function () {
+            this.items.products = [];
+            $('#tblProducts tbody').html('');
+            $('#fecha').val('');
+        }
+    };
+
+
+    // MOSTRAR MENSAJE DE ESTADO
+    function showStatus(message, type) {
+        var statusDiv = $('#statusMessage');
+        statusDiv.removeClass('alert-success alert-danger alert-info alert-warning');
+        statusDiv.addClass('alert-' + type);
+        statusDiv.html(message);
+        statusDiv.show();
+
+        if (type === 'success') {
+            setTimeout(function() {
+                statusDiv.fadeOut();
+            }, 5000);
+        }
+    }
+
+
+    // LIMPIAR NUMEROS (formato Excel)
+    function limpiarNumero(valor) {
+        if (!valor) return 0;
+
+        valor = valor.toString().trim();
+        valor = valor.replace(/\./g, '');
+        valor = valor.replace(',', '.');
+
+        return parseFloat(valor) || 0;
+    }
+
+
+    // VALIDAR SI UN VALOR ESTA VACIO O ES GUION
+    function esVacio(valor) {
+        if (!valor) return true;
+        var v = valor.toString().trim();
+        return v === '' || v === '-' || v === '0';
+    }
+
+
+    // PEGAR DESDE EXCEL (CTRL + V)
+    document.addEventListener('paste', function (e) {
+
+        if ($(e.target).is("input, textarea")) return;
+
+        var texto = e.clipboardData.getData('text');
+        if (!texto) return;
+
+        var filas = texto.trim().split("\n").map(function(f) {
+            return f.split("\t");
+        });
+
+        var data = [];
+        var ignoradas = 0;
+        var sinBalanceado = 0;
+
+        // Empezar desde la fila 1 (saltando encabezado en fila 0)
+        for (var i = 1; i < filas.length; i++) {
+
+            var f = filas[i];
+
+            var piscina = f[0] ? f[0].trim() : '';
+            var tipo = f[2] ? f[2].trim().replace(/\s+/g, ' ') : '';
+            var libras = f[3] ? f[3].trim() : '';
+
+            var ins1 = f[5] ? f[5].trim() : '';
+            var gr1 = f[6] || '';
+
+            var ins2 = f[8] ? f[8].trim() : '';
+            var gr2 = f[9] || '';
+
+            var ins3 = f[11] ? f[11].trim() : '';
+            var gr3 = f[12] || '';
+
+            var ins4 = f[14] ? f[14].trim() : '';
+            var gr4 = f[15] || '';
+
+            // VALIDACION: Si no tiene piscina, ignorar
+            if (esVacio(piscina)) {
+                ignoradas++;
+                continue;
             }
-        };
 
+            // VALIDACION: Si tiene piscina pero NO tiene balanceado, OMITIR
+            if (esVacio(tipo)) {
+                sinBalanceado++;
+                continue;
+            }
 
-        // 🔥 LIMPIAR NUMEROS
-        function limpiarNumero(valor) {
-            if (!valor) return 0;
+            data.push({
+                id: piscina,
+                balanceado: tipo,
+                cantidad: limpiarNumero(libras),
 
-            valor = valor.toString().trim();
-            valor = valor.replace(/\./g, '');
-            valor = valor.replace(',', '.');
+                insumo1: (!esVacio(ins1)) ? ins1 : '',
+                gramaje1: limpiarNumero(gr1),
 
-            return parseFloat(valor) || 0;
+                insumo2: (!esVacio(ins2)) ? ins2 : '',
+                gramaje2: limpiarNumero(gr2),
+
+                insumo3: (!esVacio(ins3)) ? ins3 : '',
+                gramaje3: limpiarNumero(gr3),
+
+                insumo4: (!esVacio(ins4)) ? ins4 : '',
+                gramaje4: limpiarNumero(gr4),
+            });
         }
 
+        vents.items.products = data;
+        vents.list();
 
-        // 🔥 PEGAR DESDE EXCEL (CLAVE TOTAL)
-        document.addEventListener('paste', function (e) {
+        // Mostrar mensaje con detalles
+        var mensaje = '<i class="fas fa-check-circle"></i> Se cargaron <strong>' + data.length + '</strong> filas correctamente.';
+        var tipo_alerta = 'info';
 
-            if ($(e.target).is("input, textarea")) return;
-
-            let texto = e.clipboardData.getData('text');
-            if (!texto) return;
-
-            let filas = texto.trim().split("\n").map(f => f.split("\t"));
-
-            let data = [];
-            let ignoradas = 0;
-
-            for (let i = 1; i < filas.length; i++) {
-
-                let f = filas[i];
-
-                let piscina = f[0]?.trim();
-                let libras = f[1]?.trim();
-                let tipo = f[3]?.trim();
-                let ins1 = f[5]?.trim();
-                let gr1 = f[6];
-                let ins2 = f[8]?.trim();
-                let gr2 = f[9];
-                let ins3 = f[11]?.trim();
-                let gr3 = f[12];
-                let ins4 = f[14]?.trim();
-                let gr4 = f[15];
-
-                // 🔥 VALIDACIONES
-                if (!piscina || (!libras && !tipo)) {
-                    ignoradas++;
-                    continue;
-                }
-
-                data.push({
-                    id: piscina,
-                    balanceado: tipo,
-                    cantidad: limpiarNumero(libras),
-
-                    insumo1: ins1 && ins1 !== '-' ? ins1 : '',
-                    gramaje1: limpiarNumero(gr1),
-
-                    insumo2: ins2 && ins2 !== '-' ? ins2 : '',
-                    gramaje2: limpiarNumero(gr2),
-
-                    insumo3: ins3 && ins3 !== '-' ? ins3 : '',
-                    gramaje3: limpiarNumero(gr3),
-
-                    insumo4: ins4 && ins4 !== '-' ? ins4 : '',
-                    gramaje4: limpiarNumero(gr4),
-                });
+        if (sinBalanceado > 0 || ignoradas > 0) {
+            mensaje += '<br><small>';
+            if (sinBalanceado > 0) {
+                mensaje += 'Omitidas sin balanceado: <strong>' + sinBalanceado + '</strong>. ';
             }
-
-            vents.items.products = data;
-            vents.list();
-
-            console.log("Datos transformados:", data);
-
             if (ignoradas > 0) {
-                alert("Filas ignoradas: " + ignoradas);
+                mensaje += 'Filas vacias ignoradas: <strong>' + ignoradas + '</strong>.';
+            }
+            mensaje += '</small>';
+            tipo_alerta = 'warning';
+        } else {
+            mensaje += ' Seleccione la fecha y presione Guardar.';
+        }
+
+        showStatus(mensaje, tipo_alerta);
+    });
+
+
+    // BOTON LIMPIAR TABLA
+    $('#btnLimpiar').on('click', function () {
+        vents.clear();
+        showStatus('<i class="fas fa-info-circle"></i> Tabla limpiada correctamente. Puede pegar nuevos datos.', 'info');
+    });
+
+
+    // GUARDAR (SUBMIT)
+    $('#frmExcel').on('submit', function (e) {
+
+        e.preventDefault();
+
+        var fecha = $('#fecha').val();
+        if (!fecha) {
+            showStatus('<i class="fas fa-exclamation-circle"></i> Debe seleccionar una fecha.', 'danger');
+            return;
+        }
+
+        if (vents.items.products.length === 0) {
+            showStatus('<i class="fas fa-exclamation-circle"></i> No hay datos para guardar. Pegue datos desde Excel primero (CTRL + V).', 'danger');
+            return;
+        }
+
+        var btnGuardar = $('#btnGuardar');
+        btnGuardar.prop('disabled', true);
+        btnGuardar.html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+        showStatus('<i class="fas fa-spinner fa-spin"></i> Procesando... Por favor espere.', 'info');
+
+        $.ajax({
+            url: window.location.pathname,
+            type: "POST",
+            data: {
+                action: 'edit',
+                fecha: fecha,
+                items: JSON.stringify(vents.items.products),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function (resp) {
+                if (resp.success) {
+                    var mensaje = '<i class="fas fa-check-circle"></i> <strong>Guardado correctamente!</strong>';
+                    mensaje += ' Se guardaron <strong>' + (resp.guardados || vents.items.products.length) + '</strong> registros.';
+
+                    if (resp.errores && resp.errores.length > 0) {
+                        mensaje += '<br><small>Advertencias: ' + resp.errores.join(', ') + '</small>';
+                    }
+
+                    mensaje += '<br><small>La tabla ha sido limpiada. Puede continuar pegando mas datos.</small>';
+
+                    showStatus(mensaje, 'success');
+
+                    // LIMPIAR TODO DESPUES DE GUARDAR EXITOSAMENTE
+                    vents.clear();
+
+                } else {
+                    showStatus('<i class="fas fa-times-circle"></i> <strong>Error:</strong> ' + (resp.error || 'Error desconocido'), 'danger');
+                }
+            },
+            error: function (xhr, status, error) {
+                showStatus('<i class="fas fa-times-circle"></i> <strong>Error de conexion:</strong> ' + error, 'danger');
+            },
+            complete: function () {
+                btnGuardar.prop('disabled', false);
+                btnGuardar.html('<i class="fas fa-save"></i> Guardar');
             }
         });
+    });
 
-
-        // 🔥 GUARDAR
-        $('#frmExcel').on('submit', function (e) {
-
-            e.preventDefault();
-
-            $.ajax({
-                url: window.location.pathname,
-                type: "POST",
-                data: {
-                    action: 'edit',
-                    fecha: $('input[name="fecha"]').val(),
-                    items: JSON.stringify(vents.items.products),
-                    csrfmiddlewaretoken: '{{ csrf_token }}'
-                },
-                success: function (resp) {
-                    if (resp.success) {
-                        alert('Guardado correctamente');
-                    } else {
-                        alert('Error: ' + resp.error);
-                    }
-                }
-            });
-        });
-
-    </script>
+</script>
 
 {% endblock %}

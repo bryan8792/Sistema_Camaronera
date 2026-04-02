@@ -100,9 +100,9 @@ var tabla = {
                             total_stock -= cantidad_egreso;
                             $('td', row).eq(5).css({'background-color': '#f08080', 'color': 'white',});
                         }
-                        console.log('nuevo total '+ total_stock);
+                        console.log('nuevo total ' + total_stock);
 
-                        $('td', row).eq(5).html('<b>' + total_stock.toFixed(0) +'</b>');
+                        $('td', row).eq(5).html('<b>' + total_stock.toFixed(0) + '</b>');
                     }
 
                 }
@@ -115,4 +115,35 @@ var tabla = {
 
 $(function () {
     tabla.list();
+
+    // FILTRO POR FECHA
+    $.fn.dataTable.ext.search.push(
+        function (settings, data, dataIndex) {
+
+            var min = $('#min').val();
+            var max = $('#max').val();
+
+            var fecha = tblProducts.row(dataIndex).node()
+                .querySelector('td:nth-child(2)')
+                .getAttribute('data-order');
+
+            if (!fecha) return true;
+
+            if (
+                (min === "" && max === "") ||
+                (min === "" && fecha <= max) ||
+                (min <= fecha && max === "") ||
+                (fecha >= min && fecha <= max)
+            ) {
+                return true;
+            }
+            return false;
+        }
+    );
+
+    // refrescar tabla
+    $('#min, #max').on('change', function () {
+        total_stock = 0;
+        tblProducts.draw();
+    });
 });
