@@ -3442,3 +3442,1038 @@ class DiarioGeneralAcumuladoBIOView(ListView):
         # context['empresa_id'] = self.kwargs['empresa_id']
         # context['empresa_nombre'] = Empresa.objects.get(id=self.kwargs['empresa_id']).nombre
         return context
+
+
+# =========================
+# LIBRO MAYOR - DETALLE POR CUENTA
+# =========================
+class LibroMayorDetalleView(ListView):
+    model = DetalleCuentasPlanCuenta
+    template_name = 'app_contabilidad_planCuentas/libro_mayor/libro_mayor_detalle.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'search_mayor':
+                data = []
+                cuenta_id = request.POST.get('cuenta_id')
+                fecha_inicio = request.POST.get('fecha_inicio')
+                fecha_fin = request.POST.get('fecha_fin')
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+
+                queryset = DetalleCuentasPlanCuenta.objects.filter(
+                    encabezadocuentaplan__empresa__siglas=empresa_siglas,
+                    encabezadocuentaplan__reg_control='RT'
+                ).select_related('cuenta', 'encabezadocuentaplan')
+
+                if cuenta_id:
+                    queryset = queryset.filter(cuenta_id=cuenta_id)
+                if fecha_inicio:
+                    queryset = queryset.filter(encabezadocuentaplan__fecha__gte=fecha_inicio)
+                if fecha_fin:
+                    queryset = queryset.filter(encabezadocuentaplan__fecha__lte=fecha_fin)
+
+                queryset = queryset.order_by('encabezadocuentaplan__fecha', 'encabezadocuentaplan__codigo')
+
+                saldo_acumulado = Decimal('0')
+                for det in queryset:
+                    # Calcular saldo segun naturaleza de la cuenta
+                    if det.cuenta.band_deudor:  # Cuenta deudora
+                        saldo_acumulado += det.debe - det.haber
+                    else:  # Cuenta acreedora
+                        saldo_acumulado += det.haber - det.debe
+
+                    item = det.toJSON()
+                    item['saldo_acumulado'] = format(saldo_acumulado, '.2f')
+                    item['fecha_transaccion'] = det.encabezadocuentaplan.fecha.strftime(
+                        '%Y-%m-%d') if det.encabezadocuentaplan.fecha else ''
+                    item['codigo_transaccion'] = det.encabezadocuentaplan.codigo
+                    item['descripcion_transaccion'] = det.encabezadocuentaplan.descripcion
+                    item['comprobante'] = det.encabezadocuentaplan.comprobante
+                    data.append(item)
+
+            elif action == 'get_cuentas':
+                data = []
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+                cuentas = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+                for c in cuentas:
+                    data.append({
+                        'id': c.id,
+                        'codigo': c.codigo,
+                        'nombre': c.nombre,
+                        'full_name': f'{c.codigo} - {c.nombre}'
+                    })
+
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Libro Mayor'
+        context['title'] = 'Libro Mayor - Detalle por Cuenta'
+        context['cuentas'] = PlanCuenta.objects.filter(tipo_cuenta='DETALLE').order_by('codigo')
+        return context
+
+
+# =========================
+# ESTADO DE RESULTADOS
+# =========================
+class EstadoResultadosView(TemplateView):
+    template_name = 'app_contabilidad_planCuentas/reportes/estado_resultados.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'generar_estado_resultados':
+                fecha_inicio = request.POST.get('fecha_inicio')
+                fecha_fin = request.POST.get('fecha_fin')
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+
+                # Obtener cuentas de INGRESOS (codigo empieza con 4)
+                ingresos = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='4',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                # Obtener cuentas de GASTOS/COSTOS (codigo empieza con 5 o 6)
+                gastos = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    tipo_cuenta='DETALLE'
+                ).filter(
+                    Q(codigo__startswith='5') | Q(codigo__startswith='6')
+                ).order_by('codigo')
+
+                data_ingresos = []
+                total_ingresos = Decimal('0')
+
+                for cuenta in ingresos:
+                    saldos = self.calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
+                    # Ingresos son acreedores: saldo = haber - debe
+                    saldo = saldos['haber'] - saldos['debe']
+                    if saldo != 0:
+                        data_ingresos.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(saldo, '.2f')
+                        })
+                        total_ingresos += saldo
+
+                data_gastos = []
+                total_gastos = Decimal('0')
+
+                for cuenta in gastos:
+                    saldos = self.calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
+                    # Gastos son deudores: saldo = debe - haber
+                    saldo = saldos['debe'] - saldos['haber']
+                    if saldo != 0:
+                        data_gastos.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(saldo, '.2f')
+                        })
+                        total_gastos += saldo
+
+                utilidad_neta = total_ingresos - total_gastos
+
+                data = {
+                    'ingresos': data_ingresos,
+                    'gastos': data_gastos,
+                    'total_ingresos': format(total_ingresos, '.2f'),
+                    'total_gastos': format(total_gastos, '.2f'),
+                    'utilidad_neta': format(utilidad_neta, '.2f'),
+                    'es_utilidad': utilidad_neta >= 0
+                }
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def calcular_saldo_cuenta(self, cuenta, fecha_inicio, fecha_fin):
+        filtros = {
+            'cuenta': cuenta,
+            'encabezadocuentaplan__reg_control': 'RT'
+        }
+        if fecha_inicio:
+            filtros['encabezadocuentaplan__fecha__gte'] = fecha_inicio
+        if fecha_fin:
+            filtros['encabezadocuentaplan__fecha__lte'] = fecha_fin
+
+        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
+            debe=Coalesce(Sum('debe'), Decimal('0')),
+            haber=Coalesce(Sum('haber'), Decimal('0'))
+        )
+        return totales
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Estado de Resultados'
+        context['title'] = 'Estado de Resultados'
+        return context
+
+
+# =========================
+# BALANCE GENERAL
+# =========================
+class BalanceGeneralView(TemplateView):
+    template_name = 'app_contabilidad_planCuentas/reportes/balance_general.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'generar_balance_general':
+                fecha_corte = request.POST.get('fecha_corte')
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+
+                # ACTIVOS (codigo empieza con 1)
+                activos = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='1',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                # PASIVOS (codigo empieza con 2)
+                pasivos = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='2',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                # PATRIMONIO (codigo empieza con 3)
+                patrimonio = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='3',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                data_activos = []
+                total_activos = Decimal('0')
+
+                for cuenta in activos:
+                    saldos = self.calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    # Activos son deudores: saldo = debe - haber
+                    saldo = saldos['debe'] - saldos['haber']
+                    if saldo != 0:
+                        data_activos.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(saldo, '.2f')
+                        })
+                        total_activos += saldo
+
+                data_pasivos = []
+                total_pasivos = Decimal('0')
+
+                for cuenta in pasivos:
+                    saldos = self.calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    # Pasivos son acreedores: saldo = haber - debe
+                    saldo = saldos['haber'] - saldos['debe']
+                    if saldo != 0:
+                        data_pasivos.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(saldo, '.2f')
+                        })
+                        total_pasivos += saldo
+
+                data_patrimonio = []
+                total_patrimonio = Decimal('0')
+
+                for cuenta in patrimonio:
+                    saldos = self.calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    # Patrimonio es acreedor: saldo = haber - debe
+                    saldo = saldos['haber'] - saldos['debe']
+                    if saldo != 0:
+                        data_patrimonio.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(saldo, '.2f')
+                        })
+                        total_patrimonio += saldo
+
+                total_pasivo_patrimonio = total_pasivos + total_patrimonio
+                diferencia = total_activos - total_pasivo_patrimonio
+                cuadrado = abs(diferencia) < Decimal('0.01')
+
+                data = {
+                    'activos': data_activos,
+                    'pasivos': data_pasivos,
+                    'patrimonio': data_patrimonio,
+                    'total_activos': format(total_activos, '.2f'),
+                    'total_pasivos': format(total_pasivos, '.2f'),
+                    'total_patrimonio': format(total_patrimonio, '.2f'),
+                    'total_pasivo_patrimonio': format(total_pasivo_patrimonio, '.2f'),
+                    'cuadrado': cuadrado,
+                    'diferencia': format(diferencia, '.2f')
+                }
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def calcular_saldo_cuenta(self, cuenta, fecha_inicio, fecha_fin):
+        filtros = {
+            'cuenta': cuenta,
+            'encabezadocuentaplan__reg_control': 'RT'
+        }
+        if fecha_inicio:
+            filtros['encabezadocuentaplan__fecha__gte'] = fecha_inicio
+        if fecha_fin:
+            filtros['encabezadocuentaplan__fecha__lte'] = fecha_fin
+
+        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
+            debe=Coalesce(Sum('debe'), Decimal('0')),
+            haber=Coalesce(Sum('haber'), Decimal('0'))
+        )
+        return totales
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Balance General'
+        context['title'] = 'Balance General'
+        return context
+
+
+# =========================
+# ESTADO DE RESULTADOS
+# =========================
+class EstadoResultadosView(TemplateView):
+    template_name = 'app_contabilidad_planCuentas/reportes/estado_resultados.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'generar_estado_resultados':
+                fecha_inicio = request.POST.get('fecha_inicio')
+                fecha_fin = request.POST.get('fecha_fin')
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+
+                # INGRESOS (cuentas que empiezan con 4)
+                ingresos_data = []
+                total_ingresos = Decimal('0')
+
+                cuentas_ingresos = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='4',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                for cuenta in cuentas_ingresos:
+                    saldos = self._calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
+                    # Ingresos son acreedores: saldo = haber - debe
+                    saldo = saldos['haber'] - saldos['debe']
+                    if saldo != 0:
+                        ingresos_data.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_ingresos += abs(saldo)
+
+                # COSTOS DE VENTA (cuentas que empiezan con 51)
+                costos_data = []
+                total_costos = Decimal('0')
+
+                cuentas_costos = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='51',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                for cuenta in cuentas_costos:
+                    saldos = self._calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
+                    # Costos son deudores: saldo = debe - haber
+                    saldo = saldos['debe'] - saldos['haber']
+                    if saldo != 0:
+                        costos_data.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_costos += abs(saldo)
+
+                # GASTOS OPERACIONALES (cuentas que empiezan con 52, 53, 54, etc.)
+                gastos_data = []
+                total_gastos = Decimal('0')
+
+                cuentas_gastos = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    tipo_cuenta='DETALLE'
+                ).filter(
+                    Q(codigo__startswith='52') |
+                    Q(codigo__startswith='53') |
+                    Q(codigo__startswith='54') |
+                    Q(codigo__startswith='55') |
+                    Q(codigo__startswith='56') |
+                    Q(codigo__startswith='6')
+                ).order_by('codigo')
+
+                for cuenta in cuentas_gastos:
+                    saldos = self._calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
+                    saldo = saldos['debe'] - saldos['haber']
+                    if saldo != 0:
+                        gastos_data.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_gastos += abs(saldo)
+
+                # CALCULOS
+                utilidad_bruta = total_ingresos - total_costos
+                utilidad_operacional = utilidad_bruta - total_gastos
+                utilidad_neta = utilidad_operacional  # Simplificado, sin impuestos
+
+                data = {
+                    'ingresos': ingresos_data,
+                    'costos': costos_data,
+                    'gastos': gastos_data,
+                    'total_ingresos': format(total_ingresos, '.2f'),
+                    'total_costos': format(total_costos, '.2f'),
+                    'total_gastos': format(total_gastos, '.2f'),
+                    'utilidad_bruta': format(utilidad_bruta, '.2f'),
+                    'utilidad_operacional': format(utilidad_operacional, '.2f'),
+                    'utilidad_neta': format(utilidad_neta, '.2f'),
+                    'es_utilidad': utilidad_neta >= 0
+                }
+
+            elif action == 'export_pdf':
+                # Implementar exportacion PDF
+                pass
+
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def _calcular_saldo_cuenta(self, cuenta, fecha_inicio, fecha_fin):
+        filtros = {
+            'cuenta': cuenta,
+            'encabezadocuentaplan__reg_control': 'RT'
+        }
+        if fecha_inicio:
+            filtros['encabezadocuentaplan__fecha__gte'] = fecha_inicio
+        if fecha_fin:
+            filtros['encabezadocuentaplan__fecha__lte'] = fecha_fin
+
+        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
+            debe=Coalesce(Sum('debe'), Decimal('0')),
+            haber=Coalesce(Sum('haber'), Decimal('0'))
+        )
+        return totales
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Estado de Resultados'
+        context['title'] = 'Estado de Resultados'
+        return context
+
+
+class EstadoResultadosBIOView(EstadoResultadosView):
+    template_name = 'app_contabilidad_planCuentas/reportes/estado_resultados_bio.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Estado de Resultados - BIO'
+        context['empresa_default'] = 'BIO'
+        return context
+
+
+# =========================
+# BALANCE GENERAL
+# =========================
+class BalanceGeneralView(TemplateView):
+    template_name = 'app_contabilidad_planCuentas/reportes/balance_general.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'generar_balance_general':
+                fecha_corte = request.POST.get('fecha_corte')
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+
+                # ========== ACTIVOS (codigo empieza con 1) ==========
+                activos_corrientes = []
+                activos_no_corrientes = []
+                total_activos_corrientes = Decimal('0')
+                total_activos_no_corrientes = Decimal('0')
+
+                # Activos Corrientes (11)
+                cuentas_ac = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='11',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                for cuenta in cuentas_ac:
+                    saldos = self._calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    saldo = saldos['debe'] - saldos['haber']  # Activos son deudores
+                    if saldo != 0:
+                        activos_corrientes.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_activos_corrientes += abs(saldo)
+
+                # Activos No Corrientes (12, 13, 14, etc.)
+                cuentas_anc = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='1',
+                    tipo_cuenta='DETALLE'
+                ).exclude(codigo__startswith='11').order_by('codigo')
+
+                for cuenta in cuentas_anc:
+                    saldos = self._calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    saldo = saldos['debe'] - saldos['haber']
+                    if saldo != 0:
+                        activos_no_corrientes.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_activos_no_corrientes += abs(saldo)
+
+                total_activos = total_activos_corrientes + total_activos_no_corrientes
+
+                # ========== PASIVOS (codigo empieza con 2) ==========
+                pasivos_corrientes = []
+                pasivos_no_corrientes = []
+                total_pasivos_corrientes = Decimal('0')
+                total_pasivos_no_corrientes = Decimal('0')
+
+                # Pasivos Corrientes (21)
+                cuentas_pc = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='21',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                for cuenta in cuentas_pc:
+                    saldos = self._calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    saldo = saldos['haber'] - saldos['debe']  # Pasivos son acreedores
+                    if saldo != 0:
+                        pasivos_corrientes.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_pasivos_corrientes += abs(saldo)
+
+                # Pasivos No Corrientes (22, 23, etc.)
+                cuentas_pnc = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='2',
+                    tipo_cuenta='DETALLE'
+                ).exclude(codigo__startswith='21').order_by('codigo')
+
+                for cuenta in cuentas_pnc:
+                    saldos = self._calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    saldo = saldos['haber'] - saldos['debe']
+                    if saldo != 0:
+                        pasivos_no_corrientes.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_pasivos_no_corrientes += abs(saldo)
+
+                total_pasivos = total_pasivos_corrientes + total_pasivos_no_corrientes
+
+                # ========== PATRIMONIO (codigo empieza con 3) ==========
+                patrimonio_data = []
+                total_patrimonio = Decimal('0')
+
+                cuentas_patrimonio = PlanCuenta.objects.filter(
+                    empresa__siglas=empresa_siglas,
+                    codigo__startswith='3',
+                    tipo_cuenta='DETALLE'
+                ).order_by('codigo')
+
+                for cuenta in cuentas_patrimonio:
+                    saldos = self._calcular_saldo_cuenta(cuenta, None, fecha_corte)
+                    saldo = saldos['haber'] - saldos['debe']  # Patrimonio es acreedor
+                    if saldo != 0:
+                        patrimonio_data.append({
+                            'codigo': cuenta.codigo,
+                            'nombre': cuenta.nombre,
+                            'saldo': format(abs(saldo), '.2f')
+                        })
+                        total_patrimonio += abs(saldo)
+
+                # VERIFICACION ECUACION CONTABLE
+                total_pasivo_patrimonio = total_pasivos + total_patrimonio
+                diferencia = total_activos - total_pasivo_patrimonio
+                cuadrado = abs(diferencia) < Decimal('0.01')
+
+                data = {
+                    'activos_corrientes': activos_corrientes,
+                    'activos_no_corrientes': activos_no_corrientes,
+                    'pasivos_corrientes': pasivos_corrientes,
+                    'pasivos_no_corrientes': pasivos_no_corrientes,
+                    'patrimonio': patrimonio_data,
+                    'total_activos_corrientes': format(total_activos_corrientes, '.2f'),
+                    'total_activos_no_corrientes': format(total_activos_no_corrientes, '.2f'),
+                    'total_activos': format(total_activos, '.2f'),
+                    'total_pasivos_corrientes': format(total_pasivos_corrientes, '.2f'),
+                    'total_pasivos_no_corrientes': format(total_pasivos_no_corrientes, '.2f'),
+                    'total_pasivos': format(total_pasivos, '.2f'),
+                    'total_patrimonio': format(total_patrimonio, '.2f'),
+                    'total_pasivo_patrimonio': format(total_pasivo_patrimonio, '.2f'),
+                    'cuadrado': cuadrado,
+                    'diferencia': format(diferencia, '.2f')
+                }
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def _calcular_saldo_cuenta(self, cuenta, fecha_inicio, fecha_fin):
+        filtros = {
+            'cuenta': cuenta,
+            'encabezadocuentaplan__reg_control': 'RT'
+        }
+        if fecha_inicio:
+            filtros['encabezadocuentaplan__fecha__gte'] = fecha_inicio
+        if fecha_fin:
+            filtros['encabezadocuentaplan__fecha__lte'] = fecha_fin
+
+        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
+            debe=Coalesce(Sum('debe'), Decimal('0')),
+            haber=Coalesce(Sum('haber'), Decimal('0'))
+        )
+        return totales
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Balance General'
+        context['title'] = 'Balance General'
+        return context
+
+
+class BalanceGeneralBIOView(BalanceGeneralView):
+    template_name = 'app_contabilidad_planCuentas/reportes/balance_general_bio.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Balance General - BIO'
+        context['empresa_default'] = 'BIO'
+        return context
+
+
+# =========================
+# CIERRE CONTABLE
+# =========================
+class CierreContableView(TemplateView):
+    template_name = 'app_contabilidad_planCuentas/reportes/cierre_contable.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'preview_cierre':
+                # Vista previa del cierre sin ejecutar
+                fecha_cierre = request.POST.get('fecha_cierre')
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+                anio = request.POST.get('anio')
+
+                # Obtener saldos de cuentas de resultado (4, 5, 6)
+                cuentas_ingresos = self._obtener_saldos_cuentas('4', empresa_siglas, anio)
+                cuentas_gastos = self._obtener_saldos_cuentas('5', empresa_siglas, anio)
+                cuentas_costos = self._obtener_saldos_cuentas('6', empresa_siglas, anio)
+
+                total_ingresos = sum(c['saldo'] for c in cuentas_ingresos)
+                total_gastos = sum(c['saldo'] for c in cuentas_gastos)
+                total_costos = sum(c['saldo'] for c in cuentas_costos)
+
+                utilidad_perdida = total_ingresos - total_gastos - total_costos
+
+                data = {
+                    'cuentas_ingresos': cuentas_ingresos,
+                    'cuentas_gastos': cuentas_gastos,
+                    'cuentas_costos': cuentas_costos,
+                    'total_ingresos': format(total_ingresos, '.2f'),
+                    'total_gastos': format(total_gastos, '.2f'),
+                    'total_costos': format(total_costos, '.2f'),
+                    'utilidad_perdida': format(utilidad_perdida, '.2f'),
+                    'es_utilidad': utilidad_perdida >= 0
+                }
+
+            elif action == 'ejecutar_cierre':
+                with transaction.atomic():
+                    fecha_cierre = request.POST.get('fecha_cierre')
+                    empresa_siglas = request.POST.get('empresa', 'PSM')
+                    anio = request.POST.get('anio')
+
+                    empresa = Empresa.objects.get(siglas=empresa_siglas)
+
+                    # Obtener cuenta de Utilidad/Perdida del Ejercicio (normalmente 3.6.x)
+                    cuenta_resultado = PlanCuenta.objects.filter(
+                        empresa=empresa,
+                        codigo__startswith='36',
+                        tipo_cuenta='DETALLE'
+                    ).first()
+
+                    if not cuenta_resultado:
+                        raise Exception('No se encontro la cuenta de Utilidad/Perdida del Ejercicio (36.x.x)')
+
+                    # Calcular utilidad/perdida
+                    cuentas_ingresos = self._obtener_saldos_cuentas('4', empresa_siglas, anio)
+                    cuentas_gastos = self._obtener_saldos_cuentas('5', empresa_siglas, anio)
+                    cuentas_costos = self._obtener_saldos_cuentas('6', empresa_siglas, anio)
+
+                    total_ingresos = sum(Decimal(str(c['saldo'])) for c in cuentas_ingresos)
+                    total_gastos = sum(Decimal(str(c['saldo'])) for c in cuentas_gastos)
+                    total_costos = sum(Decimal(str(c['saldo'])) for c in cuentas_costos)
+
+                    utilidad_perdida = total_ingresos - total_gastos - total_costos
+
+                    # Crear asiento de cierre
+                    ultimo_codigo = EncabezadoCuentasPlanCuenta.objects.filter(
+                        empresa=empresa
+                    ).order_by('-codigo').first()
+
+                    nuevo_codigo = (ultimo_codigo.codigo + 1) if ultimo_codigo else 1
+
+                    encabezado = EncabezadoCuentasPlanCuenta.objects.create(
+                        codigo=nuevo_codigo,
+                        tip_cuenta='CIERRE',
+                        tip_transa='CIERRE CONTABLE',
+                        fecha=fecha_cierre,
+                        comprobante=f'CIERRE-{anio}',
+                        descripcion=f'Asiento de cierre contable periodo {anio}',
+                        empresa=empresa,
+                        reg_control='RT'
+                    )
+
+                    # Cerrar cuentas de INGRESOS (debitar para saldar)
+                    for cuenta_data in cuentas_ingresos:
+                        if cuenta_data['saldo'] != 0:
+                            cuenta = PlanCuenta.objects.get(id=cuenta_data['id'])
+                            DetalleCuentasPlanCuenta.objects.create(
+                                encabezadocuentaplan=encabezado,
+                                cuenta=cuenta,
+                                detalle=f'Cierre cuenta {cuenta.codigo}',
+                                debe=Decimal(str(abs(cuenta_data['saldo']))),
+                                haber=Decimal('0')
+                            )
+
+                    # Cerrar cuentas de GASTOS (acreditar para saldar)
+                    for cuenta_data in cuentas_gastos:
+                        if cuenta_data['saldo'] != 0:
+                            cuenta = PlanCuenta.objects.get(id=cuenta_data['id'])
+                            DetalleCuentasPlanCuenta.objects.create(
+                                encabezadocuentaplan=encabezado,
+                                cuenta=cuenta,
+                                detalle=f'Cierre cuenta {cuenta.codigo}',
+                                debe=Decimal('0'),
+                                haber=Decimal(str(abs(cuenta_data['saldo'])))
+                            )
+
+                    # Cerrar cuentas de COSTOS (acreditar para saldar)
+                    for cuenta_data in cuentas_costos:
+                        if cuenta_data['saldo'] != 0:
+                            cuenta = PlanCuenta.objects.get(id=cuenta_data['id'])
+                            DetalleCuentasPlanCuenta.objects.create(
+                                encabezadocuentaplan=encabezado,
+                                cuenta=cuenta,
+                                detalle=f'Cierre cuenta {cuenta.codigo}',
+                                debe=Decimal('0'),
+                                haber=Decimal(str(abs(cuenta_data['saldo'])))
+                            )
+
+                    # Registrar utilidad/perdida en cuenta de patrimonio
+                    if utilidad_perdida >= 0:
+                        # Utilidad: se acredita (aumenta patrimonio)
+                        DetalleCuentasPlanCuenta.objects.create(
+                            encabezadocuentaplan=encabezado,
+                            cuenta=cuenta_resultado,
+                            detalle=f'Utilidad del ejercicio {anio}',
+                            debe=Decimal('0'),
+                            haber=utilidad_perdida
+                        )
+                    else:
+                        # Perdida: se debita (disminuye patrimonio)
+                        DetalleCuentasPlanCuenta.objects.create(
+                            encabezadocuentaplan=encabezado,
+                            cuenta=cuenta_resultado,
+                            detalle=f'Perdida del ejercicio {anio}',
+                            debe=abs(utilidad_perdida),
+                            haber=Decimal('0')
+                        )
+
+                    data = {
+                        'success': True,
+                        'mensaje': f'Cierre contable ejecutado correctamente. Asiento #{nuevo_codigo}',
+                        'asiento_id': encabezado.pk
+                    }
+
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def _obtener_saldos_cuentas(self, prefijo_codigo, empresa_siglas, anio):
+        cuentas = PlanCuenta.objects.filter(
+            empresa__siglas=empresa_siglas,
+            codigo__startswith=prefijo_codigo,
+            tipo_cuenta='DETALLE'
+        ).order_by('codigo')
+
+        resultado = []
+        for cuenta in cuentas:
+            saldos = DetalleCuentasPlanCuenta.objects.filter(
+                cuenta=cuenta,
+                encabezadocuentaplan__reg_control='RT',
+                encabezadocuentaplan__fecha__year=anio
+            ).aggregate(
+                debe=Coalesce(Sum('debe'), Decimal('0')),
+                haber=Coalesce(Sum('haber'), Decimal('0'))
+            )
+
+            # Calcular saldo segun naturaleza
+            if cuenta.band_deudor:  # Deudora (gastos, costos)
+                saldo = float(saldos['debe'] - saldos['haber'])
+            else:  # Acreedora (ingresos)
+                saldo = float(saldos['haber'] - saldos['debe'])
+
+            if saldo != 0:
+                resultado.append({
+                    'id': cuenta.id,
+                    'codigo': cuenta.codigo,
+                    'nombre': cuenta.nombre,
+                    'saldo': saldo
+                })
+
+        return resultado
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Cierre Contable'
+        context['title'] = 'Proceso de Cierre Contable'
+        context['anios'] = list(range(datetime.now().year, 2020, -1))
+        return context
+
+
+# =========================
+# RATIOS FINANCIEROS
+# =========================
+class RatiosFinancierosView(TemplateView):
+    template_name = 'app_contabilidad_planCuentas/reportes/ratios_financieros.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'calcular_ratios':
+                fecha_corte = request.POST.get('fecha_corte')
+                empresa_siglas = request.POST.get('empresa', 'PSM')
+
+                # Obtener totales de Balance General
+                activo_corriente = self._sumar_cuentas('11', empresa_siglas, fecha_corte, 'deudor')
+                activo_no_corriente = self._sumar_cuentas('12', empresa_siglas, fecha_corte, 'deudor') + \
+                                      self._sumar_cuentas('13', empresa_siglas, fecha_corte, 'deudor') + \
+                                      self._sumar_cuentas('14', empresa_siglas, fecha_corte, 'deudor')
+                total_activo = activo_corriente + activo_no_corriente
+
+                pasivo_corriente = self._sumar_cuentas('21', empresa_siglas, fecha_corte, 'acreedor')
+                pasivo_no_corriente = self._sumar_cuentas('22', empresa_siglas, fecha_corte, 'acreedor') + \
+                                      self._sumar_cuentas('23', empresa_siglas, fecha_corte, 'acreedor')
+                total_pasivo = pasivo_corriente + pasivo_no_corriente
+
+                total_patrimonio = self._sumar_cuentas('3', empresa_siglas, fecha_corte, 'acreedor')
+
+                # Obtener cuentas especificas
+                caja_bancos = self._sumar_cuentas('1101', empresa_siglas, fecha_corte, 'deudor') + \
+                              self._sumar_cuentas('1102', empresa_siglas, fecha_corte, 'deudor')
+                inventarios = self._sumar_cuentas('1103', empresa_siglas, fecha_corte, 'deudor') + \
+                              self._sumar_cuentas('1104', empresa_siglas, fecha_corte, 'deudor')
+                cuentas_cobrar = self._sumar_cuentas('1105', empresa_siglas, fecha_corte, 'deudor')
+
+                # Estado de Resultados (ultimo anio)
+                anio = datetime.strptime(fecha_corte, '%Y-%m-%d').year if fecha_corte else datetime.now().year
+                ventas = self._sumar_cuentas_periodo('41', empresa_siglas, anio, 'acreedor')
+                costo_ventas = self._sumar_cuentas_periodo('51', empresa_siglas, anio, 'deudor')
+                gastos_operacionales = self._sumar_cuentas_periodo('52', empresa_siglas, anio, 'deudor') + \
+                                       self._sumar_cuentas_periodo('53', empresa_siglas, anio, 'deudor')
+                utilidad_neta = ventas - costo_ventas - gastos_operacionales
+
+                # ========== CALCULAR RATIOS ==========
+                ratios = {
+                    # LIQUIDEZ
+                    'liquidez': {
+                        'razon_corriente': self._safe_divide(activo_corriente, pasivo_corriente),
+                        'prueba_acida': self._safe_divide(activo_corriente - inventarios, pasivo_corriente),
+                        'capital_trabajo': float(activo_corriente - pasivo_corriente),
+                        'liquidez_inmediata': self._safe_divide(caja_bancos, pasivo_corriente),
+                    },
+                    # ENDEUDAMIENTO
+                    'endeudamiento': {
+                        'endeudamiento_total': self._safe_divide(total_pasivo, total_activo) * 100,
+                        'endeudamiento_patrimonio': self._safe_divide(total_pasivo, total_patrimonio) * 100,
+                        'apalancamiento': self._safe_divide(total_activo, total_patrimonio),
+                        'concentracion_corto_plazo': self._safe_divide(pasivo_corriente, total_pasivo) * 100,
+                    },
+                    # RENTABILIDAD
+                    'rentabilidad': {
+                        'margen_bruto': self._safe_divide(ventas - costo_ventas, ventas) * 100,
+                        'margen_operacional': self._safe_divide(ventas - costo_ventas - gastos_operacionales,
+                                                                ventas) * 100,
+                        'margen_neto': self._safe_divide(utilidad_neta, ventas) * 100,
+                        'roa': self._safe_divide(utilidad_neta, total_activo) * 100,
+                        'roe': self._safe_divide(utilidad_neta, total_patrimonio) * 100,
+                    },
+                    # ACTIVIDAD
+                    'actividad': {
+                        'rotacion_activos': self._safe_divide(ventas, total_activo),
+                        'rotacion_inventarios': self._safe_divide(costo_ventas, inventarios),
+                        'dias_inventario': self._safe_divide(365, self._safe_divide(costo_ventas,
+                                                                                    inventarios)) if inventarios > 0 else 0,
+                        'rotacion_cuentas_cobrar': self._safe_divide(ventas, cuentas_cobrar),
+                        'periodo_cobro': self._safe_divide(365, self._safe_divide(ventas,
+                                                                                  cuentas_cobrar)) if cuentas_cobrar > 0 else 0,
+                    },
+                    # VALORES BASE
+                    'valores': {
+                        'activo_corriente': format(activo_corriente, '.2f'),
+                        'activo_no_corriente': format(activo_no_corriente, '.2f'),
+                        'total_activo': format(total_activo, '.2f'),
+                        'pasivo_corriente': format(pasivo_corriente, '.2f'),
+                        'pasivo_no_corriente': format(pasivo_no_corriente, '.2f'),
+                        'total_pasivo': format(total_pasivo, '.2f'),
+                        'total_patrimonio': format(total_patrimonio, '.2f'),
+                        'ventas': format(ventas, '.2f'),
+                        'utilidad_neta': format(utilidad_neta, '.2f'),
+                    }
+                }
+
+                # Formatear ratios a 2 decimales
+                for categoria, valores in ratios.items():
+                    if categoria != 'valores':
+                        for key, value in valores.items():
+                            ratios[categoria][key] = round(value, 2)
+
+                data = ratios
+
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            data['error'] = str(e)
+        return JsonResponse(data, safe=False)
+
+    def _safe_divide(self, numerador, denominador):
+        if denominador == 0:
+            return 0
+        return float(numerador) / float(denominador)
+
+    def _sumar_cuentas(self, prefijo, empresa_siglas, fecha_corte, naturaleza):
+        filtros = {
+            'cuenta__empresa__siglas': empresa_siglas,
+            'cuenta__codigo__startswith': prefijo,
+            'cuenta__tipo_cuenta': 'DETALLE',
+            'encabezadocuentaplan__reg_control': 'RT'
+        }
+        if fecha_corte:
+            filtros['encabezadocuentaplan__fecha__lte'] = fecha_corte
+
+        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
+            debe=Coalesce(Sum('debe'), Decimal('0')),
+            haber=Coalesce(Sum('haber'), Decimal('0'))
+        )
+
+        if naturaleza == 'deudor':
+            return totales['debe'] - totales['haber']
+        else:
+            return totales['haber'] - totales['debe']
+
+    def _sumar_cuentas_periodo(self, prefijo, empresa_siglas, anio, naturaleza):
+        filtros = {
+            'cuenta__empresa__siglas': empresa_siglas,
+            'cuenta__codigo__startswith': prefijo,
+            'cuenta__tipo_cuenta': 'DETALLE',
+            'encabezadocuentaplan__reg_control': 'RT',
+            'encabezadocuentaplan__fecha__year': anio
+        }
+
+        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
+            debe=Coalesce(Sum('debe'), Decimal('0')),
+            haber=Coalesce(Sum('haber'), Decimal('0'))
+        )
+
+        if naturaleza == 'deudor':
+            return abs(totales['debe'] - totales['haber'])
+        else:
+            return abs(totales['haber'] - totales['debe'])
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Ratios Financieros'
+        context['title'] = 'Indicadores Financieros'
+        return context

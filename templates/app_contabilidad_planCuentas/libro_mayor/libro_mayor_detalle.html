@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block head %}
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}">
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/jquery.dataTables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'acciones/app_datatable/datatables/datatables.min.js' %}"></script>
+{% endblock %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="#">{{ nombre }} <i class="fa fa-book"></i></a></li>
+                    <li class="breadcrumb-item active">{{ title }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header" style="background-color:#3498DB">
+                <h3 class="card-title text-white"><strong>{{ title }}</strong></h3>
+            </div>
+            <div class="card-body">
+                <!-- Filtros -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <label>Empresa:</label>
+                        <select id="empresa" class="form-control select2">
+                            <option value="PSM">PSM</option>
+                            <option value="BIO">BIO</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Cuenta Contable:</label>
+                        <select id="cuenta" class="form-control select2">
+                            <option value="">-- Seleccione una cuenta --</option>
+                            {% for c in cuentas %}
+                            <option value="{{ c.id }}">{{ c.codigo }} - {{ c.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Fecha Inicio:</label>
+                        <input type="date" id="fecha_inicio" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label>Fecha Fin:</label>
+                        <input type="date" id="fecha_fin" class="form-control">
+                    </div>
+                    <div class="col-md-1" style="padding-top: 32px;">
+                        <button type="button" id="btnBuscar" class="btn btn-primary btn-block">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Info de cuenta seleccionada -->
+                <div id="infoCuenta" class="alert alert-info" style="display:none;">
+                    <strong>Cuenta:</strong> <span id="cuentaNombre"></span>
+                </div>
+                
+                <!-- Tabla de movimientos -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover" id="tblMayor" style="width:100%">
+                        <thead style="background-color:#3498DB; color:white;">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Codigo</th>
+                                <th>Comprobante</th>
+                                <th>Descripcion</th>
+                                <th>Detalle</th>
+                                <th class="text-right">Debe</th>
+                                <th class="text-right">Haber</th>
+                                <th class="text-right">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                            <tr style="background-color:#f8f9fa; font-weight:bold;">
+                                <td colspan="5" class="text-right">TOTALES:</td>
+                                <td class="text-right" id="totalDebe">0.00</td>
+                                <td class="text-right" id="totalHaber">0.00</td>
+                                <td class="text-right" id="saldoFinal">0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function() {
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        language: 'es',
+        width: '100%'
+    });
+    
+    $('#btnBuscar').on('click', function() {
+        var cuenta_id = $('#cuenta').val();
+        var fecha_inicio = $('#fecha_inicio').val();
+        var fecha_fin = $('#fecha_fin').val();
+        var empresa = $('#empresa').val();
+        
+        if (!cuenta_id) {
+            Swal.fire('Atencion', 'Debe seleccionar una cuenta', 'warning');
+            return;
+        }
+        
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'search_mayor',
+                'cuenta_id': cuenta_id,
+                'fecha_inicio': fecha_inicio,
+                'fecha_fin': fecha_fin,
+                'empresa': empresa
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                    return;
+                }
+                
+                var tbody = $('#tblMayor tbody');
+                tbody.html('');
+                
+                var totalDebe = 0;
+                var totalHaber = 0;
+                
+                $.each(data, function(i, item) {
+                    var row = '<tr>';
+                    row += '<td>' + item.fecha_transaccion + '</td>';
+                    row += '<td>' + item.codigo_transaccion + '</td>';
+                    row += '<td>' + (item.comprobante || '') + '</td>';
+                    row += '<td>' + (item.descripcion_transaccion || '') + '</td>';
+                    row += '<td>' + (item.detalle || '') + '</td>';
+                    row += '<td class="text-right">' + item.debe + '</td>';
+                    row += '<td class="text-right">' + item.haber + '</td>';
+                    row += '<td class="text-right">' + item.saldo_acumulado + '</td>';
+                    row += '</tr>';
+                    tbody.append(row);
+                    
+                    totalDebe += parseFloat(item.debe);
+                    totalHaber += parseFloat(item.haber);
+                });
+                
+                $('#totalDebe').text(totalDebe.toFixed(2));
+                $('#totalHaber').text(totalHaber.toFixed(2));
+                $('#saldoFinal').text(data.length > 0 ? data[data.length-1].saldo_acumulado : '0.00');
+                
+                // Mostrar info de cuenta
+                var cuentaText = $('#cuenta option:selected').text();
+                $('#cuentaNombre').text(cuentaText);
+                $('#infoCuenta').show();
+            },
+            error: function() {
+                Swal.fire('Error', 'Error al consultar el servidor', 'error');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

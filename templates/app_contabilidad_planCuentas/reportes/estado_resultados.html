@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <script src="{% static 'lib/select2-4.0.13/js/select2.min.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/select2-4.0.13/css/select2-bootstrap4.min.css' %}">
+{% endblock %}
+
+{% block contenido %}
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-12">
+                <ol class="breadcrumb float-sm-left">
+                    <li class="breadcrumb-item"><a href="#">Contabilidad <i class="fa fa-chart-line"></i></a></li>
+                    <li class="breadcrumb-item active">{{ title }}</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header" style="background-color:#3498DB">
+                <h3 class="card-title text-white"><strong>{{ title }}</strong></h3>
+            </div>
+            <div class="card-body">
+                <!-- Filtros -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <label>Empresa:</label>
+                        <select id="empresa" class="form-control select2">
+                            <option value="PSM">PSM</option>
+                            <option value="BIO">BIO</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Fecha Inicio:</label>
+                        <input type="date" id="fecha_inicio" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label>Fecha Fin:</label>
+                        <input type="date" id="fecha_fin" class="form-control">
+                    </div>
+                    <div class="col-md-3" style="padding-top: 32px;">
+                        <button type="button" id="btnGenerar" class="btn btn-primary">
+                            <i class="fas fa-calculator"></i> Generar
+                        </button>
+                        <button type="button" id="btnExportPdf" class="btn btn-danger" style="display:none;">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Reporte -->
+                <div id="reporteContainer" style="display:none;">
+                    <div class="row">
+                        <!-- INGRESOS -->
+                        <div class="col-md-12">
+                            <h4 class="text-success"><i class="fas fa-arrow-up"></i> INGRESOS</h4>
+                            <table class="table table-sm table-bordered" id="tblIngresos">
+                                <thead style="background-color:#28a745; color:white;">
+                                    <tr>
+                                        <th style="width:15%;">Codigo</th>
+                                        <th style="width:60%;">Cuenta</th>
+                                        <th style="width:25%;" class="text-right">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr style="background-color:#d4edda; font-weight:bold;">
+                                        <td colspan="2" class="text-right">TOTAL INGRESOS:</td>
+                                        <td class="text-right" id="totalIngresos">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <!-- GASTOS -->
+                        <div class="col-md-12 mt-4">
+                            <h4 class="text-danger"><i class="fas fa-arrow-down"></i> GASTOS Y COSTOS</h4>
+                            <table class="table table-sm table-bordered" id="tblGastos">
+                                <thead style="background-color:#dc3545; color:white;">
+                                    <tr>
+                                        <th style="width:15%;">Codigo</th>
+                                        <th style="width:60%;">Cuenta</th>
+                                        <th style="width:25%;" class="text-right">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr style="background-color:#f8d7da; font-weight:bold;">
+                                        <td colspan="2" class="text-right">TOTAL GASTOS:</td>
+                                        <td class="text-right" id="totalGastos">0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <!-- RESULTADO -->
+                        <div class="col-md-12 mt-4">
+                            <div id="resultadoBox" class="alert text-center" style="font-size: 1.5rem;">
+                                <strong id="resultadoLabel">UTILIDAD/PERDIDA NETA:</strong>
+                                <span id="resultadoValor" style="font-size: 2rem; font-weight: bold;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(function() {
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        language: 'es',
+        width: '100%'
+    });
+    
+    $('#btnGenerar').on('click', function() {
+        var fecha_inicio = $('#fecha_inicio').val();
+        var fecha_fin = $('#fecha_fin').val();
+        var empresa = $('#empresa').val();
+        
+        $.ajax({
+            url: window.location.pathname,
+            type: 'POST',
+            data: {
+                'action': 'generar_estado_resultados',
+                'fecha_inicio': fecha_inicio,
+                'fecha_fin': fecha_fin,
+                'empresa': empresa
+            },
+            dataType: 'json',
+            success: function(data) {
+                if (data.error) {
+                    Swal.fire('Error', data.error, 'error');
+                    return;
+                }
+                
+                // Llenar tabla de ingresos
+                var tbodyIngresos = $('#tblIngresos tbody');
+                tbodyIngresos.html('');
+                $.each(data.ingresos, function(i, item) {
+                    tbodyIngresos.append('<tr><td>' + item.codigo + '</td><td>' + item.nombre + '</td><td class="text-right">' + item.saldo + '</td></tr>');
+                });
+                $('#totalIngresos').text(data.total_ingresos);
+                
+                // Llenar tabla de gastos
+                var tbodyGastos = $('#tblGastos tbody');
+                tbodyGastos.html('');
+                $.each(data.gastos, function(i, item) {
+                    tbodyGastos.append('<tr><td>' + item.codigo + '</td><td>' + item.nombre + '</td><td class="text-right">' + item.saldo + '</td></tr>');
+                });
+                $('#totalGastos').text(data.total_gastos);
+                
+                // Mostrar resultado
+                var resultadoBox = $('#resultadoBox');
+                var resultadoValor = $('#resultadoValor');
+                resultadoValor.text('$ ' + data.utilidad_neta);
+                
+                if (data.es_utilidad) {
+                    resultadoBox.removeClass('alert-danger').addClass('alert-success');
+                    $('#resultadoLabel').text('UTILIDAD NETA:');
+                } else {
+                    resultadoBox.removeClass('alert-success').addClass('alert-danger');
+                    $('#resultadoLabel').text('PERDIDA NETA:');
+                }
+                
+                $('#reporteContainer').show();
+                $('#btnExportPdf').show();
+            },
+            error: function() {
+                Swal.fire('Error', 'Error al consultar el servidor', 'error');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,4 +1,3 @@
-
 from django.urls import path
 from app_factura_detalle.views.factura_gasto import *
 from .views.recibo import *
@@ -65,8 +64,10 @@ urlpatterns = [
     path('receipt/eliminar/<int:pk>/', ReceiptDeleteView.as_view(), name='recibo_eliminar'),
 
     # PrintExpenseInvoiceView
-    path('factura_gasto/print/invoice/<int:pk>/', PrintExpenseInvoiceView.as_view(), name='factura_gasto_print_invoice'),
-    path('factura_gasto_bio/print/invoice_bio/<int:pk>/', PrintExpenseInvoiceBIOView.as_view(), name='factura_gasto_bio_print_invoice'),
+    path('factura_gasto/print/invoice/<int:pk>/', PrintExpenseInvoiceView.as_view(),
+         name='factura_gasto_print_invoice'),
+    path('factura_gasto_bio/print/invoice_bio/<int:pk>/', PrintExpenseInvoiceBIOView.as_view(),
+         name='factura_gasto_bio_print_invoice'),
 
     # Menú principal
     path('menu_ats/', ATSMenuView.as_view(), name='menu_ats'),
@@ -84,5 +85,28 @@ urlpatterns = [
 
     # Carpeta XML
     path('carpeta_xml/', ATSCarpetaXMLView.as_view(), name='carpeta_xml'),
+
+    # Libro Mayor Detalle
+    path('libro_mayor/detalle/', LibroMayorDetalleView.as_view(), name='libro_mayor_detalle'),
+
+    # Estado de Resultados
+    path('estado_resultados/', EstadoResultadosView.as_view(), name='estado_resultados'),
+
+    # Balance General
+    path('balance_general/', BalanceGeneralView.as_view(), name='balance_general'),
+
+    # ESTADO DE RESULTADOS
+    path('estado_resultados_psm/', EstadoResultadosView.as_view(), name='estado_resultados_psm'),
+    path('estado_resultados_bio/', EstadoResultadosBIOView.as_view(), name='estado_resultados_bio'),
+
+    # BALANCE GENERAL
+    path('balance_general_psm/', BalanceGeneralView.as_view(), name='balance_general_psm'),
+    path('balance_general_bio/', BalanceGeneralBIOView.as_view(), name='balance_general_bio'),
+
+    # CIERRE CONTABLE
+    path('cierre_contable/', CierreContableView.as_view(), name='cierre_contable'),
+
+    # RATIOS FINANCIEROS
+    path('ratios_financieros/', RatiosFinancierosView.as_view(), name='ratios_financieros'),
 
 ]
