@@ -1217,6 +1217,24 @@
                                     </p>
                                 </a>
                             </li>
+                            <li class="nav-item bio-item">
+                                <a class="nav-link" href="{% url 'app_stock_directo:ingreso_bodega_balanceado' %}">
+                                    <i class="far nav-icon fa fa-cube">
+                                    </i>
+                                    <p>
+                                        Insumos Balanceados Ingreso
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item bio-item">
+                                <a class="nav-link" href="{% url 'app_stock_directo:egreso_bodega_balanceado' %}">
+                                    <i class="far nav-icon fa fa-cube">
+                                    </i>
+                                    <p>
+                                        Insumos Balanceados Egreso
+                                    </p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <!-- Modulo Consumo por Piscinas -->
@@ -1254,7 +1272,7 @@
                         </ul>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                            <a class="nav-link" href="{% url 'app_consumo:listar_consumo_general_empresas' %}">
+                                <a class="nav-link" href="{% url 'app_consumo:listar_consumo_general_empresas' %}">
                                     <i class="nav-icon fas fa-list-alt">
                                     </i>
                                     <p>
@@ -1314,6 +1332,17 @@
                                     </i>
                                     <p>
                                         Consumo Insumos/Piscina
+                                    </p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item bio-item">
+                                <a class="nav-link" href="{% url 'app_stock:kardex_stock_piscina' %}">
+                                    <i class="nav-icon fas fa-list-alt">
+                                    </i>
+                                    <p>
+                                        Kardex Stock Piscina
                                     </p>
                                 </a>
                             </li>
@@ -1708,25 +1737,25 @@
                     </li>
                     <!-- Modulo Gestor de Archivos -->
                     <li class="nav-item has-treeview">
-                            <a class="nav-link" href="#">
-                                <i class="fa fa-box nav-icon">
-                                </i>
-                                <p> Gestor de Archivos
-                                    <i class="right fas fa-angle-left"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'app_filemanager:dashboard' %}">
-                                        <i class="fa fa-book-open nav-icon">
-                                        </i>
-                                        <p>
-                                            Ver archivos
-                                        </p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                        <a class="nav-link" href="#">
+                            <i class="fa fa-box nav-icon">
+                            </i>
+                            <p> Gestor de Archivos
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'app_filemanager:dashboard' %}">
+                                    <i class="fa fa-book-open nav-icon">
+                                    </i>
+                                    <p>
+                                        Ver archivos
+                                    </p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     {% if request.user.is_superuser == True %}
                         <!-- Barra que divide campo Administracion-->
                         <li class="nav-header">
@@ -1974,6 +2003,109 @@
                                         </li>
                                     </ul>
                                 </li>
+                                <li class="nav-item has-treeview">
+                                    <a class="nav-link" href="#">
+                                        <i class="fas fa-balance-scale nav-icon">
+                                        </i>
+                                        <p>
+                                            Libro Mayor Detalle
+                                            <i class="right fas fa-angle-left">
+                                            </i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item bio-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:libro_mayor_detalle' %}">
+                                                <i class="fas fa-balance-scale-left nav-icon">
+                                                </i>
+                                                <p>
+                                                    Ver Libro Mayor Detalle
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:estado_resultados' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Estado de Resultados
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:estado_resultados_psm' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    ESTADO DE RESULTADOS PSM
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:estado_resultados_bio' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    ESTADO DE RESULTADOS BIO
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:balance_general' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Balance General
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:balance_general_psm' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Balance General PSM
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:balance_general_bio' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Balance General BIO
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:cierre_contable' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Cierre Contable
+                                                </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item psm-item">
+                                            <a class="nav-link"
+                                               href="{% url 'app_planCuentas:ratios_financieros' %}">
+                                                <i class="fas fa-balance-scale-right nav-icon">
+                                                </i>
+                                                <p>
+                                                    Ratios Financieros
+                                                </p>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
                             </ul>
                         </li>
                         <!-- Modulo Tesoreria -->
@@ -2119,7 +2251,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{% url 'app_stock:reporte_piscina_insumos' %}">
-{#                                    <a class="nav-link" href="{% url 'app_stock:reporte_asientos_contables' %}">#}
+                                        {#                                    <a class="nav-link" href="{% url 'app_stock:reporte_asientos_contables' %}">#}
                                         <i class="fa fa-chart-bar nav-icon">
                                         </i>
                                         <p>
@@ -2497,10 +2629,34 @@
         // function actualizarSidebar(empresa) {
         // Elementos del sidebar a actualizar                const empresaSidebarTitle = document.getElementById('empresa-sidebar-title');                const logoEmpresaSidebar = document.getElementById('logo-empresa-sidebar');                const menuTitleSidebar = document.getElementById('menu-title-sidebar');                // Elementos específicos de cada empresa                const psmItems = document.querySelectorAll('.psm-item');                const bioItems = document.querySelectorAll('.bio-item');                const bothItems = document.querySelectorAll('.both-item');                // Actualizar según la empresa seleccionada                if (empresa === 'psm') {                    // Actualizar título y logo                    empresaSidebarTitle.textContent = 'PSM';                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/PSM.png' %}";                    menuTitleSidebar.textContent = 'PSM';                    // Mostrar elementos de PSM y ocultar elementos de BIO                    psmItems.forEach(item => item.style.display = 'block');                    bioItems.forEach(item => item.style.display = 'none');                    bothItems.forEach(item => item.style.display = 'block');                } else if (empresa === 'bio') {                    // Actualizar título y logo                    empresaSidebarTitle.textContent = 'BIO';                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/BIO.png' %}";                    menuTitleSidebar.textContent = 'BIO';                    // Mostrar elementos de BIO y ocultar elementos de PSM                    bioItems.forEach(item => item.style.display = 'block');                    psmItems.forEach(item => item.style.display = 'none');                    bothItems.forEach(item => item.style.display = 'block');                } else {                    // Mostrar ambos (estado predeterminado)                    empresaSidebarTitle.textContent = 'PSM & BIO';                    logoEmpresaSidebar.src = "{% static 'img/img_empresa/logo_slider-png.png' %}";                    menuTitleSidebar.textContent = 'PSM & BIO';                    psmItems.forEach(item => item.style.display = 'block');                    bioItems.forEach(item => item.style.display = 'block');                    bothItems.forEach(item => item.style.display = 'block');                }                // Guardar la selección en localStorage para mantenerla entre páginas                localStorage.setItem('empresaSeleccionada', empresa);            }            // Añadir evento de clic a cada tarjeta            empresaCards.forEach(card => {                card.addEventListener('click', function () {                    // Obtener el tipo de empresa (psm o bio)                    const empresa = this.getAttribute('data-empresa');                    // Actualizar el sidebar                    actualizarSidebar(empresa);                    // Mostrar el slider correspondiente (código que ya teníamos)                    if (document.getElementById('empresa-slider')) {                        document.getElementById('empresa-slider').style.display = 'block';                        document.getElementById('slider-psm').style.display = 'none';                        document.getElementById('slider-bio').style.display = 'none';                        if (empresa === 'psm') {                            document.getElementById('slider-title').textContent = 'Slider de Empresa PSM';                            document.getElementById('slider-psm').style.display = 'block';                            $('#carouselPSM').carousel(0);                        } else if (empresa === 'bio') {                            document.getElementById('slider-title').textContent = 'Slider de Empresa BIO';                            document.getElementById('slider-bio').style.display = 'block';                            $('#carouselBIO').carousel(0);                        }                        document.getElementById('empresa-slider').scrollIntoView({behavior: 'smooth'});                    }                });            });            // Verificar si hay una empresa seleccionada previamente en localStorage            const empresaGuardada = localStorage.getItem('empresaSeleccionada');            if (empresaGuardada) {                actualizarSidebar(empresaGuardada);            }        });    ç
     </script>{% endcomment %}
-    <div class="content-wrapper">
-        {% block contenido %}
-            <!-- AQUI VA TODO EL CONTENIDO DEL BLOQUE -->
-        {% endblock %}
+    <div class="content-wrapper iframe-mode"
+         data-widget="iframe"
+         data-loading-screen="300">
+
+        <!-- Barra tabs -->
+        <div class="nav navbar navbar-expand navbar-white navbar-light border-bottom p-0">
+
+            <a class="nav-link bg-danger" href="#" id="cerrar_iframe" data-widget="iframe-close">
+                Cerrar
+            </a>
+
+            <ul class="navbar-nav" role="tablist"></ul>
+
+        </div>
+
+        <!-- Contenido iframe -->
+        <div class="tab-content">
+
+            <!-- CONTENIDO DJANGO -->
+            <div class="tab-pane fade show active" id="panel-inicio" role="tabpanel">
+
+                {% block contenido %}
+                {% endblock %}
+
+            </div>
+
+        </div>
+
     </div>
     <aside class="control-sidebar control-sidebar-dark">
     </aside>
@@ -2552,11 +2708,39 @@
 </script>
 <script src="{% static 'lib/jquery-loading-overlay-2.1.7/js/loadingoverlay.min.js' %}">
 </script>
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
 {% block scripts %}
     <script>
         // JavaScript para forzar estilos después de que AdminLTE cargue    $(document).ready(function() {        // Esperar a que DataTables se inicialice completamente        setTimeout(function() {            forceDataTableStyles();            // Initialize DataTables with Spanish localization            $('.table').DataTable({                "language": {                    "sProcessing":     "Procesando...",                    "sLengthMenu":     "Mostrar _MENU_ registros",                    "sZeroRecords":    "No se encontraron resultados",                    "sEmptyTable":     "Ningún dato disponible en esta tabla",                    "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",                    "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",                    "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",                    "sInfoPostFix":    "",                    "sSearch":         "Buscar:",                    "sUrl":            "",                    "sInfoThousands":  ",",                    "sLoadingRecords": "Cargando...",                    "oPaginate": {                        "sFirst":    "Primero",                        "sLast":     "Último",                        "sNext":     "Siguiente",                        "sPrevious": "Anterior"                    },                    "oAria": {                        "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"                    }                },                "responsive": true,                "autoWidth": false,            });        }, 500);        // También aplicar cuando se redibuje la tabla        $('.table').on('draw.dt', function() {            setTimeout(function() {                forceDataTableStyles();            }, 100);        });    });    function forceDataTableStyles() {        // Forzar la visibilidad de los controles de DataTables        $('.dataTables_filter').show().css({            'display': 'block',            'visibility': 'visible',            'opacity': '1',            'float': 'right',            'text-align': 'right'        });        // Asegurar que el input sea visible        $('.dataTables_filter input').show().css({            'display': 'inline-block',            'visibility': 'visible',            'opacity': '1',            'width': '200px',            'margin-left': '8px'        });        // Asegurar que el show entries sea visible        $('.dataTables_length').show().css({            'display': 'block',            'visibility': 'visible',            'opacity': '1',            'float': 'left'        });        // Forzar estilos del header (from clean-professional-datatable.css)        $('.table thead th, .table thead td').each(function() {            $(this).css({                'background': '#f5f5f5',                'background-color': '#f5f5f5',                'color': '#333',                'font-weight': 'bold',                'font-size': '13px',                'padding': '8px',                'border': '1px solid #ddd',                'border-bottom': '1px solid #ddd',                'text-align': 'left',                'vertical-align': 'middle'            });        });        // Forzar botones (from clean-professional-datatable.css)        $('.btn-primary').css({            'background-color': '#337ab7',            'border-color': '#2e6da4',            'color': 'white',            'padding': '6px 12px',            'font-size': '14px',            'border-radius': '4px',            'border': '1px solid transparent',            'margin-right': '5px'        });        // Forzar paginación (from clean-professional-datatable.css)        $('.dataTables_paginate .paginate_button.current').css({            'background': '#337ab7',            'border-color': '#337ab7',            'color': 'white'        });        console.log('Estilos DataTable aplicados y forzados');    }    // Modificar tu inicialización de DataTables existente (if any, otherwise the above will handle it)    $(function () {        $('[data-toggle="tooltip"]').tooltip();        // Tu código existente de la tabla        $('.table')            .on('draw.dt', function () {                $('[data-toggle="tooltip"]').tooltip();                // AGREGAR ESTA LÍNEA para forzar estilos después del redibujado                setTimeout(forceDataTableStyles, 50);            });        // Resto de tu código AdminLTE existente...        var pathname = window.location.pathname;        var nav = $('body');        var page = {            // ... tu código existente        };        // Al final, después de page.initial(), agregar:        // page.initial(); // Uncomment if you have this function        // FORZAR ESTILOS AL CARGAR LA PÁGINA        setTimeout(function() {            forceDataTableStyles();        }, 1000);    });
     </script>
 {% endblock %}
+<script>
+
+function disposeIframe() {
+
+    let $tab = $('.navbar-nav[role="tablist"] .nav-link.active');
+
+    if (!$tab.length) return;
+
+    let tabId = $tab.attr('href');
+
+    $(tabId).remove();
+
+    $tab.parent().remove();
+
+    $('.navbar-nav[role="tablist"] .nav-item:last-child a').tab('show');
+
+}
+
+$('#cerrar_iframe').click(function (e) {
+
+    e.preventDefault();
+
+    disposeIframe();
+
+});
+
+</script>
 <div class="modal fade" id="modal-default">
     <div class="modal-dialog">
         <div class="modal-content">

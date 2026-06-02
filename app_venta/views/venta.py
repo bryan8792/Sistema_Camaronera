@@ -339,23 +339,43 @@ class SaleDeleteView(DeleteView):
 
 
 class SalePrintInvoiceView(View):
-    success_url = reverse_lazy('sale_admin_list')
-
+    success_url = reverse_lazy('app_venta:sale_admin_list')
     def get_success_url(self):
         if self.request.user.is_client():
-            return reverse_lazy('sale_client_list')
+            return reverse_lazy('app_venta:sale_client_list')
         return self.success_url
 
     def get(self, request, *args, **kwargs):
+        print("========== ENTRANDO A IMPRIMIR PDF ==========")
         try:
             sale = Sale.objects.filter(id=self.kwargs['pk']).first()
+            print("SALE:", sale)
             if sale:
-                context = {'sale': sale, 'height': 450 + sale.saledetail_set.all().count() * 10}
-                pdf_file = printer.create_pdf(context=context, template_name='sale/format/ticket.html')
-                return HttpResponse(pdf_file, content_type='application/pdf')
-        except:
-            pass
-        return HttpResponseRedirect(self.get_success_url())
+                context = {
+                    'sale': sale,
+                    'height': 450 + sale.saledetail_set.all().count() * 10
+                }
+                print("CONTEXT OK")
+                print("TEMPLATE:", 'app_venta/format/ticket.html Or app_venta/format/invoice.html')
+                pdf_file = printer.create_pdf(
+                    context=context,
+                    template_name='app_venta/format/invoice.html'
+                )
+                print("PDF GENERADO CORRECTAMENTE")
+                return HttpResponse(
+                    pdf_file,
+                    content_type='application/pdf'
+                )
+            else:
+                print("NO EXISTE SALE")
+        except Exception as e:
+            print("\n========== ERROR COMPLETO ==========")
+            print("ERROR:", str(e))
+            traceback.print_exc()
+            print("====================================\n")
+        return HttpResponseRedirect(
+            self.get_success_url()
+        )
 
 
 class SaleClientListView(FormView):

@@ -90,14 +90,14 @@ urlpatterns = [
     path('libro_mayor/detalle/', LibroMayorDetalleView.as_view(), name='libro_mayor_detalle'),
 
     # Estado de Resultados
-    path('estado_resultados/', EstadoResultadosView.as_view(), name='estado_resultados'),
+    path('estado_resultados/', EstadoResultadosPSMView.as_view(), name='estado_resultados'),
+
+    # Estado de Resultados Empresas
+    path('estado_resultados_psm/', EstadoResultadosPSMView.as_view(), name='estado_resultados_psm'),
+    path('estado_resultados_bio/', EstadoResultadosBIOView.as_view(), name='estado_resultados_bio'),
 
     # Balance General
     path('balance_general/', BalanceGeneralView.as_view(), name='balance_general'),
-
-    # ESTADO DE RESULTADOS
-    path('estado_resultados_psm/', EstadoResultadosView.as_view(), name='estado_resultados_psm'),
-    path('estado_resultados_bio/', EstadoResultadosBIOView.as_view(), name='estado_resultados_bio'),
 
     # BALANCE GENERAL
     path('balance_general_psm/', BalanceGeneralView.as_view(), name='balance_general_psm'),

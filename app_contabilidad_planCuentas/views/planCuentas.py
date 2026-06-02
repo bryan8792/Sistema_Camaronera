@@ -2047,6 +2047,7 @@ class listarMayorPlanView(ListView):
 
 # LIBRO MAYOR
 class listarMayorPlanViewBIO(ListView):
+
     model = DetalleCuentasPlanCuenta
     template_name = 'app_contabilidad_planCuentas/transaccion_Plan/mayorizacion/mayorizacionPlan_listarBIO.html'
 
@@ -2056,92 +2057,261 @@ class listarMayorPlanViewBIO(ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        data = {}
+
         try:
-            action = request.POST['action']
+
+            action = request.POST.get('action')
+
+            # ==========================================================
+            # DATATABLE PRINCIPAL
+            # ==========================================================
             if action == 'searchdata':
-                data = []
-                empresa = request.POST['empresa']
-                print('empresa')
-                print(empresa)
-                detallecuenta = DetalleCuentasPlanCuenta.objects.filter(
-                    cuenta__empresa__siglas__exact=empresa).order_by('cuenta__codigo')
-                for i in detallecuenta:
-                    data.append(i.toJSON())
 
+                draw = int(request.POST.get('draw', 1))
+                start = int(request.POST.get('start', 0))
+                length = int(request.POST.get('length', 25))
+                search_value = request.POST.get('search[value]', '')
+                empresa = request.POST.get('empresa', 'BIO')
+
+                queryset = DetalleCuentasPlanCuenta.objects.filter(
+                    cuenta__empresa__siglas=empresa
+                ).select_related(
+                    'cuenta',
+                    'encabezadocuentaplan'
+                )
+
+                # ======================================================
+                # BUSCADOR
+                # ======================================================
+
+                if search_value:
+                    queryset = queryset.filter(
+                        Q(cuenta__codigo__icontains=search_value) |
+                        Q(cuenta__nombre__icontains=search_value) |
+                        Q(descripcion__icontains=search_value)
+                    )
+
+                records_total = queryset.count()
+
+                # ======================================================
+                # ORDEN
+                # ======================================================
+
+                queryset = queryset.order_by(
+                    'cuenta__codigo',
+                    'id'
+                )[start:start + length]
+
+                # ======================================================
+                # DATA
+                # ======================================================
+
+                data = []
+
+                saldo_acumulado = 0
+                cuenta_actual = None
+
+                for i in queryset:
+
+                    codigo_cuenta = i.cuenta.codigo if i.cuenta else ''
+
+                    debe = float(i.debe) if i.debe else 0
+                    haber = float(i.haber) if i.haber else 0
+
+                    # ==================================================
+                    # REINICIAR SALDO SI CAMBIA LA CUENTA
+                    # ==================================================
+
+                    if cuenta_actual != codigo_cuenta:
+                        saldo_acumulado = 0
+                        cuenta_actual = codigo_cuenta
+
+                    # ==================================================
+                    # CALCULAR SALDO
+                    # ==================================================
+
+                    saldo_acumulado += (debe - haber)
+
+                    data.append({
+                        'codigo': codigo_cuenta,
+                        'nombre': i.cuenta.nombre if i.cuenta else '',
+                        'descripcion': getattr(i, 'descripcion', ''),
+                        'fecha': str(i.encabezadocuentaplan.fecha) if i.encabezadocuentaplan else '',
+                        'transaccion': getattr(i, 'transaccion', ''),
+                        'asiento': getattr(i, 'asiento', ''),
+                        'debe': round(debe, 2),
+                        'haber': round(haber, 2),
+                        'saldo': round(saldo_acumulado, 2),
+                    })
+
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': records_total,
+                    'recordsFiltered': records_total,
+                    'data': data
+                })
+
+            # ==========================================================
+            # SELECT PLAN CUENTAS
+            # ==========================================================
             elif action == 'searchdataplan':
-                print('llego a search data plan')
-                data = []
-                for i in PlanCuenta.objects.filter(empresa__siglas__exact='BIO').order_by('codigo'):
-                    item = i.toJSON()
-                    item['codigo'] = i.codigo
-                    item['text'] = i.get_name()
-                    data.append(item)
-            # elif action == 'search_plan':
-            #     print('LLEGO A SEARCH PLAN')
-            #     data = []
-            #     term = request.POST['term'].strip()
-            #     queryset = PlanCuenta.objects.filter(codigo__icontains=term)
-            #     for i in queryset:
-            #         item = i.toJSON()
-            #         item['codigo'] = i.codigo
-            #         item['text'] = i.nombre
-            #         data.append(item)
-            #
-            # elif action == 'search_autocomplete':
-            #     print('LLEGO A SEARCH AUTOCOMPLETE')
-            #     data = []
-            #     term = request.POST['term']
-            #     print('se extrajo parametro de term')
-            #     print(term)
-            #     data.append({'codigo': term, 'text': term})
-            #     plan_detail = PlanCuenta.objects.filter(Q(nombre__icontains=term))[0:50]
-            #     for i in plan_detail:
-            #         item = i.toJSON()
-            #         data.append(item)
-            #
-            # elif action == 'search_autocomplete':
-            #     data = []
-            #     ids_exclude = json.loads(request.POST['ids'])
-            #     term = request.POST['term'].strip()
-            #     data.append({'codigo': term, 'text': term})
-            #     plan_detail = PlanCuenta.objects.filter(nombre__icontains=term).exclude(id__in=ids_exclude)
-            #     for i in plan_detail[0:50]:
-            #         item = i.toJSON()
-            #         item['codigo'] = i.codigo
-            #         item['text'] = i.nombre
-            #         data.append(item)
 
-            elif action == 'search_report':
                 data = []
+
+                queryset = PlanCuenta.objects.filter(
+                    empresa__siglas='BIO'
+                ).only(
+                    'id',
+                    'codigo',
+                    'nombre'
+                ).order_by('codigo')
+
+                for i in queryset:
+
+                    data.append({
+                        'id': i.id,
+                        'codigo': i.codigo,
+                        'text': f'{i.codigo} / {i.nombre}'
+                    })
+
+                return JsonResponse(data, safe=False)
+
+            # ==========================================================
+            # REPORTE POR RANGO
+            # ==========================================================
+            elif action == 'search_report':
+
+                draw = int(request.POST.get('draw', 1))
+                start = int(request.POST.get('start', 0))
+                length = int(request.POST.get('length', 25))
+
                 start_date = request.POST.get('start_date', '')
                 end_date = request.POST.get('end_date', '')
                 desde_rang = request.POST.get('desde_rang', '')
                 hasta_rang = request.POST.get('hasta_rang', '')
-                empresa = request.POST['empresa']
-                print('empresa')
-                print(empresa)
-                search = DetalleCuentasPlanCuenta.objects.all()
-                if len(start_date) and len(end_date):
-                    search = search.filter(
-                        encabezadocuentaplan__fecha__range=[start_date, end_date],
-                        cuenta__codigo__range=[desde_rang, hasta_rang],
-                        cuenta__empresa__siglas__exact=empresa,
-                    )
-                for i in search:
-                    data.append(i.toJSON())
+                empresa = request.POST.get('empresa', 'BIO')
 
-            else:
-                data['error'] = 'Ha ocurrido un error'
+                queryset = DetalleCuentasPlanCuenta.objects.filter(
+                    cuenta__empresa__siglas=empresa
+                ).select_related(
+                    'cuenta',
+                    'encabezadocuentaplan'
+                )
+
+                # ======================================================
+                # FILTRO FECHAS
+                # ======================================================
+
+                if start_date and end_date:
+
+                    queryset = queryset.filter(
+                        encabezadocuentaplan__fecha__range=[
+                            start_date,
+                            end_date
+                        ]
+                    )
+
+                # ======================================================
+                # FILTRO RANGO CUENTAS
+                # ======================================================
+
+                if desde_rang and hasta_rang:
+
+                    queryset = queryset.filter(
+                        cuenta__codigo__range=[
+                            desde_rang,
+                            hasta_rang
+                        ]
+                    )
+
+                records_total = queryset.count()
+
+                # ======================================================
+                # ORDEN
+                # ======================================================
+
+                queryset = queryset.order_by(
+                    'cuenta__codigo',
+                    'id'
+                )[start:start + length]
+
+                # ======================================================
+                # DATA
+                # ======================================================
+
+                data = []
+
+                saldo_acumulado = 0
+                cuenta_actual = None
+
+                for i in queryset:
+
+                    codigo_cuenta = i.cuenta.codigo if i.cuenta else ''
+
+                    debe = float(i.debe) if i.debe else 0
+                    haber = float(i.haber) if i.haber else 0
+
+                    # ==================================================
+                    # REINICIAR SALDO SI CAMBIA LA CUENTA
+                    # ==================================================
+
+                    if cuenta_actual != codigo_cuenta:
+                        saldo_acumulado = 0
+                        cuenta_actual = codigo_cuenta
+
+                    # ==================================================
+                    # CALCULAR SALDO
+                    # ==================================================
+
+                    saldo_acumulado += (debe - haber)
+
+                    data.append({
+                        'codigo': codigo_cuenta,
+                        'nombre': i.cuenta.nombre if i.cuenta else '',
+                        'descripcion': getattr(i, 'descripcion', ''),
+                        'fecha': str(i.encabezadocuentaplan.fecha) if i.encabezadocuentaplan else '',
+                        'transaccion': getattr(i, 'transaccion', ''),
+                        'asiento': getattr(i, 'asiento', ''),
+                        'debe': round(debe, 2),
+                        'haber': round(haber, 2),
+                        'saldo': round(saldo_acumulado, 2),
+                    })
+
+                return JsonResponse({
+                    'draw': draw,
+                    'recordsTotal': records_total,
+                    'recordsFiltered': records_total,
+                    'data': data
+                })
+
+            # ==========================================================
+            # ERROR
+            # ==========================================================
+
+            return JsonResponse({
+                'error': 'No existe la acción solicitada'
+            })
+
         except Exception as e:
-            data['error'] = str(e)
-        return JsonResponse(data, safe=False)
+
+            return JsonResponse({
+                'error': str(e)
+            })
+
+    # ==============================================================
+    # CONTEXT
+    # ==============================================================
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
+
         context['nombre'] = 'Libro Mayor Empresa BIO'
         context['title'] = 'Libro Mayor Empresa BIO'
-        context['list_url'] = reverse_lazy('app_planCuentas:listar_transaccionPlan')
+        context['list_url'] = reverse_lazy(
+            'app_planCuentas:listar_transaccionPlan'
+        )
+
         return context
 
 
@@ -3532,107 +3702,107 @@ class LibroMayorDetalleView(ListView):
 # =========================
 # ESTADO DE RESULTADOS
 # =========================
-class EstadoResultadosView(TemplateView):
-    template_name = 'app_contabilidad_planCuentas/reportes/estado_resultados.html'
-
-    @method_decorator(csrf_exempt)
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        data = {}
-        try:
-            action = request.POST.get('action')
-
-            if action == 'generar_estado_resultados':
-                fecha_inicio = request.POST.get('fecha_inicio')
-                fecha_fin = request.POST.get('fecha_fin')
-                empresa_siglas = request.POST.get('empresa', 'PSM')
-
-                # Obtener cuentas de INGRESOS (codigo empieza con 4)
-                ingresos = PlanCuenta.objects.filter(
-                    empresa__siglas=empresa_siglas,
-                    codigo__startswith='4',
-                    tipo_cuenta='DETALLE'
-                ).order_by('codigo')
-
-                # Obtener cuentas de GASTOS/COSTOS (codigo empieza con 5 o 6)
-                gastos = PlanCuenta.objects.filter(
-                    empresa__siglas=empresa_siglas,
-                    tipo_cuenta='DETALLE'
-                ).filter(
-                    Q(codigo__startswith='5') | Q(codigo__startswith='6')
-                ).order_by('codigo')
-
-                data_ingresos = []
-                total_ingresos = Decimal('0')
-
-                for cuenta in ingresos:
-                    saldos = self.calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
-                    # Ingresos son acreedores: saldo = haber - debe
-                    saldo = saldos['haber'] - saldos['debe']
-                    if saldo != 0:
-                        data_ingresos.append({
-                            'codigo': cuenta.codigo,
-                            'nombre': cuenta.nombre,
-                            'saldo': format(saldo, '.2f')
-                        })
-                        total_ingresos += saldo
-
-                data_gastos = []
-                total_gastos = Decimal('0')
-
-                for cuenta in gastos:
-                    saldos = self.calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
-                    # Gastos son deudores: saldo = debe - haber
-                    saldo = saldos['debe'] - saldos['haber']
-                    if saldo != 0:
-                        data_gastos.append({
-                            'codigo': cuenta.codigo,
-                            'nombre': cuenta.nombre,
-                            'saldo': format(saldo, '.2f')
-                        })
-                        total_gastos += saldo
-
-                utilidad_neta = total_ingresos - total_gastos
-
-                data = {
-                    'ingresos': data_ingresos,
-                    'gastos': data_gastos,
-                    'total_ingresos': format(total_ingresos, '.2f'),
-                    'total_gastos': format(total_gastos, '.2f'),
-                    'utilidad_neta': format(utilidad_neta, '.2f'),
-                    'es_utilidad': utilidad_neta >= 0
-                }
-            else:
-                data['error'] = 'Accion no valida'
-
-        except Exception as e:
-            data['error'] = str(e)
-        return JsonResponse(data, safe=False)
-
-    def calcular_saldo_cuenta(self, cuenta, fecha_inicio, fecha_fin):
-        filtros = {
-            'cuenta': cuenta,
-            'encabezadocuentaplan__reg_control': 'RT'
-        }
-        if fecha_inicio:
-            filtros['encabezadocuentaplan__fecha__gte'] = fecha_inicio
-        if fecha_fin:
-            filtros['encabezadocuentaplan__fecha__lte'] = fecha_fin
-
-        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
-            debe=Coalesce(Sum('debe'), Decimal('0')),
-            haber=Coalesce(Sum('haber'), Decimal('0'))
-        )
-        return totales
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Estado de Resultados'
-        context['title'] = 'Estado de Resultados'
-        return context
+# class EstadoResultadosView(TemplateView):
+#     template_name = 'app_contabilidad_planCuentas/reportes/estado_resultados.html'
+#
+#     @method_decorator(csrf_exempt)
+#     @method_decorator(login_required)
+#     def dispatch(self, request, *args, **kwargs):
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     def post(self, request, *args, **kwargs):
+#         data = {}
+#         try:
+#             action = request.POST.get('action')
+#
+#             if action == 'generar_estado_resultados':
+#                 fecha_inicio = request.POST.get('fecha_inicio')
+#                 fecha_fin = request.POST.get('fecha_fin')
+#                 empresa_siglas = request.POST.get('empresa', 'PSM')
+#
+#                 # Obtener cuentas de INGRESOS (codigo empieza con 4)
+#                 ingresos = PlanCuenta.objects.filter(
+#                     empresa__siglas=empresa_siglas,
+#                     codigo__startswith='4',
+#                     tipo_cuenta='DETALLE'
+#                 ).order_by('codigo')
+#
+#                 # Obtener cuentas de GASTOS/COSTOS (codigo empieza con 5 o 6)
+#                 gastos = PlanCuenta.objects.filter(
+#                     empresa__siglas=empresa_siglas,
+#                     tipo_cuenta='DETALLE'
+#                 ).filter(
+#                     Q(codigo__startswith='5') | Q(codigo__startswith='6')
+#                 ).order_by('codigo')
+#
+#                 data_ingresos = []
+#                 total_ingresos = Decimal('0')
+#
+#                 for cuenta in ingresos:
+#                     saldos = self.calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
+#                     # Ingresos son acreedores: saldo = haber - debe
+#                     saldo = saldos['haber'] - saldos['debe']
+#                     if saldo != 0:
+#                         data_ingresos.append({
+#                             'codigo': cuenta.codigo,
+#                             'nombre': cuenta.nombre,
+#                             'saldo': format(saldo, '.2f')
+#                         })
+#                         total_ingresos += saldo
+#
+#                 data_gastos = []
+#                 total_gastos = Decimal('0')
+#
+#                 for cuenta in gastos:
+#                     saldos = self.calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
+#                     # Gastos son deudores: saldo = debe - haber
+#                     saldo = saldos['debe'] - saldos['haber']
+#                     if saldo != 0:
+#                         data_gastos.append({
+#                             'codigo': cuenta.codigo,
+#                             'nombre': cuenta.nombre,
+#                             'saldo': format(saldo, '.2f')
+#                         })
+#                         total_gastos += saldo
+#
+#                 utilidad_neta = total_ingresos - total_gastos
+#
+#                 data = {
+#                     'ingresos': data_ingresos,
+#                     'gastos': data_gastos,
+#                     'total_ingresos': format(total_ingresos, '.2f'),
+#                     'total_gastos': format(total_gastos, '.2f'),
+#                     'utilidad_neta': format(utilidad_neta, '.2f'),
+#                     'es_utilidad': utilidad_neta >= 0
+#                 }
+#             else:
+#                 data['error'] = 'Accion no valida'
+#
+#         except Exception as e:
+#             data['error'] = str(e)
+#         return JsonResponse(data, safe=False)
+#
+#     def calcular_saldo_cuenta(self, cuenta, fecha_inicio, fecha_fin):
+#         filtros = {
+#             'cuenta': cuenta,
+#             'encabezadocuentaplan__reg_control': 'RT'
+#         }
+#         if fecha_inicio:
+#             filtros['encabezadocuentaplan__fecha__gte'] = fecha_inicio
+#         if fecha_fin:
+#             filtros['encabezadocuentaplan__fecha__lte'] = fecha_fin
+#
+#         totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
+#             debe=Coalesce(Sum('debe'), Decimal('0')),
+#             haber=Coalesce(Sum('haber'), Decimal('0'))
+#         )
+#         return totales
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['nombre'] = 'Estado de Resultados'
+#         context['title'] = 'Estado de Resultados'
+#         return context
 
 
 # =========================
@@ -3767,157 +3937,120 @@ class BalanceGeneralView(TemplateView):
 
 
 # =========================
-# ESTADO DE RESULTADOS
+# ESTADO DE RESULTADOS - VISTA BASE
 # =========================
 class EstadoResultadosView(TemplateView):
     template_name = 'app_contabilidad_planCuentas/reportes/estado_resultados.html'
 
-    @method_decorator(csrf_exempt)
+    def get_empresa_default(self):
+        return 'PSM'
+
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         data = {}
+
         try:
             action = request.POST.get('action')
 
             if action == 'generar_estado_resultados':
+
                 fecha_inicio = request.POST.get('fecha_inicio')
                 fecha_fin = request.POST.get('fecha_fin')
-                empresa_siglas = request.POST.get('empresa', 'PSM')
+                empresa_siglas = request.POST.get('empresa') or self.get_empresa_default()
 
-                # INGRESOS (cuentas que empiezan con 4)
-                ingresos_data = []
+                # 🔥 QUERY REAL (UNA SOLA)
+                detalles = DetalleCuentasPlanCuenta.objects.filter(
+                    encabezadocuentaplan__fecha__range=[fecha_inicio, fecha_fin],
+                    encabezadocuentaplan__empresa__siglas=empresa_siglas
+                ).values(
+                    'cuenta__codigo',
+                    'cuenta__nombre'
+                ).annotate(
+                    total_debe=Coalesce(Sum('debe'), Decimal('0')),
+                    total_haber=Coalesce(Sum('haber'), Decimal('0'))
+                )
+
+                ingresos = []
+                gastos = []
+
                 total_ingresos = Decimal('0')
-
-                cuentas_ingresos = PlanCuenta.objects.filter(
-                    empresa__siglas=empresa_siglas,
-                    codigo__startswith='4',
-                    tipo_cuenta='DETALLE'
-                ).order_by('codigo')
-
-                for cuenta in cuentas_ingresos:
-                    saldos = self._calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
-                    # Ingresos son acreedores: saldo = haber - debe
-                    saldo = saldos['haber'] - saldos['debe']
-                    if saldo != 0:
-                        ingresos_data.append({
-                            'codigo': cuenta.codigo,
-                            'nombre': cuenta.nombre,
-                            'saldo': format(abs(saldo), '.2f')
-                        })
-                        total_ingresos += abs(saldo)
-
-                # COSTOS DE VENTA (cuentas que empiezan con 51)
-                costos_data = []
-                total_costos = Decimal('0')
-
-                cuentas_costos = PlanCuenta.objects.filter(
-                    empresa__siglas=empresa_siglas,
-                    codigo__startswith='51',
-                    tipo_cuenta='DETALLE'
-                ).order_by('codigo')
-
-                for cuenta in cuentas_costos:
-                    saldos = self._calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
-                    # Costos son deudores: saldo = debe - haber
-                    saldo = saldos['debe'] - saldos['haber']
-                    if saldo != 0:
-                        costos_data.append({
-                            'codigo': cuenta.codigo,
-                            'nombre': cuenta.nombre,
-                            'saldo': format(abs(saldo), '.2f')
-                        })
-                        total_costos += abs(saldo)
-
-                # GASTOS OPERACIONALES (cuentas que empiezan con 52, 53, 54, etc.)
-                gastos_data = []
                 total_gastos = Decimal('0')
 
-                cuentas_gastos = PlanCuenta.objects.filter(
-                    empresa__siglas=empresa_siglas,
-                    tipo_cuenta='DETALLE'
-                ).filter(
-                    Q(codigo__startswith='52') |
-                    Q(codigo__startswith='53') |
-                    Q(codigo__startswith='54') |
-                    Q(codigo__startswith='55') |
-                    Q(codigo__startswith='56') |
-                    Q(codigo__startswith='6')
-                ).order_by('codigo')
+                # 🔥 PROCESAMIENTO
+                for d in detalles:
 
-                for cuenta in cuentas_gastos:
-                    saldos = self._calcular_saldo_cuenta(cuenta, fecha_inicio, fecha_fin)
-                    saldo = saldos['debe'] - saldos['haber']
-                    if saldo != 0:
-                        gastos_data.append({
-                            'codigo': cuenta.codigo,
-                            'nombre': cuenta.nombre,
-                            'saldo': format(abs(saldo), '.2f')
-                        })
-                        total_gastos += abs(saldo)
+                    codigo = d['cuenta__codigo']
+                    nombre = d['cuenta__nombre']
 
-                # CALCULOS
-                utilidad_bruta = total_ingresos - total_costos
-                utilidad_operacional = utilidad_bruta - total_gastos
-                utilidad_neta = utilidad_operacional  # Simplificado, sin impuestos
+                    debe = d['total_debe']
+                    haber = d['total_haber']
+
+                    print("DEBUG REAL:", codigo, debe, haber)
+
+                    # ================= INGRESOS =================
+                    if codigo.startswith('4'):
+                        saldo = haber - debe
+
+                        if saldo != 0:
+                            ingresos.append({
+                                'codigo': codigo,
+                                'nombre': nombre,
+                                'saldo': format(abs(saldo), '.2f')
+                            })
+                            total_ingresos += abs(saldo)
+
+                    # ================= GASTOS =================
+                    elif codigo.startswith('5') or codigo.startswith('6'):
+                        saldo = debe - haber
+
+                        if saldo != 0:
+                            gastos.append({
+                                'codigo': codigo,
+                                'nombre': nombre,
+                                'saldo': format(abs(saldo), '.2f')
+                            })
+                            total_gastos += abs(saldo)
+
+                # ================= RESULTADO =================
+                utilidad_neta = total_ingresos - total_gastos
 
                 data = {
-                    'ingresos': ingresos_data,
-                    'costos': costos_data,
-                    'gastos': gastos_data,
+                    'ingresos': ingresos,
+                    'gastos': gastos,
                     'total_ingresos': format(total_ingresos, '.2f'),
-                    'total_costos': format(total_costos, '.2f'),
                     'total_gastos': format(total_gastos, '.2f'),
-                    'utilidad_bruta': format(utilidad_bruta, '.2f'),
-                    'utilidad_operacional': format(utilidad_operacional, '.2f'),
                     'utilidad_neta': format(utilidad_neta, '.2f'),
                     'es_utilidad': utilidad_neta >= 0
                 }
 
-            elif action == 'export_pdf':
-                # Implementar exportacion PDF
-                pass
-
             else:
-                data['error'] = 'Accion no valida'
+                data['error'] = 'Acción no válida'
 
         except Exception as e:
             data['error'] = str(e)
+
         return JsonResponse(data, safe=False)
 
-    def _calcular_saldo_cuenta(self, cuenta, fecha_inicio, fecha_fin):
-        filtros = {
-            'cuenta': cuenta,
-            'encabezadocuentaplan__reg_control': 'RT'
-        }
-        if fecha_inicio:
-            filtros['encabezadocuentaplan__fecha__gte'] = fecha_inicio
-        if fecha_fin:
-            filtros['encabezadocuentaplan__fecha__lte'] = fecha_fin
-
-        totales = DetalleCuentasPlanCuenta.objects.filter(**filtros).aggregate(
-            debe=Coalesce(Sum('debe'), Decimal('0')),
-            haber=Coalesce(Sum('haber'), Decimal('0'))
-        )
-        return totales
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Estado de Resultados'
         context['title'] = 'Estado de Resultados'
+        context['empresa_default'] = self.get_empresa_default()
         return context
 
 
+# ================= BIO =================
 class EstadoResultadosBIOView(EstadoResultadosView):
-    template_name = 'app_contabilidad_planCuentas/reportes/estado_resultados_bio.html'
+    def get_empresa_default(self):
+        return 'BIO'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['nombre'] = 'Estado de Resultados - BIO'
-        context['empresa_default'] = 'BIO'
-        return context
+
+# ================= PSM =================
+class EstadoResultadosPSMView(EstadoResultadosView):
+    def get_empresa_default(self):
+        return 'PSM'
 
 
 # =========================

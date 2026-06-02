@@ -1984,3 +1984,232 @@ class ConsumoInsumosPiscinaView(TemplateView):
         })
 
         return context
+
+
+class KardexStockPiscinaView(TemplateView):
+    template_name = 'app_stock/app_control/kardex_stock_piscina.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Filtros desde GET
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+        empresa_id = self.request.GET.get('empresa')
+        producto_id = self.request.GET.get('producto')
+        piscina_filtro = self.request.GET.get('piscina')
+
+        # Obtener listas para los dropdowns
+        empresas = Empresa.objects.all().order_by('nombre')
+        productos = Producto.objects.all().order_by('nombre')
+
+        # Filtros base - SOLO CONSUMO DE DIETA
+        filtros = Q(activo=True)
+        filtros &= Q(numero_guia__icontains='CONSUMO DE DIETA')
+
+        if fecha_desde:
+            filtros &= Q(fecha_ingreso__gte=fecha_desde)
+        if fecha_hasta:
+            filtros &= Q(fecha_ingreso__lte=fecha_hasta)
+        if empresa_id:
+            filtros &= Q(producto_empresa__nombre_empresa_id=empresa_id)
+        if producto_id:
+            filtros &= Q(producto_empresa__nombre_prod_id=producto_id)
+        if piscina_filtro:
+            filtros &= Q(piscinas=piscina_filtro)
+
+        movimientos = (
+            Producto_Stock.objects
+                .filter(filtros)
+                .select_related('producto_empresa', 'producto_empresa__nombre_empresa', 'producto_empresa__nombre_prod')
+                .order_by('producto_empresa__nombre_prod__nombre', 'piscinas', 'fecha_ingreso')
+        )
+
+        # Obtener INGRESOS (solo de "Todas las piscinas" o similar)
+        filtros_ingreso = Q(activo=True)
+        filtros_ingreso &= (Q(piscinas__icontains='Todas') | Q(piscinas__isnull=True) | Q(piscinas=''))
+
+        if fecha_desde:
+            filtros_ingreso &= Q(fecha_ingreso__gte=fecha_desde)
+        if fecha_hasta:
+            filtros_ingreso &= Q(fecha_ingreso__lte=fecha_hasta)
+        if empresa_id:
+            filtros_ingreso &= Q(producto_empresa__nombre_empresa_id=empresa_id)
+        if producto_id:
+            filtros_ingreso &= Q(producto_empresa__nombre_prod_id=producto_id)
+
+        ingresos_query = (
+            Producto_Stock.objects
+                .filter(filtros_ingreso)
+                .filter(cantidad_ingreso__gt=0)
+                .select_related('producto_empresa', 'producto_empresa__nombre_empresa', 'producto_empresa__nombre_prod')
+                .order_by('fecha_ingreso')
+        )
+
+        # Crear diccionario de ingresos por producto y fecha
+        ingresos_dict = defaultdict(list)
+        for ing in ingresos_query:
+            producto_nombre = ing.producto_empresa.nombre_prod.nombre if ing.producto_empresa and ing.producto_empresa.nombre_prod else 'Sin Producto'
+            ingresos_dict[producto_nombre].append({
+                'fecha': ing.fecha_ingreso,
+                'ingreso': Decimal(ing.cantidad_ingreso or 0),
+                'numero_guia': ing.numero_guia or '',
+                'empresa': ing.producto_empresa.nombre_empresa.siglas if ing.producto_empresa and ing.producto_empresa.nombre_empresa else '',
+                'responsable': ing.responsable_ingreso or '',
+            })
+
+        # Estructura: PRODUCTO > PISCINA > MOVIMIENTOS
+        productos_data = defaultdict(lambda: defaultdict(list))
+
+        for mov in movimientos:
+            if not mov.piscinas:
+                continue
+
+            piscina = mov.piscinas
+            producto_nombre = mov.producto_empresa.nombre_prod.nombre if mov.producto_empresa and mov.producto_empresa.nombre_prod else 'Sin Producto'
+
+            egreso = Decimal(mov.cantidad_egreso or 0)
+
+            productos_data[producto_nombre][piscina].append({
+                'empresa': mov.producto_empresa.nombre_empresa.siglas if mov.producto_empresa and mov.producto_empresa.nombre_empresa else '',
+                'fecha': mov.fecha_ingreso,
+                'numero_guia': mov.numero_guia or '',
+                'ingreso': Decimal('0'),  # Los egresos no tienen ingreso
+                'egreso': egreso,
+                'responsable': mov.responsable_ingreso or '',
+            })
+
+        # Construir lista final con SALDO ACUMULATIVO
+        productos_list = []
+        total_general_ingreso = Decimal('0')
+        total_general_egreso = Decimal('0')
+
+        for producto_nombre in sorted(productos_data.keys()):
+            piscinas_dict = productos_data[producto_nombre]
+            piscinas_list = []
+
+            # Obtener ingresos de este producto
+            ingresos_producto = ingresos_dict.get(producto_nombre, [])
+
+            for piscina_num in sorted(piscinas_dict.keys()):
+                movimientos_piscina = piscinas_dict[piscina_num]
+
+                # Combinar movimientos con ingresos y ordenar por fecha
+                todos_movimientos = []
+
+                # Agregar egresos
+                for mov in movimientos_piscina:
+                    todos_movimientos.append({
+                        'tipo': 'egreso',
+                        'empresa': mov['empresa'],
+                        'fecha': mov['fecha'],
+                        'numero_guia': mov['numero_guia'],
+                        'ingreso': Decimal('0'),
+                        'egreso': mov['egreso'],
+                        'responsable': mov['responsable'],
+                    })
+
+                # Agregar ingresos (solo para la primera piscina para no duplicar)
+                if piscina_num == sorted(piscinas_dict.keys())[0]:
+                    for ing in ingresos_producto:
+                        todos_movimientos.append({
+                            'tipo': 'ingreso',
+                            'empresa': ing['empresa'],
+                            'fecha': ing['fecha'],
+                            'numero_guia': ing['numero_guia'],
+                            'ingreso': ing['ingreso'],
+                            'egreso': Decimal('0'),
+                            'responsable': ing['responsable'],
+                        })
+
+                # Ordenar por fecha
+                todos_movimientos.sort(key=lambda x: x['fecha'] if x['fecha'] else date.min)
+
+                # Calcular SALDO ACUMULATIVO
+                saldo_acumulado = Decimal('0')
+                for mov in todos_movimientos:
+                    saldo_acumulado = saldo_acumulado + mov['ingreso'] - mov['egreso']
+                    mov['saldo'] = saldo_acumulado
+
+                total_ingreso_piscina = sum(m['ingreso'] for m in todos_movimientos)
+                total_egreso_piscina = sum(m['egreso'] for m in todos_movimientos)
+
+                piscinas_list.append({
+                    'numero': piscina_num,
+                    'movimientos': todos_movimientos,
+                    'total_ingreso': total_ingreso_piscina,
+                    'total_egreso': total_egreso_piscina,
+                    'saldo': saldo_acumulado,  # Saldo final acumulado
+                })
+
+                total_general_ingreso += total_ingreso_piscina
+                total_general_egreso += total_egreso_piscina
+
+            productos_list.append({
+                'nombre': producto_nombre,
+                'piscinas': piscinas_list,
+            })
+
+        # Obtener lista de piscinas unicas para el filtro
+        piscinas_filtro_q = Q(activo=True)
+        if empresa_id:
+            piscinas_filtro_q &= Q(producto_empresa__nombre_empresa_id=empresa_id)
+        if producto_id:
+            piscinas_filtro_q &= Q(producto_empresa__nombre_prod_id=producto_id)
+
+        piscinas_unicas = (
+            Producto_Stock.objects
+                .filter(piscinas_filtro_q)
+                .exclude(piscinas__isnull=True)
+                .exclude(piscinas='')
+                .values_list('piscinas', flat=True)
+                .distinct()
+                .order_by('piscinas')
+        )
+
+        # Formatear fechas para el encabezado
+        fecha_desde_fmt = None
+        fecha_hasta_fmt = None
+        if fecha_desde:
+            fd = datetime.strptime(fecha_desde, '%Y-%m-%d')
+            fecha_desde_fmt = f"{fd.day} de {fd.strftime('%b')} del {fd.year}"
+        if fecha_hasta:
+            fh = datetime.strptime(fecha_hasta, '%Y-%m-%d')
+            fecha_hasta_fmt = f"{fh.day} de {fh.strftime('%b')} del {fh.year}"
+
+        # Nombres para el titulo
+        empresa_nombre = None
+        producto_nombre_titulo = None
+        if empresa_id:
+            emp = Empresa.objects.filter(pk=empresa_id).first()
+            empresa_nombre = emp.nombre if emp else None
+        if producto_id:
+            prod = Producto.objects.filter(pk=producto_id).first()
+            producto_nombre_titulo = prod.nombre if prod else None
+
+        context.update({
+            'nombre': 'KARDEX STOCK POR PISCINA',
+            'productos': productos_list,
+            'total_general_ingreso': total_general_ingreso,
+            'total_general_egreso': total_general_egreso,
+            'total_general_saldo': total_general_ingreso - total_general_egreso,
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+            'fecha_desde_fmt': fecha_desde_fmt,
+            'fecha_hasta_fmt': fecha_hasta_fmt,
+            'piscinas_lista': list(piscinas_unicas),
+            'piscina_filtro': piscina_filtro,
+            # Dropdowns
+            'empresas': empresas,
+            'productos_dropdown': productos,
+            'empresa_id': empresa_id,
+            'producto_id': producto_id,
+            'empresa_nombre': empresa_nombre,
+            'producto_nombre_titulo': producto_nombre_titulo,
+        })
+
+        return context

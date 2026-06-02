@@ -27,7 +27,8 @@
                     <div class="card">
                         <div class="card-header" style="background-color:#3498DB">
                             <div class="card-tools">
-                                <a href="{% url 'app_dieta:crear_anio_dieta' %}"  class="btn btn-block btn-default btn-sm">
+                                <a href="{% url 'app_dieta:crear_anio_dieta' %}"
+                                   class="btn btn-block btn-default btn-sm">
                                     <strong><i class="fas fa-plus"></i> CREAR AÑO:</strong>
                                 </a>
                             </div>
@@ -43,7 +44,8 @@
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-7 text-center">
-                                                        <h2 class="lead"><strong><b>Año: {{ data.anio_dieta }}</b></strong></h2>
+                                                        <h2 class="lead">
+                                                            <strong><b>Año: {{ data.anio_dieta }}</b></strong></h2>
                                                         <p class="text-muted text-sm text-center">
                                                             <b>Registro y Control</b>
                                                             <b>Dietas Diarias</b>
@@ -58,10 +60,16 @@
 
                                             <div class="card-footer">
                                                 <div class="text-center">
+
                                                     <a href="{% url 'app_dieta:principal_mes' data.id %}"
-                                                       class="btn btn-sm btn-primary">
+                                                       class="btn btn-sm btn-primary"
+                                                       data-widget="iframe"
+                                                       data-caption="Mes {{ data.anio_dieta }}">
+
                                                         <i class="fas fa-plus"></i> Ver
+
                                                     </a>
+
                                                 </div>
                                             </div>
 

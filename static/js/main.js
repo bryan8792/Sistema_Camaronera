@@ -1,4 +1,3 @@
-
 var pathname = window.location.pathname;
 var nav = $('body');
 
@@ -50,16 +49,20 @@ var page = {
 
 $(function () {
 
-    $('[data-toggle="tooltip"]').tooltip();
+    if ($.fn.tooltip) {
+        $('[data-toggle="tooltip"]').tooltip();
+    }
 
     $('.table')
         .on('draw.dt', function () {
-            $('[data-toggle="tooltip"]').tooltip();
+            if ($.fn.tooltip) {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
         })
-        /*.on('click', 'img', function () {
-            var src = $(this).attr('src');
-            load_image(src);
-        });*/
+    /*.on('click', 'img', function () {
+        var src = $(this).attr('src');
+        load_image(src);
+    });*/
 
     // Vertical
 

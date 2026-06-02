@@ -1,0 +1,604 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+
+    <style>
+        .header-egreso {
+            background: linear-gradient(135deg, #FF6B6B 0%, #CC0000 100%);
+            color: #000;
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .header-egreso h2 {
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .empresa-badge {
+            background-color: #FFFF00;
+            color: #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid #000;
+            display: inline-block;
+        }
+
+        .empresa-nombre-badge {
+            background-color: #fff;
+            color: #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            border: 2px solid #000;
+            display: inline-block;
+        }
+
+        .form-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .form-header label {
+            font-weight: bold;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .form-header input, .form-header select {
+            border: 2px solid #333;
+            font-weight: bold;
+        }
+
+        .tabla-egreso {
+            border: 2px solid #333;
+        }
+
+        .tabla-egreso thead {
+            background-color: #C0C0C0;
+        }
+
+        .tabla-egreso thead th {
+            border: 2px solid #333;
+            text-align: center;
+            font-weight: bold;
+            color: #000;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .tabla-egreso tbody td {
+            border: 1px solid #333;
+            padding: 5px;
+        }
+
+        .tabla-egreso tbody input,
+        .tabla-egreso tbody select {
+            border: 1px solid #999;
+            width: 100%;
+            padding: 5px;
+            font-size: 12px;
+        }
+
+        .tabla-egreso tbody select {
+            min-width: 200px;
+        }
+
+        .tabla-egreso tbody input[type="number"] {
+            text-align: right;
+        }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-save:hover {
+            background-color: #45a049;
+            color: white;
+        }
+
+        .total-row {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .instrucciones {
+            background-color: #FFFF99;
+            border: 2px solid #CC0000;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 11px;
+        }
+
+        .instrucciones p {
+            margin: 3px 0;
+        }
+
+        .instrucciones .paso {
+            color: #CC0000;
+            font-weight: bold;
+        }
+
+        .instrucciones .highlight {
+            color: #0000FF;
+            font-weight: bold;
+        }
+
+        .numero-grande {
+            font-size: 48px;
+            font-weight: bold;
+            border: 2px solid #000;
+            padding: 10px 20px;
+            display: inline-block;
+        }
+
+        .dar-click-text {
+            color: #CC0000;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item"><a
+                                href="{% url 'app_stock_directo:listar_stock_directo_bio' %}">{{ nombre }} <i
+                                class="far nav-icon fa fa-home"></i></a></li>
+                        <li class="breadcrumb-item active">Egreso de Bodega Balanceado <i
+                                class="far nav-icon fa fa-clipboard-check"></i></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+
+                        <!-- HEADER -->
+                        <div class="header-egreso">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h2>EGRESO DE BODEGA BALANCEADO</h2>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <label style="color: #000;">EMPRESA:</label>
+                                    <select id="empresa_id" class="form-control empresa-badge"
+                                            style="display: inline-block; width: auto;">
+                                        <option value="">Seleccione...</option>
+                                        {% for emp in empresas %}
+                                            <option value="{{ emp.id }}" data-siglas="{{ emp.siglas }}"
+                                                    data-nombre="{{ emp.nombre }}">
+                                                {{ emp.siglas }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="empresa-nombre-badge"
+                                          id="empresa_nombre_display">Seleccione empresa</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- FORMULARIO PRINCIPAL -->
+                                <div class="col-md-8">
+
+                                    <!-- ENCABEZADO DEL FORMULARIO -->
+                                    <div class="form-header">
+                                        <div class="row align-items-end">
+                                            <div class="col-md-1">
+                                                <button type="button" class="btn btn-save" id="btnGuardar">
+                                                    <i class="fas fa-save fa-2x"></i><br>
+                                                    SAVE
+                                                </button>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label>NUMERO</label>
+                                                <input type="text" id="numero_documento"
+                                                       class="form-control text-center"
+                                                       value="{{ numero_documento }}" readonly
+                                                       style="background-color: #fff;">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label>FECHA</label>
+                                                <input type="date" id="fecha_egreso" class="form-control"
+                                                       value="{{ fecha_actual }}">
+                                            </div>
+                                            <div class="col-md-1 text-center">
+                                                <p class="dar-click-text">DAR CLICK<br>PARA<br>GUARDAR</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>PROVEEDOR / BODEGA:</label>
+                                                <select id="proveedor_id" class="form-control">
+                                                    <option value="">Seleccione...</option>
+                                                    {% for prov in proveedores %}
+                                                        <option value="{{ prov.id }}">{{ prov.nombre_com }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>RESPONSABLE:</label>
+                                                <input type="text" id="responsable" class="form-control"
+                                                       placeholder="Nombre del responsable">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- TABLA DE PRODUCTOS -->
+                                    <table class="table tabla-egreso" id="tablaProductos">
+                                        <thead>
+                                        <tr>
+                                            <th style="width: 5%;">#</th>
+                                            <th style="width: 40%;">TIPO BALANCEADO</th>
+                                            <th style="width: 15%;">CANT SC</th>
+                                            <th style="width: 15%;">LIBRAS</th>
+                                            <th style="width: 20%;">TOT_LIBRAS</th>
+                                            <th style="width: 5%;">X</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="tbody-productos">
+                                        <!-- Las filas se agregan dinámicamente -->
+                                        </tbody>
+                                        <tfoot>
+                                        <tr class="total-row">
+                                            <td colspan="2" class="text-right"><strong>TOTAL EGRESO</strong></td>
+                                            <td class="text-right"><span id="total_sacos">0</span></td>
+                                            <td class="text-right">-</td>
+                                            <td class="text-right"><span id="total_libras">0.00</span></td>
+                                            <td></td>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+
+                                    <button type="button" class="btn btn-primary btn-sm" id="btnAgregarFila">
+                                        <i class="fas fa-plus"></i> Agregar Fila
+                                    </button>
+
+                                </div>
+
+                                <!-- INSTRUCCIONES -->
+                                <div class="col-md-4">
+                                    <div class="instrucciones">
+                                        <p><span class="paso">PASO 1:</span> SELECCIONAR LA <span class="highlight">EMPRESA</span>.
+                                        </p>
+                                        <p><span class="paso">PASO 2:</span> INGRESAR FECHA (EN CASO DE REGISTRAR UNA
+                                            <span class="highlight">FECHA ANTERIOR</span>)</p>
+                                        <p style="margin-left: 50px;">CASO CONTRARIO OMITIR PASO 2)</p>
+                                        <p><span class="paso">PASO 3:</span> SELECCIONAR <span class="highlight">PROVEEDOR/BODEGA</span>.
+                                        </p>
+                                        <p><span class="paso">PASO 4:</span> SELECCIONAR EL <span class="highlight">TIPO DE BALANCEADO</span>.
+                                        </p>
+                                        <p><span class="paso">PASO 5:</span> INGRESAR LA <span class="highlight">CANTIDAD DE SACOS</span>.
+                                        </p>
+                                        <p><span class="paso">PASO 6:</span> DAR CLICK EN EL BOTON <span
+                                                style="color: green; font-weight: bold;">"SAVE"</span></p>
+                                    </div>
+
+                                    <!-- Número de documento grande -->
+                                    <div class="text-center mt-3">
+                                        <span class="numero-grande"
+                                              id="numero_grande_display">{{ numero_documento }}</span>
+                                        <p id="fecha_formateada" class="mt-2">{{ fecha_actual }}</p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="{% url 'app_stock_directo:listar_stock_directo_bio' %}" class="btn btn-danger">
+                                <i class="fas fa-undo"></i> CANCELAR / REGRESAR
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script src="{% static 'acciones/app_datatable/jquery/jquery-3.3.1.min.js' %}"></script>
+
+    <script>
+        // Obtener el token CSRF de Django
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Evita redeclaraciones si ya existe en otro script
+        window.csrftoken = window.csrftoken || getCookie('csrftoken');
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", window.csrftoken);
+                }
+            }
+        });
+
+        // Productos disponibles (se cargan dinámicamente según empresa)
+        var productosBalanceados = [];
+        var filaCounter = 0;
+
+        $(document).ready(function () {
+            // Agregar filas iniciales vacías
+            for (var i = 0; i < 10; i++) {
+                agregarFila();
+            }
+
+            // Evento cambio de empresa - FILTRAR PRODUCTOS
+            $('#empresa_id').change(function () {
+                var empresa_id = $(this).val();
+                var siglas = $(this).find(':selected').data('siglas') || '';
+                var nombre = $(this).find(':selected').data('nombre') || 'Seleccione empresa';
+
+                // Actualizar display de empresa
+                $('#empresa_nombre_display').text(nombre);
+
+                if (empresa_id) {
+                    // Cargar productos de esta empresa via AJAX
+                    $.ajax({
+                        url: '',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            action: 'get_productos_by_empresa',
+                            empresa_id: empresa_id
+                        }),
+                        success: function (response) {
+                            if (response.success) {
+                                productosBalanceados = response.productos;
+                                // Actualizar todos los selects de productos
+                                actualizarSelectsProductos();
+                            } else {
+                                Swal.fire('Error', response.error || 'Error al cargar productos', 'error');
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            Swal.fire('Error', 'Error de conexi��n: ' + error, 'error');
+                        }
+                    });
+                } else {
+                    productosBalanceados = [];
+                    actualizarSelectsProductos();
+                }
+            });
+
+            // Botón agregar fila
+            $('#btnAgregarFila').click(function () {
+                agregarFila();
+            });
+
+            // Botón guardar
+            $('#btnGuardar').click(function () {
+                guardarEgreso();
+            });
+
+            // Actualizar fecha formateada
+            $('#fecha_egreso').change(function () {
+                $('#fecha_formateada').text($(this).val());
+            });
+        });
+
+        function actualizarSelectsProductos() {
+            var selectOptions = '<option value="">Seleccione...</option>';
+            productosBalanceados.forEach(function (prod) {
+                selectOptions += '<option value="' + prod.id + '" data-peso="' + prod.peso + '">' + prod.nombre + '</option>';
+            });
+
+            // Actualizar todos los selects existentes
+            $('.producto-select').each(function () {
+                var valorActual = $(this).val();
+                $(this).html(selectOptions);
+                // Intentar mantener el valor si existe en la nueva lista
+                if (valorActual) {
+                    $(this).val(valorActual);
+                }
+            });
+        }
+
+        function agregarFila() {
+            filaCounter++;
+            var selectOptions = '<option value="">Seleccione...</option>';
+            productosBalanceados.forEach(function (prod) {
+                selectOptions += '<option value="' + prod.id + '" data-peso="' + prod.peso + '">' + prod.nombre + '</option>';
+            });
+
+            var fila = `
+                <tr id="fila_${filaCounter}">
+                    <td class="text-center">${filaCounter}</td>
+                    <td>
+                        <select class="form-control producto-select" name="producto_${filaCounter}" data-fila="${filaCounter}">
+                            ${selectOptions}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control cant-sacos" name="sacos_${filaCounter}"
+                               data-fila="${filaCounter}" value="0" min="0" step="1">
+                    </td>
+                    <td>
+                        <input type="number" class="form-control libras-unidad" name="libras_${filaCounter}"
+                               data-fila="${filaCounter}" value="0" min="0" step="0.01" readonly>
+                    </td>
+                    <td>
+                        <input type="number" class="form-control total-libras" name="total_${filaCounter}"
+                               data-fila="${filaCounter}" value="0" min="0" step="0.01" readonly>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm btn-eliminar" data-fila="${filaCounter}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+
+            $('#tbody-productos').append(fila);
+
+            // Eventos para la nueva fila
+            $(`#fila_${filaCounter} .producto-select`).change(function () {
+                var fila = $(this).data('fila');
+                var peso = $(this).find(':selected').data('peso') || 0;
+                $(`input[name="libras_${fila}"]`).val(peso);
+                calcularTotalFila(fila);
+            });
+
+            $(`#fila_${filaCounter} .cant-sacos`).on('input', function () {
+                var fila = $(this).data('fila');
+                calcularTotalFila(fila);
+            });
+
+            $(`#fila_${filaCounter} .btn-eliminar`).click(function () {
+                var fila = $(this).data('fila');
+                $(`#fila_${fila}`).remove();
+                calcularTotales();
+            });
+        }
+
+        function calcularTotalFila(fila) {
+            var sacos = parseFloat($(`input[name="sacos_${fila}"]`).val()) || 0;
+            var libras = parseFloat($(`input[name="libras_${fila}"]`).val()) || 0;
+            var total = sacos * libras;
+            $(`input[name="total_${fila}"]`).val(total.toFixed(2));
+            calcularTotales();
+        }
+
+        function calcularTotales() {
+            var totalSacos = 0;
+            var totalLibras = 0;
+
+            $('.cant-sacos').each(function () {
+                totalSacos += parseFloat($(this).val()) || 0;
+            });
+
+            $('.total-libras').each(function () {
+                totalLibras += parseFloat($(this).val()) || 0;
+            });
+
+            $('#total_sacos').text(totalSacos);
+            $('#total_libras').text(totalLibras.toFixed(2));
+        }
+
+        function guardarEgreso() {
+            var empresa_id = $('#empresa_id').val();
+            var numero_documento = $('#numero_documento').val();
+            var fecha = $('#fecha_egreso').val();
+            var proveedor_id = $('#proveedor_id').val();
+            var responsable = $('#responsable').val();
+
+            // Validaciones
+            if (!empresa_id) {
+                Swal.fire('Error', 'Debe seleccionar una empresa', 'error');
+                return;
+            }
+
+            if (!fecha) {
+                Swal.fire('Error', 'Debe seleccionar una fecha', 'error');
+                return;
+            }
+
+            if (!responsable) {
+                Swal.fire('Error', 'Debe ingresar el responsable', 'error');
+                return;
+            }
+
+            var items = [];
+            $('#tbody-productos tr').each(function () {
+                var productoSelect = $(this).find('.producto-select');
+                var producto_id = productoSelect.val();
+                var cantidad_sacos = parseFloat($(this).find('.cant-sacos').val()) || 0;
+                var libras = parseFloat($(this).find('.libras-unidad').val()) || 0;
+                var total_libras = parseFloat($(this).find('.total-libras').val()) || 0;
+
+                if (producto_id && total_libras > 0) {
+                    items.push({
+                        producto_id: producto_id,
+                        cantidad_sacos: cantidad_sacos,
+                        libras: libras,
+                        total_libras: total_libras
+                    });
+                }
+            });
+
+            if (items.length === 0) {
+                Swal.fire('Error', 'Debe agregar al menos un producto con cantidad', 'error');
+                return;
+            }
+
+            // Enviar datos
+            $.ajax({
+                url: '',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    action: 'guardar',
+                    numero_documento: numero_documento,
+                    fecha: fecha,
+                    proveedor_id: proveedor_id,
+                    empresa_id: empresa_id,
+                    responsable: responsable,
+                    items: items
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Guardado',
+                            text: response.message || 'Egreso registrado correctamente',
+                            showConfirmButton: true
+                        }).then(function () {
+                            window.location.href = "{% url 'app_stock_directo:listar_stock_directo_bio' %}";
+                        });
+                    } else {
+                        Swal.fire('Error', response.error || 'Error al guardar', 'error');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire('Error', 'Error de conexión: ' + error, 'error');
+                }
+            });
+        }
+    </script>
+{% endblock %}

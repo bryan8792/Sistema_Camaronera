@@ -62,7 +62,9 @@ class Sale(models.Model):
         return float(self.saledetail_set.filter().aggregate(result=Coalesce(Sum('subtotal'), 0.00, output_field=FloatField()))['result'])
 
     def get_authorization_date(self):
-        return self.authorization_date.strftime('%Y-%m-%d %H:%M:%S')
+        return self.authorization_date.strftime(
+            '%Y-%m-%d %H:%M:%S'
+        ) if self.authorization_date else ''
 
     def get_date_joined(self):
         return (datetime.strptime(self.date_joined, '%Y-%m-%d') if isinstance(self.date_joined, str) else self.date_joined).strftime('%Y-%m-%d')

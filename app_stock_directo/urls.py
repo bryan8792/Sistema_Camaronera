@@ -19,4 +19,6 @@ urlpatterns = [
     path('stock/editarbio_directo/editar/<int:pk>/', editarStockBIODirectoView.as_view(), name='editar_stock_directo_bio'),
     path('stock/listarbio_directo/listar/', listarStockBIODirectoView.as_view(), name='listar_stock_directo_bio'),
 
+    path('stock/ingreso_bodega_balanceado/', IngresoBodegaBalanceadoView.as_view(), name='ingreso_bodega_balanceado'),
+    path('stock/egreso_bodega_balanceado/', EgresoBodegaBalanceadoView.as_view(), name='egreso_bodega_balanceado'),
 ]

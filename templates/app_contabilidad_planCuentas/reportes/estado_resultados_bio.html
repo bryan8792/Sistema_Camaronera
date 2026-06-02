@@ -28,35 +28,23 @@
                 <h3 class="card-title text-white"><strong>{{ title }}</strong></h3>
             </div>
             <div class="card-body">
-
-                <!-- TOKEN CSRF (IMPORTANTE) -->
-                <form id="csrfForm">
-                    {% csrf_token %}
-                </form>
-
-                <!-- DEBUG BOX -->
-                <div id="debugBox" class="alert alert-warning" style="display:none;"></div>
-
                 <!-- Filtros -->
                 <div class="row mb-4">
                     <div class="col-md-3">
                         <label>Empresa:</label>
                         <select id="empresa" class="form-control select2">
-                            <option value="PSM" {% if empresa_default == 'PSM' %}selected{% endif %}>PSM</option>
-                            <option value="BIO" {% if empresa_default == 'BIO' %}selected{% endif %}>BIO</option>
+                            <option value="PSM">PSM</option>
+                            <option value="BIO">BIO</option>
                         </select>
                     </div>
-
                     <div class="col-md-3">
                         <label>Fecha Inicio:</label>
                         <input type="date" id="fecha_inicio" class="form-control">
                     </div>
-
                     <div class="col-md-3">
                         <label>Fecha Fin:</label>
                         <input type="date" id="fecha_fin" class="form-control">
                     </div>
-
                     <div class="col-md-3" style="padding-top: 32px;">
                         <button type="button" id="btnGenerar" class="btn btn-primary">
                             <i class="fas fa-calculator"></i> Generar
@@ -66,20 +54,19 @@
                         </button>
                     </div>
                 </div>
-
+                
                 <!-- Reporte -->
                 <div id="reporteContainer" style="display:none;">
                     <div class="row">
-
                         <!-- INGRESOS -->
                         <div class="col-md-12">
-                            <h4 class="text-success">↑ INGRESOS</h4>
+                            <h4 class="text-success"><i class="fas fa-arrow-up"></i> INGRESOS</h4>
                             <table class="table table-sm table-bordered" id="tblIngresos">
                                 <thead style="background-color:#28a745; color:white;">
                                     <tr>
-                                        <th>Codigo</th>
-                                        <th>Cuenta</th>
-                                        <th class="text-right">Valor</th>
+                                        <th style="width:15%;">Codigo</th>
+                                        <th style="width:60%;">Cuenta</th>
+                                        <th style="width:25%;" class="text-right">Valor</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -91,16 +78,16 @@
                                 </tfoot>
                             </table>
                         </div>
-
+                        
                         <!-- GASTOS -->
                         <div class="col-md-12 mt-4">
-                            <h4 class="text-danger">↓ GASTOS Y COSTOS</h4>
+                            <h4 class="text-danger"><i class="fas fa-arrow-down"></i> GASTOS Y COSTOS</h4>
                             <table class="table table-sm table-bordered" id="tblGastos">
                                 <thead style="background-color:#dc3545; color:white;">
                                     <tr>
-                                        <th>Codigo</th>
-                                        <th>Cuenta</th>
-                                        <th class="text-right">Valor</th>
+                                        <th style="width:15%;">Codigo</th>
+                                        <th style="width:60%;">Cuenta</th>
+                                        <th style="width:25%;" class="text-right">Valor</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -112,18 +99,16 @@
                                 </tfoot>
                             </table>
                         </div>
-
+                        
                         <!-- RESULTADO -->
                         <div class="col-md-12 mt-4">
                             <div id="resultadoBox" class="alert text-center" style="font-size: 1.5rem;">
-                                <strong id="resultadoLabel">UTILIDAD/PERDIDA:</strong>
-                                <span id="resultadoValor"></span>
+                                <strong id="resultadoLabel">UTILIDAD/PERDIDA NETA:</strong>
+                                <span id="resultadoValor" style="font-size: 2rem; font-weight: bold;"></span>
                             </div>
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -133,117 +118,70 @@
 {% block scripts %}
 <script>
 $(function() {
-
     $('.select2').select2({
         theme: 'bootstrap4',
         language: 'es',
         width: '100%'
     });
-
-    // 🔥 OBTENER CSRF TOKEN
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            let cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                let cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
-    const csrftoken = getCookie('csrftoken');
-
+    
     $('#btnGenerar').on('click', function() {
-
         var fecha_inicio = $('#fecha_inicio').val();
         var fecha_fin = $('#fecha_fin').val();
         var empresa = $('#empresa').val();
-
-        if (!fecha_inicio || !fecha_fin) {
-            $('#debugBox').show().text('Debes seleccionar fechas');
-            return;
-        }
-
-        $('#debugBox').hide();
-
+        
         $.ajax({
             url: window.location.pathname,
             type: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken
-            },
             data: {
-                action: 'generar_estado_resultados',
-                fecha_inicio: fecha_inicio,
-                fecha_fin: fecha_fin,
-                empresa: empresa
+                'action': 'generar_estado_resultados',
+                'fecha_inicio': fecha_inicio,
+                'fecha_fin': fecha_fin,
+                'empresa': empresa
             },
             dataType: 'json',
-
             success: function(data) {
-
-                console.log("RESPUESTA:", data);
-
                 if (data.error) {
-                    $('#debugBox').show().text(data.error);
+                    Swal.fire('Error', data.error, 'error');
                     return;
                 }
-
+                
+                // Llenar tabla de ingresos
                 var tbodyIngresos = $('#tblIngresos tbody');
                 tbodyIngresos.html('');
-
                 $.each(data.ingresos, function(i, item) {
-                    tbodyIngresos.append(`
-                        <tr>
-                            <td>${item.codigo}</td>
-                            <td>${item.nombre}</td>
-                            <td class="text-right">${item.saldo}</td>
-                        </tr>
-                    `);
+                    tbodyIngresos.append('<tr><td>' + item.codigo + '</td><td>' + item.nombre + '</td><td class="text-right">' + item.saldo + '</td></tr>');
                 });
-
                 $('#totalIngresos').text(data.total_ingresos);
-
+                
+                // Llenar tabla de gastos
                 var tbodyGastos = $('#tblGastos tbody');
                 tbodyGastos.html('');
-
                 $.each(data.gastos, function(i, item) {
-                    tbodyGastos.append(`
-                        <tr>
-                            <td>${item.codigo}</td>
-                            <td>${item.nombre}</td>
-                            <td class="text-right">${item.saldo}</td>
-                        </tr>
-                    `);
+                    tbodyGastos.append('<tr><td>' + item.codigo + '</td><td>' + item.nombre + '</td><td class="text-right">' + item.saldo + '</td></tr>');
                 });
-
                 $('#totalGastos').text(data.total_gastos);
-
-                $('#resultadoValor').text('$ ' + data.utilidad_neta);
-
+                
+                // Mostrar resultado
+                var resultadoBox = $('#resultadoBox');
+                var resultadoValor = $('#resultadoValor');
+                resultadoValor.text('$ ' + data.utilidad_neta);
+                
                 if (data.es_utilidad) {
-                    $('#resultadoBox').removeClass('alert-danger').addClass('alert-success');
+                    resultadoBox.removeClass('alert-danger').addClass('alert-success');
                     $('#resultadoLabel').text('UTILIDAD NETA:');
                 } else {
-                    $('#resultadoBox').removeClass('alert-success').addClass('alert-danger');
+                    resultadoBox.removeClass('alert-success').addClass('alert-danger');
                     $('#resultadoLabel').text('PERDIDA NETA:');
                 }
-
+                
                 $('#reporteContainer').show();
                 $('#btnExportPdf').show();
             },
-
-            error: function(xhr) {
-                $('#debugBox').show().text('Error servidor: ' + xhr.status);
+            error: function() {
+                Swal.fire('Error', 'Error al consultar el servidor', 'error');
             }
         });
     });
-
 });
 </script>
 {% endblock %}
