@@ -1,19 +1,20 @@
-
 import decimal
 import json
 from datetime import date
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import *
-from app_empresa.app_reg_empresa.models import Empresa
+from app_empresa.app_reg_empresa.models import Empresa, Piscinas
 from app_inventario.app_categoria.models import Producto
 from app_proveedor.models import Proveedor
 from app_stock.app_detalle_stock.forms import ProdStockForm, ProdStockTotalForm
 from app_stock.app_detalle_stock.models import Producto_Stock, Total_Stock
+from app_stock.app_detalle_stock.forms import PISCINAS_ESCOGER
 
 
 # EMPRESA PRESQUERA SAN MIGUEL
@@ -31,7 +32,7 @@ class crearStockPSMDirectoView(CreateView):
         context['producto'] = producto
 
         unidad_aplicacion = producto.nombre_prod.unid_aplicacion
-        print('LA APLICACION ES  '+unidad_aplicacion)
+        print('LA APLICACION ES  ' + unidad_aplicacion)
         if unidad_aplicacion == 'GR':
             aplicacion = 1000
         elif unidad_aplicacion == 'KG':
@@ -108,7 +109,6 @@ class editarStockPSMDirectoView(UpdateView):
         return reverse_lazy('app_stock_directo:listarpsmunico_directo', kwargs={'pk': piscina_id})
 
 
-
 class listarStockPSMDirectoView(ListView):
     model = Total_Stock
     template_name = 'app_stock_directo/stock_dir_listar_psm.html'
@@ -131,7 +131,8 @@ class listarStockPSMDirectoView(ListView):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Stock Productos Aplicación Directa PSM'
         context['sotck'] = Total_Stock.objects.all()
-        context['balanceados'] = Total_Stock.objects.filter(nombre_prod__categoria__nombre__icontains='BALANCEADOS', nombre_empresa__siglas='PSM')
+        context['balanceados'] = Total_Stock.objects.filter(nombre_prod__categoria__nombre__icontains='BALANCEADOS',
+                                                            nombre_empresa__siglas='PSM')
         # context['insumos'] = Total_Stock.objects.filter(nombre_prod__categoria__nombre__icontains='INSUMOS', nombre_empresa__siglas='PSM')
         context['insumos'] = Total_Stock.objects.filter(nombre_empresa__siglas='PSM')
         return context
@@ -173,7 +174,6 @@ class listarStockUnicoPSMDirectoView(ListView):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Stock Productos Aplicación Directa PSM'
         return context
-
 
 
 # EMPRESA BIO CASCAJAL
@@ -262,9 +262,12 @@ class listarStockBIODirectoView(ListView):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Stock Productos Aplicación Directa BIO'
         context['sotck'] = Total_Stock.objects.all()
-        context['balanceados'] = Total_Stock.objects.filter(nombre_prod__categoria__nombre__icontains='BALANCEADOS', nombre_empresa__siglas='BIO')
-        context['insumos'] = Total_Stock.objects.filter(nombre_prod__categoria__nombre__icontains='INSUMOS', nombre_empresa__siglas='BIO')
+        context['balanceados'] = Total_Stock.objects.filter(nombre_prod__categoria__nombre__icontains='BALANCEADOS',
+                                                            nombre_empresa__siglas='BIO')
+        context['insumos'] = Total_Stock.objects.filter(nombre_prod__categoria__nombre__icontains='INSUMOS',
+                                                        nombre_empresa__siglas='BIO')
         return context
+
 
 class listarStockUnicoBIODirectoView(ListView):
     model = Producto_Stock
@@ -539,3 +542,111 @@ class EgresoBodegaBalanceadoView(TemplateView):
             data['error'] = str(e)
 
         return JsonResponse(data)
+
+
+
+class crearEgresoDirectoMatrizView(TemplateView):
+    """
+    Egreso de productos de aplicacion directa en formato MATRIZ
+    (igual al reporte diario escaneado):
+      - Filas    = productos en stock de la empresa (Total_Stock)
+      - Columnas = piscinas (lista PISCINAS_ESCOGER)
+      - Cada celda con cantidad > 0 genera un registro de EGRESO (Producto_Stock)
+
+    El stock se descuenta solo, porque Producto_Stock.save() ya resta
+    cantidad_egreso del Total_Stock cuando tipo == 'EGRESO'.
+    """
+    template_name = 'app_stock_directo/egreso_directo_matriz.html'
+    success_url = reverse_lazy('app_detalle_stock:listar_stock_directo_psm')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST['action']
+
+            # -------- PASO 1: cargar piscinas + productos de la empresa --------
+            if action == 'search_matriz':
+                empresa = request.POST['empresa']  # siglas de la empresa, ej: PSM
+
+                # Columnas: piscinas (excluye "Todas las Piscinas")
+                piscinas = []
+                for valor, etiqueta in PISCINAS_ESCOGER:
+                    if valor == 'Todas las Piscinas':
+                        continue
+                    piscinas.append({
+                        'valor': valor,                       # se guarda en el CharField
+                        'label': etiqueta.replace('PISCINA ', ''),  # cabecera corta
+                    })
+
+                # Filas: productos en stock de la empresa
+                productos = []
+                qs_prod = Total_Stock.objects.filter(
+                    nombre_empresa__siglas=empresa
+                ).order_by('nombre_prod__nombre')
+                for ts in qs_prod:
+                    productos.append({
+                        'id': ts.id,                          # id de Total_Stock (producto_empresa)
+                        'nombre': str(ts.nombre_prod.nombre),
+                        'stock': format(ts.stock, '.2f'),
+                    })
+
+                data['piscinas'] = piscinas
+                data['productos'] = productos
+
+            # -------- GUARDAR: un egreso por celda con cantidad > 0 --------
+            elif action == 'create':
+                with transaction.atomic():
+                    empresa = request.POST.get('empresa')
+                    fecha = request.POST.get('fecha') or date.today().strftime('%Y-%m-%d')
+                    responsable = request.POST.get('responsable', '')
+                    guia = request.POST.get('numero_guia') or ('EGRESO PISCINAS - %s' % empresa)
+                    items = json.loads(request.POST.get('items', '[]'))
+
+                    registros = 0
+                    for i in items:
+                        cantidad = decimal.Decimal(str(i.get('cantidad') or '0'))
+                        if cantidad <= 0:
+                            continue
+
+                        total_stock = Total_Stock.objects.get(pk=int(i['producto']))
+
+                        reg = Producto_Stock()
+                        reg.producto_empresa = total_stock
+                        reg.tipo = 'EGRESO'
+                        reg.piscinas = i.get('piscina', 'Todas las Piscinas')
+                        reg.cantidad_usar = cantidad
+                        reg.cantidad_egreso = cantidad
+                        reg.cantidad_ingreso = decimal.Decimal('0')
+                        reg.fecha_ingreso = fecha
+                        reg.numero_guia = guia
+                        reg.responsable_ingreso = responsable
+                        reg.activo = True
+                        reg.save()  # save() descuenta el stock automaticamente
+                        registros += 1
+
+                    if registros == 0:
+                        data['error'] = 'No ingreso ninguna cantidad para registrar.'
+                    else:
+                        data['success'] = True
+                        data['registros'] = registros
+
+            else:
+                data['error'] = 'Ha ocurrido un error'
+
+        except Exception as e:
+            data['error'] = 'El error es: ' + str(e)
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['nombre'] = 'Productos Aplicacion Directa'
+        context['entity'] = 'Egreso a Piscinas'
+        context['list_url'] = self.success_url
+        context['action'] = 'create'
+        context['empresas'] = Empresa.objects.all().order_by('siglas')
+        context['fecha'] = date.today().strftime('%Y-%m-%d')
+        return context

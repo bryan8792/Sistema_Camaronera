@@ -188,21 +188,20 @@
                                     <h2>INGRESO DE BODEGA BALANCEADO</h2>
                                 </div>
                                 <div class="col-md-3 text-center">
-                                    <label style="color: #000;">EMPRESA:</label>
+                                    <label style="color: #000;">SELECCIONAR EMPRESA:</label>
                                     <select id="empresa_id" class="form-control empresa-badge"
                                             style="display: inline-block; width: auto;">
                                         <option value="">Seleccione...</option>
                                         {% for emp in empresas %}
-                                            <option value="{{ emp.id }}" data-siglas="{{ emp.siglas }}"
-                                                    data-nombre="{{ emp.nombre }}">
+                                            <option value="{{ emp.id }}" data-siglas="{{ emp.siglas }}" data-nombre="{{ emp.nombre }}">
                                                 {{ emp.siglas }}
                                             </option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <span class="empresa-nombre-badge"
-                                          id="empresa_nombre_display">Seleccione empresa</span>
+                                    <label style="color: #000;">EMPRESA SELECCIONADA:</label>
+                                    <span class="empresa-nombre-badge" id="empresa_nombre_display">Seleccione empresa</span>
                                 </div>
                             </div>
                         </div>
@@ -218,7 +217,7 @@
                                             <div class="col-md-1">
                                                 <button type="button" class="btn btn-save" id="btnGuardar">
                                                     <i class="fas fa-save fa-2x"></i><br>
-                                                    SAVE
+                                                    Guardar
                                                 </button>
                                             </div>
                                             <div class="col-md-2">
@@ -398,7 +397,7 @@
                             }
                         },
                         error: function (xhr, status, error) {
-                            Swal.fire('Error', 'Error de conexión: ' + error, 'error');
+                            Swal.fire('Error', 'Error de conexion: ' + error, 'error');
                         }
                     });
                 } else {

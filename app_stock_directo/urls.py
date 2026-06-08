@@ -21,4 +21,7 @@ urlpatterns = [
 
     path('stock/ingreso_bodega_balanceado/', IngresoBodegaBalanceadoView.as_view(), name='ingreso_bodega_balanceado'),
     path('stock/egreso_bodega_balanceado/', EgresoBodegaBalanceadoView.as_view(), name='egreso_bodega_balanceado'),
+
+    path('egreso_matriz/', crearEgresoDirectoMatrizView.as_view(), name='egreso_directo_matriz'),
+
 ]
