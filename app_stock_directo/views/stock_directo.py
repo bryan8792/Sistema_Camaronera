@@ -546,16 +546,6 @@ class EgresoBodegaBalanceadoView(TemplateView):
 
 
 class crearEgresoDirectoMatrizView(TemplateView):
-    """
-    Egreso de productos de aplicacion directa en formato MATRIZ
-    (igual al reporte diario escaneado):
-      - Filas    = productos en stock de la empresa (Total_Stock)
-      - Columnas = piscinas (lista PISCINAS_ESCOGER)
-      - Cada celda con cantidad > 0 genera un registro de EGRESO (Producto_Stock)
-
-    El stock se descuenta solo, porque Producto_Stock.save() ya resta
-    cantidad_egreso del Total_Stock cuando tipo == 'EGRESO'.
-    """
     template_name = 'app_stock_directo/egreso_directo_matriz.html'
     success_url = reverse_lazy('app_detalle_stock:listar_stock_directo_psm')
 
@@ -570,27 +560,30 @@ class crearEgresoDirectoMatrizView(TemplateView):
 
             # -------- PASO 1: cargar piscinas + productos de la empresa --------
             if action == 'search_matriz':
-                empresa = request.POST['empresa']  # siglas de la empresa, ej: PSM
 
-                # Columnas: piscinas (excluye "Todas las Piscinas")
+                empresa = request.POST.get('empresa')
                 piscinas = []
-                for valor, etiqueta in PISCINAS_ESCOGER:
-                    if valor == 'Todas las Piscinas':
-                        continue
+                qs_piscinas = Piscinas.objects.filter(
+                    empresa__siglas=empresa,
+                    estado=True,
+                    pis=True
+                ).order_by('numero')
+                for p in qs_piscinas:
                     piscinas.append({
-                        'valor': valor,                       # se guarda en el CharField
-                        'label': etiqueta.replace('PISCINA ', ''),  # cabecera corta
+                        'valor': p.id,  # ID de la piscina
+                        'label': p.numero,  # Nombre mostrado en la cabecera
                     })
 
-                # Filas: productos en stock de la empresa
                 productos = []
+
                 qs_prod = Total_Stock.objects.filter(
                     nombre_empresa__siglas=empresa
                 ).order_by('nombre_prod__nombre')
+
                 for ts in qs_prod:
                     productos.append({
-                        'id': ts.id,                          # id de Total_Stock (producto_empresa)
-                        'nombre': str(ts.nombre_prod.nombre),
+                        'id': ts.id,
+                        'nombre': ts.nombre_prod.nombre,
                         'stock': format(ts.stock, '.2f'),
                     })
 
@@ -617,7 +610,12 @@ class crearEgresoDirectoMatrizView(TemplateView):
                         reg = Producto_Stock()
                         reg.producto_empresa = total_stock
                         reg.tipo = 'EGRESO'
-                        reg.piscinas = i.get('piscina', 'Todas las Piscinas')
+                        piscina_id = i.get('piscina')
+                        try:
+                            piscina = Piscinas.objects.get(pk=piscina_id)
+                            reg.piscinas = piscina.numero
+                        except:
+                            reg.piscinas = 'Sin Piscina'
                         reg.cantidad_usar = cantidad
                         reg.cantidad_egreso = cantidad
                         reg.cantidad_ingreso = decimal.Decimal('0')

@@ -118,7 +118,7 @@
         <form id="frmEgreso" method="post">
             <div class="card">
                 <div class="card-header" style="background-color:#c0392b">
-                    <h3 class="card-title" style="color:#fff;">
+                    <h3 class="card-title" style="color:#0c0c0c;">
                         <strong>Reporte Diario - Productos Aplicados a Piscinas</strong>
                     </h3>
                 </div>
@@ -158,24 +158,36 @@
                     <hr>
 
                     <div class="tabla-matriz-wrap">
+
                         <table id="tblMatriz">
+
                             <thead>
                             <tr id="matrizHead">
                                 <th class="col-producto">PRODUCTOS</th>
-                                <!-- columnas de piscinas se inyectan por JS -->
-                                <th class="col-unidad">UNIDAD</th>
+                                <th class="col-unidad">STOCK</th>
                                 <th class="col-total">TOTAL</th>
+                                <th>ACCION</th>
                             </tr>
                             </thead>
+
                             <tbody id="matrizBody">
-                            <tr>
-                                <td class="col-producto" colspan="3" style="text-align:center;color:#888;">
-                                    Sin datos. Seleccione una empresa.
-                                </td>
-                            </tr>
+
                             </tbody>
+
                         </table>
+
                     </div>
+
+                    <br>
+
+                    <button type="button"
+                            class="btn btn-success btn-sm"
+                            id="btnAgregarProducto">
+
+                        <i class="fas fa-plus"></i>
+                        Agregar Producto
+                    </button>
+
                 </div>
 
                 <div class="card-footer navbar-white">
@@ -201,24 +213,6 @@
             productos: [],  // [{id, nombre, stock}]
         };
 
-        // ---- CSRF: adjuntar el token en TODAS las peticiones AJAX (POST) ----
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        var csrftoken = getCookie('csrftoken');
-
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
                 if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
@@ -233,6 +227,51 @@
                 theme: 'bootstrap4',
                 language: "es",
                 width: '100%'
+            });
+
+            $('#matrizBody').on('change', '.productoRow', function () {
+                let stock =
+                    $(this)
+                        .find(':selected')
+                        .data('stock') || 0;
+                $(this)
+                    .closest('tr')
+                    .find('.stockRow')
+                    .html(stock);
+            });
+
+            $('#matrizBody').on('click', '.eliminarFila', function () {
+                $(this).closest('tr').remove();
+            });
+
+            $('#matrizBody').on('keyup change', '.celda', function () {
+
+    let fila = $(this).closest('tr');
+    let totalFila = 0;
+
+    fila.find('.celda').each(function () {
+        totalFila += parseFloat($(this).val()) || 0;
+    });
+
+    fila.find('.total-fila').html(totalFila.toFixed(2));
+
+    let totalGeneral = 0;
+
+    $('#matrizBody .total-fila').each(function () {
+        totalGeneral += parseFloat($(this).text()) || 0;
+    });
+
+    $('#totalGeneral').html(totalGeneral.toFixed(2));
+
+});
+
+            $('.productoRow').select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+
+            $('#btnAgregarProducto').on('click', function () {
+                agregarProducto();
             });
 
             // PASO 1: al escoger empresa, cargar piscinas + productos
@@ -257,178 +296,229 @@
             });
         });
 
-        function resetMatriz() {
-            matriz.piscinas = [];
-            matriz.productos = [];
-            $('#matrizHead').html(
-                '<th class="col-producto">PRODUCTOS</th>' +
-                '<th class="col-unidad">UNIDAD</th>' +
-                '<th class="col-total">TOTAL</th>'
-            );
-            $('#matrizBody').html(
-                '<tr><td class="col-producto" colspan="3" style="text-align:center;color:#888;">' +
-                'Sin datos. Seleccione una empresa.</td></tr>'
-            );
-        }
-
         function cargarMatriz(empresa) {
-            $('#msgAyuda').hide();
+
             $.ajax({
                 url: window.location.pathname,
                 type: 'POST',
                 data: {
-                    'action': 'search_matriz',
-                    'empresa': empresa
+                    action: 'search_matriz',
+                    empresa: empresa
                 },
-                dataType: 'json',
+                dataType: 'json'
             }).done(function (data) {
-                if (data.hasOwnProperty('error')) {
-                    alert(data.error);
-                    return;
-                }
+
                 matriz.piscinas = data.piscinas || [];
                 matriz.productos = data.productos || [];
+
                 renderMatriz();
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                alert('Error al cargar: ' + textStatus + ' ' + errorThrown);
+
             });
+
+        }
+
+        function resetMatriz() {
+
+            matriz.piscinas = [];
+            matriz.productos = [];
+
+            $('#matrizHead').html(
+                '<th class="col-producto">PRODUCTOS</th>' +
+                '<th class="col-unidad">STOCK</th>' +
+                '<th class="col-total">TOTAL</th>' +
+                '<th>ACCION</th>'
+            );
+
+            $('#matrizBody').html('');
+
         }
 
         function renderMatriz() {
-            // ---- ENCABEZADO (columnas = piscinas) ----
-            var head = '<th class="col-producto">PRODUCTOS</th>';
+
+            let head =
+                '<th class="col-producto">PRODUCTOS</th>';
+
             $.each(matriz.piscinas, function (i, p) {
-                head += '<th data-piscina="' + p.valor + '">' + p.label + '</th>';
+
+                head +=
+                    '<th data-piscina="' + p.valor + '">' +
+                    p.label +
+                    '</th>';
+
             });
+
             head += '<th class="col-unidad">STOCK</th>';
             head += '<th class="col-total">TOTAL</th>';
+            head += '<th>ACCION</th>';
+
             $('#matrizHead').html(head);
 
-            // ---- CUERPO (filas = productos) ----
-            if (matriz.productos.length === 0) {
-                var colsp = matriz.piscinas.length + 3;
-                $('#matrizBody').html(
-                    '<tr><td class="col-producto" colspan="' + colsp + '" ' +
-                    'style="text-align:center;color:#888;">Esta empresa no tiene productos en stock.</td></tr>'
-                );
-                return;
-            }
+            $('#matrizBody').html('');
+        }
 
-            var body = '';
+        function agregarProducto() {
+
+            let opciones = '';
+
             $.each(matriz.productos, function (i, prod) {
-                body += '<tr data-producto="' + prod.id + '">';
-                body += '<td class="col-producto">' + prod.nombre + '</td>';
-                $.each(matriz.piscinas, function (j, p) {
-                    body += '<td>' +
-                        '<input type="text" class="celda" autocomplete="off" ' +
-                        'data-piscina="' + p.valor + '" value="">' +
-                        '</td>';
-                });
-                body += '<td class="col-unidad">' + (prod.stock || '0.00') + '</td>';
-                body += '<td class="col-total total-fila">0</td>';
-                body += '</tr>';
-            });
-            $('#matrizBody').html(body);
 
-            // Fila de totales por piscina
-            var foot = '<tr><th class="col-producto">TOTAL POR PISCINA</th>';
+                opciones +=
+                    '<option value="' + prod.id + '" data-stock="' + prod.stock + '">' +
+                    prod.nombre +
+                    '</option>';
+
+            });
+
+            let fila = '';
+
+            fila += '<tr>';
+
+            fila += '<td class="col-producto">';
+
+            fila += '<select class="form-control productoRow">';
+
+            fila += '<option value="">Seleccione...</option>';
+
+            fila += opciones;
+
+            fila += '</select>';
+
+            fila += '</td>';
+
             $.each(matriz.piscinas, function (i, p) {
-                foot += '<th class="total-col" data-piscina="' + p.valor + '">0</th>';
-            });
-            foot += '<th class="col-unidad"></th><th class="col-total" id="totalGeneral">0</th></tr>';
-            // limpiar y reasignar tfoot
-            $('#tblMatriz tfoot').remove();
-            $('#tblMatriz').append('<tfoot>' + foot + '</tfoot>');
 
-            recalcularTotalesColumna();
-        }
+                fila += '<td>';
 
-        function recalcularFila($tr) {
-            var total = 0;
-            $tr.find('input.celda').each(function () {
-                var v = parseFloat($(this).val());
-                if (!isNaN(v)) total += v;
-            });
-            $tr.find('.total-fila').text(parseFloat(total.toFixed(2)));
-        }
+                fila += '<input type="number" ' +
+                    'class="celda" ' +
+                    'data-piscina="' + p.valor + '" ' +
+                    'value="0" min="0" step="0.01">';
 
-        function recalcularTotalesColumna() {
-            var general = 0;
-            $('#tblMatriz tfoot .total-col').each(function () {
-                var pisc = $(this).data('piscina');
-                var suma = 0;
-                $('#matrizBody input.celda[data-piscina="' + pisc + '"]').each(function () {
-                    var v = parseFloat($(this).val());
-                    if (!isNaN(v)) suma += v;
-                });
-                $(this).text(parseFloat(suma.toFixed(2)));
-                general += suma;
+                fila += '</td>';
+
             });
-            $('#totalGeneral').text(parseFloat(general.toFixed(2)));
+
+            fila += '<td class="col-unidad stockRow">0</td>';
+
+            fila += '<td class="col-total total-fila">0</td>';
+
+            fila += '<td>';
+
+            fila += '<button type="button" class="btn btn-danger btn-sm eliminarFila">';
+
+            fila += '<i class="fas fa-times"></i>';
+
+            fila += '</button>';
+
+            fila += '</td>';
+
+            fila += '</tr>';
+
+            $('#matrizBody').append(fila);
+
         }
 
         function guardarEgreso() {
-            var empresa = $('#empresa').val();
+
+            let empresa = $('#empresa').val();
+
             if (!empresa) {
-                alert('Debe seleccionar una empresa.');
-                return;
-            }
-            var fecha = $('#fecha').val();
-            if (!fecha) {
-                alert('Debe ingresar la fecha.');
+                alert('Debe seleccionar una empresa');
                 return;
             }
 
-            // Construir items: una entrada por celda con cantidad > 0
-            var items = [];
+            let items = [];
+
             $('#matrizBody tr').each(function () {
-                var productoId = $(this).data('producto');
-                $(this).find('input.celda').each(function () {
-                    var cantidad = parseFloat($(this).val());
-                    if (!isNaN(cantidad) && cantidad > 0) {
+
+                let producto = $(this)
+                    .find('.productoRow')
+                    .val();
+
+                if (!producto) {
+                    return true; // continue
+                }
+
+                $(this).find('.celda').each(function () {
+
+                    let cantidad = parseFloat($(this).val()) || 0;
+
+                    if (cantidad > 0) {
+
                         items.push({
-                            'producto': productoId,
-                            'piscina': $(this).data('piscina'),
-                            'cantidad': cantidad
+
+                            producto: producto,
+
+                            piscina: $(this).data('piscina'),
+
+                            cantidad: cantidad
+
                         });
+
                     }
+
                 });
+
             });
 
             if (items.length === 0) {
-                alert('Debe registrar al menos una cantidad aplicada.');
+
+                alert('Debe ingresar al menos una cantidad');
+
                 return;
             }
 
             $.ajax({
+
                 url: window.location.pathname,
+
                 type: 'POST',
+
                 data: {
-                    'action': 'create',
-                    'empresa': empresa,
-                    'fecha': fecha,
-                    'responsable': $('#responsable').val(),
-                    'items': JSON.stringify(items)
+
+                    action: 'create',
+
+                    empresa: empresa,
+
+                    fecha: $('#fecha').val(),
+
+                    responsable: $('#responsable').val(),
+
+                    items: JSON.stringify(items)
+
                 },
-                dataType: 'json',
-            }).done(function (request) {
-                if (!request.hasOwnProperty('error')) {
-                    Swal.fire({
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Egreso registrado correctamente',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                    setTimeout(function () {
-                        location.href = "{% url 'app_stock_directo:listar_stock_directo_psm' %}";
-                    }, 1200);
+
+                dataType: 'json'
+
+            }).done(function (response) {
+
+                if (response.error) {
+
+                    alert(response.error);
+
                     return;
                 }
-                alert(request.error);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Registro guardado',
+                    text: response.registros + ' movimientos registrados',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                setTimeout(function () {
+
+                    location.reload();
+
+                }, 2000);
+
             }).fail(function (jqXHR, textStatus, errorThrown) {
-                alert('Error al guardar: ' + errorThrown + ' ' + textStatus);
+
+                alert(errorThrown);
+
             });
+
         }
 
     </script>
