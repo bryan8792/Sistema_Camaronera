@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <div class="card">
+
+        <div class="card-header bg-danger">
+
+            <h3>
+
+                Eliminar Transferencia
+
+            </h3>
+
+        </div>
+
+        <div class="card-body text-center">
+
+            <i class="fas fa-trash-alt fa-5x text-danger"></i>
+
+            <br><br>
+
+            <h4>
+
+                ¿Está seguro de eliminar el registro?
+
+            </h4>
+
+            <br>
+
+            <h5>
+
+                ID:
+                {{ object.id }}
+
+            </h5>
+
+            <h5>
+
+                Laboratorio:
+                {{ object.laboratorio }}
+
+            </h5>
+
+        </div>
+
+        <div class="card-footer">
+
+            <button type="submit"
+                    class="btn btn-primary">
+
+                <i class="fas fa-check"></i>
+
+                SI, ELIMINAR
+
+            </button>
+
+            <a href="{% url 'app_seguimiento_lineal:listar_transferencia' %}"
+               class="btn btn-danger">
+
+                Cancelar
+
+            </a>
+
+        </div>
+
+    </div>
+
+</form>
+
+{% endblock %}

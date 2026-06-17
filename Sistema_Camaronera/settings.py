@@ -71,6 +71,7 @@ LOCAL_APPS = [
     'app_filemanager',
     'app_anticipo',
     'app_retencion',
+    'app_seglineal.app_seguimiento',
 
 ]
 

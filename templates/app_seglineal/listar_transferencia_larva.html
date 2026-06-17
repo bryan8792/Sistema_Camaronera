@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+
+            <div class="row mb-2">
+
+                <div class="col-sm-12">
+
+                    <ol class="breadcrumb float-sm-left">
+
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                {{ nombre }}
+                                <i class="far nav-icon fa fa-home"></i>
+                            </a>
+                        </li>
+
+                        <li class="breadcrumb-item active">
+                            Listado
+                        </li>
+
+                    </ol>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <section class="content">
+
+        <div class="row">
+
+            <div class="col-12">
+
+                <div class="card">
+
+                    <div class="card-header"
+                         style="background-color:#3498DB">
+
+                        <h3 class="card-title">
+
+                            Registros de:
+                            <strong>{{ nombre }}</strong>
+
+                        </h3>
+
+                        <div class="card-tools">
+
+                            <a href="{% url 'app_seguimiento_lineal:dashboard_transferencia' %}"
+                               class="btn btn-success btn-sm">
+
+                                <i class="fas fa-chart-bar"></i>
+                                DASHBOARD
+
+                            </a>
+
+                            <a href="{% url 'app_seguimiento_lineal:crear_transf_larva' %}"
+                               class="btn btn-primary btn-sm">
+
+                                <i class="fas fa-plus"></i>
+                                NUEVO REGISTRO
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <table
+                                id="tblTransferencia"
+                                class="table table-sm table-bordered table-striped table-hover">
+
+                            <thead>
+
+                            <tr>
+
+                                <th>ID</th>
+
+                                <th>Fecha Larva</th>
+
+                                <th>Cantidad Larva</th>
+
+                                <th>Fecha Siembra</th>
+
+                                <th>Laboratorio</th>
+
+                                <th>Total Transferido</th>
+
+                                <th>% Sobrevivencia</th>
+
+                                <th>Piscinas</th>
+
+                                <th>Usuario</th>
+
+                                <th>Fecha Registro</th>
+
+                                <th>Acciones</th>
+
+                            </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            {% for t in object_list %}
+
+                                <tr>
+
+                                    <td>
+
+                                        {{ t.id }}
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ t.fecha_larva_sembrada|date:'d/m/Y' }}
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ t.cantidad_larva_sembrada|floatformat:0 }}
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ t.fecha_siembra_piscina|date:'d/m/Y' }}
+
+                                    </td>
+
+                                    <td>
+
+                                    <span class="badge badge-info">
+
+                                        {{ t.laboratorio }}
+
+                                    </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ t.total_transferido|floatformat:0 }}
+
+                                    </td>
+
+                                    <td>
+
+                                    <span class="badge badge-success">
+
+                                        {{ t.promedio_sobrevivencia|floatformat:2 }} %
+
+                                    </span>
+
+                                    </td>
+
+                                    <td>
+
+                                    <span class="badge badge-primary">
+
+                                        {{ t.cantidad_piscinas }}
+
+                                    </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ t.usuario }}
+
+                                    </td>
+
+                                    <td>
+
+                                        {{ t.fecha_registro|date:'d/m/Y H:i' }}
+
+                                    </td>
+
+                                    <td class="text-center">
+
+                                        <a href="{% url 'app_seguimiento_lineal:detalle_transferencia' t.id %}"
+                                           class="btn btn-info btn-xs">
+
+                                            <i class="fas fa-eye"></i>
+
+                                        </a>
+
+                                        <a href="{% url 'app_seguimiento_lineal:editar_transferencia' t.id %}"
+                                           class="btn btn-warning btn-xs">
+
+                                            <i class="fas fa-edit"></i>
+
+                                        </a>
+
+                                        <a href="{% url 'app_seguimiento_lineal:eliminar_transferencia' t.id %}"
+                                           class="btn btn-danger btn-xs">
+
+                                            <i class="fas fa-trash"></i>
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+
+        $(function () {
+
+            $('#tblTransferencia').DataTable({
+
+                responsive: true,
+
+                autoWidth: false,
+
+                destroy: true,
+
+                pageLength: 25,
+
+                order: [[0, 'desc']],
+
+                language: {
+
+                    url: '{% static "lib/datatables-1.10.20/spanish.txt" %}'
+
+                },
+
+                dom: 'Bfrtip',
+
+                buttons: [
+
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel"></i> Excel',
+                        className: 'btn btn-success btn-sm'
+                    },
+
+                    {
+                        extend: 'pdf',
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        className: 'btn btn-danger btn-sm'
+                    },
+
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Imprimir',
+                        className: 'btn btn-info btn-sm'
+                    }
+
+                ]
+
+            });
+
+        });
+
+    </script>
+
+{% endblock %}

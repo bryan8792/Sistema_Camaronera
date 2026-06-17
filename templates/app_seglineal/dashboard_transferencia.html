@@ -1,0 +1,483 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+
+<div class="content-header">
+    <div class="container-fluid">
+
+        <div class="row mb-2">
+
+            <div class="col-sm-6">
+                <h4>
+                    Dashboard Transferencia de Larvas
+                </h4>
+            </div>
+
+            <div class="col-sm-6 text-right">
+
+                <a href="{% url 'app_seguimiento_lineal:listar_transferencia' %}"
+                   class="btn btn-secondary">
+
+                    <i class="fas fa-list"></i>
+                    Listado
+
+                </a>
+
+                <a href="{% url 'app_seguimiento_lineal:crear_transf_larva' %}"
+                   class="btn btn-primary">
+
+                    <i class="fas fa-plus"></i>
+                    Nuevo Registro
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<section class="content">
+
+    <div class="card">
+
+        <div class="card-header bg-primary">
+
+            <h3 class="card-title">
+
+                Dashboard de Supervivencia de Larvas
+
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <label>
+                        Laboratorio
+                    </label>
+
+                    <select id="laboratorio"
+                            class="form-control">
+
+                        <option value="">
+                            TODOS
+                        </option>
+
+                        {% for l in laboratorios %}
+
+                            <option value="{{ l }}">
+                                {{ l }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label>
+                        Sector
+                    </label>
+
+                    <select id="sector"
+                            class="form-control">
+
+                        <option value="">
+                            TODOS
+                        </option>
+
+                        {% for s in sectores %}
+
+                            <option value="{{ s }}">
+                                {{ s }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label>
+                        Desde Piscina
+                    </label>
+
+                    <select id="desde"
+                            class="form-control">
+
+                        <option value="">
+                            TODOS
+                        </option>
+
+                        {% for d in desde_piscinas %}
+
+                            <option value="{{ d }}">
+                                {{ d }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <br>
+
+            <button
+                id="btnBuscar"
+                type="button"
+                class="btn btn-success">
+
+                <i class="fas fa-search"></i>
+                Consultar
+
+            </button>
+
+            <hr>
+
+            <div class="row">
+
+                <div class="col-md-3">
+
+                    <div class="small-box bg-info">
+
+                        <div class="inner">
+
+                            <h3 id="lblPiscinas">
+                                0
+                            </h3>
+
+                            <p>
+                                Piscinas
+                            </p>
+
+                        </div>
+
+                        <div class="icon">
+
+                            <i class="fas fa-water"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="small-box bg-success">
+
+                        <div class="inner">
+
+                            <h3 id="lblPromedio">
+                                0%
+                            </h3>
+
+                            <p>
+                                Promedio Supervivencia
+                            </p>
+
+                        </div>
+
+                        <div class="icon">
+
+                            <i class="fas fa-chart-line"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="graficoContainer">
+
+                <canvas id="graficoSupervivencia"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+#graficoContainer{
+
+    background:#2d3436;
+
+    padding:20px;
+
+    border-radius:10px;
+
+    overflow-x:auto;
+
+}
+
+#graficoSupervivencia{
+
+    min-width:2200px;
+
+    height:600px !important;
+
+}
+
+</style>
+
+<script>
+
+let chart1 = null;
+
+$(function(){
+
+    cargarGrafico();
+
+    $('#btnBuscar').click(function(){
+
+        cargarGrafico();
+
+    });
+
+});
+
+function cargarGrafico(){
+
+    $.ajax({
+
+        url: window.location.pathname,
+
+        type:'POST',
+
+        data:{
+
+            csrfmiddlewaretoken:'{{ csrf_token }}',
+
+            action:'grafico',
+
+            laboratorio:$('#laboratorio').val(),
+
+            sector:$('#sector').val(),
+
+            desde:$('#desde').val()
+
+        },
+
+        dataType:'json',
+
+        success:function(data){
+
+            generarGrafico(data);
+
+        }
+
+    });
+
+}
+
+function generarGrafico(data){
+
+    if(chart1){
+
+        chart1.destroy();
+
+    }
+
+    let promedio = 0;
+
+    if(data.supervivencia.length > 0){
+
+        let suma = 0;
+
+        data.supervivencia.forEach(function(v){
+
+            suma += parseFloat(v);
+
+        });
+
+        promedio = suma / data.supervivencia.length;
+
+    }
+
+    $('#lblPiscinas').html(data.categorias.length);
+
+    $('#lblPromedio').html(
+        promedio.toFixed(2) + '%'
+    );
+
+    chart1 = new Chart(
+
+        document.getElementById(
+            'graficoSupervivencia'
+        ),
+
+        {
+
+            type:'bar',
+
+            data:{
+
+                labels:data.categorias,
+
+                datasets:[{
+
+                    label:'% Sobrevivencia',
+
+                    data:data.supervivencia,
+
+                    backgroundColor:
+                        'rgba(54,162,235,0.8)',
+
+                    borderColor:
+                        'rgba(54,162,235,1)',
+
+                    borderWidth:1
+
+                }]
+
+            },
+
+            options:{
+
+                responsive:true,
+
+                maintainAspectRatio:false,
+
+                plugins:{
+
+                    legend:{
+                        labels:{
+                            color:'white'
+                        }
+                    },
+
+                    title:{
+
+                        display:true,
+
+                        text:'Sobrevivencia de larva por Piscina',
+
+                        color:'white',
+
+                        font:{
+                            size:22
+                        }
+
+                    }
+
+                },
+
+                scales:{
+
+                    x:{
+
+                        ticks:{
+                            color:'white'
+                        },
+
+                        grid:{
+                            color:'#444'
+                        }
+
+                    },
+
+                    y:{
+
+                        beginAtZero:true,
+
+                        max:100,
+
+                        ticks:{
+
+                            color:'white',
+
+                            callback:function(value){
+
+                                return value + '%';
+
+                            }
+
+                        },
+
+                        grid:{
+                            color:'#444'
+                        }
+
+                    }
+
+                }
+
+            },
+
+            plugins:[{
+
+                id:'labels',
+
+                afterDatasetsDraw(chart){
+
+                    const ctx = chart.ctx;
+
+                    chart.data.datasets.forEach((dataset,i)=>{
+
+                        const meta =
+                            chart.getDatasetMeta(i);
+
+                        meta.data.forEach((bar,index)=>{
+
+                            let value =
+                                dataset.data[index];
+
+                            ctx.fillStyle='white';
+
+                            ctx.font='11px Arial';
+
+                            ctx.textAlign='center';
+
+                            ctx.fillText(
+
+                                value.toFixed(2)+'%',
+
+                                bar.x,
+
+                                bar.y - 8
+
+                            );
+
+                        });
+
+                    });
+
+                }
+
+            }]
+
+        }
+
+    );
+
+}
+
+</script>
+
+{% endblock %}

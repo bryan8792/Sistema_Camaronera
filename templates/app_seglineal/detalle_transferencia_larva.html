@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block contenido %}
+
+<div class="card">
+
+    <div class="card-header bg-info">
+
+        <h3 class="card-title">
+
+            DETALLE TRANSFERENCIA #{{ object.id }}
+
+        </h3>
+
+    </div>
+
+    <div class="card-body">
+
+        <table class="table table-bordered">
+
+            <tr>
+                <th>Fecha Larva</th>
+                <td>{{ object.fecha_larva_sembrada }}</td>
+            </tr>
+
+            <tr>
+                <th>Fecha Siembra</th>
+                <td>{{ object.fecha_siembra_piscina }}</td>
+            </tr>
+
+            <tr>
+                <th>Laboratorio</th>
+                <td>{{ object.laboratorio }}</td>
+            </tr>
+
+        </table>
+
+        <hr>
+
+        <table class="table table-striped">
+
+            <thead>
+
+            <tr>
+
+                <th>Piscina</th>
+
+                <th>Sector</th>
+
+                <th>Animales</th>
+
+                <th>% Sobrevivencia</th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for d in object.detalles.all %}
+
+                <tr>
+
+                    <td>
+
+                        {{ d.hacia_piscina }}
+
+                    </td>
+
+                    <td>
+
+                        {{ d.sector }}
+
+                    </td>
+
+                    <td>
+
+                        {{ d.animales_sembrados }}
+
+                    </td>
+
+                    <td>
+
+                        {{ d.porcentaje_sobrevivencia }} %
+
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

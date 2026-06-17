@@ -565,8 +565,7 @@ class crearEgresoDirectoMatrizView(TemplateView):
                 piscinas = []
                 qs_piscinas = Piscinas.objects.filter(
                     empresa__siglas=empresa,
-                    estado=True,
-                    pis=True
+                    estado=True
                 ).order_by('numero')
                 for p in qs_piscinas:
                     piscinas.append({
@@ -584,7 +583,7 @@ class crearEgresoDirectoMatrizView(TemplateView):
                     productos.append({
                         'id': ts.id,
                         'nombre': ts.nombre_prod.nombre,
-                        'stock': format(ts.stock, '.2f'),
+                        'unidad': ts.nombre_prod.presentacion or '',
                     })
 
                 data['piscinas'] = piscinas

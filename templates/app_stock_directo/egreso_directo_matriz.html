@@ -164,7 +164,7 @@
                             <thead>
                             <tr id="matrizHead">
                                 <th class="col-producto">PRODUCTOS</th>
-                                <th class="col-unidad">STOCK</th>
+                                <th class="col-unidad">UNIDAD DE DESPACHO</th>
                                 <th class="col-total">TOTAL</th>
                                 <th>ACCION</th>
                             </tr>
@@ -186,6 +186,13 @@
 
                         <i class="fas fa-plus"></i>
                         Agregar Producto
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-info btn-sm"
+                            id="btnAgregarPiscina">
+                        <i class="fas fa-plus"></i>
+                        Agregar Piscina
                     </button>
 
                 </div>
@@ -212,6 +219,7 @@
             piscinas: [],   // [{valor, label}]  valor = texto que se guarda en CharField
             productos: [],  // [{id, nombre, stock}]
         };
+        var piscinasSeleccionadas = [];
 
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
@@ -230,14 +238,15 @@
             });
 
             $('#matrizBody').on('change', '.productoRow', function () {
-                let stock =
+                let unidad =
                     $(this)
                         .find(':selected')
-                        .data('stock') || 0;
+                        .data('unidad') || '';
+
                 $(this)
                     .closest('tr')
                     .find('.stockRow')
-                    .html(stock);
+                    .html(unidad);
             });
 
             $('#matrizBody').on('click', '.eliminarFila', function () {
@@ -246,24 +255,24 @@
 
             $('#matrizBody').on('keyup change', '.celda', function () {
 
-    let fila = $(this).closest('tr');
-    let totalFila = 0;
+                let fila = $(this).closest('tr');
+                let totalFila = 0;
 
-    fila.find('.celda').each(function () {
-        totalFila += parseFloat($(this).val()) || 0;
-    });
+                fila.find('.celda').each(function () {
+                    totalFila += parseFloat($(this).val()) || 0;
+                });
 
-    fila.find('.total-fila').html(totalFila.toFixed(2));
+                fila.find('.total-fila').html(totalFila.toFixed(2));
 
-    let totalGeneral = 0;
+                let totalGeneral = 0;
 
-    $('#matrizBody .total-fila').each(function () {
-        totalGeneral += parseFloat($(this).text()) || 0;
-    });
+                $('#matrizBody .total-fila').each(function () {
+                    totalGeneral += parseFloat($(this).text()) || 0;
+                });
 
-    $('#totalGeneral').html(totalGeneral.toFixed(2));
+                $('#totalGeneral').html(totalGeneral.toFixed(2));
 
-});
+            });
 
             $('.productoRow').select2({
                 theme: 'bootstrap4',
@@ -290,6 +299,56 @@
                 recalcularTotalesColumna();
             });
 
+            $('#btnAgregarPiscina').on('click', function () {
+
+                let opciones = {};
+
+                $.each(matriz.piscinas, function (i, p) {
+
+                    if (!piscinasSeleccionadas.includes(String(p.valor))) {
+                        opciones[p.valor] = p.label;
+                    }
+
+                });
+
+                Swal.fire({
+                    title: 'Seleccione una piscina',
+                    input: 'select',
+                    inputOptions: opciones,
+                    showCancelButton: true
+                }).then((result) => {
+
+                    console.log("RESULTADO:", result);
+
+                    if (!result.value) {
+                        return;
+                    }
+
+                    let piscinaId = String(result.value);
+
+                    console.log("Seleccionada:", piscinaId);
+
+                    if (piscinasSeleccionadas.includes(piscinaId)) {
+
+                        Swal.fire(
+                            'Aviso',
+                            'La piscina ya fue agregada',
+                            'warning'
+                        );
+
+                        return;
+                    }
+
+                    piscinasSeleccionadas.push(piscinaId);
+
+                    console.log("Array:", piscinasSeleccionadas);
+
+                    renderColumnas();
+
+                });
+
+            });
+
             // GUARDAR
             $('.btnSave').on('click', function () {
                 guardarEgreso();
@@ -297,7 +356,7 @@
         });
 
         function cargarMatriz(empresa) {
-
+            piscinasSeleccionadas = [];
             $.ajax({
                 url: window.location.pathname,
                 type: 'POST',
@@ -324,7 +383,7 @@
 
             $('#matrizHead').html(
                 '<th class="col-producto">PRODUCTOS</th>' +
-                '<th class="col-unidad">STOCK</th>' +
+                '<th class="col-unidad">UNIDAD DE DESPACHO</th>' +
                 '<th class="col-total">TOTAL</th>' +
                 '<th>ACCION</th>'
             );
@@ -338,16 +397,7 @@
             let head =
                 '<th class="col-producto">PRODUCTOS</th>';
 
-            $.each(matriz.piscinas, function (i, p) {
-
-                head +=
-                    '<th data-piscina="' + p.valor + '">' +
-                    p.label +
-                    '</th>';
-
-            });
-
-            head += '<th class="col-unidad">STOCK</th>';
+            head += '<th class="col-unidad">UNIDAD DE DESPACHO</th>';
             head += '<th class="col-total">TOTAL</th>';
             head += '<th>ACCION</th>';
 
@@ -356,14 +406,64 @@
             $('#matrizBody').html('');
         }
 
+        function renderColumnas() {
+
+            console.log("Entró a renderColumnas");
+            console.log("Piscinas seleccionadas:", piscinasSeleccionadas);
+
+            let head = '<th class="col-producto">PRODUCTOS</th>';
+
+            $.each(piscinasSeleccionadas, function (i, piscinaId) {
+
+                let piscina = matriz.piscinas.find(function (x) {
+                    return String(x.valor) === String(piscinaId);
+                });
+
+                console.log("Piscina encontrada:", piscina);
+
+                if (piscina) {
+
+                    head +=
+                        '<th data-piscina="' + piscinaId + '">' +
+                        piscina.label +
+                        '</th>';
+                }
+
+            });
+
+            head += '<th class="col-unidad">UNIDAD DE DESPACHO</th>';
+            head += '<th class="col-total">TOTAL</th>';
+            head += '<th>ACCION</th>';
+
+            console.log("HTML generado:");
+            console.log(head);
+
+            $('#matrizHead').empty().append(head);
+
+            console.log("Cabecera actual:");
+            console.log($('#matrizHead').html());
+
+        }
+
         function agregarProducto() {
+
+            if (piscinasSeleccionadas.length === 0) {
+
+                Swal.fire(
+                    'Aviso',
+                    'Primero agregue una piscina',
+                    'warning'
+                );
+
+                return;
+            }
 
             let opciones = '';
 
             $.each(matriz.productos, function (i, prod) {
 
                 opciones +=
-                    '<option value="' + prod.id + '" data-stock="' + prod.stock + '">' +
+                    '<option value="' + prod.id + '" data-unidad="' + prod.unidad + '">' +
                     prod.nombre +
                     '</option>';
 
@@ -385,13 +485,13 @@
 
             fila += '</td>';
 
-            $.each(matriz.piscinas, function (i, p) {
+            $.each(piscinasSeleccionadas, function (i, piscinaId) {
 
                 fila += '<td>';
 
                 fila += '<input type="number" ' +
                     'class="celda" ' +
-                    'data-piscina="' + p.valor + '" ' +
+                    'data-piscina="' + piscinaId + '" ' +
                     'value="0" min="0" step="0.01">';
 
                 fila += '</td>';
