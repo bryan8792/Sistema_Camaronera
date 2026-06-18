@@ -2213,3 +2213,88 @@ class KardexStockPiscinaView(TemplateView):
         })
 
         return context
+
+
+
+class KardexStockProductoView(TemplateView):
+    template_name = 'app_stock/app_control/kardex_stock_producto.html'
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        fecha_desde = self.request.GET.get('fecha_desde')
+        fecha_hasta = self.request.GET.get('fecha_hasta')
+        empresa_id = self.request.GET.get('empresa')
+        producto_id = self.request.GET.get('producto')
+        empresas = Empresa.objects.all().order_by('nombre')
+        productos = Producto.objects.all().order_by('nombre')
+        filtros = Q(activo=True)
+        # SOLO CONSUMO DE DIETA
+        filtros &= Q(numero_guia__icontains='CONSUMO DE DIETA')
+        if fecha_desde:
+            filtros &= Q(fecha_ingreso__gte=fecha_desde)
+        if fecha_hasta:
+            filtros &= Q(fecha_ingreso__lte=fecha_hasta)
+        if empresa_id:
+            filtros &= Q(producto_empresa__nombre_empresa_id=empresa_id)
+        if producto_id:
+            filtros &= Q(producto_empresa__nombre_prod_id=producto_id)
+
+        movimientos_qs = (
+            Producto_Stock.objects
+            .filter(filtros)
+            .select_related(
+                'producto_empresa',
+                'producto_empresa__nombre_prod',
+                'producto_empresa__nombre_empresa'
+            )
+            .order_by(
+                'producto_empresa__nombre_prod__nombre',
+                'fecha_ingreso',
+                'id'
+            )
+        )
+
+        movimientos = []
+        saldo_producto = {}
+        total_ingreso = Decimal('0')
+        total_egreso = Decimal('0')
+
+        for mov in movimientos_qs:
+            producto = ''
+            if mov.producto_empresa and mov.producto_empresa.nombre_prod:
+                producto = mov.producto_empresa.nombre_prod.nombre
+            ingreso = Decimal(mov.cantidad_ingreso or 0)
+            egreso = Decimal(mov.cantidad_egreso or 0)
+            if producto not in saldo_producto:
+                saldo_producto[producto] = Decimal('0')
+            saldo_producto[producto] += ingreso
+            saldo_producto[producto] -= egreso
+            total_ingreso += ingreso
+            total_egreso += egreso
+            movimientos.append({
+                'producto': producto,
+                'egresos': mov.numero_guia or '',
+                'fecha': mov.fecha_ingreso,
+                'ingreso': ingreso,
+                'egreso': egreso,
+                'saldo': saldo_producto[producto],
+                'responsable': mov.responsable_ingreso or '',
+            })
+        context.update({
+            'nombre': 'KARDEX STOCK POR PRODUCTO',
+            'movimientos': movimientos,
+            'empresas': empresas,
+            'productos_dropdown': productos,
+            'empresa_id': empresa_id,
+            'producto_id': producto_id,
+            'fecha_desde': fecha_desde,
+            'fecha_hasta': fecha_hasta,
+            'total_ingreso': total_ingreso,
+            'total_egreso': total_egreso,
+            'saldo_general': total_ingreso - total_egreso,
+        })
+        return context

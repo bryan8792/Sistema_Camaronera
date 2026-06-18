@@ -84,7 +84,7 @@ function renderizarTabla() {
     var headerHtml = '<th>MES</th>';
     productos.forEach(function(producto, index) {
         // Truncar nombre si es muy largo para el header vertical
-        var nombreCorto = producto.length > 20 ? producto.substring(0, 17) + '...' : producto;
+        var nombreCorto = producto.length > 40 ? producto.substring(0, 37) + '...' : producto;
         headerHtml += '<th title="' + producto + '">' + nombreCorto + '</th>';
     });
     $('#header_row').html(headerHtml);

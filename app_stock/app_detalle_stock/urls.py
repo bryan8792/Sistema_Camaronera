@@ -21,6 +21,7 @@ urlpatterns = [
     path('consumo_insumos_piscina/', ConsumoInsumosPiscinaView.as_view(), name='consumo_insumos_piscina'),
 
     path('kardex_stock_piscina/', KardexStockPiscinaView.as_view(), name='kardex_stock_piscina'),
+    path('kardex_stock_producto/', KardexStockProductoView.as_view(), name='kardex_stock_producto'),
 
     path('listarpsmunico/<int:pk>/', listarStockUnicoPSMView.as_view(), name='listar_stock_unico_psm'),
     path('listarbiounico/<int:pk>/', listarStockUnicoBIOView.as_view(), name='listar_stock_unico_bio'),

@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+
+    <link rel="stylesheet" href="{% static 'acciones/app_datatable/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/css/dataTables.bootstrap4.min.css' %}">
+    <link rel="stylesheet" href="{% static 'lib/datatables-1.10.20/plugins/responsive-2.2.3/css/responsive.bootstrap4.min.css' %}">
+
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            body {
+                font-size: 9pt;
+            }
+
+            @page {
+                margin: 0.5cm;
+            }
+        }
+
+        .reporte-container {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            width: 100%;
+            padding: 15px;
+            background: #fff;
+        }
+
+        .reporte-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .reporte-header h3,
+        .reporte-header h4 {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .tabla-reporte {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .tabla-reporte thead th {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            padding: 6px 5px;
+            text-align: left;
+        }
+
+        .tabla-reporte tbody td {
+            padding: 4px 5px;
+            border: none;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .total-general td {
+            border-top: 1px solid #000;
+            font-weight: bold;
+            padding-top: 8px;
+        }
+    </style>
+
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">
+                        KARDEX STOCK POR PRODUCTO
+                    </h1>
+                </div>
+
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Kardex</a></li>
+                        <li class="breadcrumb-item active">Reporte</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card card-primary">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-warehouse"></i>&nbsp;  Movimientos de Inventario
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <!-- FILTROS -->
+                    <form method="GET">
+                        <div class="row">
+
+                            <div class="col-md-2">
+                                <label>Fecha Desde</label>
+                                <input type="date" name="fecha_desde" class="form-control" value="{{ fecha_desde }}">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label>Fecha Hasta</label>
+                                <input type="date" name="fecha_hasta" class="form-control" value="{{ fecha_hasta }}">
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Empresa</label>
+                                <select name="empresa" class="form-control">
+                                    <option value="">Todas</option>
+                                    {% for emp in empresas %}
+                                        <option value="{{ emp.id }}"
+                                                {% if empresa_id == emp.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ emp.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>Producto</label>
+                                <select name="producto" class="form-control">
+                                    <option value="">Todos</option>
+                                    {% for prod in productos_dropdown %}
+                                        <option value="{{ prod.id }}"{% if producto_id == prod.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ prod.nombre }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-search"></i>Filtrar
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <hr>
+                    <!-- BOTONES -->
+                    <div class="mb-3">
+                        <button class="btn btn-success" onclick="exportTableToExcel('tblKardex','KardexStock')">
+                            <i class="fas fa-file-excel"></i>Excel
+                        </button>
+                        <button class="btn btn-danger" onclick="window.print()">
+                            <i class="fas fa-print"></i>Imprimir
+                        </button>
+                    </div>
+                    <!-- TABLA -->
+                    <div class="reporte-container" id="reporte-container">
+                        <div class="reporte-header">
+                            <h3>
+                                {% if empresa_nombre %}
+                                    <b>{{ empresa_nombre|upper }}</b>
+                                {% else %}
+                                    <b>TODAS LAS EMPRESAS</b>
+                                {% endif %}
+                            </h3>
+                            <h4>KARDEX STOCK POR PRODUCTO</h4>
+                            <p>
+                                DESDE:
+                                {{ fecha_desde|default:"Inicio" }}
+                                HASTA:
+                                {{ fecha_hasta|default:"Actual" }}
+                            </p>
+                        </div>
+
+                        <table class="tabla-reporte" id="tblKardex">
+                            <thead>
+                            <tr>
+                                <th>PRODUCTO</th>
+                                <th>EGRESOS</th>
+                                <th>FECHA</th>
+                                <th>INGRESO</th>
+                                <th>EGRESO</th>
+                                <th>SALDO</th>
+                                <th>RESPONSABLE</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            {% for mov in movimientos %}
+                                <tr>
+                                    <td>{{ mov.producto }}</td>
+                                    <td>{{ mov.egresos }}</td>
+                                    <td class="text-center">{{ mov.fecha|date:"Y/m/d" }}</td>
+                                    <td class="text-right">{{ mov.ingreso|floatformat:2 }}</td>
+                                    <td class="text-right">{{ mov.egreso|floatformat:2 }}</td>
+                                    <td class="text-right">{{ mov.saldo|floatformat:2 }}</td>
+                                    <td class="text-center">{{ mov.responsable }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No existen registros</td>
+                                </tr>
+                            {% endfor %}
+
+                            {% if movimientos %}
+                                <tr class="total-general">
+                                    <td colspan="3" class="text-right">TOTAL GENERAL_____</td>
+                                    <td class="text-right">{{ total_ingreso|floatformat:2 }}</td>
+                                    <td class="text-right">{{ total_egreso|floatformat:2 }}</td>
+                                    <td class="text-right">{{ saldo_general|floatformat:2 }}</td>
+                                    <td></td>
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function exportTableToExcel(tableID, filename = '') {
+            var downloadLink;
+            var dataType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+            filename = filename ? filename + '.xls' : 'excel_data.xls';
+            downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+            if (navigator.msSaveOrOpenBlob) {
+                var blob = new Blob(['\ufeff', tableHTML], {
+                    type: dataType
+                });
+                navigator.msSaveOrOpenBlob(blob, filename);
+            } else {
+                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+                downloadLink.download = filename;
+                downloadLink.click();
+            }
+        }
+    </script>
+{% endblock %}
