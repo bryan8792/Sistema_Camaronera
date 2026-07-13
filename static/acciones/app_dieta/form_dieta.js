@@ -2,6 +2,7 @@ var tblProducts;
 var tblSearchProducts;
 var balanced = [];
 var supplies = [];
+var productsData = {};
 var vents = {
     items: {
         mes_dieta: '',
@@ -28,24 +29,55 @@ var vents = {
             },
             dataType: 'json',
         }).done(function (data) {
+
             if (!data.hasOwnProperty('error')) {
-                console.log(data);
+                balanced = [];
+                supplies = [];
+                productsData = {};
                 $.each(data, function (key, value) {
-                    //console.log(value);
+                    // Guardar el producto completo
+                    productsData[value.id] = value;
                     if (value.categoria.id === 2) {
-                        balanced.push({'id': value.id, 'text': value.nombre});
+                        balanced.push({
+                            id: value.id,
+                            text: value.nombre
+                        });
                     } else {
-                        if (value.gramaje != null) {
-                            supplies.push({'id': value.id, 'text': value.nombre});
+                        // Solo mostrar insumos que tengan gramaje
+                        if (value.gramaje && value.gramaje.trim() !== "") {
+                            supplies.push({
+                                id: value.id,
+                                text: value.nombre
+                            });
                         }
                     }
                 });
             }
         }).fail(function (jqXHR, textStatus, errorThrown) {
             alert(textStatus + ': ' + errorThrown);
-        }).always(function (data) {
-
         });
+    },
+    calcularGramaje: function (cantidad, gramaje) {
+
+        if (!gramaje)
+            return 0;
+
+        gramaje = gramaje.replace(',', '.');
+
+        if (gramaje.indexOf('/') !== -1) {
+
+            var partes = gramaje.split('/');
+
+            if (partes.length == 2) {
+
+                return ((cantidad * parseFloat(partes[0])) / parseFloat(partes[1])).toFixed(0);
+
+            }
+
+        }
+
+        return (cantidad * parseFloat(gramaje)).toFixed(0);
+
     },
     get_ids: function () {
         var ids = [];
@@ -227,10 +259,10 @@ var vents = {
             ],
             rowCallback: function (row, data, index) {
                 var tr = $(row).closest('tr');
-                console.log('resultado de balanced');
-                console.log(balanced);
-                console.log('resultado de supplies');
-                console.log(supplies);
+                // console.log('resultado de balanced');
+                // console.log(balanced);
+                // console.log('resultado de supplies');
+                // console.log(supplies);
                 //console.log(data);
                 tr.find('select[name="balanceado"]').select2({
                     theme: 'bootstrap4',
@@ -272,6 +304,8 @@ var vents = {
 
 
 $(function () {
+
+    vents.getItems();
 
     $('.select2').select2({
         theme: 'bootstrap4',
@@ -463,21 +497,37 @@ $(function () {
             data.balanceado = $(this).val();
             console.log('data.balanceado')
             console.log(data.balanceado)
-            /* var balan = data.balanceado;
-             if (data.balanceado > 0) {
-                 parseFloat(data.balanceado > 0 ? data.balanceado : 0).toFixed(0)
-             } else {
-
-             }*/
         })
 
-        .on('change', 'input[name="cantidad"]', function () {
+        /*.on('change', 'input[name="cantidad"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             var data = tblProducts.row(tr.row).data();
             data.cantidad = parseInt($(this).val());
+        })*/
+
+        .on('change', 'input[name="cantidad"]', function () {
+            var tr = tblProducts.cell($(this).closest('td')).index();
+            var row = vents.items.products[tr.row];
+            row.cantidad = parseFloat($(this).val()) || 0;
+            function actualizar(insumo, campoGramaje, columna) {
+                if (row[insumo] > 0) {
+                    var producto = productsData[row[insumo]];
+                    if (producto) {
+                        row[campoGramaje] = vents.calcularGramaje(row.cantidad, producto.gramaje);
+                        $('td:eq(' + columna + ')', tblProducts.row(tr.row).node()).html('<b>' + row[campoGramaje] + '</b>');
+                    }
+                } else {
+                    row[campoGramaje] = 0;
+                    $('td:eq(' + columna + ')', tblProducts.row(tr.row).node()).html('<b>0</b>');
+                }
+            }
+            actualizar('insumo1', 'gramaje1', 5);
+            actualizar('insumo2', 'gramaje2', 7);
+            actualizar('insumo3', 'gramaje3', 9);
+            actualizar('insumo4', 'gramaje4', 11);
         })
 
-        .on('change', 'select[name="insumo1"]', function () {
+        /*.on('change', 'select[name="insumo1"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             var data = tblProducts.row(tr.row).data();
             data.insumo1 = $(this).val();
@@ -510,38 +560,35 @@ $(function () {
             } else {
                 $('td:eq(5)', tblProducts.row(tr.row).node()).html('<b>' + 0 + '</b>');
             }
+        })*/
+
+        .on('change', 'select[name="insumo1"]', function () {
+            var tr = tblProducts.cell($(this).closest('td, li')).index();
+            var data = tblProducts.row(tr.row).data();
+            data.insumo1 = $(this).val();
+            if (data.insumo1 > 0) {
+                var producto = productsData[data.insumo1];
+                if (producto) {
+                    vents.items.products[tr.row].gramaje1 = vents.calcularGramaje(vents.items.products[tr.row].cantidad, producto.gramaje);
+                    $('td:eq(5)', tblProducts.row(tr.row).node()).html('<b>' + vents.items.products[tr.row].gramaje1 + '</b>');
+                }
+            } else {
+                $('td:eq(5)', tblProducts.row(tr.row).node()).html('<b>0</b>');
+            }
         })
 
         .on('change', 'select[name="insumo2"]', function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             var data = tblProducts.row(tr.row).data();
             data.insumo2 = $(this).val();
-            var insum2 = data.insumo2;
             if (data.insumo2 > 0) {
-                $.ajax({
-                    url: window.location.pathname,
-                    type: 'POST',
-                    data: {
-                        'action': 'search_balanceado'
-                    },
-                    dataType: 'json',
-                }).done(function (data) {
-                    if (!data.hasOwnProperty('error')) {
-                        $.each(data, function (key, value) {
-                            if (insum2 == value.id) {
-                                vents.items.products[tr.row].gramaje2 = (vents.items.products[tr.row].cantidad * eval(value.gramaje)).toFixed(0);
-                                $('td:eq(7)', tblProducts.row(tr.row).node()).html('<b>' + parseFloat(vents.items.products[tr.row].gramaje2 > 0 ? vents.items.products[tr.row].gramaje2 : 0).toFixed(0) + '</b>');
-                            }
-                        });
-                        return false;
-                    }
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
-                }).always(function (data) {
-                    //select_products.html(options);
-                });
+                var producto = productsData[data.insumo2];
+                if (producto) {
+                    vents.items.products[tr.row].gramaje2 = vents.calcularGramaje(vents.items.products[tr.row].cantidad, producto.gramaje);
+                    $('td:eq(7)', tblProducts.row(tr.row).node()).html('<b>' + vents.items.products[tr.row].gramaje2 + '</b>');
+                }
             } else {
-                $('td:eq(7)', tblProducts.row(tr.row).node()).html('<b>' + 0 + '</b>');
+                $('td:eq(7)', tblProducts.row(tr.row).node()).html('<b>0</b>');
             }
         })
 
@@ -549,32 +596,14 @@ $(function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             var data = tblProducts.row(tr.row).data();
             data.insumo3 = $(this).val();
-            var insum3 = data.insumo3;
             if (data.insumo3 > 0) {
-                $.ajax({
-                    url: window.location.pathname,
-                    type: 'POST',
-                    data: {
-                        'action': 'search_balanceado'
-                    },
-                    dataType: 'json',
-                }).done(function (data) {
-                    if (!data.hasOwnProperty('error')) {
-                        $.each(data, function (key, value) {
-                            if (insum3 == value.id) {
-                                vents.items.products[tr.row].gramaje3 = (vents.items.products[tr.row].cantidad * eval(value.gramaje)).toFixed(0);
-                                $('td:eq(9)', tblProducts.row(tr.row).node()).html('<b>' + parseFloat(vents.items.products[tr.row].gramaje3 > 0 ? vents.items.products[tr.row].gramaje3 : 0).toFixed(0) + '</b>');
-                            }
-                        });
-                        return false;
-                    }
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
-                }).always(function (data) {
-                    //select_products.html(options);
-                });
+                var producto = productsData[data.insumo3];
+                if (producto) {
+                    vents.items.products[tr.row].gramaje3 = vents.calcularGramaje(vents.items.products[tr.row].cantidad, producto.gramaje);
+                    $('td:eq(9)', tblProducts.row(tr.row).node()).html('<b>' + vents.items.products[tr.row].gramaje3 + '</b>');
+                }
             } else {
-                $('td:eq(9)', tblProducts.row(tr.row).node()).html('<b>' + 0 + '</b>');
+                $('td:eq(9)', tblProducts.row(tr.row).node()).html('<b>0</b>');
             }
         })
 
@@ -582,33 +611,14 @@ $(function () {
             var tr = tblProducts.cell($(this).closest('td, li')).index();
             var data = tblProducts.row(tr.row).data();
             data.insumo4 = $(this).val();
-            var insum4 = data.insumo4;
             if (data.insumo4 > 0) {
-                $.ajax({
-                    url: window.location.pathname,
-                    type: 'POST',
-                    data: {
-                        'action': 'search_balanceado'
-                    },
-                    dataType: 'json',
-                }).done(function (data) {
-                    if (!data.hasOwnProperty('error')) {
-                        $.each(data, function (key, value) {
-                            if (insum4 == value.id) {
-                                // vents.items.products[tr.row].gramaje4 = calculos(vents.items.products[tr.row].cantidad, value.gramaje);
-                                vents.items.products[tr.row].gramaje4 =  (vents.items.products[tr.row].cantidad * eval(value.gramaje)).toFixed(0);
-                                $('td:eq(-1)', tblProducts.row(tr.row).node()).html('<b>' + parseFloat(vents.items.products[tr.row].gramaje4 > 0 ? vents.items.products[tr.row].gramaje4 : 0).toFixed(0) + '</b>');
-                            }
-                        });
-                        return false;
-                    }
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    alert(textStatus + ': ' + errorThrown);
-                }).always(function (data) {
-                    console.log('Operacion realizada correctamente')
-                });
+                var producto = productsData[data.insumo4];
+                if (producto) {
+                    vents.items.products[tr.row].gramaje4 = vents.calcularGramaje(vents.items.products[tr.row].cantidad, producto.gramaje);
+                    $('td:eq(11)', tblProducts.row(tr.row).node()).html('<b>' + vents.items.products[tr.row].gramaje4 + '</b>');
+                }
             } else {
-                $('td:eq(-1)', tblProducts.row(tr.row).node()).html('<b>' + 0 + '</b>');
+                $('td:eq(11)', tblProducts.row(tr.row).node()).html('<b>0</b>');
             }
         });
 

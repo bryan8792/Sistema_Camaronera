@@ -856,134 +856,266 @@ def listarDiasDietasPrecrias(request, pk):
 
 
 
-class ListarDietaPDF(View):
-    def get(self, request, *args, **kwargs):
-        if 'pk' in kwargs:
-            dieta = DetalleDiaDieta.objects.filter(dieta_id=kwargs['pk']).order_by('piscinas_id')
-
-            fecha_dieta = ''
-
-            if dieta:
-                fecha_dieta = dieta[0].dieta.fecha
-
-            # Empresa PSM
-            balanceado = {}
-            insumo = {}
-            acum = {}
-
-            for b in dieta.filter(piscinas__empresa__siglas='PSM'):
-                if b.balanceado:
-                    nombre_b = b.balanceado.nombre
-                    prod = Producto.objects.get(nombre__icontains=nombre_b).peso_presentacion
-
-                    if nombre_b not in balanceado:
-                        balanceado[nombre_b] = b.cantidad
-                    else:
-                        balanceado[nombre_b] = balanceado[nombre_b] + b.cantidad
-                        acum = format(balanceado[nombre_b] / prod, '.1f')
-
-                nombre_i = b.insumo1
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje1
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje1
-                        acum = format(insumo[nombre_i] / prod, '.1f')
-
-                nombre_i = b.insumo2
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje2
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje2
-                        acum = format(insumo[nombre_i] / prod, '.1f')
-
-                nombre_i = b.insumo3
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje3
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje3
-                        acum = format(insumo[nombre_i] / prod, '.1f')
-
-                nombre_i = b.insumo4
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje4
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje4
-                        acum = format(insumo[nombre_i] / prod, '.1f')
-
-            resumen_totales = {
-                'psm': {'balanceado': balanceado, 'insumo': insumo}
-            }
-
-            # Empresa BIO
-            balanceado = {}
-            insumo = {}
-
-            for b in dieta.filter(piscinas__empresa__siglas='BIO'):
-                if b.balanceado:
-                    nombre_b = b.balanceado.nombre
-
-                    if nombre_b not in balanceado:
-                        balanceado[nombre_b] = b.cantidad
-                    else:
-                        balanceado[nombre_b] = balanceado[nombre_b] + b.cantidad
-
-                nombre_i = b.insumo1
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje1
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje1
-
-                nombre_i = b.insumo2
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje2
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje2
-
-                nombre_i = b.insumo3
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje3
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje3
-
-                nombre_i = b.insumo4
-                if nombre_i:
-                    nombre_i = Producto.objects.get(id=nombre_i).nombre
-                    if nombre_i not in insumo:
-                        insumo[nombre_i] = b.gramaje4
-                    else:
-                        insumo[nombre_i] = insumo[nombre_i] + b.gramaje4
-
-            resumen_totales['bio'] = {'balanceado': balanceado, 'insumo': insumo}
-
-            data = {
-                'insumos': Producto.objects.filter(categoria__nombre__icontains='INSUMOS'),
-                'dieta_registros': dieta,
-                'fecha_dieta': fecha_dieta,
-                'resumen_totales': resumen_totales
-            }
-            pdf = render_to_pdf('app_reportes/printDieta.html', data)
-            return HttpResponse(pdf, content_type='application/pdf')
+# class ListarDietaPDF(View):
+#     def get(self, request, *args, **kwargs):
+#         if 'pk' in kwargs:
+#             dieta = DetalleDiaDieta.objects.filter(dieta_id=kwargs['pk']).order_by('piscinas_id')
+#
+#             fecha_dieta = ''
+#
+#             if dieta:
+#                 fecha_dieta = dieta[0].dieta.fecha
+#
+#             # Empresa PSM
+#             balanceado = {}
+#             insumo = {}
+#             acum = {}
+#
+#             for b in dieta.filter(piscinas__empresa__siglas='PSM'):
+#                 if b.balanceado:
+#                     nombre_b = b.balanceado.nombre
+#                     prod = Producto.objects.get(nombre__icontains=nombre_b).peso_presentacion
+#
+#                     if nombre_b not in balanceado:
+#                         balanceado[nombre_b] = b.cantidad
+#                     else:
+#                         balanceado[nombre_b] = balanceado[nombre_b] + b.cantidad
+#                         acum = format(balanceado[nombre_b] / prod, '.1f')
+#
+#                 nombre_i = b.insumo1
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje1
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje1
+#                         acum = format(insumo[nombre_i] / prod, '.1f')
+#
+#                 nombre_i = b.insumo2
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje2
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje2
+#                         acum = format(insumo[nombre_i] / prod, '.1f')
+#
+#                 nombre_i = b.insumo3
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje3
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje3
+#                         acum = format(insumo[nombre_i] / prod, '.1f')
+#
+#                 nombre_i = b.insumo4
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     prod = Producto.objects.get(nombre__icontains=nombre_i).peso_presentacion
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje4
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje4
+#                         acum = format(insumo[nombre_i] / prod, '.1f')
+#
+#             resumen_totales = {
+#                 'psm': {'balanceado': balanceado, 'insumo': insumo}
+#             }
+#
+#             # Empresa BIO
+#             balanceado = {}
+#             insumo = {}
+#
+#             for b in dieta.filter(piscinas__empresa__siglas='BIO'):
+#                 if b.balanceado:
+#                     nombre_b = b.balanceado.nombre
+#
+#                     if nombre_b not in balanceado:
+#                         balanceado[nombre_b] = b.cantidad
+#                     else:
+#                         balanceado[nombre_b] = balanceado[nombre_b] + b.cantidad
+#
+#                 nombre_i = b.insumo1
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje1
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje1
+#
+#                 nombre_i = b.insumo2
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje2
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje2
+#
+#                 nombre_i = b.insumo3
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje3
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje3
+#
+#                 nombre_i = b.insumo4
+#                 if nombre_i:
+#                     nombre_i = Producto.objects.get(id=nombre_i).nombre
+#                     if nombre_i not in insumo:
+#                         insumo[nombre_i] = b.gramaje4
+#                     else:
+#                         insumo[nombre_i] = insumo[nombre_i] + b.gramaje4
+#
+#             resumen_totales['bio'] = {'balanceado': balanceado, 'insumo': insumo}
+#
+#             data = {
+#                 'insumos': Producto.objects.filter(categoria__nombre__icontains='INSUMOS'),
+#                 'dieta_registros': dieta,
+#                 'fecha_dieta': fecha_dieta,
+#                 'resumen_totales': resumen_totales
+#             }
+#             pdf = render_to_pdf('app_reportes/printDieta.html', data)
+#             return HttpResponse(pdf, content_type='application/pdf')
 
 
 # CON WEASYPRINT
+
+
+class ListarDietaPDF(View):
+
+    def get(self, request, *args, **kwargs):
+
+        if 'pk' not in kwargs:
+            return HttpResponse(status=404)
+
+        dieta = (
+            DetalleDiaDieta.objects
+            .filter(dieta_id=kwargs['pk'])
+            .select_related(
+                'dieta',
+                'balanceado',
+                'piscinas',
+                'piscinas__empresa'
+            )
+            .order_by('piscinas_id')
+        )
+
+        fecha_dieta = dieta.first().dieta.fecha if dieta.exists() else ''
+        # =============================================
+        # Cargar TODOS los productos una sola vez
+        # =============================================
+        productos = Producto.objects.in_bulk()
+        # =============================================
+        # Función auxiliar
+        # =============================================
+        def agregar_insumo(diccionario, producto_id, gramaje):
+
+            if not producto_id:
+                return
+
+            producto = productos.get(int(producto_id))
+
+            if not producto:
+                return
+
+            nombre = producto.nombre
+
+            if nombre not in diccionario:
+                diccionario[nombre] = gramaje
+            else:
+                diccionario[nombre] += gramaje
+
+        # =============================================
+        # EMPRESA PSM
+        # =============================================
+
+        balanceado = {}
+        insumo = {}
+
+        for b in dieta.filter(piscinas__empresa__siglas='PSM'):
+
+            # -----------------------------
+            # Balanceado
+            # -----------------------------
+
+            if b.balanceado:
+
+                nombre = b.balanceado.nombre
+
+                if nombre not in balanceado:
+                    balanceado[nombre] = b.cantidad
+                else:
+                    balanceado[nombre] += b.cantidad
+
+            # -----------------------------
+            # Insumos
+            # -----------------------------
+
+            agregar_insumo(insumo, b.insumo1, b.gramaje1)
+            agregar_insumo(insumo, b.insumo2, b.gramaje2)
+            agregar_insumo(insumo, b.insumo3, b.gramaje3)
+            agregar_insumo(insumo, b.insumo4, b.gramaje4)
+
+        resumen_totales = {
+            'psm': {
+                'balanceado': balanceado,
+                'insumo': insumo
+            }
+        }
+
+        # =============================================
+        # EMPRESA BIO
+        # =============================================
+
+        balanceado = {}
+        insumo = {}
+
+        for b in dieta.filter(piscinas__empresa__siglas='BIO'):
+
+            if b.balanceado:
+
+                nombre = b.balanceado.nombre
+
+                if nombre not in balanceado:
+                    balanceado[nombre] = b.cantidad
+                else:
+                    balanceado[nombre] += b.cantidad
+
+            agregar_insumo(insumo, b.insumo1, b.gramaje1)
+            agregar_insumo(insumo, b.insumo2, b.gramaje2)
+            agregar_insumo(insumo, b.insumo3, b.gramaje3)
+            agregar_insumo(insumo, b.insumo4, b.gramaje4)
+
+        resumen_totales['bio'] = {
+            'balanceado': balanceado,
+            'insumo': insumo
+        }
+
+        data = {
+            'insumos': Producto.objects.filter(
+                categoria__nombre__icontains='INSUMOS'
+            ),
+            'dieta_registros': dieta,
+            'fecha_dieta': fecha_dieta,
+            'resumen_totales': resumen_totales
+        }
+
+        pdf = render_to_pdf(
+            'app_reportes/printDieta.html',
+            data
+        )
+
+        return HttpResponse(
+            pdf,
+            content_type='application/pdf'
+        )
+
+
 class printDieta(View):
 
     def get(self, request, *args, **kwargs):
@@ -1226,7 +1358,6 @@ class CopiarGuardarView(TemplateView):
 
                 try:
                     def safe_decimal(value):
-                        """Convierte valores a Decimal de forma segura"""
                         try:
                             if value in [None, '-', '', 0, '0']:
                                 return Decimal('0')
@@ -1234,10 +1365,18 @@ class CopiarGuardarView(TemplateView):
                         except:
                             return Decimal('0')
 
+                    def buscar_producto(nombre):
+                        nombre = (nombre or '').strip()
+                        if not nombre or nombre in ['-', '0']:
+                            return None
+                        prod = Producto.objects.filter(nombre__iexact=nombre).first()
+                        if not prod:
+                            prod = Producto.objects.filter(nombre__icontains=nombre).first()
+                        return prod
+
                     items = json.loads(request.POST.get('items', '[]'))
                     fecha_str = request.POST.get('fecha')
 
-                    # Validaciones
                     if not items:
                         data['error'] = 'No hay datos para guardar'
                         return JsonResponse(data, safe=False)
@@ -1246,8 +1385,17 @@ class CopiarGuardarView(TemplateView):
                         data['error'] = 'Debe seleccionar una fecha'
                         return JsonResponse(data, safe=False)
 
-                    # Parsear fecha
-                    fecha_obj = datetime.datetime.strptime(fecha_str, "%Y-%m-%d")
+                    # FIX 1: usar .date() para que SIEMPRE coincida con el DateField guardado
+                    fecha_obj = datetime.datetime.strptime(fecha_str, "%Y-%m-%d").date()
+
+                    # FIX 2: eliminar filas repetidas del Excel (misma piscina) -> se queda la ultima
+                    filas_unicas = {}
+                    for i in items:
+                        pid = i.get('id')
+                        if pid is None or str(pid).strip() == '':
+                            continue
+                        filas_unicas[str(pid)] = i
+                    items = list(filas_unicas.values())
 
                     meses = {
                         1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL',
@@ -1256,106 +1404,95 @@ class CopiarGuardarView(TemplateView):
                     }
 
                     with transaction.atomic():
+                        anio_obj, _ = AnioDieta.objects.get_or_create(anio_dieta=fecha_obj.year)
+                        mes_obj, _ = MesDieta.objects.get_or_create(anio=anio_obj, mes_dieta=meses[fecha_obj.month])
 
-                        # Crear o obtener Anio
-                        anio_obj, _ = AnioDieta.objects.get_or_create(
-                            anio_dieta=fecha_obj.year
-                        )
-
-                        # Crear o obtener Mes
-                        mes_obj, _ = MesDieta.objects.get_or_create(
-                            anio=anio_obj,
-                            mes_dieta=meses[fecha_obj.month]
-                        )
-
-                        # Crear o obtener DiaDietaRegistro
-                        factura, created = DiaDietaRegistro.objects.get_or_create(
-                            mes_dieta=mes_obj,
-                            fecha=fecha_obj,
-                            defaults={'tip_dieta': False}
-                        )
-
-                        # Si ya existia, eliminar detalles anteriores
-                        if not created:
-                            factura.detallediadieta_set.all().delete()
-                            print(f"Registros anteriores eliminados para fecha: {fecha_obj}")
-
-                        factura.tip_dieta = True
-                        factura.save()
-
-                        guardados = 0
+                        # ---- Agrupar items por empresa ----
+                        grupos_por_empresa = {}
                         errores = []
 
-                        for idx, i in enumerate(items, start=1):
+                        for i in items:
                             piscina_orden = i.get('id')
-
-                            # Ignorar filas vacias
                             if not piscina_orden:
                                 continue
 
-                            print(f"Procesando fila {idx} - Piscina orden: {piscina_orden}")
-
-                            inv = DetalleDiaDieta(dieta_id=factura.pk)
-
-                            # CORRECCION: Buscar piscina por ORDEN (igual que upload_excel)
-                            piscina = Piscinas.objects.filter(orden=piscina_orden).first()
-
-                            if piscina:
-                                inv.piscinas_id = piscina.id
-                                print(f"  Piscina encontrada: {piscina} (id={piscina.id})")
-                            else:
-                                print(f"  Piscina con orden {piscina_orden} no encontrada")
+                            piscina = Piscinas.objects.select_related('empresa').filter(orden=piscina_orden).first()
+                            if not piscina:
                                 errores.append(f"Piscina orden {piscina_orden} no encontrada")
                                 continue
+                            if not piscina.empresa:
+                                errores.append(f"Piscina orden {piscina_orden} sin empresa asignada")
+                                continue
 
-                            # Balanceado - buscar por nombre exacto
-                            name_balanceado = i.get('balanceado', '').strip()
-                            if name_balanceado:
-                                balanceado = Producto.objects.filter(nombre__iexact=name_balanceado).first()
-                                if not balanceado:
-                                    # Intentar busqueda parcial
-                                    balanceado = Producto.objects.filter(nombre__icontains=name_balanceado).first()
+                            emp = piscina.empresa
+                            grupo = grupos_por_empresa.setdefault(emp.id, {'empresa': emp, 'filas': []})
+                            grupo['filas'].append((i, piscina))
 
+                        guardados = 0
+
+                        # ---- Procesar cada empresa ----
+                        for emp_id, grupo in grupos_por_empresa.items():
+                            empresa = grupo['empresa']
+
+                            # FIX 3: traer TODOS los registros existentes (no .first()) y BLOQUEARLOS
+                            #        con select_for_update para evitar doble envio simultaneo.
+                            facturas_existentes = list(
+                                DiaDietaRegistro.objects
+                                    .select_for_update()
+                                    .filter(
+                                    mes_dieta=mes_obj,
+                                    fecha=fecha_obj,
+                                    detallediadieta__piscinas__empresa=empresa
+                                ).distinct()
+                            )
+
+                            if facturas_existentes:
+                                factura = facturas_existentes[0]  # conservamos el primero
+                                # Reversar stock de TODOS los detalles y eliminar registros sobrantes
+                                for f in facturas_existentes:
+                                    for s in f.detallediadieta_set.all():
+                                        s.delete()  # dispara reversa de stock/kardex
+                                    if f.id != factura.id:
+                                        f.delete()  # FIX: elimina duplicados previos ya existentes
+                                print(f"Registros anteriores limpiados para {empresa} en {fecha_obj}")
+                            else:
+                                factura = DiaDietaRegistro.objects.create(
+                                    mes_dieta=mes_obj,
+                                    fecha=fecha_obj,
+                                    tip_dieta=True
+                                )
+                                print(f"Nuevo registro creado para empresa {empresa} en {fecha_obj}")
+
+                            factura.tip_dieta = True
+                            factura.save()
+
+                            # ---- Crear detalles ----
+                            for i, piscina in grupo['filas']:
+                                inv = DetalleDiaDieta(dieta_id=factura.pk)
+                                inv.piscinas_id = piscina.id
+
+                                balanceado = buscar_producto(i.get('balanceado', ''))
                                 if balanceado:
                                     inv.balanceado_id = balanceado.id
-                                    inv.cantidad = safe_decimal(i.get('cantidad', 0))
-                                    print(f"  Balanceado: {balanceado.nombre} ({inv.cantidad} lb)")
-                                else:
-                                    print(f"  Balanceado no encontrado: {name_balanceado}")
-                                    inv.cantidad = safe_decimal(i.get('cantidad', 0))
-                            else:
                                 inv.cantidad = safe_decimal(i.get('cantidad', 0))
 
-                            # INSUMOS 1-4 (igual que upload_excel)
-                            for num in range(1, 5):
-                                name_insumo = i.get(f'insumo{num}', '')
-                                cant_insumo = safe_decimal(i.get(f'gramaje{num}', 0))
-
-                                if name_insumo and name_insumo not in ['-', '', None, '0']:
-                                    # Buscar insumo por nombre
-                                    insumo = Producto.objects.filter(nombre__iexact=name_insumo).first()
-                                    if not insumo:
-                                        insumo = Producto.objects.filter(nombre__icontains=name_insumo).first()
-
+                                for num in range(1, 5):
+                                    insumo = buscar_producto(i.get(f'insumo{num}', ''))
                                     if insumo:
                                         setattr(inv, f"insumo{num}", insumo.id)
-                                        setattr(inv, f"gramaje{num}", cant_insumo)
-                                        print(f"  Insumo {num}: {insumo.nombre} ({cant_insumo} g)")
+                                        setattr(inv, f"gramaje{num}", safe_decimal(i.get(f'gramaje{num}', 0)))
                                     else:
-                                        print(f"  Insumo {num} no encontrado: {name_insumo}")
                                         setattr(inv, f"insumo{num}", 0)
                                         setattr(inv, f"gramaje{num}", Decimal('0'))
-                                else:
-                                    setattr(inv, f"insumo{num}", 0)
-                                    setattr(inv, f"gramaje{num}", Decimal('0'))
 
-                            inv.save()
-                            guardados += 1
+                                inv.save()  # genera los EGRESOS de stock
+                                guardados += 1
 
                         print(f"Proceso completado. Guardados: {guardados}, Errores: {len(errores)}")
 
                         data['success'] = True
                         data['guardados'] = guardados
+                        data['registros_empresas'] = len(grupos_por_empresa)
                         data['errores'] = errores
 
                 except Exception as e:

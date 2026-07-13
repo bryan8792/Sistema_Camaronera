@@ -68,6 +68,7 @@ class editarStockPSMDirectoView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Stock Productos Aplicación Directa PSM'
+
         producto = self.object.producto_empresa
         context['producto'] = producto
 
@@ -88,9 +89,12 @@ class editarStockPSMDirectoView(UpdateView):
 
     def form_valid(self, form):
         obj = form.save(commit=False)
+        # FORZAR ACTIVO EN TRUE AL EDITAR
+        obj.activo = True
         print(f"[DEBUG] Antes de guardar: ID={obj.pk}, Producto Empresa={obj.producto_empresa}")
         obj.save()
         print(f"[DEBUG] Después de guardar: ID={obj.pk}, Producto Empresa={obj.producto_empresa}")
+        self.object = obj
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -100,13 +104,11 @@ class editarStockPSMDirectoView(UpdateView):
     def get_success_url(self):
         # Si el usuario vino con piscina_id en GET, mantenemos ese filtro
         if self.piscina_origen:
-            return reverse_lazy(
-                'app_stock_directo:listarpsmunico_directo',
-                kwargs={'pk': self.piscina_origen}
-            )
+            return reverse_lazy('app_stock_directo:listarpsmunico_directo', kwargs={'pk': self.piscina_origen})
         # Si no, usamos el filtro basado en el objeto editado
-        piscina_id = self.object.producto_empresa.piscina_id
-        return reverse_lazy('app_stock_directo:listarpsmunico_directo', kwargs={'pk': piscina_id})
+        #piscina_id = self.object.producto_empresa.piscina_id
+        #return reverse_lazy('app_stock_directo:listarpsmunico_directo', kwargs={'pk': piscina_id})
+        return reverse_lazy('app_stock_directo:listar_stock_directo_psm')
 
 
 class listarStockPSMDirectoView(ListView):
@@ -206,25 +208,73 @@ class crearStockBIODirectoView(CreateView):
         return context
 
 
+# class editarStockBIODirectoView(UpdateView):
+#     model = Producto_Stock
+#     form_class = ProdStockForm
+#     template_name = 'app_stock_directo/stock_dir_editar_bio.html'
+#     success_url = reverse_lazy('app_stock_directo:listar_stock_directo_bio')
+#
+#     @method_decorator(csrf_exempt)
+#     @method_decorator(login_required)
+#     def dispatch(self, request, *args, **kwargs):
+#         self.object = self.get_object()
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['nombre'] = 'Stock Productos Aplicación Directa BIO'
+#
+#         producto = self.object.producto_empresa
+#         context['producto'] = producto
+#
+#         unidad_aplicacion = producto.nombre_prod.unid_aplicacion
+#         if unidad_aplicacion == 'GR':
+#             aplicacion = 1000
+#         elif unidad_aplicacion == 'KG':
+#             aplicacion = 2.2
+#         elif unidad_aplicacion == 'LB':
+#             aplicacion = 55
+#         else:
+#             aplicacion = 1000
+#
+#         context['aplicacion'] = aplicacion
+#         context['peso_presentacion'] = producto.nombre_prod.peso_presentacion
+#
+#         return context
+#
+#     def form_valid(self, form):
+#         response = super().form_valid(form)
+#
+#         # Siempre dejar el movimiento activo al editar desde esta vista
+#         Producto_Stock.objects.filter(pk=self.object.pk).update(activo=True)
+#
+#         return response
+
+
 class editarStockBIODirectoView(UpdateView):
     model = Producto_Stock
     form_class = ProdStockForm
     template_name = 'app_stock_directo/stock_dir_editar_bio.html'
-    success_url = reverse_lazy('app_stock_directo:listar_stock_directo_bio')
 
     @method_decorator(csrf_exempt)
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
+
+        # Guardamos la piscina_id de donde viene el usuario
+        self.piscina_origen = request.GET.get('piscina_id', None)
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['nombre'] = 'Stock Productos Aplicación Directa BIO'
+
         producto = self.object.producto_empresa
         context['producto'] = producto
 
         unidad_aplicacion = producto.nombre_prod.unid_aplicacion
+
         if unidad_aplicacion == 'GR':
             aplicacion = 1000
         elif unidad_aplicacion == 'KG':
@@ -236,8 +286,28 @@ class editarStockBIODirectoView(UpdateView):
 
         context['aplicacion'] = aplicacion
         context['peso_presentacion'] = producto.nombre_prod.peso_presentacion
-
         return context
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        # FORZAR ACTIVO EN TRUE AL EDITAR
+        obj.activo = True
+        print(f"[DEBUG] Antes de guardar: ID={obj.pk}, Activo={obj.activo}")
+        obj.save()
+        print(f"[DEBUG] Después de guardar: ID={obj.pk}, Activo={obj.activo}")
+        self.object = obj
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print(f"[DEBUG] Errores del formulario: {form.errors}")
+        return super().form_invalid(form)
+
+    def get_success_url(self):
+        # Si vino desde una piscina específica
+        if self.piscina_origen:
+            return reverse_lazy('app_stock_directo:listarbiounico_directo', kwargs={'pk': self.piscina_origen})
+        # Si no vino con filtro
+        return reverse_lazy('app_stock_directo:listar_stock_directo_bio')
 
 
 class listarStockBIODirectoView(ListView):
