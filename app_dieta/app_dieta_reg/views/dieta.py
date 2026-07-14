@@ -2,7 +2,7 @@
 import json
 import datetime
 import decimal
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
@@ -450,8 +450,7 @@ class crearDiaDietaPrecriaView(CreateView):
                         inv.piscinas_id = int(i['id']) if i.get('id') else None
                         balanceado_id = (i['balanceado']) if i.get('balanceado') else None
                         inv.balanceado_id = balanceado_id
-                        inv.cantidad = decimal.Decimal(i['cantidad']) if i.get(
-                            'cantidad') and balanceado_id is not None else 0
+                        inv.cantidad = decimal.Decimal(i['cantidad']) if i.get('cantidad') and balanceado_id is not None else 0
                         inv.insumo1 = int(i['insumo1']) if i.get('insumo1') else 0
                         inv.gramaje1 = decimal.Decimal(i['gramaje1']) if i.get('gramaje1') else decimal.Decimal('0.00')
                         inv.insumo2 = int(i['insumo2']) if i.get('insumo2') else 0
@@ -580,10 +579,7 @@ class editarDiaDietaPrecriaView(UpdateView):
                     for s in factura.detallediadieta_set.all():
                         eliminar_asientos_por_detalle(s.pk)
 
-                        revertir_stock_por_detalle(
-                            detalle=s,
-                            texto_guia='EDICION DE PRECRIA Y REAJUSTE DE STOCK'
-                        )
+                        revertir_stock_por_detalle(detalle=s, texto_guia='EDICION DE PRECRIA Y REAJUSTE DE STOCK')
 
                         s.delete()
 
