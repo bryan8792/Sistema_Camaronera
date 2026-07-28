@@ -199,10 +199,8 @@ class DetalleDiaDieta(models.Model):
                 stock = mov.producto_empresa
                 stock.stock += mov.cantidad_egreso
                 stock.save(update_fields=['stock'])
-
                 mov.activo = False
                 mov.save(update_fields=['activo'])
-
             super().delete(using=using, keep_parents=keep_parents)
 
     # ======================================================
@@ -216,7 +214,6 @@ class DetalleDiaDieta(models.Model):
         for i in range(1, 5):
             item[f'insumo{i}'] = format(getattr(self, f'insumo{i}'), '.0f')
             item[f'gramaje{i}'] = format(getattr(self, f'gramaje{i}'), '.0f')
-
         return item
 
     class Meta:
@@ -224,8 +221,6 @@ class DetalleDiaDieta(models.Model):
         verbose_name = "Detalle del día dieta"
         verbose_name_plural = "Detalle del día dietas"
         ordering = ['id']
-
-
 
 
 class DescripcionDieta(models.Model):
@@ -251,3 +246,5 @@ class DescripcionDieta(models.Model):
         verbose_name = 'Registro'
         verbose_name_plural = 'Registros'
         ordering = ['id']
+
+

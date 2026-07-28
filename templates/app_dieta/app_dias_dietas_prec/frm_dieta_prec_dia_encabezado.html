@@ -4,69 +4,69 @@
 
 {% block contenido %}
 
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-12">
-                <ol class="breadcrumb float-sm-left">
-                    <li class="breadcrumb-item">
-                        <a href="#">
-                            {{ nombre }}&nbsp <i class="far nav-icon fa fa-home"></i>
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active">
-                        Listado de {{ nombre }}&nbsp <i class="far nav-icon fa fa-clipboard-check"></i>
-                    </li>
-                </ol>
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-12">
+                    <ol class="breadcrumb float-sm-left">
+                        <li class="breadcrumb-item">
+                            <a href="#">
+                                {{ nombre }}&nbsp <i class="far nav-icon fa fa-home"></i>
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            Listado de {{ nombre }}&nbsp <i class="far nav-icon fa fa-clipboard-check"></i>
+                        </li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="col-md-12">
-    <div class="card">
-        <div class="card-header" style="background-color: #0d8ddb">
-            <h1 class="card-title text-center">
-                <strong>
-                    <i class="fas fa-list-alt"></i>
-                    &nbsp LISTADO DE REGISTRO DE DIETAS DE PRECRÍAS POR DÍAS:
-                </strong>
-            </h1>
-            <div class="card-tools">
-                <button id="btn_call_cabecera_dieta" type="submit" class="btn btn-md bg-cyan">
-                    <i class="fas fa-plus"></i> Generar Dieta
-                </button>
-                <a href="{% url 'app_dieta:principal_mes_prec' anio_id %}" class="btn btn-md bg-danger">
-                    <i class="fas fa-reply"></i> Regresar
-                </a>
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header" style="background-color: #0d8ddb">
+                <h1 class="card-title text-center">
+                    <strong>
+                        <i class="fas fa-list-alt"></i>
+                        &nbsp LISTADO DE REGISTRO DE DIETAS DE PRECRÍAS POR DÍAS:
+                    </strong>
+                </h1>
+                <div class="card-tools">
+                    <button id="btn_call_cabecera_dieta" type="submit" class="btn btn-md bg-cyan">
+                        <i class="fas fa-plus"></i> Generar Dieta
+                    </button>
+                    <a href="{% url 'app_dieta:principal_mes_prec' anio_id %}" class="btn btn-md bg-danger">
+                        <i class="fas fa-reply"></i> Regresar
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <div class="card-body bg-white">
+            <div class="card-body bg-white">
 
-            {% for empresa_nombre, dietas_empresa in dietas_por_empresa.items %}
-                <!-- Empresa -->
-                <div class="card mb-4">
-                    <div class="card-header bg-olive">
-                        <h5 class="mb-0">
-                            <i class="fas fa-building"></i> {{ empresa_nombre }}
-                        </h5>
-                    </div>
+                {% for empresa_nombre, dietas_empresa in dietas_por_empresa.items %}
+                    <!-- Empresa -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-olive">
+                            <h5 class="mb-0">
+                                <i class="fas fa-building"></i> {{ empresa_nombre }}
+                            </h5>
+                        </div>
 
-                    <div class="card-body">
-                        <div class="row">
-                            {% for dieta in dietas_empresa %}
-                                <div class="col-md-2">
-                                    <div class="card card-widget">
-                                        <div class="card-body">
+                        <div class="card-body">
+                            <div class="row">
+                                {% for dieta in dietas_empresa %}
+                                    <div class="col-md-2">
+                                        <div class="card card-widget">
+                                            <div class="card-body">
                                             <span class="mailbox-attachment-icon">
                                                 <i class="far fa-file-excel"></i>
                                             </span>
-                                        </div>
+                                            </div>
 
-                                        <div class="card-footer card-comments">
-                                            <div class="mailbox-attachment-info">
-                                                <div class="text-center">
+                                            <div class="card-footer card-comments">
+                                                <div class="mailbox-attachment-info">
+                                                    <div class="text-center">
                                                     <span class="username">
                                                         <a href="/dieta/crear/dia_prec/{{ dieta.id }}/"
                                                            class="mailbox-attachment-name">
@@ -75,101 +75,106 @@
                                                         </a>
                                                     </span>
 
-                                                    <a href="/dieta/crear/dia_prec/{{ dieta.id }}/"
+                                                        {% comment %}<a href="/dieta/crear/dia_prec/{{ dieta.id }}/"
                                                        class="btn btn-secondary btn-sm">
                                                         <i class="fas fa-plus"></i>
-                                                    </a>
+                                                    </a>{% endcomment %}
 
-                                                    <a href="/dieta/editar/dia_prec/{{ dieta.id }}"
-                                                       class="btn btn-secondary btn-sm">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
+                                                        <a href="/dieta/editar/dia_prec/{{ dieta.id }}"
+                                                           class="btn btn-secondary btn-sm">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
 
-                                                    <a href="/dieta/reporte_dieta/{{ dieta.id }}/"
-                                                       target="_blank"
-                                                       class="btn btn-sm btn-secondary">
-                                                        <i class="fas fa-file-pdf"></i>
-                                                    </a>
+                                                        <a href="/dieta/eliminar/dia_prec/{{ dieta.id }}"
+                                                           class="btn btn-secondary btn-sm">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+
+                                                        <a href="/dieta/reporte_dieta/{{ dieta.id }}/"
+                                                           target="_blank"
+                                                           class="btn btn-sm btn-secondary">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mt-2 text-right">
+                                <small class="text-muted">
+                                    <strong>Total Dietas Precrias:</strong> {{ dietas_empresa|length }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i>
+                        No se encontraron dietas de precría registradas para este mes.
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal fade" id="modal_crear_dieta">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Crear día de Dieta Precría</h4>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form class="form-horizontal" id="crear_mes" method="post">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">Mes *</label>
+                                <div class="col-sm-6">
+                                    <input type="text"
+                                           value="{{ mes.mes_dieta }}"
+                                           readonly
+                                           class="form-control">
                                 </div>
-                            {% endfor %}
-                        </div>
-
-                        <div class="mt-2 text-right">
-                            <small class="text-muted">
-                                <strong>Total Dietas Precrias:</strong> {{ dietas_empresa|length }}
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle"></i>
-                    No se encontraron dietas de precría registradas para este mes.
-                </div>
-            {% endfor %}
-
-        </div>
-    </div>
-</div>
-
-<!-- MODAL -->
-<div class="modal fade" id="modal_crear_dieta">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Crear día de Dieta Precría</h4>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-
-            <div class="modal-body">
-                <form class="form-horizontal" id="crear_mes" method="post">
-                    {% csrf_token %}
-                    <div class="card-body">
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Mes *</label>
-                            <div class="col-sm-6">
-                                <input type="text"
-                                       value="{{ mes.mes_dieta }}"
-                                       readonly
-                                       class="form-control">
-                            </div>
-                            <div class="col-sm-4">
-                                <input type="text"
-                                       value="{{ mes.anio.anio_dieta }}"
-                                       readonly
-                                       class="form-control">
+                                <div class="col-sm-4">
+                                    <input type="text"
+                                           value="{{ mes.anio.anio_dieta }}"
+                                           readonly
+                                           class="form-control">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="card-footer">
-                        <button id="btn_registrar_cabecera_dieta"
-                                type="submit"
-                                class="btn btn-primary">
-                            Registrar
-                        </button>
-                        <button type="reset"
-                                class="btn btn-default"
-                                data-dismiss="modal">
-                            Salir
-                        </button>
-                    </div>
-                </form>
+                        <div class="card-footer">
+                            <button id="btn_registrar_cabecera_dieta"
+                                    type="submit"
+                                    class="btn btn-primary">
+                                Registrar
+                            </button>
+                            <button type="reset"
+                                    class="btn btn-default"
+                                    data-dismiss="modal">
+                                Salir
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    $('#btn_call_cabecera_dieta').on('click', function () {
-        $('#btn_registrar_cabecera_dieta').trigger('click');
-    });
-</script>
+    <script>
+        $('#btn_call_cabecera_dieta').on('click', function () {
+            $('#btn_registrar_cabecera_dieta').trigger('click');
+        });
+    </script>
 
 {% endblock %}

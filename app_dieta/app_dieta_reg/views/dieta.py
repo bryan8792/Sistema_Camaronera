@@ -641,6 +641,66 @@ class editarDiaDietaPrecriaView(UpdateView):
         return context
 
 
+class eliminarDiaDietaPrecriaView(DeleteView):
+    model = DiaDietaRegistro
+    template_name = 'app_dieta/app_dias_dietas/eliminar_dieta_dia_prec.html'
+
+    @method_decorator(csrf_exempt)
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        # Obtener el pk del mes_dieta para redirigir correctamente
+        mes_dieta_pk = self.object.mes_dieta.pk
+        return reverse('app_dieta:principal_dia_prec', kwargs={'pk': mes_dieta_pk})
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            with transaction.atomic():
+                factura = self.get_object()
+
+                # Guardar el pk del mes antes de eliminar
+                mes_dieta_pk = factura.mes_dieta.pk
+
+                # Revertir stock + eliminar asientos + eliminar detalles
+                for detalle in factura.detallediadieta_set.all():
+                    # Eliminar asientos contables relacionados
+                    eliminar_asientos_por_detalle(detalle.pk)
+
+                    # Revertir stock
+                    revertir_stock_por_detalle(
+                        detalle=detalle,
+                        texto_guia='ELIMINACION DE DIETA PRECRIA Y REAJUSTE DE STOCK'
+                    )
+
+                    # Eliminar el detalle
+                    detalle.delete()
+
+                # Eliminar el registro principal
+                factura.delete()
+
+                data['success'] = True
+                data['redirect_url'] = reverse('app_dieta:principal_dia_prec', kwargs={'pk': mes_dieta_pk})
+
+        except Exception as e:
+            data['error'] = 'Error al eliminar: ' + str(e)
+
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        dieta = self.object.mes_dieta
+        context['nombre'] = 'Dia de Dieta'
+        context['entity'] = 'Eliminar Registro de Dieta Precria'
+        context['list_url'] = reverse('app_dieta:principal_dia_prec', kwargs={'pk': dieta.pk})
+        context['mes'] = dieta.mes_dieta
+        context['fecha'] = self.object.fecha
+        return context
+
+
 # Para listar las Dietas Año
 class listarDietaAnioPrincipalView(ListView):
     model = AnioDieta
@@ -1432,15 +1492,26 @@ class CopiarGuardarView(TemplateView):
 
                             # FIX 3: traer TODOS los registros existentes (no .first()) y BLOQUEARLOS
                             #        con select_for_update para evitar doble envio simultaneo.
+                            # Obtener primero las dietas que pertenecen a la empresa
+                            ids_dietas = (
+                                DetalleDiaDieta.objects
+                                    .filter(piscinas__empresa=empresa)
+                                    .values_list('dieta_id', flat=True)
+                                    .distinct()
+                            )
+
+                            # Bloquear únicamente los registros necesarios
+                            print("ANTES DE BUSCAR FACTURAS")
                             facturas_existentes = list(
                                 DiaDietaRegistro.objects
                                     .select_for_update()
                                     .filter(
+                                    id__in=ids_dietas,
                                     mes_dieta=mes_obj,
-                                    fecha=fecha_obj,
-                                    detallediadieta__piscinas__empresa=empresa
-                                ).distinct()
+                                    fecha=fecha_obj
+                                )
                             )
+                            print("DESPUES DE BUSCAR FACTURAS")
 
                             if facturas_existentes:
                                 factura = facturas_existentes[0]  # conservamos el primero

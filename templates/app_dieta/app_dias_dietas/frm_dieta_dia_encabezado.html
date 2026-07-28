@@ -9,9 +9,9 @@
             <div class="row mb-2">
                 <div class="col-sm-12">
                     <ol class="breadcrumb float-sm-left">
-                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp
+                        <li class="breadcrumb-item"><a href="#">{{ nombre }}&nbsp;
                             <i class="far nav-icon fa fa-home"></i></a></li>
-                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp
+                        <li class="breadcrumb-item active">Listado de {{ nombre }}&nbsp;
                             <i class="far nav-icon fa fa-clipboard-check"></i></li>
                     </ol>
                 </div>
@@ -59,14 +59,14 @@
                                                 <div class="mailbox-attachment-info">
                                                     <div class="text-center">
                                                         <span class="username">
-                                                            <a href="/dieta/crear/dia/{{ dieta.id }}/" class="mailbox-attachment-name">
+                                                            <a {% comment %}href="/dieta/crear/dia/{{ dieta.id }}/"{% endcomment %} href="#" class="mailbox-attachment-name">
                                                                 <i class="fas fa-paperclip"></i>
                                                                 {{ detail }}-{{ dieta.fecha }}{{ extension }}
                                                             </a>
                                                         </span>
-                                                        <a href="/dieta/crear/dia/{{ dieta.id }}/" class="btn btn-secondary btn-sm">
+                                                        {% comment %}<a href="/dieta/crear/dia/{{ dieta.id }}/" class="btn btn-secondary btn-sm">
                                                             <i class="fas fa-plus"></i>
-                                                        </a>
+                                                        </a>{% endcomment %}
                                                         <a href="/dieta/editar/dia/{{ dieta.id }}" class="btn btn-secondary btn-sm">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
