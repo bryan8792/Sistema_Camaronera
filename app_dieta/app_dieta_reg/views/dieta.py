@@ -578,9 +578,7 @@ class editarDiaDietaPrecriaView(UpdateView):
                     # 🔁 REVERTIR STOCK PRECRÍA
                     for s in factura.detallediadieta_set.all():
                         eliminar_asientos_por_detalle(s.pk)
-
                         revertir_stock_por_detalle(detalle=s, texto_guia='EDICION DE PRECRIA Y REAJUSTE DE STOCK')
-
                         s.delete()
 
                     # ➕ CREAR NUEVOS DETALLES

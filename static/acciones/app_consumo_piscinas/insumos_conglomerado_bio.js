@@ -88,7 +88,7 @@ function exportarExcel() {
     });
     
     // Fila de totales
-    ws_data.push(['Cantidad Total', 'Cantidad Total', total_cantidad.toFixed(2), '', total_total.toFixed(2)]);
+    ws_data.push(['Cantidad Total', '  ', total_cantidad.toFixed(2), '', total_total.toFixed(2)]);
     
     // Crear libro de Excel
     var wb = XLSX.utils.book_new();
@@ -153,7 +153,7 @@ function exportarPDF() {
     // Fila de totales
     body.push([
         {text: 'Cantidad Total', style: 'tableFooter'},
-        {text: 'Cantidad Total', style: 'tableFooter'},
+        {text: '  ', style: 'tableFooter'},
         {text: total_cantidad.toFixed(2), style: 'tableFooterRight'},
         {text: '', style: 'tableFooter'},
         {text: total_total.toFixed(2), style: 'tableFooterRight'}
@@ -334,7 +334,7 @@ function imprimirReporte() {
                     ${filas}
                     <tr class="total-row">
                         <td style="padding: 8px;">Cantidad Total</td>
-                        <td style="padding: 8px;">Cantidad Total</td>
+                        <td style="padding: 8px;">&nbsp;</td>
                         <td style="padding: 8px; text-align: right;">${total_cantidad.toFixed(2)}</td>
                         <td style="padding: 8px;"></td>
                         <td style="padding: 8px; text-align: right;">${total_total.toFixed(2)}</td>
