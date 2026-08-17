@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block contenido %}
+
+<div class="content-header">
+    <div class="container-fluid">
+        <h5><b>Copiar Precria desde Excel</b></h5>
+        <p>Seleccione la piscina, luego presione <b>CTRL + V</b> para pegar (cada fila es un dia)</p>
+    </div>
+</div>
+
+<section class="content">
+
+    <form id="frmExcel">
+
+        <div class="card">
+
+            <div class="card-header" style="background:#27AE60; color: white;">
+                <h3 class="card-title"><b>Pegar Precria</b></h3>
+            </div>
+
+            <div class="card-body">
+
+                <input type="hidden" name="action" value="edit">
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label><b>Piscina (Precria):</b></label>
+                        <select name="piscina" id="piscina" class="form-control" required>
+                            <option value="">--- Seleccione una piscina ---</option>
+                            {% for p in piscinas %}
+                                <option value="{{ p.orden }}">{{ p.numero }} (orden {{ p.orden }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- MENSAJE DE ESTADO -->
+                <div id="statusMessage" class="alert" style="display: none;"></div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover" id="tblProducts">
+                        <thead style="background:#27AE60; color: white;">
+                        <tr>
+                            <th>#</th>
+                            <th>DIA</th>
+                            <th>FECHA</th>
+                            <th>BALANCEADO</th>
+                            <th>LIBRAS</th>
+                            <th>INSUMO1</th>
+                            <th>GRAMOS</th>
+                            <th>INSUMO2</th>
+                            <th>GRAMOS</th>
+                            <th>INSUMO3</th>
+                            <th>GRAMOS</th>
+                            <th>INSUMO4</th>
+                            <th>GRAMOS</th>
+                            <th>ACCION</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Los datos se cargan dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                <button type="submit" class="btn btn-success" id="btnGuardar">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-warning ml-2" id="btnLimpiar">
+                    <i class="fas fa-eraser"></i> Limpiar Tabla
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+
+    // Nombres de los 3 balanceados de precria (columnas 2, 3 y 4 del Excel, 0-index).
+    // El backend usa icontains, asi que pequenas diferencias se toleran.
+    let BALANCEADOS_PREC = {
+        2: 'EXIA PRIME 35% 1.5',
+        3: 'INICIO FOCUS 35% 1.2 MM',
+        4: 'INICIO MAXIO 35% 1.2 MM'
+    };
+
+    // Meses en espanol abreviados -> numero
+    let MESES = {
+        'ene': 1, 'feb': 2, 'mar': 3, 'abr': 4, 'may': 5, 'jun': 6,
+        'jul': 7, 'ago': 8, 'sep': 9, 'set': 9, 'oct': 10, 'nov': 11, 'dic': 12
+    };
+
+    // OBJETO PRINCIPAL PARA MANEJAR LOS DATOS
+    let vents = {
+        items: {
+            products: []
+        },
+
+        // Renderizar la tabla
+        list: function () {
+            let html = '';
+
+            this.items.products.forEach((item, index) => {
+                html += '<tr>';
+                html += '<td>' + (index + 1) + '</td>';
+                html += '<td>' + (item.dia || '-') + '</td>';
+                html += '<td>' + (item.fecha || '-') + '</td>';
+                html += '<td>' + (item.balanceado || '-') + '</td>';
+                html += '<td>' + (item.cantidad || 0) + '</td>';
+                html += '<td>' + (item.insumo1 || '-') + '</td>';
+                html += '<td>' + (item.gramaje1 || 0) + '</td>';
+                html += '<td>' + (item.insumo2 || '-') + '</td>';
+                html += '<td>' + (item.gramaje2 || 0) + '</td>';
+                html += '<td>' + (item.insumo3 || '-') + '</td>';
+                html += '<td>' + (item.gramaje3 || 0) + '</td>';
+                html += '<td>' + (item.insumo4 || '-') + '</td>';
+                html += '<td>' + (item.gramaje4 || 0) + '</td>';
+                html += '<td class="text-center">' +
+                            '<button type="button" class="btn btn-danger btn-sm btnEliminarDia" data-index="' + index + '" title="Eliminar este dia">' +
+                                '<i class="fas fa-trash"></i>' +
+                            '</button>' +
+                        '</td>';
+                html += '</tr>';
+            });
+
+            $('#tblProducts tbody').html(html);
+        },
+
+        // ELIMINAR UN DIA (fila) por su indice
+        remove: function (index) {
+            this.items.products.splice(index, 1);
+            this.list();
+        },
+
+        // LIMPIAR TODO
+        clear: function () {
+            this.items.products = [];
+            $('#tblProducts tbody').html('');
+        }
+    };
+
+
+    // MOSTRAR MENSAJE DE ESTADO
+    function showStatus(message, type) {
+        var statusDiv = $('#statusMessage');
+        statusDiv.removeClass('alert-success alert-danger alert-info alert-warning');
+        statusDiv.addClass('alert-' + type);
+        statusDiv.html(message);
+        statusDiv.show();
+
+        if (type === 'success') {
+            setTimeout(function() {
+                statusDiv.fadeOut();
+            }, 5000);
+        }
+    }
+
+
+    // LIMPIAR NUMEROS (formato Excel: 10,0 / 1.234,5)
+    function limpiarNumero(valor) {
+        if (!valor) return 0;
+
+        valor = valor.toString().trim();
+        if (valor === '' || valor === '-') return 0;
+        valor = valor.replace(/\./g, '');
+        valor = valor.replace(',', '.');
+
+        return parseFloat(valor) || 0;
+    }
+
+
+    // VALIDAR SI UN VALOR ESTA VACIO O ES GUION
+    function esVacio(valor) {
+        if (!valor) return true;
+        var v = valor.toString().trim();
+        return v === '' || v === '-' || v === '0';
+    }
+
+
+    // Convierte "mie, 25/mar/26" (o "25/mar/26") a "YYYY-MM-DD"
+    function parseFecha(valor) {
+        if (!valor) return '';
+        var v = valor.toString().trim().toLowerCase();
+
+        // quitar el dia de la semana antes de la coma: "mie, 25/mar/26" -> "25/mar/26"
+        if (v.indexOf(',') !== -1) {
+            v = v.split(',')[1].trim();
+        }
+
+        var partes = v.split('/');
+        if (partes.length !== 3) return '';
+
+        var dia = parseInt(partes[0], 10);
+        var mesTxt = partes[1].trim().substring(0, 3);
+        var mes = MESES[mesTxt];
+        var anio = parseInt(partes[2], 10);
+
+        if (!dia || !mes || isNaN(anio)) return '';
+
+        // anio de 2 digitos -> 2000+
+        if (anio < 100) anio = 2000 + anio;
+
+        var mm = ('0' + mes).slice(-2);
+        var dd = ('0' + dia).slice(-2);
+        return anio + '-' + mm + '-' + dd;
+    }
+
+
+    // PEGAR DESDE EXCEL (CTRL + V)
+    document.addEventListener('paste', function (e) {
+
+        if ($(e.target).is("input, textarea, select")) return;
+
+        var texto = e.clipboardData.getData('text');
+        if (!texto) return;
+
+        var filas = texto.trim().split("\n").map(function(f) {
+            return f.split("\t");
+        });
+
+        var data = [];
+        var ignoradas = 0;
+
+        // Estructura precria por columnas (0-index):
+        // 0:DIA 1:FECHA 2:EXIA PRIME 3:INICIO FOCUS 4:INICIO MAXIO
+        // 5:SUB TOTAL 6-8:BIO (calculados, se ignoran)
+        // 9:INSUMO1 10:GR 11:INSUMO2 12:GR 13:INSUMO3 14:GR 15:INSUMO4 16:GR
+        for (var i = 0; i < filas.length; i++) {
+
+            var f = filas[i];
+
+            var diaTxt = f[0] ? f[0].trim() : '';
+            var fechaTxt = f[1] ? f[1].trim() : '';
+            var fecha = parseFecha(fechaTxt);
+
+            // Si no se pudo parsear una fecha valida -> es encabezado o fila vacia
+            if (!fecha) {
+                ignoradas++;
+                continue;
+            }
+
+            // Balanceado: la primera columna (2,3,4) que tenga valor > 0
+            var balanceado = '';
+            var cantidad = 0;
+            [2, 3, 4].forEach(function (col) {
+                var val = limpiarNumero(f[col]);
+                if (val > 0 && !balanceado) {
+                    balanceado = BALANCEADOS_PREC[col] || '';
+                    cantidad = val;
+                }
+            });
+
+            var ins1 = f[9] ? f[9].trim() : '';
+            var gr1 = f[10] || '';
+
+            var ins2 = f[11] ? f[11].trim() : '';
+            var gr2 = f[12] || '';
+
+            var ins3 = f[13] ? f[13].trim() : '';
+            var gr3 = f[14] || '';
+
+            var ins4 = f[15] ? f[15].trim() : '';
+            var gr4 = f[16] || '';
+
+            var tieneInsumos = !esVacio(ins1) || !esVacio(ins2) || !esVacio(ins3) || !esVacio(ins4);
+
+            // Si el dia no tiene balanceado ni insumos, se omite
+            if (!balanceado && !tieneInsumos) {
+                ignoradas++;
+                continue;
+            }
+
+            data.push({
+                dia: diaTxt,
+                fecha: fecha,
+                balanceado: balanceado,
+                cantidad: cantidad,
+
+                insumo1: (!esVacio(ins1)) ? ins1 : '',
+                gramaje1: limpiarNumero(gr1),
+
+                insumo2: (!esVacio(ins2)) ? ins2 : '',
+                gramaje2: limpiarNumero(gr2),
+
+                insumo3: (!esVacio(ins3)) ? ins3 : '',
+                gramaje3: limpiarNumero(gr3),
+
+                insumo4: (!esVacio(ins4)) ? ins4 : '',
+                gramaje4: limpiarNumero(gr4),
+            });
+        }
+
+        vents.items.products = data;
+        vents.list();
+
+        // Mostrar mensaje con detalles
+        var mensaje = '<i class="fas fa-check-circle"></i> Se cargaron <strong>' + data.length + '</strong> dias correctamente.';
+        var tipo_alerta = 'info';
+
+        if (ignoradas > 0) {
+            mensaje += '<br><small>Filas ignoradas (encabezado/vacias): <strong>' + ignoradas + '</strong>.</small>';
+            tipo_alerta = data.length > 0 ? 'info' : 'warning';
+        }
+        if (data.length > 0) {
+            mensaje += ' Verifique la piscina y presione Guardar.';
+        }
+
+        showStatus(mensaje, tipo_alerta);
+    });
+
+
+    // BOTON ELIMINAR UN DIA (delegado, porque las filas son dinamicas)
+    $('#tblProducts tbody').on('click', '.btnEliminarDia', function () {
+        var index = $(this).data('index');
+        var dia = vents.items.products[index];
+        var fechaTxt = dia ? (dia.fecha || '') : '';
+
+        if (confirm('Eliminar el dia ' + fechaTxt + ' de la lista?')) {
+            vents.remove(index);
+            showStatus('<i class="fas fa-info-circle"></i> Dia <strong>' + fechaTxt + '</strong> eliminado. Quedan <strong>' + vents.items.products.length + '</strong> dias.', 'info');
+        }
+    });
+
+
+    // BOTON LIMPIAR TABLA
+    $('#btnLimpiar').on('click', function () {
+        vents.clear();
+        showStatus('<i class="fas fa-info-circle"></i> Tabla limpiada correctamente. Puede pegar nuevos datos.', 'info');
+    });
+
+
+    // GUARDAR (SUBMIT)
+    $('#frmExcel').on('submit', function (e) {
+
+        e.preventDefault();
+
+        var piscina = $('#piscina').val();
+        if (!piscina) {
+            showStatus('<i class="fas fa-exclamation-circle"></i> Debe seleccionar una piscina.', 'danger');
+            return;
+        }
+
+        if (vents.items.products.length === 0) {
+            showStatus('<i class="fas fa-exclamation-circle"></i> No hay datos para guardar. Pegue datos desde Excel primero (CTRL + V).', 'danger');
+            return;
+        }
+
+        var btnGuardar = $('#btnGuardar');
+        btnGuardar.prop('disabled', true);
+        btnGuardar.html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+        showStatus('<i class="fas fa-spinner fa-spin"></i> Procesando... Por favor espere.', 'info');
+
+        $.ajax({
+            url: window.location.pathname,
+            type: "POST",
+            data: {
+                action: 'edit',
+                piscina: piscina,
+                items: JSON.stringify(vents.items.products),
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function (resp) {
+                if (resp.success) {
+                    var mensaje = '<i class="fas fa-check-circle"></i> <strong>Guardado correctamente!</strong>';
+                    mensaje += ' Se guardaron <strong>' + (resp.guardados || vents.items.products.length) + '</strong> dias.';
+
+                    if (resp.errores && resp.errores.length > 0) {
+                        mensaje += '<br><small>Advertencias: ' + resp.errores.join(', ') + '</small>';
+                    }
+
+                    mensaje += '<br><small>La tabla ha sido limpiada. Puede continuar pegando mas datos.</small>';
+
+                    showStatus(mensaje, 'success');
+
+                    // LIMPIAR TODO DESPUES DE GUARDAR EXITOSAMENTE
+                    vents.clear();
+
+                } else {
+                    showStatus('<i class="fas fa-times-circle"></i> <strong>Error:</strong> ' + (resp.error || 'Error desconocido'), 'danger');
+                }
+            },
+            error: function (xhr, status, error) {
+                showStatus('<i class="fas fa-times-circle"></i> <strong>Error de conexion:</strong> ' + error, 'danger');
+            },
+            complete: function () {
+                btnGuardar.prop('disabled', false);
+                btnGuardar.html('<i class="fas fa-save"></i> Guardar');
+            }
+        });
+    });
+
+</script>
+
+{% endblock %}

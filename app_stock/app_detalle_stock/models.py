@@ -17,7 +17,7 @@ class Total_Stock(models.Model):
     nombre_empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, verbose_name='Empresa')
     stock = models.DecimalField(verbose_name='Stock', max_digits=9, decimal_places=2, default=0)
     cod_contable = models.CharField(max_length=50, verbose_name='Código Contable', null=True, blank=True)
-    plan_cuenta = models.ForeignKey( PlanCuenta, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Plan de Cuentas', help_text='Seleccione la cuenta contable para este producto')
+    plan_cuenta = models.ForeignKey(PlanCuenta, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Plan de Cuentas', help_text='Seleccione la cuenta contable para este producto')
 
     def __str__(self):
         # return self.nombre_prod.nombre

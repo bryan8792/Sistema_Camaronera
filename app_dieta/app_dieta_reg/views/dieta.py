@@ -1582,3 +1582,392 @@ class CopiarGuardarView(TemplateView):
         context['title'] = 'Copiar Dieta desde Excel'
         return context
 
+
+
+# class CopiarGuardarPrecriaView(TemplateView):
+#     template_name = 'app_copiarguardar/copiar_pegar_prec.html'
+#
+#     @method_decorator(login_required)
+#     @method_decorator(csrf_exempt)
+#     def dispatch(self, request, *args, **kwargs):
+#         return super().dispatch(request, *args, **kwargs)
+#
+#     def post(self, request, *args, **kwargs):
+#         data = {}
+#         try:
+#             action = request.POST.get('action')
+#
+#             if action == 'edit':
+#                 print('LLEGO A COPIAR/PEGAR PRECRIA Y EMPEZO A RECORRER EL PYTHON DESDE AJAX')
+#
+#                 try:
+#                     def safe_decimal(value):
+#                         try:
+#                             if value in [None, '-', '', 0, '0']:
+#                                 return Decimal('0')
+#                             return Decimal(str(value).replace(',', '.'))
+#                         except:
+#                             return Decimal('0')
+#
+#                     def buscar_producto(nombre):
+#                         nombre = (nombre or '').strip()
+#                         if not nombre or nombre in ['-', '0']:
+#                             return None
+#                         prod = Producto.objects.filter(nombre__iexact=nombre).first()
+#                         if not prod:
+#                             prod = Producto.objects.filter(nombre__icontains=nombre).first()
+#                         return prod
+#
+#                     items = json.loads(request.POST.get('items', '[]'))
+#                     fecha_str = request.POST.get('fecha')
+#
+#                     if not items:
+#                         data['error'] = 'No hay datos para guardar'
+#                         return JsonResponse(data, safe=False)
+#
+#                     if not fecha_str:
+#                         data['error'] = 'Debe seleccionar una fecha'
+#                         return JsonResponse(data, safe=False)
+#
+#                     # FIX 1: usar .date() para que SIEMPRE coincida con el DateField guardado
+#                     fecha_obj = datetime.datetime.strptime(fecha_str, "%Y-%m-%d").date()
+#
+#                     # FIX 2: eliminar filas repetidas del Excel (misma piscina) -> se queda la ultima
+#                     filas_unicas = {}
+#                     for i in items:
+#                         pid = i.get('id')
+#                         if pid is None or str(pid).strip() == '':
+#                             continue
+#                         filas_unicas[str(pid)] = i
+#                     items = list(filas_unicas.values())
+#
+#                     meses = {
+#                         1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL',
+#                         5: 'MAYO', 6: 'JUNIO', 7: 'JULIO', 8: 'AGOSTO',
+#                         9: 'SEPTIEMBRE', 10: 'OCTUBRE', 11: 'NOVIEMBRE', 12: 'DICIEMBRE'
+#                     }
+#
+#                     with transaction.atomic():
+#                         anio_obj, _ = AnioDieta.objects.get_or_create(anio_dieta=fecha_obj.year)
+#                         mes_obj, _ = MesDieta.objects.get_or_create(anio=anio_obj, mes_dieta=meses[fecha_obj.month])
+#
+#                         # ---- Agrupar items por empresa ----
+#                         grupos_por_empresa = {}
+#                         errores = []
+#
+#                         for i in items:
+#                             piscina_orden = i.get('id')
+#                             if not piscina_orden:
+#                                 continue
+#
+#                             # PRECRIA: solo piscinas de precria (prec=True)
+#                             piscina = Piscinas.objects.select_related('empresa').filter(
+#                                 orden=piscina_orden, prec__exact=True
+#                             ).first()
+#                             if not piscina:
+#                                 errores.append(f"Piscina orden {piscina_orden} no encontrada (precria)")
+#                                 continue
+#                             if not piscina.empresa:
+#                                 errores.append(f"Piscina orden {piscina_orden} sin empresa asignada")
+#                                 continue
+#
+#                             emp = piscina.empresa
+#                             grupo = grupos_por_empresa.setdefault(emp.id, {'empresa': emp, 'filas': []})
+#                             grupo['filas'].append((i, piscina))
+#
+#                         guardados = 0
+#
+#                         # ---- Procesar cada empresa ----
+#                         for emp_id, grupo in grupos_por_empresa.items():
+#                             empresa = grupo['empresa']
+#
+#                             # FIX 3: traer TODOS los registros existentes (no .first()) y BLOQUEARLOS
+#                             #        con select_for_update para evitar doble envio simultaneo.
+#                             # Obtener primero las precrias que pertenecen a la empresa
+#                             ids_dietas = (
+#                                 DetalleDiaDieta.objects
+#                                     .filter(piscinas__empresa=empresa)
+#                                     .values_list('dieta_id', flat=True)
+#                                     .distinct()
+#                             )
+#
+#                             # Bloquear unicamente los registros necesarios
+#                             # PRECRIA: tip_dieta = False
+#                             print("ANTES DE BUSCAR FACTURAS (PRECRIA)")
+#                             facturas_existentes = list(
+#                                 DiaDietaRegistro.objects
+#                                     .select_for_update()
+#                                     .filter(
+#                                     id__in=ids_dietas,
+#                                     mes_dieta=mes_obj,
+#                                     fecha=fecha_obj,
+#                                     tip_dieta=False
+#                                 )
+#                             )
+#                             print("DESPUES DE BUSCAR FACTURAS (PRECRIA)")
+#
+#                             if facturas_existentes:
+#                                 factura = facturas_existentes[0]  # conservamos el primero
+#                                 # Reversar stock de TODOS los detalles y eliminar registros sobrantes
+#                                 for f in facturas_existentes:
+#                                     for s in f.detallediadieta_set.all():
+#                                         s.delete()  # dispara reversa de stock/kardex
+#                                     if f.id != factura.id:
+#                                         f.delete()  # FIX: elimina duplicados previos ya existentes
+#                                 print(f"Registros anteriores de precria limpiados para {empresa} en {fecha_obj}")
+#                             else:
+#                                 factura = DiaDietaRegistro.objects.create(
+#                                     mes_dieta=mes_obj,
+#                                     fecha=fecha_obj,
+#                                     tip_dieta=False
+#                                 )
+#                                 print(f"Nuevo registro de precria creado para empresa {empresa} en {fecha_obj}")
+#
+#                             factura.tip_dieta = False
+#                             factura.save()
+#
+#                             # ---- Crear detalles ----
+#                             for i, piscina in grupo['filas']:
+#                                 inv = DetalleDiaDieta(dieta_id=factura.pk)
+#                                 inv.piscinas_id = piscina.id
+#
+#                                 balanceado = buscar_producto(i.get('balanceado', ''))
+#                                 if balanceado:
+#                                     inv.balanceado_id = balanceado.id
+#                                 inv.cantidad = safe_decimal(i.get('cantidad', 0))
+#
+#                                 for num in range(1, 5):
+#                                     insumo = buscar_producto(i.get(f'insumo{num}', ''))
+#                                     if insumo:
+#                                         setattr(inv, f"insumo{num}", insumo.id)
+#                                         setattr(inv, f"gramaje{num}", safe_decimal(i.get(f'gramaje{num}', 0)))
+#                                     else:
+#                                         setattr(inv, f"insumo{num}", 0)
+#                                         setattr(inv, f"gramaje{num}", Decimal('0'))
+#
+#                                 inv.save()  # genera los EGRESOS de stock
+#                                 guardados += 1
+#
+#                         print(f"Proceso de precria completado. Guardados: {guardados}, Errores: {len(errores)}")
+#
+#                         data['success'] = True
+#                         data['guardados'] = guardados
+#                         data['registros_empresas'] = len(grupos_por_empresa)
+#                         data['errores'] = errores
+#
+#                 except Exception as e:
+#                     import traceback
+#                     print("ERROR GENERAL EN COPIAR/PEGAR PRECRIA:", e)
+#                     traceback.print_exc()
+#                     data['error'] = str(e)
+#
+#             else:
+#                 data['error'] = 'Accion no valida'
+#
+#         except Exception as e:
+#             import traceback
+#             print("ERROR:", e)
+#             traceback.print_exc()
+#             data['error'] = str(e)
+#
+#         return JsonResponse(data, safe=False)
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['title'] = 'Copiar Precria desde Excel'
+#         return context
+
+
+
+class CopiarGuardarPrecriaView(TemplateView):
+    template_name = 'app_copiarguardar/copiar_pegar_prec.html'
+
+    @method_decorator(login_required)
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        data = {}
+        try:
+            action = request.POST.get('action')
+
+            if action == 'edit':
+                print('LLEGO A COPIAR/PEGAR PRECRIA Y EMPEZO A RECORRER EL PYTHON DESDE AJAX')
+
+                try:
+                    def safe_decimal(value):
+                        try:
+                            if value in [None, '-', '', 0, '0']:
+                                return Decimal('0')
+                            return Decimal(str(value).replace(',', '.'))
+                        except:
+                            return Decimal('0')
+
+                    def buscar_producto(nombre):
+                        nombre = (nombre or '').strip()
+                        if not nombre or nombre in ['-', '0']:
+                            return None
+                        prod = Producto.objects.filter(nombre__iexact=nombre).first()
+                        if not prod:
+                            prod = Producto.objects.filter(nombre__icontains=nombre).first()
+                        return prod
+
+                    items = json.loads(request.POST.get('items', '[]'))
+                    # PRECRIA: la PISCINA se elige en el formulario (viene su "orden")
+                    piscina_orden = request.POST.get('piscina')
+
+                    if not piscina_orden:
+                        data['error'] = 'Debe seleccionar una piscina'
+                        return JsonResponse(data, safe=False)
+
+                    if not items:
+                        data['error'] = 'No hay datos para guardar'
+                        return JsonResponse(data, safe=False)
+
+                    # Buscar la piscina seleccionada (solo precria: prec=True)
+                    piscina = (
+                        Piscinas.objects
+                        .select_related('empresa')
+                        .filter(orden=piscina_orden, prec__exact=True)
+                        .first()
+                    )
+                    if not piscina:
+                        data['error'] = f'Piscina orden {piscina_orden} no encontrada (precria)'
+                        return JsonResponse(data, safe=False)
+                    if not piscina.empresa:
+                        data['error'] = f'Piscina orden {piscina_orden} sin empresa asignada'
+                        return JsonResponse(data, safe=False)
+
+                    empresa = piscina.empresa
+
+                    meses = {
+                        1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL',
+                        5: 'MAYO', 6: 'JUNIO', 7: 'JULIO', 8: 'AGOSTO',
+                        9: 'SEPTIEMBRE', 10: 'OCTUBRE', 11: 'NOVIEMBRE', 12: 'DICIEMBRE'
+                    }
+
+                    # FIX: eliminar filas repetidas (misma fecha) -> se queda la ultima
+                    filas_unicas = {}
+                    for i in items:
+                        fkey = (i.get('fecha') or '').strip()
+                        if not fkey:
+                            continue
+                        filas_unicas[fkey] = i
+                    items = list(filas_unicas.values())
+
+                    guardados = 0
+                    errores = []
+
+                    with transaction.atomic():
+
+                        # PRECRIA: cada FILA es un DIA distinto -> un registro por fecha
+                        for i in items:
+                            fecha_str = i.get('fecha')
+                            if not fecha_str:
+                                errores.append('Fila sin fecha, omitida')
+                                continue
+
+                            try:
+                                # FIX: .date() para que coincida con el DateField guardado
+                                fecha_obj = datetime.datetime.strptime(fecha_str, "%Y-%m-%d").date()
+                            except Exception:
+                                errores.append(f'Fecha invalida: {fecha_str}')
+                                continue
+
+                            anio_obj, _ = AnioDieta.objects.get_or_create(anio_dieta=fecha_obj.year)
+                            mes_obj, _ = MesDieta.objects.get_or_create(
+                                anio=anio_obj, mes_dieta=meses[fecha_obj.month]
+                            )
+
+                            # Buscar el registro de PRECRIA (tip_dieta=False) de esta empresa
+                            # para esta fecha. Se comparte entre las piscinas de precria de la
+                            # misma empresa en el mismo dia.
+                            ids_dietas = (
+                                DetalleDiaDieta.objects
+                                .filter(piscinas__empresa=empresa)
+                                .values_list('dieta_id', flat=True)
+                                .distinct()
+                            )
+
+                            # Bloquear con select_for_update para evitar doble envio simultaneo
+                            factura = (
+                                DiaDietaRegistro.objects
+                                .select_for_update()
+                                .filter(
+                                    id__in=ids_dietas,
+                                    mes_dieta=mes_obj,
+                                    fecha=fecha_obj,
+                                    tip_dieta=False
+                                )
+                                .first()
+                            )
+
+                            if not factura:
+                                factura = DiaDietaRegistro.objects.create(
+                                    mes_dieta=mes_obj,
+                                    fecha=fecha_obj,
+                                    tip_dieta=False
+                                )
+                                print(f"Nuevo registro PRECRIA creado {empresa} {fecha_obj}")
+
+                            factura.tip_dieta = False
+                            factura.save()
+
+                            # Reversar/limpiar SOLO el detalle de ESTA piscina en ese dia
+                            # (no tocar las demas piscinas del mismo registro)
+                            for s in factura.detallediadieta_set.filter(piscinas=piscina):
+                                s.delete()  # dispara reversa de stock/kardex
+
+                            # Crear el detalle de la piscina para ese dia
+                            inv = DetalleDiaDieta(dieta_id=factura.pk)
+                            inv.piscinas_id = piscina.id
+
+                            balanceado = buscar_producto(i.get('balanceado', ''))
+                            if balanceado:
+                                inv.balanceado_id = balanceado.id
+                                inv.cantidad = safe_decimal(i.get('cantidad', 0))
+                            else:
+                                inv.cantidad = Decimal('0')
+
+                            for num in range(1, 5):
+                                insumo = buscar_producto(i.get(f'insumo{num}', ''))
+                                if insumo:
+                                    setattr(inv, f"insumo{num}", insumo.id)
+                                    setattr(inv, f"gramaje{num}", safe_decimal(i.get(f'gramaje{num}', 0)))
+                                else:
+                                    setattr(inv, f"insumo{num}", 0)
+                                    setattr(inv, f"gramaje{num}", Decimal('0'))
+
+                            inv.save()  # genera los EGRESOS de stock
+                            guardados += 1
+
+                        print(f"Proceso PRECRIA completado. Guardados: {guardados}, Errores: {len(errores)}")
+
+                        data['success'] = True
+                        data['guardados'] = guardados
+                        data['errores'] = errores
+
+                except Exception as e:
+                    import traceback
+                    print("ERROR GENERAL EN COPIAR/PEGAR PRECRIA:", e)
+                    traceback.print_exc()
+                    data['error'] = str(e)
+
+            else:
+                data['error'] = 'Accion no valida'
+
+        except Exception as e:
+            import traceback
+            print("ERROR:", e)
+            traceback.print_exc()
+            data['error'] = str(e)
+
+        return JsonResponse(data, safe=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Copiar Precria desde Excel'
+        # Piscinas de precria para el selector del formulario
+        context['piscinas'] = Piscinas.objects.filter(prec__exact=True).order_by('orden')
+        return context

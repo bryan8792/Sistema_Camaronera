@@ -31,6 +31,7 @@ urlpatterns = [
     path('crear/dia_prec/<int:pk>/', crearDiaDietaPrecriaView.as_view(), name='crear_dia_dieta_prec'),
     path('editar/dia_prec/<int:pk>/', editarDiaDietaPrecriaView.as_view(), name='modificar_dieta_prec'),
     path('eliminar/dia_prec/<int:pk>/', eliminarDiaDietaPrecriaView.as_view(), name='eliminar_dieta_prec'),
+    path('copiar_prec/', CopiarGuardarPrecriaView.as_view(), name='copiar_dietaprec'),
 
     # REPORTE DE LA DIETA CREADA
     path('reporte_dieta/<int:pk>/', ListarDietaPDF.as_view(), name='reporte_dieta'),
